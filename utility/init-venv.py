@@ -206,6 +206,19 @@ def init_venv(force: bool = False) -> bool:
             print(f"\n❌  pip install failed (exit {exc.returncode}).")
         return False
 
+    # ── Step 3a: upgrade all packages to latest available versions ──────────────
+    print(f"\n🔄  Upgrading all packages to latest versions …")
+    try:
+        run([venv_pip(), "install", "--upgrade", "-r", str(REQUIREMENTS)])
+    except subprocess.CalledProcessError as exc:
+        stderr = exc.stderr or ""
+        if "No such file or directory" in stderr or "long path" in stderr.lower():
+            print("\n❌  Upgrade failed – likely a Windows Long Path issue.")
+            warn_long_paths_disabled()
+        else:
+            print(f"\n❌  pip upgrade failed (exit {exc.returncode}).")
+        return False
+
     # ── Step 4: write lockfile ─────────────────────────────────────────────────
     print(f"\n📸  Writing lockfile  {LOCKFILE}  …")
     result = run([venv_pip(), "freeze"], capture=True)

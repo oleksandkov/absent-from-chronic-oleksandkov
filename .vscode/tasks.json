@@ -220,6 +220,19 @@
       "group": "build",
       "presentation": { "echo": true, "reveal": "always", "panel": "shared" },
       "problemMatcher": []
+    },
+    {
+      "label": "Run EDA-3 Pipeline",
+      "detail": "Run analysis/eda-3/eda-3.R then render analysis/eda-3/eda-3.qmd",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-File",
+        "scripts/ps1/run-eda-3.ps1"
+      ],
+      "group": "build",
+      "presentation": { "echo": true, "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
     }
   ]
 }

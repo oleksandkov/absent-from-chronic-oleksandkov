@@ -97,7 +97,13 @@ strict_cycle_integrity <- FALSE
 # Sample filtering mode:
 #   FALSE = keep full pooled sample (default; includes employed + unemployed)
 #   TRUE  = apply legacy exclusions from stats_instructions_v3 Section 3.1
-apply_sample_exclusions <- FALSE
+apply_sample_exclusions <- TRUE
+
+# Completeness exclusion mode (§3.1 criterion 4b):
+#   TRUE  = also exclude respondents with missing values on any CCC condition
+#           or predictor variable (full §3.1 compliance)
+#   FALSE = skip this step; missing CCC/predictors handled in analysis phase
+apply_completeness_exclusion <- FALSE
 
 # Output — SQLite (secondary: ad-hoc SQL exploration; factors as character)
 output_sqlite <- file.path(project_root, "data-private", "derived", "cchs-2.sqlite")
@@ -182,8 +188,21 @@ vars_inferred_predisposing <- c(
   "sdcfimm",    # INFERRED: immigration status (1=Immigrant, 2=Non-immigrant)
   "sdcdgcb",    # INFERRED: ethnic origin / visible minority (1=White/non-visible min,
                 #            2=Visible minority)  Alt: "sdcgcgt"
-  "dhhdglvg"    # INFERRED: homeownership / living arrangements
+  "dhhdglvg",   # INFERRED: homeownership / living arrangements
                 #            check if present or use different variable
+  # --- Children in household by age group (§2.2 predisposing) ---
+  # VERIFY exact variable names against CCHS data dictionaries;
+  # standard CCHS PUMF may use a single derived variable or separate counts
+  "dhhdfc5",    # INFERRED: number of children < 5 yrs in household
+                #            Alt candidate: "dhhghc1", "dhh_hc1"
+  "dhhdfc11",   # INFERRED: number of children 6–11 yrs in household
+                #            Alt candidate: "dhhghc2", "dhh_hc2"
+  "dhhdfc12p",  # INFERRED: number of children ≥ 12 yrs in household
+                #            Alt candidate: "dhhghc3", "dhh_hc3"
+  # --- Student status (§2.2 predisposing) ---
+  "sdcdgstud"   # INFERRED: student status (1=Full-time, 2=Part-time, 3=Not student)
+                #            Alt candidate: "sdcdg045", "edu_050", "lbs_*"
+                #            NOTE: verify presence in both 2010 and 2014 PUMF
 )
 
 vars_inferred_facilitating <- c(
@@ -208,8 +227,13 @@ vars_inferred_facilitating <- c(
                #            Alt: "hwtgbmi" (continuous)
   "pacdpai",   # INFERRED: physical activity index (derived)
                #            Alt: "pacdee" (daily energy expenditure)
-  "gen_07"     # INFERRED: job stress level (GEN module)
+  "gen_07",    # INFERRED: job stress level (GEN module)
                #            NOTE: check if present in 2010 and 2014 PUMF
+  # --- Occupation category (§2.2 facilitating) ---
+  "noc_31"     # INFERRED: occupation category (National Occupation Classification,
+               #            major group 2-digit; derived)
+               #            Alt candidates: "lbfg01", "nocg10", "ochg10"
+               #            VERIFY naming and categories against data dictionaries
 )
 
 vars_inferred_needs <- c(
@@ -572,7 +596,8 @@ cat("\n🔧 Step 2: Sample inclusion mode\n")
 #   1=12-14yrs, 2=15-17yrs, 3=18-19yrs, 4=20-24yrs, 5=25-29yrs, 6=30-34yrs,
 #   7=35-39yrs, 8=40-44yrs, 9=45-49yrs, 10=50-54yrs, 11=55-59yrs, 12=60-64yrs,
 #   13=65-69yrs, 14=70-74yrs, 15=75-79yrs, 16=80+yrs
-# Include: codes 2-15 (15-79 yrs), but instruction says max 75 → use codes 2-14
+# Include: codes 2-15 (15-79 yrs). Age 75 is in code 15 (75-79); code 15 is kept
+# since data cannot distinguish 75 from 76-79 in the PUMF grouped variable.
 #
 # LOP_015: 1=Yes (employed), 2=No, 6=Not applicable, 9=Not stated
 # ADM_PRX: 1=Proxy, 2=Not proxy
@@ -597,8 +622,12 @@ if (isTRUE(apply_sample_exclusions)) {
   ds2 <- ds1
 
   # Step 1: Age 15–75
-  # dhhgage codes 2–14 correspond to ages 15–74 (code 15 = 75-79, which includes 75)
-  # ADJUST if actual codes differ
+  # DHHGAGE codes 2–15 correspond to ages 15–79.
+  # Code 15 = 75-79 yrs (grouped; no single-year resolution in PUMF).
+  # The instruction says exclude >75, but since ages 75-79 share one code,
+  # code 15 is RETAINED to capture 75-year-olds — ages 76-79 in code 15
+  # are an unavoidable inclusion given the grouped derived variable.
+  # VERIFY if a single-year age variable is available in the restricted-access file.
   in_age_range <- ds2$dhhgage %in% 2:15   # codes 2=15-17 through 15=75-79
   n_step["n_after_age"] <- sum(in_age_range, na.rm = TRUE)
   ds2 <- ds2 %>% filter(dhhgage %in% 2:15)
@@ -614,7 +643,6 @@ if (isTRUE(apply_sample_exclusions)) {
   ds2 <- ds2 %>% filter(adm_prx != 1 | is.na(adm_prx))
 
   # Step 4: Complete outcome (days_absent_total must be non-NA)
-  # Additional predictor completeness handled in analysis phase (see missingness section)
   complete_outcome <- !is.na(ds2$days_absent_total)
   n_step["n_after_complete_outcome"] <- sum(complete_outcome, na.rm = TRUE)
   ds2 <- ds2 %>% filter(!is.na(days_absent_total))
@@ -649,6 +677,28 @@ if (isTRUE(apply_sample_exclusions)) {
   print(ds2 %>%
           count(lop_015, name = "n") %>%
           arrange(lop_015))
+}
+
+# Step 5b (optional): CCC + predictor completeness (§3.1 criterion 4b)
+# Controlled by `apply_completeness_exclusion` in the globals section.
+# NOTE: ds2 is still pre-recode at this point — only structural NAs from
+#       import are detected here. CCHS special codes (6/7/8/9) become NA
+#       only after Step 3 factor recoding. For full §3.1 compliance, verify
+#       that recode order matches the intended exclusion timing.
+if (isTRUE(apply_completeness_exclusion)) {
+  cat("\n   Step 5b: CCC + predictor completeness exclusion\n")
+  ccc_cols_found      <- intersect(vars_inferred_ccc, names(ds2))
+  predictor_cols_full <- intersect(c(ccc_cols_found, predictor_cols), names(ds2))
+  complete_predictors <- apply(
+    ds2[, predictor_cols_full, drop = FALSE], 1,
+    function(row) !any(is.na(row))
+  )
+  n_step["n_after_complete_predictors"] <- sum(complete_predictors, na.rm = TRUE)
+  n_before_step5b <- nrow(ds2)
+  ds2 <- ds2[complete_predictors, ]
+  cat(sprintf("   ✓ After CCC + predictor completeness: %s  (-%s excluded)\n",
+              format(n_step["n_after_complete_predictors"], big.mark = ","),
+              format(n_before_step5b - n_step["n_after_complete_predictors"], big.mark = ",")))
 }
 
 cat("\n   Cycle counts after exclusions:\n")
@@ -698,16 +748,33 @@ sample_flow <- tibble::tibble(
     if (isTRUE(apply_sample_exclusions)) "Exclude proxy respondents" else "No exclusion applied (proxy retained)",
     if (isTRUE(apply_sample_exclusions)) "Exclude respondents with missing outcome (days absent)" else "No exclusion applied (outcome missingness retained)"
   ),
-  n_remaining = as.integer(n_step),
+  n_remaining = as.integer(c(
+    n_step["n_start"],
+    n_step["n_after_age"],
+    n_step["n_after_employment"],
+    n_step["n_after_proxy"],
+    n_step["n_after_complete_outcome"]
+  )),
   n_excluded  = as.integer(c(
     0L,
-    n_step["n_start"] - n_step["n_after_age"],
-    n_step["n_after_age"] - n_step["n_after_employment"],
+    n_step["n_start"]            - n_step["n_after_age"],
+    n_step["n_after_age"]        - n_step["n_after_employment"],
     n_step["n_after_employment"] - n_step["n_after_proxy"],
-    n_step["n_after_proxy"] - n_step["n_after_complete_outcome"]
+    n_step["n_after_proxy"]      - n_step["n_after_complete_outcome"]
   )),
   pct_remaining = round(n_remaining / n_step["n_start"] * 100, 1)
 )
+
+# Conditionally append step 6 (CCC + predictor completeness)
+if (isTRUE(apply_completeness_exclusion) && "n_after_complete_predictors" %in% names(n_step)) {
+  sample_flow <- rbind(sample_flow, tibble::tibble(
+    step          = "6_after_complete_ccc_predictors",
+    description   = "Exclude respondents with missing values on any CCC condition or predictor variable (§3.1)",
+    n_remaining   = as.integer(n_step["n_after_complete_predictors"]),
+    n_excluded    = as.integer(n_step["n_after_complete_outcome"] - n_step["n_after_complete_predictors"]),
+    pct_remaining = round(n_step["n_after_complete_predictors"] / n_step["n_start"] * 100, 1)
+  ))
+}
 
 cat("\n   Sample flow table:\n")
 print(as.data.frame(sample_flow[, c("step", "n_remaining", "n_excluded")]))
@@ -733,7 +800,12 @@ special_na_codes <- c(6, 7, 8, 9, 96, 97, 98, 99)
 recode_source_vars <- c(
   "dhhgage", "dhh_sex", "dhhgms", "edudh04", "sdcfimm", "sdcdgcb",
   "incdghh", "hcu_1aa", "lbfdghp", "lbfdgft", "alcdgtyp", "smkdsty",
-  "hwtdgbmi", "pacdpai", "gen_01", "gen_02a", "gen_09", "rac_1", "inj_01"
+  "hwtdgbmi", "pacdpai", "gen_01", "gen_02a", "gen_09", "rac_1", "inj_01",
+  # Added: previously missing from recode pipeline
+  "dhhdglvg",   # homeownership
+  "gen_07",     # job stress level
+  "sdcdgstud",  # student status
+  "noc_31"      # occupation category
 )
 
 ds2 <- ensure_columns(ds2, recode_source_vars, context_label = "factor recoding inputs")
@@ -1015,6 +1087,76 @@ ds3 <- ds2 %>%
       levels = c("Yes", "No")
     ),
 
+    # --- Homeownership / living arrangements (§2.2 predisposing) ---
+    # DHHDGLVG: typical CCHS codes — VERIFY against data dictionary
+    # Common coding: 1=Owner, 2=Renter/other
+    homeownership = factor(
+      case_when(
+        dhhdglvg == 1 ~ "Owner",
+        dhhdglvg == 2 ~ "Renter/other",
+        dhhdglvg %in% special_na_codes ~ NA_character_,
+        TRUE ~ NA_character_
+      ),
+      levels = c("Owner", "Renter/other")
+    ),
+
+    # --- Job stress level (§2.2 facilitating) ---
+    # GEN_07: 1=Not at all stressful, 2=Not very stressful, 3=A bit stressful,
+    #          4=Quite a bit stressful, 5=Extremely stressful  — VERIFY codes
+    job_stress = factor(
+      case_when(
+        gen_07 == 1 ~ "Not at all stressful",
+        gen_07 == 2 ~ "Not very stressful",
+        gen_07 == 3 ~ "A bit stressful",
+        gen_07 == 4 ~ "Quite a bit stressful",
+        gen_07 == 5 ~ "Extremely stressful",
+        gen_07 %in% special_na_codes ~ NA_character_,
+        TRUE ~ NA_character_
+      ),
+      levels = c("Not at all stressful", "Not very stressful",
+                 "A bit stressful", "Quite a bit stressful", "Extremely stressful"),
+      ordered = TRUE
+    ),
+
+    # --- Student status (§2.2 predisposing) ---
+    # SDCDGSTUD: 1=Full-time student, 2=Part-time student, 3=Not a student — VERIFY
+    student_status = factor(
+      case_when(
+        sdcdgstud == 1 ~ "Full-time student",
+        sdcdgstud == 2 ~ "Part-time student",
+        sdcdgstud == 3 ~ "Not a student",
+        sdcdgstud %in% special_na_codes ~ NA_character_,
+        TRUE ~ NA_character_
+      ),
+      levels = c("Not a student", "Part-time student", "Full-time student")
+    ),
+
+    # --- Occupation category (§2.2 facilitating) ---
+    # NOC_31: National Occupation Classification major group — VERIFY codes
+    # Typical NOC major groups: 0=Management, 1=Business/finance, 2=Natural sciences,
+    #   3=Health, 4=Education, 5=Art/culture, 6=Sales/service, 7=Trades,
+    #   8=Primary industries, 9=Manufacturing/utilities
+    occupation_category = factor(
+      case_when(
+        noc_31 == 0  ~ "Management",
+        noc_31 == 1  ~ "Business/finance/admin",
+        noc_31 == 2  ~ "Natural/applied sciences",
+        noc_31 == 3  ~ "Health",
+        noc_31 == 4  ~ "Education/law/social",
+        noc_31 == 5  ~ "Art/culture/sport",
+        noc_31 == 6  ~ "Sales/service",
+        noc_31 == 7  ~ "Trades/transport",
+        noc_31 == 8  ~ "Primary industries",
+        noc_31 == 9  ~ "Manufacturing/utilities",
+        noc_31 %in% special_na_codes ~ NA_character_,
+        TRUE ~ NA_character_
+      ),
+      levels = c("Management", "Business/finance/admin", "Natural/applied sciences",
+                 "Health", "Education/law/social", "Art/culture/sport",
+                 "Sales/service", "Trades/transport", "Primary industries",
+                 "Manufacturing/utilities")
+    ),
+
     # --- Cycle as factor for models ---
     cycle_f = factor(
       case_when(
@@ -1115,6 +1257,8 @@ factor_cols     <- c(
   "work_schedule", "alcohol_type", "smoking_status", "bmi_category",
   "physical_activity", "self_health_general", "self_health_mental",
   "health_vs_lastyear", "activity_limitation", "injury_past_year",
+  # Added: previously dropped from output (Fix #2)
+  "homeownership", "job_stress", "student_status", "occupation_category",
   "cycle_f",
   cc_factor_cols
 )
@@ -1127,6 +1271,8 @@ keep_numeric <- c(
   lop_vars,                                      # raw LOP components (kept for transparency)
   # Survey design
   "wts_m_pooled", "wts_m_original", "geodpmf",
+  # Province/territory (§2.2 facilitating) — added: previously dropped (Fix #2)
+  if ("geodgprv" %in% names(ds4)) "geodgprv",
   # Raw sample construction vars (kept for audit trail)
   "dhhgage", "lop_015", "adm_prx",
   # Cycle indicator
@@ -1134,6 +1280,10 @@ keep_numeric <- c(
   # Continuous predictors
   "dhhdghsz",                                    # household size
   if ("fvcdgtot" %in% names(ds4)) "fvcdgtot",   # fruit/veg servings
+  # Children by age group (§2.2 predisposing) — added: previously absent (Fix #1)
+  if ("dhhdfc5"   %in% names(ds4)) "dhhdfc5",   # children < 5 yrs
+  if ("dhhdfc11"  %in% names(ds4)) "dhhdfc11",  # children 6-11 yrs
+  if ("dhhdfc12p" %in% names(ds4)) "dhhdfc12p", # children >= 12 yrs
   if ("adm_rno"  %in% names(ds4)) "adm_rno",    # respondent ID
   boot_cols
 )

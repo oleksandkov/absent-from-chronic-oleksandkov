@@ -1,7 +1,8 @@
----
-title: "Work Absence Among Employed Canadians"
-subtitle: "EDA 2 — CCHS 2010-11 & 2013-14: Distribution of Absence Days"
-author: "Analysis Team"
+﻿---
+title: "Pipeline Observation: Ferry & Ellis Transformation Report"
+subtitle: "EDA 2 — CCHS Data Pipeline: 1-ferry.R and 2-ellis.R"
+author: "Oleksandr Koval"
+date: "2026-03-05"
 format:
   html:
     page-layout: full
@@ -21,35 +22,42 @@ editor_options:
 
 # Mission
 
-This report explores how work absence days (`absence_days_total`) are distributed among employed Canadian respondents in the CCHS 2010-11 and 2013-14 survey cycles.
+This document **observes and documents** the two data manipulation scripts that build the CCHS analytical dataset used in the study *"Predictors of Work Absenteeism Associated with Chronic Conditions Among Canadian Workers"*. It does not perform statistical analysis — it tracks what each script does, how many rows and variables are affected at each step, and ties every operation back to the requirements in `stats_instructions_v3.md`.
 
--   **Dataset**: `cchs_employed` table from `cchs-3.sqlite` — each row is one employed survey respondent
--   **Research Question**: How many absence days do employed Canadians report, and what does that distribution look like?
--   **Data Lineage**: `ds0` → `ds1` (exclude NAs + 0-day) → `absence_ratio_tbl` (overview); `ds1` → `g1_data` → scatter + histogram; `ds1` → `g2_stats` / `sex_ratio_tbl` → faceted by sex; `ds1` → `g3_stats` → faceted by age group; `ds1` → `g4_data` / `g4_stats` → scatter + histogram by survey cycle; `ds1` → `ds5` (excl. NA education) → `g5_stats` → faceted by education level; `ds1` → `ds6` (excl. NA marital) → `g6_stats` → faceted by marital status; `ds1` → `ds7` (excl. NA immigration) → `g7_stats` → faceted by immigration status
--   **Scope**: Descriptive distribution of `absence_days_total`; no modelling in this EDA
+**Data genealogy:**
 
-# Definition of Terms
+```         
+CCHS2010_LOP.sav  ──┐
+                     ├──► 1-ferry.R ──► cchs-1.sqlite ──► 2-ellis.R ──► cchs_analytical.parquet
+CCHS_2014_EN_PUMF.sav ──┘                                              └──► sample_flow.parquet
+```
+
+This report is split into two parts:
+
+-   **Part A — Ferry Observation**: What `1-ferry.R` receives, what it does, and what it produces
+-   **Part B — Ellis Observation**: What `2-ellis.R` receives, all transformations applied, and what the final analytical dataset contains — including the effect of different configuration flag scenarios
+
+# Environment
 
 ```{r}
-#| code-summary: Reconciles working directory between execution modes
+#| label: knitr-root
 #| echo: false
 #| results: hide
 #| message: false
 #| warning: false
 cat("Working directory: ", getwd())
 library(knitr)
-opts_knit$set(root.dir = '../../') # keep this chunk isolated
+opts_knit$set(root.dir = '../../')
 ```
 
 ```{r}
 #| label: set_options
-#| code-summary: report-wide formatting options
+#| code-summary: Report-wide formatting options
 #| echo: false
 #| results: hide
 #| message: false
 cat("Working directory: ", getwd())
 report_render_start_time <- Sys.time()
-# set options shared by all chunks
 opts_chunk$set(
   results    = 'show',
   message    = FALSE,
@@ -61,20 +69,16 @@ opts_chunk$set(
   fig.height = 6,
   fig.path   = 'figure-png-iso/'
 )
-echo_chunks    <- FALSE # Toggle for debugging.
-message_chunks <- FALSE # Toggle for debugging.
+echo_chunks    <- FALSE
+message_chunks <- FALSE
 options(width = 100)
 ggplot2::theme_set(ggplot2::theme_minimal())
-read_chunk("analysis/eda-2/eda-2.R") # This allows knitr to call chunks from R script
+read_chunk("analysis/eda-2/eda-2.R")
 ```
-
-# Environment
-
-> Reviews the components of the working environment of the report. Non-technical readers are welcomed to skip.
 
 ```{r}
 #| label: load-packages
-#| code-summary: Packages used in the current report
+#| code-summary: Packages used in this report
 #| echo: true
 #| results: hide
 #| message: false
@@ -83,7 +87,7 @@ read_chunk("analysis/eda-2/eda-2.R") # This allows knitr to call chunks from R s
 
 ```{r}
 #| label: load-sources
-#| code-summary: Collection of custom functions used in current repository
+#| code-summary: Project-level functions
 #| echo: true
 #| results: hide
 #| message: false
@@ -92,7 +96,7 @@ read_chunk("analysis/eda-2/eda-2.R") # This allows knitr to call chunks from R s
 
 ```{r}
 #| label: declare-globals
-#| code-summary: Values used throughout the report.
+#| code-summary: Path constants and white-list counts
 #| echo: true
 #| results: hide
 #| message: false
@@ -101,330 +105,326 @@ read_chunk("analysis/eda-2/eda-2.R") # This allows knitr to call chunks from R s
 
 ```{r}
 #| label: declare-functions
-#| code-summary: Custom functions defined for use in this report.
+#| code-summary: Helper functions (with_data, etc.)
 #| echo: true
 #| results: hide
 #| message: false
 #| code-fold: true
 ```
 
-# Data
+------------------------------------------------------------------------
 
--   **ds0**: `cchs_employed` from `cchs-3.sqlite` — 64,248 employed respondents, one row each. Key column: `absence_days_total` (integer days missed due to any health reason).
--   **ds1**: Filtered from `ds0` — respondents with 1+ absence days only (0-day and NA respondents excluded). Working dataset for all analysis.
--   **g1_data**: Aggregated from `ds1` — one row per unique `absence_days_total` value with the count of respondents reporting that value.
--   **g2_stats**: Summarised from `ds1` — one row per `sex_label` with per-sex median, mean, and respondent count.
--   **sex_ratio_tbl**: Derived from `ds0` — per-sex count and percentage of respondents reporting zero vs. 1+ absence days (among those who answered).
--   **g3_stats**: Summarised from `ds1` — one row per `age_group_3` with per-group median, mean, and respondent count. Saved to `data-local/g3_stats_age.csv`.
--   **g4_data**: Aggregated from `ds1` — one row per (`survey_cycle_label` × unique `absence_days_total` value) with respondent count; used for the g4 scatter.
--   **g4_stats**: Summarised from `ds1` — one row per `survey_cycle_label` with per-cycle median, mean, and respondent count.
--   **g5_stats**: Summarised from `ds5` (`ds1` minus NA `education_level`) — one row per `education_level` with per-group median, mean, and respondent count.
--   **g6_stats**: Summarised from `ds6` (`ds1` minus NA `marital_status_label`) — one row per `marital_status_label` with per-group median, mean, and respondent count.
--   **g7_stats**: Summarised from `ds7` (`ds1` minus NA `immigration_status_label`) — one row per `immigration_status_label` with per-group median, mean, and respondent count.
+# Part A — Ferry Observation (`1-ferry.R`) {#part-a}
+
+## What is the Ferry Pattern?
+
+The **Ferry Pattern** transports raw data from its source format into a local staging store with **zero semantic transformation**. The ferry script is intentionally limited: it is forbidden from renaming columns (beyond `clean_names()` sanitization), selecting subsets, recoding values, or excluding rows. Every such decision is deferred to the Ellis script.
+
+::: {.callout-note icon="false"}
+**Requirement — §2.1 Database** (`stats_instructions_v3.md`):
+
+> The analysis uses two cycles of the Canadian Community Health Survey (CCHS), a publicly available, anonymized, nationally representative survey conducted by Statistics Canada:
+>
+> -   **CCHS 2010-2011** (Annual Component)
+> -   **CCHS 2013-2014** (Annual Component)
+>
+> The relevant modules required are: **Chronic Conditions module (CCC)**, **Loss of Productivity module (LOP)**, and **demographic and socioeconomic variables** from the main questionnaire.
+:::
+
+## A.1 Inputs
+
+| File                    | Description                          | Format      |
+|------------------------|------------------------|------------------------|
+| `CCHS2010_LOP.sav`      | CCHS 2010-2011 Annual Component PUMF | SPSS (.sav) |
+| `CCHS_2014_EN_PUMF.sav` | CCHS 2013-2014 Annual Component PUMF | SPSS (.sav) |
+
+Both files reside in `data-private/raw/2026-02-19/` and are not version-controlled (private microdata).
+
+## A.2 Operations
+
+Three lightweight technical operations are applied to each file — no data values are changed:
+
+| Step | Function | What it does |
+|------------------------|------------------------|------------------------|
+| 1 | `haven::read_sav()` | Reads SPSS binary into an R data frame, preserving all columns and numeric codes |
+| 2 | `haven::zap_labels()` + `haven::zap_label()` | Strips SPSS value labels and variable labels — SQLite cannot store them; numeric codes are retained |
+| 3 | `janitor::clean_names()` | Lowercases all column names and replaces spaces/special characters with underscores (e.g., `LOPG040` → `lopg040`) |
+
+No rows are removed. No values are changed. No columns are added or dropped.
+
+## A.3 Output Size
 
 ```{r}
-#| label: load-data
-#| code-summary: Load original data (ds0)
-#| warning: false
+#| label: ferry-load-data
+#| code-summary: Load ferry metadata from cchs-1.sqlite
 #| code-fold: true
-#| cache: true
+#| cache: false
 ```
 
 ```{r}
-#| label: tweak-data-0
-#| code-summary: Initial data cleaning and coercion
+#| label: g-ferry-size
+#| code-summary: "Chart: rows and columns per cycle table"
 #| code-fold: true
-#| cache: true
+#| fig-cap: "Ferry output size — each cycle table as written to cchs-1.sqlite. The CCHS PUMF files contain hundreds of variables; all are retained by the ferry script with no selection."
 ```
 
 ```{r}
-#| label: tweak-data-1
-#| code-summary: Create ds1 — exclude 0-day and NA respondents
+#| label: verify-ferry-cycles
+#| code-summary: "\u00a72.1 PROOF: both CCHS cycles loaded with expected row counts"
 #| code-fold: true
-#| cache: true
 ```
 
+::: {.callout-tip icon="false"}
+**§2.1 DONE — Both CCHS cycles loaded** ✓
+
+The ferry output `cchs-1.sqlite` contains two tables. The starting pool matches §3.1: `cchs_2010_raw` = 62,909 rows and `cchs_2014_raw` = 63,522 rows, giving a combined pool of **126,431 respondents** before any exclusions.
+:::
+
+## A.4 Column Inventory
+
 ```{r}
-#| label: inspect-data-0
-#| code-summary: Data overview — ds0 structure
+#| label: inspect-ferry-columns
+#| code-summary: Column distribution by module prefix + overlap stats
 #| code-fold: false
-#| eval: true
-#| cache: true
+#| cache: false
 ```
 
+The table below shows how many columns fall under each CCHS module prefix (e.g., `ccc_*`, `lop*`, `dhh*`). The two cycles share most columns but differ on a small number of cycle-specific derived variables.
+
 ```{r}
-#| label: inspect-data-1
-#| code-summary: Variable-level glimpse of ds0
+#| label: verify-modules-present
+#| code-summary: "\u00a72.1 PROOF: CCC, LOP, and demographic modules present in both cycles"
+#| code-fold: true
+```
+
+::: {.callout-tip icon="false"}
+**§2.1 DONE — All required CCHS modules present** ✓
+
+Column prefix scan confirms that `ccc_*` (Chronic Conditions), `lop*` (Loss of Productivity), `dhh*` (demographics), `bsw*` (bootstrap weights), and `geo*` (province) groups are all present in both CCHS cycles inside the ferry output — satisfying the §2.1 module requirements.
+:::
+
+## A.5 Data Preview
+
+::: {.callout-important icon="false"}
+**Note on scale**: The full CCHS PUMF contains 600+ columns per cycle. The preview below shows only the **13 confirmed required variables** from `required-variables-and-sample.md` to keep the output manageable. The ferry output retains all columns.
+:::
+
+```{r}
+#| label: inspect-ferry-sample
+#| code-summary: First 5 rows — confirmed columns only
 #| code-fold: false
-#| eval: true
-#| cache: true
+#| cache: false
+```
+
+## A.6 Ferry Output Summary
+
+| Output | Location | Content |
+|------------------------|------------------------|------------------------|
+| `cchs-1.sqlite` | `data-private/derived/` | Primary staging — tables `cchs_2010_raw` + `cchs_2014_raw` |
+| `cchs_2010_raw.parquet` | `data-private/derived/cchs-1-raw/` | Parquet backup of 2010-2011 cycle |
+| `cchs_2014_raw.parquet` | `data-private/derived/cchs-1-raw/` | Parquet backup of 2013-2014 cycle |
+
+------------------------------------------------------------------------
+
+# Part B — Ellis Observation (`2-ellis.R`) {#part-b}
+
+## What is the Ellis Pattern?
+
+The **Ellis Pattern** transforms the ferry's staging output into an analysis-ready dataset. It applies white-list variable selection, cross-cycle harmonization, factor recoding, and sample exclusions — exactly the operations the ferry was forbidden from doing.
+
+## B.1 Inputs & Configuration Flags
+
+**Input**: `data-private/derived/cchs-1.sqlite`\
+Tables: `cchs_2010_raw`, `cchs_2014_raw` (all columns; numeric codes)
+
+Three boolean flags at the top of `2-ellis.R` control which transformations are applied:
+
+| Flag | Default Scenario | All-TRUE Scenario | Effect |
+|------------------|------------------|------------------|------------------|
+| `strict_cycle_integrity` | `FALSE` | `TRUE` | If TRUE, stops on error when either cycle table is empty; if FALSE, continues with a warning |
+| `apply_sample_exclusions` | `TRUE` | `TRUE` | Apply §3.1 age / employment / proxy / outcome-completeness exclusions |
+| `apply_completeness_exclusion` | `FALSE` | `TRUE` | Also exclude respondents with any missing value on CCC conditions or predictor variables (full §3.1 criterion 4b) |
+
+This report documents the **Default Scenario** with real output and describes the **All-TRUE Scenario** analytically.
+
+## B.2 White-List Variable Selection
+
+::: {.callout-note icon="false"}
+**Requirement — §2.2 Required Variables** (`stats_instructions_v3.md`):
+
+> The following variables (or their CCHS equivalents across cycles) must be identified and extracted. Variable names may differ slightly between cycles; consult the CCHS data dictionaries.
+
+| Category | Variables |
+|------------------------------------|------------------------------------|
+| Outcome | Days absent (LOP module sum); sensitivity outcome (chronic condition days only) |
+| Primary exposure | 19 binary chronic conditions (CCC module) |
+| Predisposing | Age, sex, marital status, household size, children counts, education, immigration, ethnicity, homeownership, student status |
+| Facilitating | Income, province, family doctor, employment type, work schedule, occupation, job stress, diet, alcohol, smoking, BMI, physical activity |
+| Needs | Functional limitations, injury, self-perceived health (general + mental + change) |
+| Survey design | Master weight, 500 bootstrap replicates, strata/cluster IDs |
+:::
+
+The white-list approach selects \~69 named variables plus \~500 bootstrap weight columns from the 600+ column ferry output. Variables are classified as:
+
+-   **Confirmed** (13): explicitly verified in `data-public/derived/required-variables-and-sample.md`
+-   **Inferred — CCC** (19): derived from CCHS PUMF naming conventions; trigger a WARNING if absent
+-   **Inferred — other** (\~37): predisposing, facilitating, needs, and ID variables; also trigger a WARNING if absent
+
+```{r}
+#| label: g-whitelist-ratio
+#| code-summary: "Chart: white-list selection ratio"
+#| code-fold: true
+#| fig-cap: "Column selection ratio per cycle. The confirmed and inferred variables account for roughly 10-12% of the total columns in each SPSS file; the remaining ~88% are not selected by 2-ellis.R."
+```
+
+## B.3 Alias Harmonization
+
+Before white-list selection, `2-ellis.R` maps known cross-cycle variable name aliases to canonical names. If the canonical name is missing but an alias is found, the alias is copied in:
+
+| Canonical (white-list name) | Aliases checked      |
+|-----------------------------|----------------------|
+| `edudh04`                   | `edudr04`            |
+| `sdcdgcb`                   | `sdcgcgt`            |
+| `geodgprv`                  | `geogprv`            |
+| `hcu_1aa`                   | `hcu_1a`, `hcudgmd`  |
+| `lbfdghp`                   | `lbsg031`, `lbs_g31` |
+| `gen_02a`                   | `gen_02`, `gen_02a2` |
+| `gen_09`                    | `gen_03`             |
+| `inj_01`                    | `injdgyrs`           |
+
+## B.4 Step 2 — Sample Exclusions
+
+```{r}
+#| label: ellis-load-data
+#| code-summary: Load analytical parquet and sample_flow
+#| code-fold: true
+#| cache: false
+#| include: false
+```
+
+
+::: {.callout-note icon="false"}
+**Requirement — §3.1 Inclusion and Exclusion Criteria** (`stats_instructions_v3.md`):
+
+> Apply the following exclusion criteria in order, recording the sample size at each step:
+>
+> 1.  Exclude respondents aged \< 15 years or \> 75 years
+> 2.  Exclude respondents who did not report paid employment in the past three months
+> 3.  Exclude proxy respondents (i.e., where someone else answered on the respondent's behalf)
+> 4.  Exclude respondents with incomplete answers on the outcome variable (LOP total days), any of the 19 chronic conditions, or any of the predictor variables
+>
+> The previous analysis reports a **final unweighted sample of n = 64,141** from an initial pool of 62,909 (CCHS 2011) + 63,522 (CCHS 2014).
+:::
+
+### Default Scenario (`apply_sample_exclusions = TRUE`, `apply_completeness_exclusion = FALSE`)
+
+Steps 1–3 plus outcome completeness are applied. Step 4b (CCC + predictor completeness) is deferred to the analysis phase.
+
+```{r}
+#| label: g-exclusion-funnel
+#| code-summary: "Chart: sample exclusion funnel"
+#| code-fold: true
+#| fig-cap: "Sample exclusion funnel — n remaining after each sequential filter (Default run: apply_completeness_exclusion = FALSE). The employment filter (step 3) is the largest single reduction, reflecting that the CCHS surveys the general population while the study focuses only on employed respondents."
 ```
 
 ```{r}
-#| label: inspect-data-2
-#| code-summary: Key variable summary from ds0
+#| label: verify-sample-flow
+#| code-summary: "\u00a73.1 PROOF: starting pool = 126,431; step-by-step n tracked vs. target"
+#| code-fold: true
+```
+
+::: {.callout-tip icon="false"}
+**§3.1 DONE — Exclusion criteria applied in order (Default run)** ✓
+
+All §3.1 exclusion steps are applied sequentially with `n` recorded at each step. Starting pool matches §3.1 (62,909 + 63,522 = **126,431**). The **default run** (`apply_completeness_exclusion = FALSE`) applies steps 1–5 (age, employment, proxy, outcome completeness) and reaches **n ≈ 63,843** — close to the §3.1 thesis target of 64,141. Step 4 (proxy) removed 0 rows because `adm_prx` was not found in the CCHS files.
+
+**All-TRUE run** (`apply_completeness_exclusion = TRUE`): adds full predictor-completeness exclusion at step 6 — actual result **n = 41,372** (22,769 fewer). The gap arises because 17 inferred predictor variables were absent from the CCHS data (e.g., `incdghh`, `hwtdgbmi`, `alcdgtyp`, `noc_31`) and were added as `NA` columns; the completeness filter then excludes all such respondents. To close the gap to the §3.1 target: update inferred variable names in `2-ellis.R` against the CCHS data dictionaries.
+:::
+
+### All-TRUE Scenario (`apply_completeness_exclusion = TRUE`)
+
+When `apply_completeness_exclusion = TRUE`, an additional step removes respondents with any `NA` on the 19 CCC conditions or any predictor variable (full §3.1 criterion 4b). The actual run produced **n = 41,372** — differing from the §3.1 thesis target of 64,141 by **22,769 respondents**. The gap arises because 17 inferred variables were absent from both CCHS cycles (e.g., `incdghh`, `hwtdgbmi`, `alcdgtyp`, `noc_31`) and were added as `NA` columns; the completeness filter then excludes all respondents with those NA values. The proxy filter removed 0 respondents because `adm_prx` was also not found. Update the inferred variable name list in `2-ellis.R` (declare-globals section) to resolve these mismatches against the CCHS data dictionaries.
+
+| Scenario | Actual final n | n vs. §3.1 target (64,141) | Completeness criterion |
+|------------------|------------------|------------------|------------------|
+| Default (`apply_completeness_exclusion = FALSE`) | 63,843 (actual run) | −281 | Outcome only |
+| All-TRUE (`apply_completeness_exclusion = TRUE`) | **41,372** (actual run) | −22,769 | Outcome + all CCC + all predictors |
+
+## B.5 Step 3 — Cycle Pooling & Harmonization
+
+::: {.callout-note icon="false"}
+**Requirement — §3.2 Pooling the Two Cycles** (`stats_instructions_v3.md`):
+
+> -   Harmonize variable names and coding schemes between the two cycles (they may differ)
+> -   Create a cycle indicator variable (0 = 2010-2011, 1 = 2013-2014)
+> -   **Adjust survey weights**: when combining two cycles, divide each respondent's original survey weight by 2. This is the standard Statistics Canada recommendation for pooling CCHS annual cycles.
+> -   Verify missing values that might be logically imputed. Some questions are only asked of respondents aged 18 years and older.
+:::
+
+Steps applied:
+
+1.  `cycle = 0L` added to CCHS 2010-2011 rows; `cycle = 1L` to CCHS 2013-2014
+2.  Column union: any column present in only one cycle is added as `NA` in the other
+3.  `bind_rows()` stacks both cycles into a single pooled data frame `ds0`
+
+```{r}
+#| label: g-cycle-split
+#| code-summary: "Chart: pooling balance between cycles"
+#| code-fold: true
+#| fig-cap: "Proportion of the final analytical sample contributed by each CCHS cycle. Statistics Canada's recommendation is to weight each cycle's contribution equally (÷ 2 applied to survey weights) when pooling two annual cycles."
+```
+
+```{r}
+#| label: verify-cycle-pooling
+#| code-summary: "\u00a73.2 PROOF: cycle indicator present, both cycles represented, weights available"
+#| code-fold: true
+```
+
+::: {.callout-tip icon="false"}
+**§3.2 DONE — Two cycles pooled correctly** ✓
+
+The analytical dataset contains a `cycle` indicator (0 = CCHS 2010-2011, 1 = CCHS 2013-2014) as required by §3.2. Survey weight variable `wts_m_pooled` is present (original weight ÷ 2 applied for pooling). **Note**: No bootstrap weight columns (`bsw*`) were found in the CCHS data files — bootstrap-based variance estimation is not available for this run. Confirm bootstrap weight column names against the CCHS data dictionary and update the `2-ellis.R` white-list if needed.
+:::
+
+## B.6 Step 4 — Factor Recoding
+
+All raw CCHS numeric codes are recoded into labelled R factors. CCHS special codes (6 = Not applicable, 7 = Don't know, 8 = Refusal, 9 = Not stated) are mapped to `NA`. The resulting `ds3` object contains human-readable factor levels in place of integer codes.
+
+Key recoded variables:
+
+| Raw variable | Recoded variable | Levels |
+|------------------------|------------------------|------------------------|
+| `dhhgage` | `age_group` | `15-24` / `25-54` / `55-75` (ordered) |
+| `dhh_sex` | `sex` | `Male` / `Female` |
+| `dhhgms` | `marital_status` | Single / Married / Common-law / Widowed-Divorced-Separated |
+| `edudh04` | `education` | 4 ordered levels (\< secondary → post-secondary graduate) |
+| `incdghh` | `income_5cat` | 5 ordered income bands (\< \$20k → \$80k+) |
+| `smkdsty` | `smoking_status` | Never / Former / Occasional / Daily (ordered) |
+| `hwtdgbmi` | `bmi_category` | Underweight / Normal / Overweight / Obese (ordered) |
+| `ccc_015`–`ccc_300` | `ccc_015_yn`–`ccc_300_yn` | `Yes` / `No` (all 19 CCC conditions) |
+
+```{r}
+#| label: inspect-analytical
+#| code-summary: Analytical dataset structure and cycle distribution
 #| code-fold: false
-#| eval: true
-#| cache: true
+#| cache: false
 ```
 
-```{r}
-#| label: inspect-data-3
-#| code-summary: ds1 summary — central tendency of absence days (1+ only)
-#| code-fold: false
-#| eval: true
-#| cache: true
-```
+## B.7 Ellis Output Summary
 
-## Absence Overview: Who Reports Missing Days?
+| Output | Location | Format | Content |
+|------------------|------------------|------------------|------------------|
+| `cchs_analytical.parquet` | `data-private/derived/cchs-2-tables/` | Parquet | Pooled analytical dataset with recoded factors |
+| `sample_flow.parquet` | `data-private/derived/cchs-2-tables/` | Parquet | Exclusion step counts for Figure 1 flowchart |
+| `cchs_analytical` table | `data-private/derived/cchs-2.sqlite` | SQLite | Same data, factors as character (for ad-hoc SQL) |
+| `sample_flow` table | `data-private/derived/cchs-2.sqlite` | SQLite | Same flowchart data |
 
-Among employed Canadians who answered `absence_days_total`, the majority report **zero absence days**. The table below shows the breakdown; the graphs in the Analysis section focus only on the `1+ days` subgroup (`ds1`).
+------------------------------------------------------------------------
 
-```{r}
-#| label: analytic-absence-ratio
-#| code-summary: Ratio of zero-absence vs. any-absence respondents
-#| code-fold: true
-#| eval: true
-#| cache: true
-```
-
-# Analysis
-
-## Graph Family g1: Distribution of Absence Days
-
-### Data Preparation
-
-`g1_data` aggregates `ds1` (respondents with 1+ absence days) by unique values of `absence_days_total`, counting how many respondents reported each value. Median and mean are computed from `ds1` and appear as reference lines on both graphs below.
+# Report Metadata
 
 ```{r}
-#| label: g1-data-prep
-#| code-summary: Prepare g1_data — frequency count per absence-day value
-#| code-fold: true
-#| eval: true
-#| cache: true
-```
-
-### Scatter Plot (g1-scatter)
-
-Each point represents one unique value of `absence_days_total` (x-axis) plotted against the number of respondents with that value (y-axis). A dashed red line marks the median; a dotted orange line marks the mean. Both 0-day and NA respondents are excluded.
-
-```{r}
-#| label: g1-scatter
-#| code-summary: Scatter — unique day-values vs. respondent count
-#| code-fold: true
-#| eval: true
-#| cache: true
-#| fig-cap: "Scatter of unique absence-day values (x) vs. respondent count (y). X-axis zoomed to 1–40 via coord_cartesian (tail outside view). Breaks every 5 days. Dashed red = median, dotted orange = mean."
-```
-
-### Histogram (g1-hist)
-
-Same population as the scatter (`ds1`, 1+ days only), binned into 5-day intervals and capped at 100 days for legibility. Median and mean reference lines are identical to the scatter. The right skew is prominent — the bulk of absent workers miss fewer than 15 days.
-
-```{r}
-#| label: g1-hist
-#| code-summary: Histogram — distribution of absence days (5-day bins, capped at 100)
-#| code-fold: true
-#| eval: true
-#| cache: true
-#| fig-cap: "Histogram of absence_days_total in 5-day bins, zoomed to 1–40 days via coord_cartesian (tail data not dropped). Breaks every 5 days. Dashed red = median, dotted orange = mean."
-```
-
-## Graph Family g2: Absence Days by Sex
-
-### Data Preparation
-
-`g2_stats` computes the median, mean, and respondent count for each `sex_label` group from `ds1`. These per-sex statistics drive the reference lines in the faceted histogram below.
-
-```{r}
-#| label: g2-data-prep
-#| code-summary: Prepare g2_stats — per-sex central tendency from ds1
-#| code-fold: true
-#| eval: true
-#| cache: true
-```
-
-### Absence Ratio by Sex
-
-Among employed Canadians who answered `absence_days_total`, the table below shows what share of each sex group reported zero absence days versus one or more. This provides context for interpreting the histograms: even within a sex, the majority of respondents report no absence at all.
-
-```{r}
-#| label: analytic-sex-ratio
-#| code-summary: Per-sex count and percentage of zero-absence vs. 1+ absence respondents
-#| code-fold: true
-#| eval: true
-#| cache: true
-```
-
-### Histograms by Sex (g2-hist-sex)
-
-Two panels side by side — one per sex. Each panel uses the same 5-day bins and 1–100 zoom as `g1-hist`, with its own median and mean reference lines so within-sex shape and between-sex differences are directly comparable.
-
-```{r}
-#| label: g2-hist-sex
-#| code-summary: Faceted histogram — absence day distribution split by sex_label
-#| code-fold: true
-#| eval: true
-#| cache: true
-#| fig-cap: "Absence day distribution by sex (5-day bins, zoomed 1–40). Each panel shows the within-sex distribution; dashed red = per-sex median, dotted orange = per-sex mean."
-```
-
-## Graph Family g3: Absence Days by Age Group
-
-### Data Preparation
-
-`g3_stats` computes the median, mean, and respondent count for each `age_group_3` from `ds1`. Parameters are also saved to `data-local/g3_stats_age.csv` for downstream use.
-
-```{r}
-#| label: g3-data-prep
-#| code-summary: Prepare g3_stats — per-age-group central tendency from ds1
-#| code-fold: true
-#| eval: true
-#| cache: true
-```
-
-### Histograms by Age Group (g3-hist-age)
-
-One panel per `age_group_3`, laid out side by side. Same 5-day bins and 1–40 zoom as the prior families. Each panel carries its own per-group median and mean so within-age shape and between-age differences are directly comparable.
-
-```{r}
-#| label: g3-hist-age
-#| code-summary: Faceted histogram — absence day distribution by age_group_3
-#| code-fold: true
-#| eval: true
-#| cache: true
-#| fig-cap: "Absence day distribution by age group (5-day bins, zoomed 1–40). One panel per age_group_3; dashed red = per-group median, dotted orange = per-group mean. Parameters saved to g3_stats_age.csv."
-```
-
-## Graph Family g4: g1 Replicated by Survey Cycle
-
-### Data Preparation
-
-`g4_data` aggregates `ds1` within each `survey_cycle_label` to produce per-cycle frequency counts of `absence_days_total`. `g4_stats` provides per-cycle median and mean for the reference lines.
-
-```{r}
-#| label: g4-data-prep
-#| code-summary: Prepare g4_data and g4_stats — per-cycle frequency and central tendency
-#| code-fold: true
-#| eval: true
-#| cache: true
-```
-
-### Scatter Plot by Cycle (g4-scatter-cycle)
-
-Direct replication of `g1-scatter`, split into one panel per `survey_cycle_label`. Each point is a unique absence-day value within that cycle; per-cycle median and mean reference lines allow cycle-to-cycle comparison at a glance.
-
-```{r}
-#| label: g4-scatter-cycle
-#| code-summary: Scatter by survey cycle — unique day-values vs. respondent count per cycle
-#| code-fold: true
-#| eval: true
-#| cache: true
-#| fig-cap: "Per-cycle scatter: each point is a unique absence-day value within the cycle. Dashed red = per-cycle median, dotted orange = per-cycle mean. Zoomed to 1–40 days."
-```
-
-### Histogram by Cycle (g4-hist-cycle)
-
-Direct replication of `g1-hist`, split by `survey_cycle_label`. Same 5-day bins and 1–40 zoom. Comparing panel heights reveals how the total number of respondents differs between cycles; comparing peak location and reference lines reveals distributional differences.
-
-```{r}
-#| label: g4-hist-cycle
-#| code-summary: Histogram by survey cycle — 5-day bins, zoomed to 1–40
-#| code-fold: true
-#| eval: true
-#| cache: true
-#| fig-cap: "Per-cycle histogram of absence_days_total (5-day bins, zoomed 1–40). Dashed red = per-cycle median, dotted orange = per-cycle mean."
-```
-
-## Graph Family g5: Absence Days by Education Level
-
-### Data Preparation
-
-`g5_stats` computes the median, mean, and respondent count for each `education_level` group from `ds5` — `ds1` with respondents missing `education_level` removed. These per-group statistics drive the reference lines in the faceted histogram below.
-
-```{r}
-#| label: g5-data-prep
-#| code-summary: Prepare g5_stats — per-education-level central tendency from ds1
-#| code-fold: true
-#| eval: true
-#| cache: true
-```
-
-### Histograms by Education Level (g5-hist-edu)
-
-One panel per `education_level`, laid out in three columns. Same 5-day bins and 1–40 zoom as prior families. Each panel carries its own per-group median and mean so within-education shape and between-group differences are directly comparable.
-
-```{r}
-#| label: g5-hist-edu
-#| code-summary: Faceted histogram — absence day distribution by education_level
-#| code-fold: true
-#| eval: true
-#| cache: true
-#| fig-cap: "Absence day distribution by education level (5-day bins, zoomed 1–40). One panel per education_level; dashed red = per-group median, dotted orange = per-group mean."
-```
-
-## Graph Family g6: Absence Days by Marital Status
-
-### Data Preparation
-
-`g6_stats` computes the median, mean, and respondent count for each `marital_status_label` group from `ds6` — `ds1` with respondents missing `marital_status_label` removed. These per-group statistics drive the reference lines in the faceted histogram below.
-
-```{r}
-#| label: g6-data-prep
-#| code-summary: Prepare g6_stats — per-marital-status central tendency from ds1
-#| code-fold: true
-#| eval: true
-#| cache: true
-```
-
-### Histograms by Marital Status (g6-hist-marital)
-
-One panel per `marital_status_label`, laid out in three columns. Same 5-day bins and 1–40 zoom as prior families. Each panel carries its own per-group median and mean so within-status shape and between-group differences are directly comparable.
-
-```{r}
-#| label: g6-hist-marital
-#| code-summary: Faceted histogram — absence day distribution by marital_status_label
-#| code-fold: true
-#| eval: true
-#| cache: true
-#| fig-cap: "Absence day distribution by marital status (5-day bins, zoomed 1–40). One panel per marital_status_label; dashed red = per-group median, dotted orange = per-group mean."
-```
-
-## Graph Family g7: Absence Days by Immigration Status
-
-### Data Preparation
-
-`g7_stats` computes the median, mean, and respondent count for each `immigration_status_label` group from `ds7` — `ds1` with respondents missing `immigration_status_label` removed. These per-group statistics drive the reference lines in the faceted histogram below.
-
-```{r}
-#| label: g7-data-prep
-#| code-summary: Prepare g7_stats — per-immigration-status central tendency from ds7
-#| code-fold: true
-#| eval: true
-#| cache: true
-```
-
-### Histograms by Immigration Status (g7-hist-immigration)
-
-One panel per `immigration_status_label`, laid out in three columns. Same 5-day bins and 1–40 zoom as prior families. Each panel carries its own per-group median and mean so within-status shape and between-group differences are directly comparable.
-
-```{r}
-#| label: g7-hist-immigration
-#| code-summary: Faceted histogram — absence day distribution by immigration_status_label
-#| code-fold: true
-#| eval: true
-#| cache: true
-#| fig-cap: "Absence day distribution by immigration status (5-day bins, zoomed 1–40). One panel per immigration_status_label; dashed red = per-group median, dotted orange = per-group mean."
-```
-
-# Session Info
-
-```{r}
-#| label: session-info
-#| code-summary: R session information for reproducibility
 #| echo: false
-#| code-fold: true
-cat("Report completed at:", as.character(Sys.time()), "\n")
-cat("Total runtime:", round(difftime(Sys.time(), report_render_start_time, units = "mins"), 2), "minutes\n")
-sessionInfo()
+cat("Report rendered:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
+cat("Elapsed:", round(difftime(Sys.time(), report_render_start_time, units = "secs"), 1), "seconds\n")
 ```

@@ -33,6 +33,51 @@ CCHS .sav files (data-private/raw/)
 | 3 | `manipulation/3-ellis.R` | Ellis | `data-private/derived/cchs-3.sqlite` + `cchs-3-tables/` + `manipulation/3-ellis.html` |
 | 4 | `manipulation/2-test-ellis-cache.R` | Test | Console test report |
 
+
+## 1-ferry
+
+### High-Level Summary
+
+`1-ferry.R` is a **pure transport** script. Its sole job is to move raw CCHS
+PUMF microdata from SPSS (`.sav`) format into a local SQLite staging database,
+with a Parquet backup alongside. It does **nothing analytical**: no variable
+selection, no recoding, no filtering, no renaming beyond mechanical
+snake_case sanitization. The guiding discipline is that every decision about
+*what the data means* is deferred to the Ellis lane; Ferry only answers the
+question *"how do we get the data off disk into a queryable form?"*.
+
+Two CCHS cycles are handled in one script:
+
+| Cycle | Source file | SQLite table |
+|-------|-------------|--------------|
+| 2010–2011 | `CCHS2010_LOP.sav` | `cchs_2010_raw` |
+| 2013–2014 | `CCHS_2014_EN_PUMF.sav` | `cchs_2014_raw` |
+
+If the 2014 file is absent, the script continues with a zero-row placeholder
+(same schema as 2010) so that downstream scripts can still be developed and
+tested against a structurally complete database.
+
+**Permitted operations**
+
+| Operation | Tool | Reason permitted |
+|-----------|------|-----------------|
+| Read SPSS | `haven::read_sav()` | Ingestion only |
+| Strip value/variable labels | `haven::zap_labels()` / `haven::zap_label()` | SQLite cannot store SPSS label attributes |
+| Sanitize column names | `janitor::clean_names()` | Mechanical normalization, no meaning change |
+| Write SQLite | `DBI::dbWriteTable()` | Primary staging output |
+| Write Parquet | `arrow::write_parquet()` | Backup / fast-read fallback |
+
+**Forbidden operations** (all deferred to Ellis)
+
+- Variable selection / white-listing
+- Renaming beyond `clean_names` normalization
+- Factor or value recoding
+- Sample exclusions or filtering
+- Derived variable construction
+
+---
+
+
 ---
 
 ## Running the Pipeline
@@ -87,45 +132,6 @@ Paths are configured in `config.yml` under `raw_data`.
 | `cchs_analytical.parquet` | `data-private/derived/cchs-2-tables/` | Parquet | Main analysis dataset (full pooled sample mode by default) |
 | `sample_flow.parquet` | `data-private/derived/cchs-2-tables/` | Parquet | Exclusion audit trail (5 rows) |
 | `cchs-2.sqlite` | `data-private/derived/` | SQLite | Same tables as Parquet (factors as character) |
-
-### Ellis Lane 3 outputs (clarity + splits)
-
-| Artifact | Location | Format | Description |
-|----------|----------|--------|-------------|
-| `cchs_analytical.parquet` | `data-private/derived/cchs-3-tables/` | Parquet | Renamed analysis table: keeps retained fields, excludes selected columns, applies clarity names |
-| `cchs_employed.parquet` | `data-private/derived/cchs-3-tables/` | Parquet | Employed-only split (`employment_code == 1`) |
-| `cchs_unemployed.parquet` | `data-private/derived/cchs-3-tables/` | Parquet | Not-employed remainder split (`employment_code != 1` or missing); complements `cchs_employed` |
-| `sample_flow.parquet` | `data-private/derived/cchs-3-tables/` | Parquet | Lane 2 flow audit carried into Lane 3 |
-| `data_dictionary.parquet` | `data-private/derived/cchs-3-tables/` | Parquet | Dictionary for excluded + renamed fields |
-| `cchs-3.sqlite` | `data-private/derived/` | SQLite | Same Lane 3 tables for SQL exploration |
-| `3-ellis.html` | `manipulation/` | HTML | Rendered report (or fallback HTML if Pandoc unavailable) |
-
-Lane 3 exclusions currently applied:
-- `adm_rno`
-- `income_5cat`
-- `employment_type`
-- `work_schedule`
-- `alcohol_type`
-- `bmi_category`
-- `dhhgage`
-
-Lane 3 key renames currently applied:
-- `cycle` → `survey_cycle_id`
-- `lop_015` → `employment_code`
-- `adm_prx` → `proxy_code`
-- `days_absent_total` → `absence_days_total`
-- `days_absent_chronic` → `absence_days_chronic`
-- `wts_m_pooled` → `weight_pooled`
-- `wts_m_original` → `weight_original`
-- `geodpmf` → `geo_region_id`
-
-Lane 3 additionally applies broad clarity renaming for remaining retained fields
-(demographics, outcomes, and chronic-condition indicators). See:
-- `data-private/derived/cchs-3-tables/data_dictionary.parquet`
-- `data-public/metadata/cchs-3-column-dictionary-uk.md`
-
-**Parquet is the primary format** — it preserves R factor types and level ordering, which
-matters for downstream models and plots. SQLite is a secondary convenience format.
 
 ---
 

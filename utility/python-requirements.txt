@@ -8,30 +8,30 @@
 # ── Core Visualization ──────────────────────────────────────────────────────
 
 # Static charts (publication-quality, matplotlib-based)
-matplotlib>=3.7.0          # Foundation plotting library
-seaborn>=0.12.0            # Statistical visualization on top of matplotlib
+matplotlib>=3.10.0         # Foundation plotting library
+seaborn>=0.13.0            # Statistical visualization on top of matplotlib
 
 # Interactive charts (widget/HTML-based)
-plotly>=5.18.0             # Interactive charts; exports to HTML or PNG
-bokeh>=3.3.0               # Interactive web-ready visualizations
+plotly>=6.5.0              # Interactive charts; exports to HTML or PNG
+bokeh>=3.8.0               # Interactive web-ready visualizations
 
 # Additional interactive / specialized
-altair>=5.2.0              # Declarative grammar of graphics (Vega-Altair)
+altair>=6.0.0              # Declarative grammar of graphics (Vega-Altair)
 
 # ── Data Manipulation ────────────────────────────────────────────────────────
-pandas>=2.0.0              # DataFrames – required by most viz libraries
-numpy>=1.24.0              # Numerical arrays
+pandas>=3.0.0              # DataFrames – required by most viz libraries
+numpy>=2.4.0               # Numerical arrays
 
 # ── Notebook / Report Integration ────────────────────────────────────────────
-ipykernel>=6.25.0          # Jupyter kernel so VS Code notebooks work
-nbformat>=5.9.0            # Notebook file format support
+ipykernel>=7.0.0           # Jupyter kernel so VS Code notebooks work
+nbformat>=5.10.0           # Notebook file format support
 # ipywidgets>=8.1.0        # Interactive widgets – installs JupyterLab extensions
 #                          # with very long paths; fails on Windows without LongPaths
 #                          # enabled. Enable via: reg add HKLM\SYSTEM\CurrentControlSet\Control\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f
 
 # ── Output / Export Utilities ────────────────────────────────────────────────
-kaleido>=0.2.1             # Static image export for Plotly (PNG, SVG, PDF)
-pillow>=10.0.0             # Image processing (used by matplotlib savefig)
+kaleido>=1.0.0             # Static image export for Plotly (PNG, SVG, PDF)
+pillow>=12.0.0             # Image processing (used by matplotlib savefig)
 
 # ── Optional: nice-to-have extras ───────────────────────────────────────────
 # Uncomment to include:

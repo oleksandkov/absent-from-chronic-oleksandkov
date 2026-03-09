@@ -28,6 +28,8 @@ website:
             text: "EDA 1 — Vehicle Performance (Template)"
           - href: analysis/eda-2/eda-2.qmd
             text: "EDA 2 — Work Absence (CCHS)"
+          # - href: analysis/eda-3/eda-3.qmd
+          #   text: "EDA 3 — Chronic Absence (CCHS)"   # uncomment when eda-3.qmd exists + add to render: list
       - href: pages/data.qmd
         text: Data
       - href: pages/pipeline.qmd

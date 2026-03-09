@@ -1,10 +1,12 @@
 {
 	"folders": [
 		{
+			"name": "absent-from-chronic-oleksandkov",
 			"path": "."
 		},
 		{
-			"path": "../../caseload-forecast-demo"
+			"name": "caseload-forecast-demo",
+			"path": "../caseload-forecast-demo"
 		}
 	],
 	"settings": {}

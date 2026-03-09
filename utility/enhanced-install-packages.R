@@ -2,22 +2,25 @@
 # This extends the original install-packages.R with optional version control
 # Maintains backward compatibility with existing package-dependency-list.csv
 
-#Clear memory from previous runs.
+# Clear memory from previous runs.
 base::rm(list=base::ls(all=TRUE))
+
+# Use Posit Package Manager to get latest CRAN packages
+cran_repo <- "https://packagemanager.posit.co/cran/latest"
 
 path_csv <- "utility/package-dependency-list.csv"
 
-if( !file.exists(path_csv)) {
+if (!file.exists(path_csv)) {
   base::stop("The path `", path_csv, "` was not found.  Make sure the working directory is set to the root of the repository.")
 }
 
 # Install required packages for enhanced functionality
-if( !base::requireNamespace("devtools") ) {
-  utils::install.packages("devtools", repos="https://cran.rstudio.com")
+if (!base::requireNamespace("devtools", quietly = TRUE)) {
+  utils::install.packages("devtools", repos = cran_repo)
 }
 
-if( !base::requireNamespace("remotes") ) {
-  utils::install.packages("remotes", repos="https://cran.rstudio.com")
+if (!base::requireNamespace("remotes", quietly = TRUE)) {
+  utils::install.packages("remotes", repos = cran_repo)
 }
 
 # Enhanced package installation function
@@ -79,11 +82,11 @@ install_package_with_version <- function(pkg_name, min_version = NULL, max_versi
       # Install from CRAN
       if (!is.null(exact_version) && !is.na(exact_version) && exact_version != "") {
         # For exact versions, use remotes::install_version
-        remotes::install_version(pkg_name, version = exact_version, 
-                                repos = "https://cran.rstudio.com", 
+        remotes::install_version(pkg_name, version = exact_version,
+                                repos = cran_repo,
                                 quiet = TRUE)
       } else {
-        utils::install.packages(pkg_name, repos = "https://cran.rstudio.com", quiet = TRUE)
+        utils::install.packages(pkg_name, repos = cran_repo, quiet = TRUE)
       }
     }
     
@@ -158,4 +161,10 @@ if (failure_count == 0) {
   cat("⚠️  Some packages failed to install. Check the messages above.\n")
 }
 
+# Update all installed CRAN packages to latest available versions
+cat("\n=========================================================\n")
+cat("Updating installed packages to latest CRAN versions...\n")
+cat("=========================================================\n")
+utils::update.packages(ask = FALSE, checkBuilt = TRUE, repos = cran_repo)
+cat("Package update complete.\n")
 cat("=========================================================\n")

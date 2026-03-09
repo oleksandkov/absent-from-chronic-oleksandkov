@@ -1,3 +1,4 @@
+# nolint  start  # TODO: oleksandkov, read up on linting errors and learn to manage in VSC
 #' ---
 #' title: "Ferry Lane 1: CCHS Data Transport (2010-2011 & 2013-2014)"
 #' author: "Andriy Koval"
@@ -36,6 +37,7 @@
 #' variable harmonization, factor recoding, outcome construction, sample exclusions
 #'
 #' ============================================================================
+
 
 #+ echo=F
 # rmarkdown::render(input = "./manipulation/1-ferry.R") # run to knit
@@ -283,3 +285,4 @@ cat("  - Outcome construction (days_absent_total, days_absent_chronic)\n")
 cat("  - Sequential sample exclusions with flow tracking\n")
 cat("  - Factor recoding for all categorical predictors\n")
 cat("  - Survey weight adjustment for pooling (÷2)\n")
+# nolint end

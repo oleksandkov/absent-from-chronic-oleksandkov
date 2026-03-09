@@ -41,24 +41,29 @@ init_renv_environment <- function() {
   # Install renv if needed
   if (!requireNamespace("renv", quietly = TRUE)) {
     cat("📦 Installing renv...\n")
-    install.packages("renv", repos = "https://cran.rstudio.com")
+    install.packages("renv", repos = "https://packagemanager.posit.co/cran/latest")
   }
   
-  # Initialize renv
+  # Initialize renv with Posit Package Manager for latest packages
   cat("🔧 Initializing renv...\n")
+  options(
+    repos = c(CRAN = "https://packagemanager.posit.co/cran/latest")
+  )
   renv::init(force = TRUE, restart = FALSE)
   
-  # Install packages using our enhanced system
+  # Install packages from CSV dependency list
   cat("📦 Installing packages from CSV...\n")
-  if (file.exists("utility/enhanced-install-packages.R")) {
-    source("utility/enhanced-install-packages.R")
-  } else if (file.exists("utility/install-packages.R")) {
-    source("utility/install-packages.R")  
+  if (file.exists("utility/install-packages.R")) {
+    source("utility/install-packages.R")
   } else {
     cat("❌ No package installation script found.\n")
     return(FALSE)
   }
-  
+
+  # Update all packages to latest versions before snapshotting
+  cat("🔄 Updating packages to latest versions...\n")
+  renv::update(prompt = FALSE)
+
   # Create renv snapshot
   cat("📸 Creating renv snapshot (renv.lock)...\n")
   renv::snapshot(prompt = FALSE)
