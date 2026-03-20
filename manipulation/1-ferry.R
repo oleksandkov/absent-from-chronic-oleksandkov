@@ -55,6 +55,8 @@ requireNamespace("arrow")
 requireNamespace("fs")
 
 script_start <- Sys.time()
+verbose      <- FALSE   # set FALSE to suppress progress output; key results always print
+vcat         <- function(...) if (verbose) cat(...)
 
 # ---- load-sources ------------------------------------------------------------
 project_root <- if (dir.exists("scripts") && dir.exists("manipulation")) {
@@ -85,19 +87,19 @@ table_2010 <- "cchs_2010_raw"
 table_2014 <- "cchs_2014_raw"
 
 cat("Ferry Lane 1: CCHS Data Transport\n")
-cat(strrep("=", 70), "\n")
-cat("Source 1:", path_sav_2010, "\n")
-cat("Source 2:", path_sav_2014, "\n")
-cat("Output:  ", output_sqlite, "\n\n")
+vcat(strrep("=", 70), "\n")
+vcat("Source 1:", path_sav_2010, "\n")
+vcat("Source 2:", path_sav_2014, "\n")
+vcat("Output:  ", output_sqlite, "\n\n")
 
 # ==============================================================================
 # SECTION 1: LOAD FROM SOURCES
 # ==============================================================================
 
 # ---- load-from-sav-2010 ------------------------------------------------------
-cat("\n", strrep("=", 70), "\n")
-cat("SECTION 1A: LOAD CCHS 2010-2011\n")
-cat(strrep("=", 70), "\n")
+vcat("\n", strrep("=", 70), "\n")
+vcat("SECTION 1A: LOAD CCHS 2010-2011\n")
+vcat(strrep("=", 70), "\n")
 
 if (!file.exists(path_sav_2010)) {
   stop("Source file not found: ", path_sav_2010,
@@ -105,7 +107,7 @@ if (!file.exists(path_sav_2010)) {
   file.path(project_root, "data-private", "raw", "2026-02-19", "CCHS2010_LOP.sav"))
 }
 
-cat("Reading SPSS file...\n")
+vcat("Reading SPSS file...\n")
 ds_2010_raw <- haven::read_sav(path_sav_2010)
 
 # Permitted ferry operations only:
@@ -121,9 +123,9 @@ cat(sprintf("✓ CCHS 2010-2011 loaded: %s rows, %s columns\n",
             format(ncol(ds_2010), big.mark = ",")))
 
 # ---- load-from-sav-2014 ------------------------------------------------------
-cat("\n", strrep("=", 70), "\n")
-cat("SECTION 1B: LOAD CCHS 2013-2014\n")
-cat(strrep("=", 70), "\n")
+vcat("\n", strrep("=", 70), "\n")
+vcat("SECTION 1B: LOAD CCHS 2013-2014\n")
+vcat(strrep("=", 70), "\n")
 
 use_2014_placeholder <- FALSE
 
@@ -137,7 +139,7 @@ if (!file.exists(path_sav_2014)) {
   ds_2014 <- ds_2010[0, , drop = FALSE]
   use_2014_placeholder <- TRUE
 } else {
-  cat("Reading SPSS file...\n")
+  vcat("Reading SPSS file...\n")
   ds_2014_raw <- haven::read_sav(path_sav_2014)
 
   ds_2014 <- ds_2014_raw %>%
@@ -158,6 +160,7 @@ if (use_2014_placeholder) {
 # ==============================================================================
 
 # ---- validate-structure ------------------------------------------------------
+if (verbose) {
 cat("\n", strrep("=", 70), "\n")
 cat("SECTION 2: VALIDATE STRUCTURE\n")
 cat(strrep("=", 70), "\n")
@@ -185,6 +188,7 @@ if (length(cols_2014_only) > 0) {
   cat("\n  Columns in 2014 only:\n")
   cat("   ", paste(sort(cols_2014_only), collapse = ", "), "\n")
 }
+} # end if (verbose)
 
 # Check that the variables documented in required-variables-and-sample.md
 # are present in both cycles (CONFIRMED variables only)
@@ -198,12 +202,14 @@ confirmed_vars <- c(
   "wts_m", "geodpmf"
 )
 
-cat("\n  Checking CONFIRMED required variables:\n")
-for (v in confirmed_vars) {
-  in_2010 <- v %in% cols_2010
-  in_2014 <- v %in% cols_2014
-  status <- if (in_2010 && in_2014) "✓ both" else if (in_2010) "⚠ 2010 only" else if (in_2014) "⚠ 2014 only" else "✗ MISSING"
-  cat(sprintf("    %-12s  %s\n", v, status))
+if (verbose) {
+  cat("\n  Checking CONFIRMED required variables:\n")
+  for (v in confirmed_vars) {
+    in_2010 <- v %in% cols_2010
+    in_2014 <- v %in% cols_2014
+    status <- if (in_2010 && in_2014) "✓ both" else if (in_2010) "⚠ 2010 only" else if (in_2014) "⚠ 2014 only" else "✗ MISSING"
+    cat(sprintf("    %-12s  %s\n", v, status))
+  }
 }
 
 # ==============================================================================
@@ -211,14 +217,14 @@ for (v in confirmed_vars) {
 # ==============================================================================
 
 # ---- save-to-sqlite ----------------------------------------------------------
-cat("\n", strrep("=", 70), "\n")
-cat("SECTION 3A: SAVE TO SQLITE\n")
-cat(strrep("=", 70), "\n")
+vcat("\n", strrep("=", 70), "\n")
+vcat("SECTION 3A: SAVE TO SQLITE\n")
+vcat(strrep("=", 70), "\n")
 
 # Remove existing file for clean state
 if (file.exists(output_sqlite)) {
   file.remove(output_sqlite)
-  cat("✓ Removed existing SQLite file\n")
+  vcat("✓ Removed existing SQLite file\n")
 }
 
 cnn <- DBI::dbConnect(RSQLite::SQLite(), output_sqlite)
@@ -237,9 +243,9 @@ cat(sprintf("✓ Table '%s': %s rows written\n", table_2014, format(n_2014_db, b
 cat(sprintf("✓ SQLite file: %s\n", output_sqlite))
 
 # ---- save-to-parquet ---------------------------------------------------------
-cat("\n", strrep("=", 70), "\n")
-cat("SECTION 3B: SAVE TO PARQUET (Backup)\n")
-cat(strrep("=", 70), "\n")
+vcat("\n", strrep("=", 70), "\n")
+vcat("SECTION 3B: SAVE TO PARQUET (Backup)\n")
+vcat(strrep("=", 70), "\n")
 
 arrow::write_parquet(ds_2010, file.path(output_parquet_dir, "cchs_2010_raw.parquet"))
 cat(sprintf("✓ cchs_2010_raw.parquet (%s rows)\n", format(nrow(ds_2010), big.mark = ",")))
@@ -270,19 +276,13 @@ cat(sprintf("  CCHS 2013-2014: %s  (%s rows, %s cols)\n",
             format(nrow(ds_2014), big.mark = ","),
             ncol(ds_2014)))
 
-cat(sprintf("\nColumn overlap: %d shared, %d 2010-only, %d 2014-only\n",
+vcat(sprintf("\nColumn overlap: %d shared, %d 2010-only, %d 2014-only\n",
             length(cols_common), length(cols_2010_only), length(cols_2014_only)))
 
 cat("\nOutputs:\n")
 cat(sprintf("  SQLite:  %s  (%d tables)\n", output_sqlite, length(tables_in_db)))
 cat(sprintf("  Parquet: %s  (2 files)\n", output_parquet_dir))
 
-cat(sprintf("\nDuration: %.1f seconds\n", as.numeric(duration)))
-cat("\nNext step: Ellis lane (manipulation/2-ellis.R)\n")
-cat("  - White-list variable selection\n")
-cat("  - Variable harmonization between cycles\n")
-cat("  - Outcome construction (days_absent_total, days_absent_chronic)\n")
-cat("  - Sequential sample exclusions with flow tracking\n")
-cat("  - Factor recoding for all categorical predictors\n")
-cat("  - Survey weight adjustment for pooling (÷2)\n")
+cat(sprintf("Duration: %.1f seconds\n", as.numeric(duration)))
+vcat("\nNext step: Ellis lane (manipulation/2-ellis.R)\n")
 # nolint end

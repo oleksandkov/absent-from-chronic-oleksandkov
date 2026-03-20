@@ -79,6 +79,24 @@ if(requireNamespace("rlang", quietly = TRUE)) {
 #    If the `root.dir` option is properly managed in the Rmd files, no files will be overwritten.
 options(knitr.duplicate.label = "allow")
 
+# ---- read-env ----------------------------------------------------------------
+# Read .env for project-level settings (no secrets — safe to version-control).
+.env_log_retention_days <- 30L  # default if .env absent or value unparseable
+if (file.exists(".env")) {
+  .env_lines <- readLines(".env", warn = FALSE)
+  .env_lines <- .env_lines[!grepl("^\\s*#", .env_lines) & nzchar(trimws(.env_lines))]
+  for (.line in .env_lines) {
+    .eq <- regexpr("=", .line)
+    if (.eq > 0L) {
+      .key   <- trimws(substring(.line, 1L, .eq - 1L))
+      .value <- trimws(substring(.line, .eq + 1L))
+      if (.key == "LOG_RETENTION_DAYS")
+        .env_log_retention_days <- suppressWarnings(as.integer(.value))
+    }
+  }
+  rm(list = intersect(ls(), c(".env_lines", ".line", ".eq", ".key", ".value")))
+}
+
 # Simplified configuration - no config package dependency
 if(file.exists("config.yml") && requireNamespace("config", quietly = TRUE)) {
   config <- config::get()
@@ -124,7 +142,7 @@ ds_rail  <- tibble::tribble(
   "run_r"     , "manipulation/1-ferry.R",              # Ferry: CCHS .sav files → cchs-1.sqlite (zero transformation)
   "run_r"     , "manipulation/2-ellis.R",              # Ellis Lane 2: white-list + recode → cchs-2.sqlite + Parquet
   # "run_r"     , "manipulation/3-ellis.R",              # Ellis Lane 3: clarity layer + splits → cchs-3.sqlite + Parquet
-  "run_r_soft", "manipulation/2-test-ellis-cache.R",   # Ellis validation (non-blocking in flow)
+ # "run_r_soft", "manipulation/2-test-ellis-cache.R",   # Ellis validation (non-blocking in flow)
   # "run_r_soft", "manipulation/ellis-lane-example.R",   # Ellis pattern example (non-blocking in flow)
   
   # ===============================
@@ -132,7 +150,8 @@ ds_rail  <- tibble::tribble(
   # ===============================
   
   # Core analysis scripts that depend on the manipulated data
-  # "run_r_soft", "analysis/eda-1/eda-1.R",              # Main exploratory data analysis script (non-blocking)
+  #"run_r_soft", "analysis/eda-1/eda-1.R",              # EDA-1 script (non-blocking)
+  #"run_r_soft", "analysis/eda-2/eda-2.R",              # EDA-2 script (non-blocking)
   #"run_r"     , "analysis/Data-visualization/Data-visual.R",  # Data visualization script
   # "run_r"     , "analysis/report-example-2/1-scribe.R", # Scribe script for analysis-ready data
   
@@ -141,7 +160,8 @@ ds_rail  <- tibble::tribble(
   # ===============================
   
   # Primary analysis reports (Quarto format) - WITH IMPROVED ERROR HANDLING
-  # "run_qmd_soft", "analysis/eda-1/eda-1.qmd",          # Main exploratory data analysis report (non-blocking)
+  #"run_qmd_soft", "analysis/eda-1/eda-1.qmd",          # EDA-1 report (non-blocking)
+ #"run_qmd_soft", "analysis/eda-2/eda-2.qmd",          # EDA-2 report (non-blocking)
   #"run_qmd"   , "analysis/Data-visualization/Data-visual.qmd", # Data visualization report
   # "run_qmd"   , "analysis/report-example-2/eda-1.qmd", # Analysis report example
   
@@ -157,6 +177,11 @@ ds_rail  <- tibble::tribble(
   # "run_qmd"   , "analysis/report-example/annotation-layer-quarto.qmd", # Annotation layer example
   # "run_qmd"   , "analysis/report-example/combined-in-quarto.qmd",      # Combined report example  
   # "run_qmd"   , "analysis/report-example/combined-in-quarto-alt.qmd"   # Alternative combined report
+  # "run_r_soft"  , "analysis/eda-1/eda-1.R",
+  # "run_qmd_soft", "analysis/eda-1/eda-1.qmd",
+  
+  
+
 
 )
 
@@ -343,6 +368,73 @@ if( sink_log ) {
     message("Closing flow log file")
   }
 }
+
+# ---- purge-expired-logs ------------------------------------------------------
+# Delete log date-directories older than LOG_RETENTION_DAYS (read from .env).
+# Runs after the sink closes so messages print to the console, not the log file.
+if (exists(".env_log_retention_days") &&
+    !is.na(.env_log_retention_days) && .env_log_retention_days > 0L) {
+  .logs_root <- "data-private/logs"
+  if (dir.exists(.logs_root)) {
+    .cutoff  <- Sys.Date() - .env_log_retention_days
+    .deleted <- character(0)
+    for (.yd in list.dirs(.logs_root, recursive = FALSE, full.names = TRUE)) {
+      for (.dd in list.dirs(.yd, recursive = FALSE, full.names = TRUE)) {
+        .dir_date <- tryCatch(as.Date(basename(.dd)), error = function(e) NA)
+        if (!is.na(.dir_date) && .dir_date < .cutoff) {
+          unlink(.dd, recursive = TRUE)
+          .deleted <- c(.deleted, .dd)
+        }
+      }
+    }
+    if (length(.deleted) > 0L) {
+      message("Log purge: removed ", length(.deleted), " director",
+              if (length(.deleted) == 1L) "y" else "ies",
+              " (older than ", .env_log_retention_days, " d):\n",
+              paste0("  ", .deleted, collapse = "\n"))
+    } else {
+      message("Log purge: nothing to remove (retention = ",
+              .env_log_retention_days, " d, cutoff = ", .cutoff, ").")
+    }
+    rm(list = intersect(ls(), c(".logs_root", ".cutoff", ".deleted", ".yd", ".dd", ".dir_date")))
+  }
+}
+rm(list = intersect(ls(), ".env_log_retention_days"))
+
+# ---- verify-outputs ----------------------------------------------------------
+# Post-run checks: confirm key artefacts were produced by each pipeline stage.
+cat("\n", strrep("=", 52), "\n", sep = "")
+cat("  PIPELINE SUMMARY\n")
+cat(strrep("=", 52), "\n", sep = "")
+
+cat("\nScripts executed:\n")
+for (.i in seq_len(nrow(ds_rail))) {
+  cat(sprintf("  %-14s  %s\n", ds_rail$fx[.i], ds_rail$path[.i]))
+}
+
+cat("\nOutput artefact checks:\n")
+.check_pass <- TRUE
+.checks <- list(
+  list(stage = "1-ferry",  label = "cchs-1.sqlite",            path = "data-private/derived/cchs-1.sqlite"),
+  list(stage = "2-ellis",  label = "cchs-2.sqlite",            path = "data-private/derived/cchs-2.sqlite"),
+  list(stage = "2-ellis",  label = "cchs_analytical.parquet",  path = "data-private/derived/cchs-2-tables/cchs_analytical.parquet"),
+  list(stage = "2-ellis",  label = "sample_flow.parquet",      path = "data-private/derived/cchs-2-tables/sample_flow.parquet")
+)
+for (.chk in .checks) {
+  .ok <- file.exists(.chk$path)
+  cat(sprintf("  [%s]  %-14s  %s\n",
+              if (.ok) "PASS" else "FAIL",
+              paste0("[", .chk$stage, "]"),
+              .chk$label))
+  if (!.ok) .check_pass <- FALSE
+}
+if (.check_pass) {
+  cat("\nAll output checks passed.\n")
+} else {
+  warning("One or more output checks FAILED -- see above.")
+}
+cat(strrep("=", 52), "\n", sep = "")
+rm(.checks, .chk, .ok, .check_pass, .i)
 
 # bash: Rscript flow.R
 # radian: source("flow.R")

@@ -158,3 +158,10 @@ _site/
 absent-from-chronic-oleksandkov.code-workspace
 .Rprofile
 _freeze/analysis/eda-2/eda-2/execute-results/html.json
+
+
+# Developer
+*notes.txt
+**/execute-results/html.json
+_freeze/analysis/eda-1/eda-1/execute-results/html.json
+_freeze/analysis/eda-2/eda-2/execute-results/html.json

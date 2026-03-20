@@ -3,7 +3,8 @@
 Human decisions and reasoning.
 
 ---
-
+# 2026-03-11
+Review the flowr.r,1-ferry and 2-ellis scripts. Udpated README.md, pipeline.md. Created some tasks to do the pipeline manageing easier. 
 # 2026-03-05
 Restructuring the ellis pipeline, and the logic of the eda folders. Creating eda report where will be described the completed tasks from the `statistics_insturcitons_v3.md` file. In the eda-2.qmd will be described the completed taks from 2-1 to 3-2.
 # 2026-03-01

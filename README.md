@@ -6,6 +6,73 @@ This template provides a comprehensive foundation for **AI-augmented reproducibl
 
 Refer to [RAnalysisSkeleton](https://github.com/wibeasley/RAnalysisSkeleton) for a deeper dive into reproducible research best practices.
 
+---
+
+## About This Project
+
+**Project**: `absent-from-chronic` — Analysis of work absenteeism using the Canadian Community Health Survey (CCHS) PUMF microdata.
+
+**Goal**: Understand how chronic health conditions relate to workplace absenteeism, using two pooled CCHS survey cycles (2010-2011 and 2013-2014).
+
+**Data source**: CCHS PUMF (`.sav`) files stored in `data-private/raw/`. These files are not committed to the repository. Contact the project lead to obtain them.
+
+### Where to find the data
+
+| Location | Contents |
+|----------|----------|
+| `data-private/raw/2026-02-19/` | Raw CCHS `.sav` files (CCHS2010_LOP.sav, CCHS_2014_EN_PUMF.sav) |
+| `data-private/derived/cchs-1.sqlite` | Ferry staging database (all raw columns) |
+| `data-private/derived/cchs-1-raw/` | Parquet backup of raw tables |
+| `data-private/derived/cchs-2-tables/` | Ellis analysis-ready Parquet files (`cchs_analytical.parquet`, `sample_flow.parquet`) |
+| `data-private/derived/cchs-2.sqlite` | Ellis SQLite output (same data, factors as character) |
+| `data-private/derived/cchs-3-tables/` | Clarity-layer splits: `cchs_employed.parquet`, `cchs_unemployed.parquet`, `data_dictionary.parquet` |
+| `data-private/derived/cchs-3.sqlite` | SQLite version of Lane 3 outputs |
+
+See `data-private/contents.md` and `data-public/metadata/CACHE-manifest.md` for detailed descriptions.
+
+### Running the data pipeline (`manipulation/`)
+
+The pipeline follows the **Ferry → Ellis → Test** pattern. All paths are relative to the project root.
+
+```r
+# Option 1: Run full pipeline
+source("flow.R")
+
+# Option 2: Run individual scripts
+source("manipulation/1-ferry.R")            # Import CCHS .sav → cchs-1.sqlite
+source("manipulation/2-ellis.R")            # Transform → cchs-2-tables/ Parquet
+source("manipulation/2-test-ellis-cache.R") # Validate Ellis ↔ CACHE-manifest alignment
+```
+
+```powershell
+# Option 3: Interactive runner (recommended for first-time or flag-sensitive runs)
+powershell -ExecutionPolicy Bypass -File scripts/ps1/run-interactive-flow.ps1
+```
+
+See `manipulation/pipeline.md` for the full pipeline reference including input/output tables, white-list design, exclusion criteria, and troubleshooting.
+
+### Running the analysis scripts (`analysis/`)
+
+Analysis scripts live in numbered subdirectories under `analysis/`. Each folder contains an `.R` script (data loading and modeling) and a `.qmd` Quarto report.
+
+```r
+# EDA-1: broad exploratory analysis of the analytical dataset
+source("analysis/eda-1/eda-1.R")
+
+# EDA-2: focused exploration of ferry and ellis outputs
+source("analysis/eda-2/eda-2.R")
+```
+
+```powershell
+# Render EDA-1 report
+quarto render analysis/eda-1/eda-1.qmd
+
+# Or use the dedicated script runner
+powershell -ExecutionPolicy Bypass -File scripts/ps1/run-eda-1.ps1
+powershell -ExecutionPolicy Bypass -File scripts/ps1/run-eda-2.ps1
+```
+
+---
 ## 🎭 AI Persona System
 
 This project template includes 9 specialized AI personas, each optimized for different research tasks:

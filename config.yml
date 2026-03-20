@@ -33,5 +33,5 @@ default:
     derived: "./data-private/derived/"
     raw: "./data-private/raw/"
 
-  # Flow execution logging (organized by year/month for easy archiving)
-  path_log_flow: !expr strftime(Sys.time(), "data-private/logs/%Y/%Y-%m/flow-%Y-%m-%d--%H-%M-%S.log")
+  # Flow execution logging (organized by year/date for easy archiving and purging)
+  path_log_flow: !expr strftime(Sys.time(), "data-private/logs/%Y/%Y-%m-%d/flow-%Y-%m-%d--%H-%M-%S.log")

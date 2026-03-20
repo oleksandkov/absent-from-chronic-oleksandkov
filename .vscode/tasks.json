@@ -146,92 +146,82 @@
       "problemMatcher": []
     },
     {
-      "label": "Render EDA-1 Quarto Report",
-      "detail": "Render EDA-1 analysis report (eda-1.qmd) with chunk integration",
-      "type": "process",
-      "command": "quarto",
-      "args": [
-        "render",
-        "analysis/eda-1/eda-1.qmd"
-      ],
-      "group": "build",
-      "presentation": { "echo": true, "reveal": "always", "panel": "shared" },
-      "problemMatcher": []
-    },
-    {
-      "label": "Run Ferry Pattern Example",
-      "detail": "Execute ferry-lane-example.R to transport mtcars from WAREHOUSE to CACHE",
-      "type": "process",
-      "command": "Rscript",
-      "args": [
-        "manipulation/ferry-lane-example.R"
-      ],
-      "group": "build",
-      "presentation": { "echo": true, "reveal": "always", "panel": "shared" },
-      "problemMatcher": []
-    },
-    {
-      "label": "Run Ellis Pattern Example",
-      "detail": "Execute ellis-lane-example.R to transform mtcars into analysis-ready dataset",
-      "type": "process",
-      "command": "Rscript",
-      "args": [
-        "manipulation/ellis-lane-example.R"
-      ],
-      "group": "build",
-      "presentation": { "echo": true, "reveal": "always", "panel": "shared" },
-      "problemMatcher": []
-    },
-    {
-      "label": "Run Complete Ellis Pipeline",
-      "detail": "Execute the full analysis pipeline via run-complete-ellis-pipeline.ps1",
+      "label": "Run  Pipeline (flow.R)",
+      "detail": "Guided menu: choose Ellis mode, EDAs, and run mode; patches files automatically",
       "type": "shell",
       "command": "powershell",
-      "args": [
-        "-File",
-        "scripts/ps1/run-complete-ellis-pipeline.ps1"
-      ],
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "scripts/ps1/run-interactive-flow.ps1"],
+      "options": { "cwd": "${workspaceFolder}" },
       "group": "build",
-      "presentation": { "echo": true, "reveal": "always", "panel": "shared" },
+      "presentation": { "reveal": "always", "panel": "new" },
       "problemMatcher": []
     },
+
+    // ── Pipeline stages (direct Rscript) ─────────────────────────────────────
+    {
+      "label": "Run Pipeline (flow.R)",
+      "detail": "Execute complete pipeline: ferry → ellis → eda (Rscript flow.R)",
+      "type": "shell",
+      "command": "Rscript",
+      "args": ["flow.R"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Ferry Lane 1",
+      "detail": "Import CCHS .sav files → cchs-1.sqlite (manipulation/1-ferry.R)",
+      "type": "shell",
+      "command": "Rscript",
+      "args": ["manipulation/1-ferry.R"],
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Ellis Lane 2",
+      "detail": "Transform cchs-1.sqlite → cchs-2.sqlite + Parquet (manipulation/2-ellis.R)",
+      "type": "shell",
+      "command": "Rscript",
+      "args": ["manipulation/2-ellis.R"],
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+
+    // ── Analysis stages (R script + QMD combined) ────────────────────────────
     {
       "label": "Run EDA-1 Pipeline",
-      "detail": "Run analysis/eda-1/eda-1.R then render analysis/eda-1/eda-1.qmd",
+      "detail": "Run eda-1.R then render eda-1.qmd",
       "type": "shell",
-      "command": "powershell",
-      "args": [
-        "-File",
-        "scripts/ps1/run-eda-1.ps1"
-      ],
+      "command": "Rscript analysis/eda-1/eda-1.R ; quarto render analysis/eda-1/eda-1.qmd",
       "group": "build",
-      "presentation": { "echo": true, "reveal": "always", "panel": "shared" },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
       "problemMatcher": []
     },
     {
       "label": "Run EDA-2 Pipeline",
-      "detail": "Run analysis/eda-2/eda-2.R then render analysis/eda-2/eda-2.qmd",
+      "detail": "Run eda-2.R then render eda-2.qmd",
       "type": "shell",
-      "command": "powershell",
-      "args": [
-        "-File",
-        "scripts/ps1/run-eda-2.ps1"
-      ],
+      "command": "Rscript analysis/eda-2/eda-2.R ; quarto render analysis/eda-2/eda-2.qmd",
       "group": "build",
-      "presentation": { "echo": true, "reveal": "always", "panel": "shared" },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
       "problemMatcher": []
     },
+
+    // ── Log maintenance ───────────────────────────────────────────────────────
     {
-      "label": "Run EDA-3 Pipeline",
-      "detail": "Run analysis/eda-3/eda-3.R then render analysis/eda-3/eda-3.qmd",
+      "label": "Clean Expired Logs",
+      "detail": "Delete log directories older than LOG_RETENTION_DAYS (set in .env) from data-private/logs/",
       "type": "shell",
       "command": "powershell",
-      "args": [
-        "-File",
-        "scripts/ps1/run-eda-3.ps1"
-      ],
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "utility/clean-logs.ps1"],
+      "options": { "cwd": "${workspaceFolder}" },
       "group": "build",
-      "presentation": { "echo": true, "reveal": "always", "panel": "shared" },
+      "presentation": { "reveal": "always", "panel": "shared", "clear": true },
       "problemMatcher": []
     }
   ]

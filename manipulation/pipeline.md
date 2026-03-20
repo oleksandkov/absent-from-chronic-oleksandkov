@@ -14,9 +14,6 @@ CCHS .sav files (data-private/raw/)
          │
          ▼  2-ellis.R   ← white-list + harmonize + recode
   cchs-2.sqlite + cchs-2-tables/*.parquet   (analysis-ready)
-    │
-    ▼  3-ellis.R   ← clarity layer + split analyst tables
-  cchs-3.sqlite + cchs-3-tables/*.parquet + 3-ellis.html
          │
          ▼  2-test-ellis-cache.R   ← alignment verification
   console report (pass/fail)
@@ -28,10 +25,17 @@ CCHS .sav files (data-private/raw/)
 
 | # | File | Pattern | Output |
 |---|------|---------|--------|
-| 1 | `manipulation/1-ferry.R` | Ferry | `data-private/derived/cchs-1.sqlite` + Parquet backup |
+| 1 | `manipulation/1-ferry.R` | Ferry | `data-private/derived/cchs-1.sqlite` + `cchs-1-raw/` Parquet backup |
 | 2 | `manipulation/2-ellis.R` | Ellis | `data-private/derived/cchs-2.sqlite` + `cchs-2-tables/` Parquet |
-| 3 | `manipulation/3-ellis.R` | Ellis | `data-private/derived/cchs-3.sqlite` + `cchs-3-tables/` + `manipulation/3-ellis.html` |
-| 4 | `manipulation/2-test-ellis-cache.R` | Test | Console test report |
+| 3 | `manipulation/2-test-ellis-cache.R` | Test | Console test report (three-way alignment check) |
+| — | `manipulation/ferry-lane-example.R` | Example | `cchs-1.sqlite` (demo only; does not affect main pipeline) |
+| — | `manipulation/ellis-lane-example.R` | Example | `cchs-2.sqlite` (demo only; does not affect main pipeline) |
+
+> **Note on Ellis Lane 3**: Derived output directories `cchs-3-tables/` and `cchs-3.sqlite`
+> exist in `data-private/derived/` from a prior run of a clarity-layer script.
+> The corresponding `manipulation/3-ellis.R` source file is not currently present in the
+> repository. If you need to regenerate the Lane 3 outputs, consult the CACHE-manifest or
+> the cchs-3-column-dictionary for its column schema.
 
 
 ## 1-ferry
@@ -90,18 +94,35 @@ Runs ferry → ellis → all downstream analyses in sequence.
 
 ### Option B: Individual scripts
 ```r
-source("manipulation/1-ferry.R")   # ~2–5 min depending on file size
-source("manipulation/2-ellis.R")   # ~1–2 min
-source("manipulation/3-ellis.R")   # ~1 min
-source("manipulation/2-test-ellis-cache.R")   # <30 sec
+source("manipulation/1-ferry.R")            # ~2–5 min depending on file size
+source("manipulation/2-ellis.R")            # ~1–2 min
+# source("manipulation/3-ellis.R")          # ~1 min — optional clarity layer
+source("manipulation/2-test-ellis-cache.R") # <30 sec
 ```
 
 ### Option C: VS Code Tasks
 Use the tasks defined in `.vscode/tasks.json`:
 - **Run Ferry Lane 1** — `Rscript manipulation/1-ferry.R`
 - **Run Ellis Lane 2** — `Rscript manipulation/2-ellis.R`
-- **Run Ellis Lane 3** — `Rscript manipulation/3-ellis.R`
 - **Test Ellis ↔ CACHE-Manifest Alignment** — `Rscript manipulation/2-test-ellis-cache.R`
+
+### Option D: Interactive Pipeline (run-interactive-flow.ps1)
+The interactive runner asks three questions before launching `flow.R`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/ps1/run-interactive-flow.ps1
+```
+
+**Q1 — Ellis mode** (`run-as-is` / `default` / `strict`): controls three pipeline
+flags in `2-ellis.R` (`strict_cycle_integrity`, `apply_sample_exclusions`,
+`apply_completeness_exclusion`).
+
+**Q2 — EDA selection**: dynamically scans `analysis/` for folders that contain
+both an `.R` file and a `.qmd` file, and lets you choose which EDAs to activate
+(uncomment) in `flow.R`. Selecting **None (0)** comments out **all** active EDA
+lines in `flow.R` so they will be skipped.
+
+**Q3 — Run mode**: apply all changes and launch, or run `flow.R` as-is.
 
 ---
 
@@ -132,6 +153,17 @@ Paths are configured in `config.yml` under `raw_data`.
 | `cchs_analytical.parquet` | `data-private/derived/cchs-2-tables/` | Parquet | Main analysis dataset (full pooled sample mode by default) |
 | `sample_flow.parquet` | `data-private/derived/cchs-2-tables/` | Parquet | Exclusion audit trail (5 rows) |
 | `cchs-2.sqlite` | `data-private/derived/` | SQLite | Same tables as Parquet (factors as character) |
+
+### Ellis Lane 3 outputs (clarity layer — from prior run)
+
+| Artifact | Location | Format | Description |
+|----------|----------|--------|-------------|
+| `cchs_analytical.parquet` | `data-private/derived/cchs-3-tables/` | Parquet | Full pooled sample (mirrors Lane 2) |
+| `cchs_employed.parquet` | `data-private/derived/cchs-3-tables/` | Parquet | Employed-respondent split |
+| `cchs_unemployed.parquet` | `data-private/derived/cchs-3-tables/` | Parquet | Non-employed-respondent split |
+| `data_dictionary.parquet` | `data-private/derived/cchs-3-tables/` | Parquet | Variable-level metadata / data dictionary |
+| `sample_flow.parquet` | `data-private/derived/cchs-3-tables/` | Parquet | Exclusion audit trail |
+| `cchs-3.sqlite` | `data-private/derived/` | SQLite | Same tables as above (factors as character) |
 
 ---
 

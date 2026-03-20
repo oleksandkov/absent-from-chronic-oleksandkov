@@ -51,7 +51,45 @@
 rm(list = ls(all.names = TRUE))
 cat("\014")
 
+# ============================================================
+# PIPELINE FLAGS  —  Edit these or let run-interactive-flow.ps1 manage them
+# ============================================================
+#
+# strict_cycle_integrity
+#   Controls what happens when one of the two CCHS survey cycles (2010-2011
+#   or 2013-2014) loads as an empty table from cchs-1.sqlite.
+#   Affects rows: acts as a guard — does NOT exclude rows, only prevents a
+#   silent single-cycle run when both cycles are required for valid analysis.
+#     FALSE = emit a warning and continue with available cycle(s);
+#             useful during development or when only one dataset is present.
+#     TRUE  = stop with an error if any cycle is empty (strict pooled mode).
+#
+# apply_sample_exclusions
+#   Applies the inclusion/exclusion criteria from stats_instructions_v3.md §3.1:
+#     – Keep only respondents employed in the past 3 months  (lop_015 == 1)
+#     – Keep only ages 15–75                                 (dhhgage in range)
+#     – Exclude proxy respondents                            (adm_prx == 1)
+#   Affects rows: removes out-of-scope respondents; reduces analytic sample.
+#     FALSE = skip these filters; retain full pooled sample.
+#     TRUE  = apply the three filters above (recommended for analysis).
+#
+# apply_completeness_exclusion  (§3.1 criterion 4b)
+#   After the above filters, also drops any respondent with NA on ANY of the
+#   19 CCC chronic-condition indicators OR on any key predictor variable.
+#   Affects rows: drops incomplete cases from cchs_analytical.parquet / SQLite.
+#   Affects columns: none (columns are kept; only rows with NA in CCC/predictors
+#                   are removed when TRUE).
+#     FALSE = do NOT drop incomplete cases here; handle missingness downstream
+#             (e.g., multiple imputation, complete-case sensitivity analysis).
+#     TRUE  = enforce full §3.1 compliance by removing incomplete cases now.
+#
+strict_cycle_integrity       <- FALSE
+apply_sample_exclusions      <- TRUE
+apply_completeness_exclusion <- FALSE
+
 script_start <- Sys.time()
+verbose      <- FALSE   # set FALSE to suppress progress output; key results always print
+vcat         <- function(...) if (verbose) cat(...)
 
 # ---- load-packages -----------------------------------------------------------
 library(magrittr)
@@ -88,22 +126,6 @@ input_sqlite <- input_sqlite_candidates[file.exists(input_sqlite_candidates)][1]
 if (is.na(input_sqlite)) input_sqlite <- input_sqlite_candidates[1]
 table_2010    <- "cchs_2010_raw"
 table_2014    <- "cchs_2014_raw"
-
-# Cycle integrity mode:
-#   TRUE  = stop if any cycle is empty (strict pooled analysis mode)
-#   FALSE = continue with available cycle(s), emit warnings (debug/single-cycle mode)
-strict_cycle_integrity <- FALSE
-
-# Sample filtering mode:
-#   FALSE = keep full pooled sample (default; includes employed + unemployed)
-#   TRUE  = apply legacy exclusions from stats_instructions_v3 Section 3.1
-apply_sample_exclusions <- TRUE
-
-# Completeness exclusion mode (§3.1 criterion 4b):
-#   TRUE  = also exclude respondents with missing values on any CCC condition
-#           or predictor variable (full §3.1 compliance)
-#   FALSE = skip this step; missing CCC/predictors handled in analysis phase
-apply_completeness_exclusion <- FALSE
 
 # Output — SQLite (secondary: ad-hoc SQL exploration; factors as character)
 output_sqlite <- file.path(project_root, "data-private", "derived", "cchs-2.sqlite")
@@ -307,7 +329,7 @@ select_whitelist <- function(data, confirmed, inferred, bootstrap_pat,
     warning(sprintf("[%s] No bootstrap weight columns found matching pattern '%s'",
                     cycle_label, bootstrap_pat))
   } else {
-    cat(sprintf("  Bootstrap weights found: %d columns (%s ... %s)\n",
+    vcat(sprintf("  Bootstrap weights found: %d columns (%s ... %s)\n",
                 length(boot_cols), boot_cols[1], utils::tail(boot_cols, 1)))
   }
 
@@ -325,7 +347,7 @@ harmonize_aliases <- function(data, alias_map, cycle_label = "") {
     found <- intersect(aliases, names(data))
     if (length(found) > 0) {
       data[[canonical]] <- data[[found[1]]]
-      cat(sprintf("  [%s] harmonized alias: %s <- %s\n",
+      vcat(sprintf("  [%s] harmonized alias: %s <- %s\n",
                   cycle_label, canonical, found[1]))
     }
   }
@@ -363,9 +385,9 @@ safe_recode_factor <- function(x, code_map, ordered = FALSE) {
 # ==============================================================================
 
 # ---- load-data ---------------------------------------------------------------
-cat("\n", strrep("=", 70), "\n")
-cat("SECTION 1: DATA IMPORT\n")
-cat(strrep("=", 70), "\n")
+vcat("\n", strrep("=", 70), "\n")
+vcat("SECTION 1: DATA IMPORT\n")
+vcat(strrep("=", 70), "\n")
 
 if (!file.exists(input_sqlite)) {
   stop("Ferry output not found: ", input_sqlite,
@@ -430,15 +452,15 @@ alias_map <- list(
 ds_2010_raw <- harmonize_aliases(ds_2010_raw, alias_map, cycle_label = "CCHS2010")
 ds_2014_raw <- harmonize_aliases(ds_2014_raw, alias_map, cycle_label = "CCHS2014")
 
-cat(sprintf("📥 Loaded CCHS 2010-2011: %s rows, %s columns\n",
+vcat(sprintf("📥 Loaded CCHS 2010-2011: %s rows, %s columns\n",
             format(nrow(ds_2010_raw), big.mark = ","),
             format(ncol(ds_2010_raw), big.mark = ",")))
-cat(sprintf("📥 Loaded CCHS 2013-2014: %s rows, %s columns\n",
+vcat(sprintf("📥 Loaded CCHS 2013-2014: %s rows, %s columns\n",
             format(nrow(ds_2014_raw), big.mark = ","),
             format(ncol(ds_2014_raw), big.mark = ",")))
 
 # ---- apply-whitelist ---------------------------------------------------------
-cat("\n📋 Applying white-list variable selection...\n")
+vcat("\n📋 Applying white-list variable selection...\n")
 
 vars_inferred_all <- c(vars_inferred_ccc, vars_inferred_predisposing,
                        vars_inferred_facilitating, vars_inferred_needs,
@@ -449,24 +471,24 @@ ds_2010_wl <- select_whitelist(ds_2010_raw, vars_confirmed, vars_inferred_all,
 ds_2014_wl <- select_whitelist(ds_2014_raw, vars_confirmed, vars_inferred_all,
                                 bootstrap_pattern, cycle_label = "CCHS2014")
 
-cat(sprintf("  CCHS 2010-2011 after white-list: %s rows, %s columns\n",
+vcat(sprintf("  CCHS 2010-2011 after white-list: %s rows, %s columns\n",
             format(nrow(ds_2010_wl), big.mark = ","),
             format(ncol(ds_2010_wl), big.mark = ",")))
-cat(sprintf("  CCHS 2013-2014 after white-list: %s rows, %s columns\n",
+vcat(sprintf("  CCHS 2013-2014 after white-list: %s rows, %s columns\n",
             format(nrow(ds_2014_wl), big.mark = ","),
             format(ncol(ds_2014_wl), big.mark = ",")))
 
 # ---- add-cycle-indicator -----------------------------------------------------
-cat("\n🔢 Adding cycle indicator variable...\n")
+vcat("\n🔢 Adding cycle indicator variable...\n")
 
 ds_2010_wl <- ds_2010_wl %>% mutate(cycle = 0L)   # 0 = CCHS 2010-2011
 ds_2014_wl <- ds_2014_wl %>% mutate(cycle = 1L)   # 1 = CCHS 2013-2014
 
-cat("  cycle = 0: CCHS 2010-2011\n")
-cat("  cycle = 1: CCHS 2013-2014\n")
+vcat("  cycle = 0: CCHS 2010-2011\n")
+vcat("  cycle = 1: CCHS 2013-2014\n")
 
 # ---- harmonize-and-stack -----------------------------------------------------
-cat("\n🔗 Harmonizing variable names between cycles and stacking...\n")
+vcat("\n🔗 Harmonizing variable names between cycles and stacking...\n")
 #
 # If variable names differ between 2010 and 2014 cycles, rename to a common
 # schema here. Common CCHS harmonization issues:
@@ -499,11 +521,11 @@ for (col in setdiff(all_cols, names(ds_2014_aligned))) {
 ds0 <- bind_rows(ds_2010_aligned, ds_2014_aligned) %>%
   select(cycle, everything())   # cycle first
 
-cat(sprintf("  ✓ Pooled (both cycles): %s rows, %s columns\n",
+vcat(sprintf("  ✓ Pooled (both cycles): %s rows, %s columns\n",
             format(nrow(ds0), big.mark = ","),
             format(ncol(ds0), big.mark = ",")))
-cat(sprintf("  ✓ CCHS 2010-2011: %s rows\n", format(sum(ds0$cycle == 0L), big.mark = ",")))
-cat(sprintf("  ✓ CCHS 2013-2014: %s rows\n", format(sum(ds0$cycle == 1L), big.mark = ",")))
+vcat(sprintf("  ✓ CCHS 2010-2011: %s rows\n", format(sum(ds0$cycle == 0L), big.mark = ",")))
+vcat(sprintf("  ✓ CCHS 2013-2014: %s rows\n", format(sum(ds0$cycle == 1L), big.mark = ",")))
 
 if (sum(ds0$cycle == 0L, na.rm = TRUE) == 0L || sum(ds0$cycle == 1L, na.rm = TRUE) == 0L) {
   msg <- paste0(
@@ -521,12 +543,12 @@ if (sum(ds0$cycle == 0L, na.rm = TRUE) == 0L || sum(ds0$cycle == 1L, na.rm = TRU
 # SECTION 2: ELLIS TRANSFORMATIONS
 # ==============================================================================
 
-cat("\n", strrep("=", 70), "\n")
-cat("SECTION 2: ELLIS TRANSFORMATIONS\n")
-cat(strrep("=", 70), "\n")
+vcat("\n", strrep("=", 70), "\n")
+vcat("SECTION 2: ELLIS TRANSFORMATIONS\n")
+vcat(strrep("=", 70), "\n")
 
 # ---- tweak-data-1-outcomes ---------------------------------------------------
-cat("\n🔧 Step 1: Construct outcome variables\n")
+vcat("\n🔧 Step 1: Construct outcome variables\n")
 #
 # Primary outcome: days_absent_total
 #   Sum of all 8 LOP reason variables. NA treated as 0 when at least one
@@ -571,17 +593,17 @@ if (n_invalid_total > 0) {
   ds1$days_absent_total[invalid_total] <- NA_real_
 }
 
-cat(sprintf("   ✓ days_absent_total range: %g – %g (n non-NA: %s)\n",
+vcat(sprintf("   ✓ days_absent_total range: %g – %g (n non-NA: %s)\n",
             min(ds1$days_absent_total, na.rm = TRUE),
             max(ds1$days_absent_total, na.rm = TRUE),
             format(sum(!is.na(ds1$days_absent_total)), big.mark = ",")))
-cat(sprintf("   ✓ days_absent_chronic range: %g – %g (n non-NA: %s)\n",
+vcat(sprintf("   ✓ days_absent_chronic range: %g – %g (n non-NA: %s)\n",
             min(ds1$days_absent_chronic, na.rm = TRUE),
             max(ds1$days_absent_chronic, na.rm = TRUE),
             format(sum(!is.na(ds1$days_absent_chronic)), big.mark = ",")))
 
 # ---- tweak-data-2-exclusions -------------------------------------------------
-cat("\n🔧 Step 2: Sample inclusion mode\n")
+vcat("\n🔧 Step 2: Sample inclusion mode\n")
 #
 # If apply_sample_exclusions=TRUE, apply legacy exclusions (Section 3.1):
 #   1. Age outside 15-75 (dhhgage)
@@ -617,7 +639,7 @@ n_step["n_start"] <- nrow(ds1)
 
 # Apply sequential filters only when explicitly requested
 if (isTRUE(apply_sample_exclusions)) {
-  cat("   Mode: legacy exclusions enabled (employment filter applied)\n")
+  vcat("   Mode: legacy exclusions enabled (employment filter applied)\n")
 
   ds2 <- ds1
 
@@ -647,21 +669,21 @@ if (isTRUE(apply_sample_exclusions)) {
   n_step["n_after_complete_outcome"] <- sum(complete_outcome, na.rm = TRUE)
   ds2 <- ds2 %>% filter(!is.na(days_absent_total))
 
-  cat(sprintf("   ✓ Starting pool:             %s\n", format(n_step["n_start"], big.mark = ",")))
-  cat(sprintf("   ✓ After age 15-75:           %s  (-%s excluded)\n",
+  vcat(sprintf("   ✓ Starting pool:             %s\n", format(n_step["n_start"], big.mark = ",")))
+  vcat(sprintf("   ✓ After age 15-75:           %s  (-%s excluded)\n",
               format(n_step["n_after_age"], big.mark = ","),
               format(n_step["n_start"] - n_step["n_after_age"], big.mark = ",")))
-  cat(sprintf("   ✓ After employed filter:     %s  (-%s excluded)\n",
+  vcat(sprintf("   ✓ After employed filter:     %s  (-%s excluded)\n",
               format(n_step["n_after_employment"], big.mark = ","),
               format(n_step["n_after_age"] - n_step["n_after_employment"], big.mark = ",")))
-  cat(sprintf("   ✓ After proxy exclusion:     %s  (-%s excluded)\n",
+  vcat(sprintf("   ✓ After proxy exclusion:     %s  (-%s excluded)\n",
               format(n_step["n_after_proxy"], big.mark = ","),
               format(n_step["n_after_employment"] - n_step["n_after_proxy"], big.mark = ",")))
-  cat(sprintf("   ✓ After complete outcome:    %s  (-%s excluded)\n",
+  vcat(sprintf("   ✓ After complete outcome:    %s  (-%s excluded)\n",
               format(n_step["n_after_complete_outcome"], big.mark = ","),
               format(n_step["n_after_proxy"] - n_step["n_after_complete_outcome"], big.mark = ",")))
 } else {
-  cat("   Mode: full pooled sample (no exclusions applied)\n")
+  vcat("   Mode: full pooled sample (no exclusions applied)\n")
 
   ds2 <- ds1
   n_step["n_after_age"] <- n_step["n_start"]
@@ -669,14 +691,16 @@ if (isTRUE(apply_sample_exclusions)) {
   n_step["n_after_proxy"] <- n_step["n_start"]
   n_step["n_after_complete_outcome"] <- n_step["n_start"]
 
-  cat(sprintf("   ✓ Starting pool:             %s\n", format(n_step["n_start"], big.mark = ",")))
-  cat(sprintf("   ✓ Full pooled retained:      %s  (-0 excluded)\n",
+  vcat(sprintf("   ✓ Starting pool:             %s\n", format(n_step["n_start"], big.mark = ",")))
+  vcat(sprintf("   ✓ Full pooled retained:      %s  (-0 excluded)\n",
               format(n_step["n_after_complete_outcome"], big.mark = ",")))
 
+  if (verbose) {
   cat("\n   Employment distribution retained (lop_015):\n")
   print(ds2 %>%
           count(lop_015, name = "n") %>%
           arrange(lop_015))
+  }
 }
 
 # Step 5b (optional): CCC + predictor completeness (§3.1 criterion 4b)
@@ -686,7 +710,7 @@ if (isTRUE(apply_sample_exclusions)) {
 #       only after Step 3 factor recoding. For full §3.1 compliance, verify
 #       that recode order matches the intended exclusion timing.
 if (isTRUE(apply_completeness_exclusion)) {
-  cat("\n   Step 5b: CCC + predictor completeness exclusion\n")
+  vcat("\n   Step 5b: CCC + predictor completeness exclusion\n")
   ccc_cols_found      <- intersect(vars_inferred_ccc, names(ds2))
   predictor_cols_full <- intersect(c(ccc_cols_found, predictor_cols), names(ds2))
   complete_predictors <- apply(
@@ -696,15 +720,17 @@ if (isTRUE(apply_completeness_exclusion)) {
   n_step["n_after_complete_predictors"] <- sum(complete_predictors, na.rm = TRUE)
   n_before_step5b <- nrow(ds2)
   ds2 <- ds2[complete_predictors, ]
-  cat(sprintf("   ✓ After CCC + predictor completeness: %s  (-%s excluded)\n",
+  vcat(sprintf("   ✓ After CCC + predictor completeness: %s  (-%s excluded)\n",
               format(n_step["n_after_complete_predictors"], big.mark = ","),
               format(n_before_step5b - n_step["n_after_complete_predictors"], big.mark = ",")))
 }
 
-cat("\n   Cycle counts after exclusions:\n")
-print(ds2 %>%
-        count(cycle, name = "n") %>%
-        arrange(cycle))
+if (verbose) {
+  cat("\n   Cycle counts after exclusions:\n")
+  print(ds2 %>%
+          count(cycle, name = "n") %>%
+          arrange(cycle))
+}
 
 if (sum(ds2$cycle == 0L, na.rm = TRUE) == 0L || sum(ds2$cycle == 1L, na.rm = TRUE) == 0L) {
   msg <- paste0(
@@ -721,7 +747,7 @@ if (sum(ds2$cycle == 0L, na.rm = TRUE) == 0L || sum(ds2$cycle == 1L, na.rm = TRU
 n_final <- nrow(ds2)
 cat(sprintf("\n   Final analytical sample: %s\n", format(n_final, big.mark = ",")))
 if (isTRUE(apply_sample_exclusions)) {
-  cat(sprintf("   Reference (legacy exclusions): 64,141\n"))
+  vcat(sprintf("   Reference (legacy exclusions): 64,141\n"))
   if (abs(n_final - 64141) > 5000) {
     warning(sprintf(
       "Final sample size (%d) differs from reference (64,141) by >5,000.\nVerify exclusion variable codes against data dictionaries.",
@@ -729,7 +755,7 @@ if (isTRUE(apply_sample_exclusions)) {
     ))
   }
 } else {
-  cat(sprintf("   Reference mode: full pooled sample from ferry output (employment not filtered)\n"))
+  vcat(sprintf("   Reference mode: full pooled sample from ferry output (employment not filtered)\n"))
 }
 
 # Build sample_flow table (for reproducing Figure 1 flowchart)
@@ -776,11 +802,13 @@ if (isTRUE(apply_completeness_exclusion) && "n_after_complete_predictors" %in% n
   ))
 }
 
-cat("\n   Sample flow table:\n")
-print(as.data.frame(sample_flow[, c("step", "n_remaining", "n_excluded")]))
+if (verbose) {
+  cat("\n   Sample flow table:\n")
+  print(as.data.frame(sample_flow[, c("step", "n_remaining", "n_excluded")]))
+}
 
 # ---- tweak-data-3-factors ----------------------------------------------------
-cat("\n🔧 Step 3: Factor recoding\n")
+vcat("\n🔧 Step 3: Factor recoding\n")
 #
 # All CCHS numeric codes below are based on standard PUMF documentation.
 # VERIFY each recode against:
@@ -1192,30 +1220,46 @@ ccc_labels <- c(
   ccc_185 = "digestive_disease"
 )
 
-cat("\n  Recoding chronic condition flags:\n")
-for (v in ccc_vars_found) {
-  label <- if (v %in% names(ccc_labels)) ccc_labels[v] else v
-  new_name <- paste0("cc_", label)
-  ds3[[new_name]] <- factor(
-    case_when(
-      ds3[[v]] == 1L ~ "Yes",
-      ds3[[v]] == 2L ~ "No",
-      ds3[[v]] %in% special_na_codes ~ NA_character_,
-      TRUE ~ NA_character_
-    ),
-    levels = c("Yes", "No")
-  )
-  cat(sprintf("    %-18s → %-22s : Yes=%d, No=%d, NA=%d\n",
-              v, new_name,
-              sum(ds3[[new_name]] == "Yes", na.rm = TRUE),
-              sum(ds3[[new_name]] == "No",  na.rm = TRUE),
-              sum(is.na(ds3[[new_name]]))))
+if (verbose) {
+  cat("\n  Recoding chronic condition flags:\n")
+  for (v in ccc_vars_found) {
+    label <- if (v %in% names(ccc_labels)) ccc_labels[v] else v
+    new_name <- paste0("cc_", label)
+    ds3[[new_name]] <- factor(
+      case_when(
+        ds3[[v]] == 1L ~ "Yes",
+        ds3[[v]] == 2L ~ "No",
+        ds3[[v]] %in% special_na_codes ~ NA_character_,
+        TRUE ~ NA_character_
+      ),
+      levels = c("Yes", "No")
+    )
+    cat(sprintf("    %-18s → %-22s : Yes=%d, No=%d, NA=%d\n",
+                v, new_name,
+                sum(ds3[[new_name]] == "Yes", na.rm = TRUE),
+                sum(ds3[[new_name]] == "No",  na.rm = TRUE),
+                sum(is.na(ds3[[new_name]]))))
+  }
+} else {
+  for (v in ccc_vars_found) {
+    label <- if (v %in% names(ccc_labels)) ccc_labels[v] else v
+    new_name <- paste0("cc_", label)
+    ds3[[new_name]] <- factor(
+      case_when(
+        ds3[[v]] == 1L ~ "Yes",
+        ds3[[v]] == 2L ~ "No",
+        ds3[[v]] %in% special_na_codes ~ NA_character_,
+        TRUE ~ NA_character_
+      ),
+      levels = c("Yes", "No")
+    )
+  }
 }
 
-cat(sprintf("   ✓ Factor recoding complete. Columns after recoding: %d\n", ncol(ds3)))
+vcat(sprintf("   ✓ Factor recoding complete. Columns after recoding: %d\n", ncol(ds3)))
 
 # ---- tweak-data-4-weights ----------------------------------------------------
-cat("\n🔧 Step 4: Survey weight adjustment for pooling\n")
+vcat("\n🔧 Step 4: Survey weight adjustment for pooling\n")
 #
 # Statistics Canada guideline: when pooling two CCHS annual cycles, divide
 # each respondent's original survey weight by the number of cycles pooled (2).
@@ -1234,19 +1278,19 @@ ds4 <- ds3 %>%
 if (length(boot_cols) > 0) {
   ds4 <- ds4 %>%
     mutate(across(all_of(boot_cols), ~ .x / 2))
-  cat(sprintf("   ✓ Original weight (wts_m) preserved in wts_m_original\n"))
-  cat(sprintf("   ✓ Pooled weight (wts_m / 2) → wts_m_pooled\n"))
-  cat(sprintf("   ✓ %d bootstrap weights divided by 2\n", length(boot_cols)))
+  vcat(sprintf("   ✓ Original weight (wts_m) preserved in wts_m_original\n"))
+  vcat(sprintf("   ✓ Pooled weight (wts_m / 2) → wts_m_pooled\n"))
+  vcat(sprintf("   ✓ %d bootstrap weights divided by 2\n", length(boot_cols)))
 } else {
   cat("   ⚠ No bootstrap weight columns found — weight adjustment incomplete\n")
   cat("   Bootstrap weights are required for correct variance estimation.\n")
 }
 
-cat(sprintf("   ✓ Mean original weight: %.1f\n", mean(ds4$wts_m_original, na.rm = TRUE)))
-cat(sprintf("   ✓ Mean pooled weight:   %.1f\n", mean(ds4$wts_m_pooled, na.rm = TRUE)))
+vcat(sprintf("   ✓ Mean original weight: %.1f\n", mean(ds4$wts_m_original, na.rm = TRUE)))
+vcat(sprintf("   ✓ Mean pooled weight:   %.1f\n", mean(ds4$wts_m_pooled, na.rm = TRUE)))
 
 # ---- tweak-data-5-types ------------------------------------------------------
-cat("\n🔧 Step 5: Final data type standardization\n")
+vcat("\n🔧 Step 5: Final data type standardization\n")
 
 # Build the final analytical column set:
 # outcomes | predictors (factors + continuous) | weights | design vars | identifiers
@@ -1303,10 +1347,10 @@ ds_long <- ds4 %>%
     adm_prx         = as.integer(adm_prx)
   )
 
-cat(sprintf("   ✓ Final analytical dataset: %s rows, %d columns\n",
+vcat(sprintf("   ✓ Final analytical dataset: %s rows, %d columns\n",
             format(nrow(ds_long), big.mark = ","),
             ncol(ds_long)))
-cat(sprintf("   ✓ Factor columns: %d  |  Numeric columns: %d\n",
+vcat(sprintf("   ✓ Factor columns: %d  |  Numeric columns: %d\n",
             sum(sapply(ds_long, is.factor)),
             sum(sapply(ds_long, is.numeric))))
 
@@ -1315,25 +1359,25 @@ cat(sprintf("   ✓ Factor columns: %d  |  Numeric columns: %d\n",
 # ==============================================================================
 
 # ---- verify-values -----------------------------------------------------------
-cat("\n", strrep("=", 70), "\n")
-cat("SECTION 3: DATA VALIDATION\n")
-cat(strrep("=", 70), "\n")
+vcat("\n", strrep("=", 70), "\n")
+vcat("SECTION 3: DATA VALIDATION\n")
+vcat(strrep("=", 70), "\n")
 
-cat("\n🔍 Running checkmate assertions...\n")
+vcat("\n🔍 Running checkmate assertions...\n")
 
 checkmate::assert_integer(ds_long$cycle, any.missing = FALSE, lower = 0L, upper = 1L)
-cat("   ✓ cycle: integer in {0, 1}\n")
+vcat("   ✓ cycle: integer in {0, 1}\n")
 
 checkmate::assert_numeric(ds_long$wts_m_pooled, any.missing = FALSE, lower = 0)
-cat("   ✓ wts_m_pooled: numeric, non-negative\n")
+vcat("   ✓ wts_m_pooled: numeric, non-negative\n")
 
 checkmate::assert_numeric(ds_long$days_absent_total, lower = 0, upper = 90)
-cat("   ✓ days_absent_total: numeric, 0–90 range\n")
+vcat("   ✓ days_absent_total: numeric, 0–90 range\n")
 
 for (fct_col in intersect(factor_cols_found, names(ds_long))) {
   checkmate::assert_factor(ds_long[[fct_col]], any.missing = TRUE)
 }
-cat(sprintf("   ✓ All %d factor columns have valid factor type\n", length(factor_cols_found)))
+vcat(sprintf("   ✓ All %d factor columns have valid factor type\n", length(factor_cols_found)))
 
 # Composite key: no duplicate respondents within a cycle
 # (adm_rno unique within cycle if present)
@@ -1344,14 +1388,14 @@ if ("adm_rno" %in% names(ds_long)) {
   if (nrow(dupes) > 0) {
     warning(sprintf("%d duplicate respondent IDs found within cycle — investigate", nrow(dupes)))
   } else {
-    cat("   ✓ No duplicate respondent IDs within cycle\n")
+    vcat("   ✓ No duplicate respondent IDs within cycle\n")
   }
 }
 
-cat("\n✅ Core validation checks passed\n")
+vcat("\n✅ Core validation checks passed\n")
 
 # ---- outcome-diagnostics -----------------------------------------------------
-cat("\n📊 Outcome distribution (reference: mean≈1.35, 70.59% zeros):\n")
+vcat("\n📊 Outcome distribution (reference: mean≈1.35, 70.59% zeros):\n")
 
 n_total    <- sum(!is.na(ds_long$days_absent_total))
 n_zeros    <- sum(ds_long$days_absent_total == 0, na.rm = TRUE)
@@ -1360,44 +1404,44 @@ mean_out   <- weighted.mean(ds_long$days_absent_total,
 var_out    <- sum(ds_long$wts_m_pooled * (ds_long$days_absent_total - mean_out)^2,
                   na.rm = TRUE) / sum(ds_long$wts_m_pooled, na.rm = TRUE)
 
-cat(sprintf("   Unweighted n:       %s\n", format(n_total, big.mark = ",")))
-cat(sprintf("   Weighted mean:      %.2f  (reference: 1.35)\n", mean_out))
-cat(sprintf("   Weighted variance:  %.1f  (reference: 17.7)\n", var_out))
-cat(sprintf("   Dispersion (var/mean): %.1f  (>1 → overdispersion → NB model)\n", var_out / mean_out))
-cat(sprintf("   Zeroes:             %.1f%%  (reference: 70.59%%)\n",
+vcat(sprintf("   Unweighted n:       %s\n", format(n_total, big.mark = ",")))
+vcat(sprintf("   Weighted mean:      %.2f  (reference: 1.35)\n", mean_out))
+vcat(sprintf("   Weighted variance:  %.1f  (reference: 17.7)\n", var_out))
+vcat(sprintf("   Dispersion (var/mean): %.1f  (>1 → overdispersion → NB model)\n", var_out / mean_out))
+vcat(sprintf("   Zeroes:             %.1f%%  (reference: 70.59%%)\n",
             n_zeros / n_total * 100))
-cat(sprintf("   Maximum:            %g\n", max(ds_long$days_absent_total, na.rm = TRUE)))
+vcat(sprintf("   Maximum:            %g\n", max(ds_long$days_absent_total, na.rm = TRUE)))
 
 # ==============================================================================
 # SECTION 4: BUILD ANALYSIS-READY TABLES
 # ==============================================================================
 
 # ---- build-cchs-analytical ---------------------------------------------------
-cat("\n", strrep("=", 70), "\n")
-cat("SECTION 4: BUILD ANALYSIS-READY TABLES\n")
-cat(strrep("=", 70), "\n")
+vcat("\n", strrep("=", 70), "\n")
+vcat("SECTION 4: BUILD ANALYSIS-READY TABLES\n")
+vcat(strrep("=", 70), "\n")
 
-cat("\n📊 Table 1: cchs_analytical (pooled white-list dataset)\n")
+vcat("\n📊 Table 1: cchs_analytical (pooled white-list dataset)\n")
 
 cchs_analytical <- ds_long   # already the final dataset
 
-cat(sprintf("   ✓ Rows:    %s\n", format(nrow(cchs_analytical), big.mark = ",")))
-cat(sprintf("   ✓ Columns: %d\n", ncol(cchs_analytical)))
-cat(sprintf("   ✓ Factors: %d\n", sum(sapply(cchs_analytical, is.factor))))
-cat(sprintf("   ✓ CCHS 2010-2011: %s\n", format(sum(cchs_analytical$cycle == 0L), big.mark = ",")))
-cat(sprintf("   ✓ CCHS 2013-2014: %s\n", format(sum(cchs_analytical$cycle == 1L), big.mark = ",")))
+vcat(sprintf("   ✓ Rows:    %s\n", format(nrow(cchs_analytical), big.mark = ",")))
+vcat(sprintf("   ✓ Columns: %d\n", ncol(cchs_analytical)))
+vcat(sprintf("   ✓ Factors: %d\n", sum(sapply(cchs_analytical, is.factor))))
+vcat(sprintf("   ✓ CCHS 2010-2011: %s\n", format(sum(cchs_analytical$cycle == 0L), big.mark = ",")))
+vcat(sprintf("   ✓ CCHS 2013-2014: %s\n", format(sum(cchs_analytical$cycle == 1L), big.mark = ",")))
 
-cat("\n📊 Table 2: sample_flow (exclusion flowchart data)\n")
-cat(sprintf("   ✓ Rows: %d (one per exclusion step)\n", nrow(sample_flow)))
-print(as.data.frame(sample_flow))
+vcat("\n📊 Table 2: sample_flow (exclusion flowchart data)\n")
+vcat(sprintf("   ✓ Rows: %d (one per exclusion step)\n", nrow(sample_flow)))
+if (verbose) print(as.data.frame(sample_flow))
 
 # ==============================================================================
 # SECTION 5: SAVE TO OUTPUT
 # ==============================================================================
 
-cat("\n", strrep("=", 70), "\n")
-cat("SECTION 5A: SAVE TO PARQUET (Primary — preserves factor types & levels)\n")
-cat(strrep("=", 70), "\n")
+vcat("\n", strrep("=", 70), "\n")
+vcat("SECTION 5A: SAVE TO PARQUET (Primary — preserves factor types & levels)\n")
+vcat(strrep("=", 70), "\n")
 
 arrow::write_parquet(cchs_analytical,
                      file.path(output_parquet_dir, "cchs_analytical.parquet"))
@@ -1412,9 +1456,9 @@ cat(sprintf("   ✓ sample_flow.parquet      (%d rows)\n", nrow(sample_flow)))
 cat(sprintf("\n✅ Parquet files saved to: %s\n", output_parquet_dir))
 
 # ---- save-to-sqlite ----------------------------------------------------------
-cat("\n", strrep("=", 70), "\n")
-cat("SECTION 5B: SAVE TO SQLITE (Secondary — factors as character)\n")
-cat(strrep("=", 70), "\n")
+vcat("\n", strrep("=", 70), "\n")
+vcat("SECTION 5B: SAVE TO SQLITE (Secondary — factors as character)\n")
+vcat(strrep("=", 70), "\n")
 
 # SQLite does not natively store R factor types.
 # Convert factors to character strings; factor level ORDER is lost in SQLite
@@ -1426,7 +1470,7 @@ sample_flow_sql <- sample_flow
 
 if (file.exists(output_sqlite)) {
   file.remove(output_sqlite)
-  cat("   ✓ Removed existing SQLite file\n")
+  vcat("   ✓ Removed existing SQLite file\n")
 }
 
 cnn_out <- DBI::dbConnect(RSQLite::SQLite(), output_sqlite)
@@ -1436,7 +1480,7 @@ DBI::dbWriteTable(cnn_out, "sample_flow",     sample_flow_sql,     overwrite = T
 tables_out <- DBI::dbListTables(cnn_out)
 for (tbl in tables_out) {
   n_rows <- DBI::dbGetQuery(cnn_out, sprintf("SELECT COUNT(*) AS n FROM %s", tbl))$n
-  cat(sprintf("   ✓ table '%s': %s rows\n", tbl, format(n_rows, big.mark = ",")))
+  vcat(sprintf("   ✓ table '%s': %s rows\n", tbl, format(n_rows, big.mark = ",")))
 }
 DBI::dbDisconnect(cnn_out)
 
@@ -1449,32 +1493,32 @@ cat(sprintf("\n✅ SQLite saved to: %s\n", output_sqlite))
 # ---- session-info ------------------------------------------------------------
 duration <- difftime(Sys.time(), script_start, units = "secs")
 
-cat("\n", strrep("=", 70), "\n")
-cat("SESSION INFO\n")
-cat(strrep("=", 70), "\n")
+vcat("\n", strrep("=", 70), "\n")
+vcat("SESSION INFO\n")
+vcat(strrep("=", 70), "\n")
 
-cat(sprintf("\n⏱️  Ellis completed in %.1f seconds\n", as.numeric(duration)))
-cat(sprintf("📅 Executed: %s\n", format(Sys.time(), "%Y-%m-%d %H:%M:%S")))
-cat(sprintf("👤 User: %s\n", Sys.info()["user"]))
+vcat(sprintf("\n⏱️  Ellis completed in %.1f seconds\n", as.numeric(duration)))
+vcat(sprintf("📅 Executed: %s\n", format(Sys.time(), "%Y-%m-%d %H:%M:%S")))
+vcat(sprintf("👤 User: %s\n", Sys.info()["user"]))
 
 cat("\n📊 Output summary:\n")
-cat(sprintf("   Parquet dir:      %s  (2 files, primary)\n", output_parquet_dir))
-cat(sprintf("   SQLite database:  %s  (2 tables, secondary)\n", output_sqlite))
+vcat(sprintf("   Parquet dir:      %s  (2 files, primary)\n", output_parquet_dir))
+vcat(sprintf("   SQLite database:  %s  (2 tables, secondary)\n", output_sqlite))
 cat(sprintf("   Analytical rows:  %s\n", format(nrow(cchs_analytical), big.mark = ",")))
 cat(sprintf("   Analytical cols:  %d  (white-listed subset)\n", ncol(cchs_analytical)))
-cat(sprintf("   Factor columns:   %d  (with levels preserved in Parquet)\n",
+vcat(sprintf("   Factor columns:   %d  (with levels preserved in Parquet)\n",
             sum(sapply(cchs_analytical, is.factor))))
-cat(sprintf("   Bootstrap weights: %d  (÷2 for pooling)\n", length(boot_cols)))
-cat(sprintf("   Cycles pooled:    2 (CCHS 2010-2011 + 2013-2014)\n"))
+vcat(sprintf("   Bootstrap weights: %d  (÷2 for pooling)\n", length(boot_cols)))
+vcat(sprintf("   Cycles pooled:    2 (CCHS 2010-2011 + 2013-2014)\n"))
 
-cat("\n⚠️  VERIFICATION CHECKLIST:\n")
-cat("   1. Review white-list miss warnings above (if any)\n")
-cat("      → Open PDF data dictionaries in ./data-private/raw/2026-02-19/\n")
-cat("      → Update INFERRED variable names in declare-globals section\n")
-cat("   2. Confirm DHHGAGE age codes match your data dictionary (currently 2-15)\n")
-cat("   3. Confirm LOP_015 employment coding (retained as raw; no employment exclusion in default mode)\n")
-cat("   4. Confirm ADM_PRX proxy coding (retained as raw; proxy exclusion only when apply_sample_exclusions=TRUE)\n")
-cat("   5. Verify CCC variable names match the 19 conditions in thesis Appendix 3\n")
-cat("   6. Check outcome distribution vs reference (mean≈1.35, 70.59% zeros)\n")
+vcat("\n⚠️  VERIFICATION CHECKLIST:\n")
+vcat("   1. Review white-list miss warnings above (if any)\n")
+vcat("      → Open PDF data dictionaries in ./data-private/raw/2026-02-19/\n")
+vcat("      → Update INFERRED variable names in declare-globals section\n")
+vcat("   2. Confirm DHHGAGE age codes match your data dictionary (currently 2-15)\n")
+vcat("   3. Confirm LOP_015 employment coding (retained as raw; no employment exclusion in default mode)\n")
+vcat("   4. Confirm ADM_PRX proxy coding (retained as raw; proxy exclusion only when apply_sample_exclusions=TRUE)\n")
+vcat("   5. Verify CCC variable names match the 19 conditions in thesis Appendix 3\n")
+vcat("   6. Check outcome distribution vs reference (mean≈1.35, 70.59% zeros)\n")
 
-sessionInfo()
+if (verbose) sessionInfo()

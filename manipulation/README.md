@@ -26,13 +26,69 @@ It might be easier to think in terms of an example more relevant to our substant
 
 ---
 
-# Ferry and Ellis Patterns: Philosophy and Implementation Guide
+# Scripts in This Directory
 
-This directory contains two core data manipulation patterns that form the backbone of reproducible research data pipelines: **Ferry** and **Ellis**. These patterns provide structured, scalable approaches to data transport and transformation.
+This directory contains the CCHS work-absenteeism data pipeline. Scripts are numbered by execution order.
 
-## Pattern Philosophy
+## Script Reference
 
-### Ferry Pattern: Data Transport (`ferry-lane-example.R`)
+| Script | Pattern | Input | Output | How to run |
+|--------|---------|-------|--------|------------|
+| `1-ferry.R` | Ferry | `data-private/raw/2026-02-19/*.sav` | `data-private/derived/cchs-1.sqlite` + `cchs-1-raw/` Parquet | `source("manipulation/1-ferry.R")` |
+| `2-ellis.R` | Ellis | `data-private/derived/cchs-1.sqlite` | `data-private/derived/cchs-2.sqlite` + `cchs-2-tables/` Parquet | `source("manipulation/2-ellis.R")` |
+| `2-test-ellis-cache.R` | Test | `cchs-2-tables/`, `cchs-2.sqlite`, `CACHE-manifest.md` | Console pass/fail report | `source("manipulation/2-test-ellis-cache.R")` |
+| `ferry-lane-example.R` | Example | Template data | Demo outputs (not used by pipeline) | `source("manipulation/ferry-lane-example.R")` |
+| `ellis-lane-example.R` | Example | Template data | Demo outputs (not used by pipeline) | `source("manipulation/ellis-lane-example.R")` |
+
+## What each script does
+
+### `1-ferry.R` — Data Ingestion
+Reads both CCHS PUMF `.sav` files (`CCHS2010_LOP.sav`, `CCHS_2014_EN_PUMF.sav`) using
+`haven::read_sav()`, strips SPSS label attributes, sanitizes column names with
+`janitor::clean_names()`, and writes two staging tables (`cchs_2010_raw`,
+`cchs_2014_raw`) into `data-private/derived/cchs-1.sqlite` plus Parquet backups in
+`data-private/derived/cchs-1-raw/`. **No semantic transformation is performed.**
+
+### `2-ellis.R` — Data Transformation
+Reads both staging tables from `cchs-1.sqlite`, white-lists ~60-80 analysis-relevant
+variables (13 confirmed + ~50 inferred), harmonizes column names across cycles,
+recodes factors, pools the two cycles with survey-weight adjustment (`wts_m_pooled =
+wts_m / 2`), applies optional exclusion filters (employed, age 15-75, non-proxy), and
+writes the analytical dataset to `data-private/derived/cchs-2-tables/` (Parquet) and
+`data-private/derived/cchs-2.sqlite`.
+
+Three pipeline flags in the script header control run behaviour and can be set
+interactively via `scripts/ps1/run-interactive-flow.ps1`:
+- `strict_cycle_integrity` — fail if either cycle is empty
+- `apply_sample_exclusions` — apply employed/age/proxy filters
+- `apply_completeness_exclusion` — drop rows with NA on CCC/predictor variables
+
+### `2-test-ellis-cache.R` — Alignment Verification
+Performs a three-way alignment check: Ellis script definitions ↔ artifacts on disk ↔
+`data-public/metadata/CACHE-manifest.md`. Run this after any change to `2-ellis.R` or the
+manifest to ensure documentation and artifacts remain in sync.
+
+## How to run the pipeline
+
+```r
+# All at once (recommended)
+source("flow.R")
+
+# Step by step
+source("manipulation/1-ferry.R")
+source("manipulation/2-ellis.R")
+source("manipulation/2-test-ellis-cache.R")
+```
+
+```powershell
+# Interactive runner (prompts for Ellis flags and EDA selection)
+powershell -ExecutionPolicy Bypass -File scripts/ps1/run-interactive-flow.ps1
+```
+
+See `manipulation/pipeline.md` for the full reference with diagnostic checkpoints,
+troubleshooting tips, and output schemas.
+
+---
 
 **Metaphor**: A ferry transports cargo between shores without altering the contents.
 
