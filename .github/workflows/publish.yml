@@ -1,7 +1,12 @@
 name: Publish to GitHub Pages
 
 on:
-  workflow_dispatch:      # manual trigger only — run from the Actions tab when ready to publish
+  push:
+    branches: [main]
+    paths:
+      - '_frontend-1/**'
+      - '.github/workflows/publish.yml'
+  workflow_dispatch:      # optional manual trigger from the Actions tab
 
 permissions:
   contents: read
@@ -24,7 +29,7 @@ jobs:
         uses: quarto-dev/quarto-actions/setup@v2
 
       - name: Render site (frozen outputs only — no R runtime needed)
-        run: quarto render
+        run: quarto render _frontend-1
         # freeze: auto (set in _quarto.yml) uses cached _freeze/ outputs when hash matches.
         # No R needed on CI as long as _freeze/ is up-to-date and committed.
         # To rebuild outputs: render locally with R + private data, commit _freeze/, then push.
@@ -32,7 +37,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: _frontend-1/_site
 
   deploy:
     needs: build
