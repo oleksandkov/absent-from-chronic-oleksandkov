@@ -33,34 +33,6 @@ Data transformation pattern that creates clean, analysis-ready datasets. Named a
 - **Output**: CACHE database (project schema), WAREHOUSE archive, parquet files
 - **Documentation**: Generates CACHE-manifest.md
 
----
-
-## Storage Layers
-
-### CACHE
-
-Intermediate database storage - the last stop before analysis. Contains multiple schemas:
-
-- **Staging schema** (`{project}_staging` or `_TEST`): Ferry deposits raw data here
-- **Project schema** (`P{YYYYMMDD}`): Ellis writes analysis-ready data here
-- Both Ferry and Ellis write to CACHE, but to different schemas with different purposes.
-
-### WAREHOUSE
-Long-term archival database storage. Only Ellis writes here after data pipelines are stabilized and verified. Used for reproducibility and historical preservation.
-
----
-
-## Schema Naming Conventions
-
-### `_TEST`
-Reserved for pattern demonstrations and ad-hoc testing. Not for production project data.
-
-### `P{YYYYMMDD}`
-Project schema naming convention. Date represents project launch or data snapshot date.
-Example: `P20250120` for a project launched January 20, 2025.
-
-### `P{YYYYMMDD}_staging`
-Optional staging schema within a project namespace for Ferry outputs before Ellis processing.
 
 ---
 

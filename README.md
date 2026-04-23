@@ -1,12 +1,6 @@
-# Quick Start Template for AI-Augmented Reproducible Research
+#  Absent from Chronic
 
-> [No one beginning a data science project should start from a blinking cursor.](https://towardsdatascience.com/better-collaborative-data-science-d2006b9c0d39) <br/>...Templatization is a best practice for things like using common directory structure across projects...<br/> -[Megan Risdal](https://towardsdatascience.com/@meganrisdal) Kaggle Product Lead.
-
-This template provides a comprehensive foundation for **AI-augmented reproducible research projects**. It combines the best practices of reproducible research with  AI support infrastructure, which levereges generative LLMs and agent customization to construct and manage analytic pipelines. 
-
-Refer to [RAnalysisSkeleton](https://github.com/wibeasley/RAnalysisSkeleton) for a deeper dive into reproducible research best practices.
-
----
+Replication of statistical analysis
 
 ## About This Project
 
@@ -28,7 +22,7 @@ Refer to [RAnalysisSkeleton](https://github.com/wibeasley/RAnalysisSkeleton) for
 | `data-private/derived/cchs-3-tables/` | Clarity-layer splits: `cchs_employed.parquet`, `cchs_unemployed.parquet`, `data_dictionary.parquet` |
 | `data-private/derived/cchs-3.sqlite` | SQLite version of Lane 3 outputs |
 
-See `data-private/contents.md` and `data-public/metadata/CACHE-manifest.md` for detailed descriptions.
+See `data-public/metadata/CACHE-manifest.md` for detailed descriptions.
 
 ### Running the data pipeline (`manipulation/`)
 
@@ -175,3 +169,26 @@ Each personal could be customized by adding specific documents to the dynamic pa
    - Edit `ai/method.md` - How you want to do it: tecniques and processes 
    - Edit `ai/glossary.md` - Encyclopedia of domain-specific terms
    - Update `config.yml` - To set project-specific configurations
+
+
+# Authoring
+
+
+## Publishing Orchestra
+
+This repo includes a two-agent publishing system for generating static Quarto websites from analytics content.
+- **Interviewer** (`@publishing-interviewer`): Plans the site, produces the contract.
+- **Writer** (`@publishing-writer`): Assembles `edited_content/`, renders `_site/`.
+- Design doc: `.github/publishing-orchestra-3.md`
+- Migration guide: `.github/migration.md`
+
+## Composing Orchestra
+
+This repo includes a single-agent system for bootstrapping and developing analytical reports (EDA or presentation Report) in `analysis/`.
+- **Report Composer** (`@report-composer`): Scaffolds directories, conducts adaptive interviews, iteratively develops .R + .qmd reports with a per-report Data Context section.
+- **Data Primer** (`analysis/data-primer-1/`): Centralized, human-verified data reference composed once via `@report-composer`. All EDAs and Reports link to it.
+- Design doc: `.github/composing-orchestra-1.md`
+- Bootstrap prompt: `.github/prompts/composing-new.prompt.md`
+- Instructions: `.github/instructions/report-composition.instructions.md` (applies to `analysis/**`)
+- Templates: `.github/templates/composing-*.{R,qmd,md}` + `data-primer-template.qmd`
+

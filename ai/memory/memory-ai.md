@@ -4,7 +4,82 @@ AI system status and technical briefings.
 
 ---
 
-# 2026-03-01
+## 2026-03-21 (documentation alignment sprint)
+
+Ran Ellis (`apply_sample_exclusions = TRUE`) producing 63,843 rows × 62 columns (Cycle 0:
+32,621; Cycle 1: 31,222) in `cchs_analytical.parquet` + `cchs-2.sqlite`. Verified actual
+output schema: 41 factors, ~20 numeric, 1 character (`geodpmf`), 1 logical
+(`outcome_all_na`). 17 cc_* binary factors present (not 19 — `ccc_300`, `ccc_185` absent
+from PUMF). 5 all-NA factor columns: `homeownership`, `student_status`,
+`occupation_category`, `alcohol_type`, `bmi_category` (source variables absent from PUMF;
+columns created by `ensure_columns()` for downstream recode stubs). 6 variables previously
+thought broken are actually populated via alias resolution: `income_5cat` (incghh→incdghh),
+`employment_type` (lbsg31→lbfdghp), `work_schedule` (lbsdpft→lbfdgft), `dhhdghsz`
+(dhhghsz), `fvcdgtot` (fvcgtot), `geodgprv` (geogprv).
+
+**Correction to prior entries**: CCC code mappings in 2026-03-20 entries were wrong.
+Correct: `ccc_015→ccc_031` (asthma), `ccc_011→ccc_041` (fibromyalgia). NOT ccc_035/ccc_036
+as previously stated. The full verified CCC map is: ccc_031=asthma, ccc_041=fibromyalgia,
+ccc_051=arthritis, ccc_061=back_problems, ccc_071=hypertension, ccc_081=migraine,
+ccc_091=copd, ccc_101=diabetes, ccc_121=heart_disease, ccc_131=cancer, ccc_141=ulcer,
+ccc_151=stroke, ccc_171=bowel_disorder, ccc_251=chronic_fatigue, ccc_261=chemical_sensitiv,
+ccc_280=mood_disorder, ccc_290=anxiety_disorder.
+
+Files updated to match actual Ellis output:
+
+- `manipulation/pipeline.md` — column count 58→62, CCC codes fixed, white-list miss 17→10
+- `data-public/metadata/CACHE-manifest.md` — major overhaul: column counts, cycle splits,
+  removed nonexistent cc_other_mental_ill/cc_digestive_disease, fixed factor level strings,
+  rewrote alias table and Known Limitations
+- `manipulation/2-test-ellis-cache.R` — no changes needed; 31/31 tests pass
+- `analysis/data-primer-1/variable-inclusion.qmd` — rewrote CCC table (7 of 17 mappings
+  were wrong), corrected predisposing/facilitating tables (many vars marked absent are
+  actually populated), updated Summary of Gaps
+- `analysis/data-primer-1/univariate-distributions.R` — added cc_asthma, cc_fibromyalgia
+  to cc_vars (were missing from list)
+- `analysis/data-primer-1/univariate-distributions.qmd` — removed incorrect all-NA guards
+  for income/employment/work_schedule, fixed condition counts and section descriptions
+
+Education cross-cycle discrepancy documented in Ellis: EDUDH04 code 3 is "Other
+post-secondary" in 2010 vs "Some post-secondary" in 2014; both mapped to "Some
+post-secondary" with in-code documentation.
+
+Round 2 dictionary-verified corrections to 2-ellis.R remain UNAPPLIED — plan saved in
+`/memories/session/plan.md`. These include: 10 variable name fixes, homeownership→living
+arrangement (8-cat), job_stress split into life_stress + job_stress, alcohol_type fix to
+3-cat, bmi_category source fix, occupation_category to 5-cat lbsgsoc.
+
+Session log: `ai/memory/log/2026-03-21-documentation-alignment.md`.
+
+---
+
+## 2026-03-20
+
+Authored `analysis/data-primer-1/variable-inclusion.md` — a five-column traceability table
+(Requested / 2011 / 2014 / In Study / Note) linking every §2.2 variable from
+`stats_instructions_v3.md` to its concrete PUMF source name and analytical-dataset column
+name in `cchs_analytical.parquet`. Organised into 7 sections matching the §2.2 table rows.
+PUMF column presence verified by querying ferry parquet files directly. Ellis "In Study"
+names traced from factor-recoding steps in `manipulation/2-ellis.R`. Key findings: 17/19
+CCC vars available (2 PUMF-suppressed: `ccc_300`, `ccc_185`); 13 INFERRED white-list codes
+need alias fixes (wrong DG-infix); student status and occupation absent from PUMF;
+bootstrap weights absent (critical blocker — separate Statistics Canada supplement file).
+Session log: `ai/memory/log/2026-03-20-variable-inclusion.md`.
+
+---
+
+## 2026-03-20 (pipeline validation)
+
+Ran 1-ferry.R (62,909 + 63,522 rows → cchs-1.sqlite) and 2-ellis.R (63,843 rows, 58 cols →
+cchs-2-tables/). Corrected pipeline.md (7 edits), INPUT-manifest.md (4 edits), and populated
+CACHE-manifest.md from stub. Root-caused 17 missing INFERRED variables: 2 wrong CCC codes
+(ccc_015→ccc_035, ccc_011→ccc_036), 11 DG-infix mismatches, 2 absent from PUMF, 2 absent
+entirely. Fixed renv.lock version pins (fs 1.6.7, later 1.4.8, httpuv 1.6.17) to allow
+binary install without Rtools.
+
+---
+
+## 2026-03-01
 
 Built `analysis/eda-3/eda-3.R`, `analysis/eda-3/eda-3.qmd`, and `analysis/eda-3/README.md` as a direct structural replica of EDA-2, substituting `absence_days_chronic` (days absent due to a chronic health condition) for `absence_days_total`. Source: same `cchs_employed` table from `cchs-3.sqlite` (64,248 rows). Variable `absence_days_chronic` originates from Lane 3 rename `days_absent_chronic→absence_days_chronic`. Data pipeline: `ds0` (raw) → `ds1` (filter `absence_days_chronic >= 1`, not NA) → per-variable subsets `ds5`/`ds6`/`ds7` (drop NAs for `education_level` / `marital_status_label` / `immigration_status_label`). Seven graph families produced: g1 (overall scatter + histogram), g2 (by `sex_label`), g3 (by `age_group_3`, stats saved to CSV), g4 (by `survey_cycle_label`, scatter + histogram), g5 (by `education_level`, ds5), g6 (by `marital_status_label`, ds6), g7 (by `immigration_status_label`, ds7). Two analytic tables: `chronic_ratio_tbl` (overall 0-day vs. 1+ ratio) and `sex_ratio_tbl` (per-sex ratio). All conventions identical to EDA-2: `coord_cartesian(xlim=c(1,40))` zoom, 5-day bins/breaks, firebrick dashed median + darkorange dotted mean lines, `geom_label(data=stats_df, inherit.aes=FALSE)` for faceted reference labels. Session logged in `ai/memory/log/2026-03-01-analysing.md`.
 

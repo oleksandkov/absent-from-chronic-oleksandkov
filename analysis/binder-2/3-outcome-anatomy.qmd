@@ -1,0 +1,270 @@
+---
+title: "Outcome Anatomy: Structure of days_absent_total"
+subtitle: "Binder 2 — Notebook 3 · CCHS Pooled 2010/11 + 2013/14"
+author: "Research Analyst"
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    code-fold: show
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission
+
+The primary outcome — `days_absent_total` — is a **count variable with extreme
+zero-inflation**. Understanding its shape is not optional: it governs every
+downstream modelling decision. This notebook examines:
+
+- How severely zero-inflated is the outcome, and did the pattern change across cycles?
+- Which of the eight LOP components contribute most to total absence, and are all
+  components equally available in the data?
+- What does the distribution of *non-zero* absences look like, and does it differ
+  by age group?
+
+Answers to these questions determine whether Negative Binomial, Zero-Inflated,
+or Hurdle models are appropriate for the analysis.
+
+# Environment
+
+```{r}
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir = normalizePath("../../"))
+```
+
+```{r}
+#| label: set-options
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results    = "show",
+  message    = FALSE,
+  warning    = FALSE,
+  comment    = NA,
+  tidy       = FALSE,
+  out.width  = "960px",
+  fig.width  = 10,
+  fig.height = 6,
+  fig.path   = "figure-png-iso/"
+)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/binder-2/3-outcome-anatomy.R")
+```
+
+```{r}
+#| label: load-packages
+#| code-summary: "Packages loaded for this notebook"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: "Project-level helper functions"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: "Paths, palette, band levels, LOP variable names and labels"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| echo: false
+#| results: hide
+```
+
+```{r}
+#| label: load-data
+#| code-summary: "Load cchs_analytical.parquet"
+#| echo: true
+#| results: show
+#| message: true
+#| code-fold: true
+```
+
+```{r}
+#| label: tweak-data-0
+#| code-summary: "Add absence_band column; confirm LOP variables present"
+#| echo: true
+#| results: show
+#| message: true
+#| code-fold: true
+```
+
+# Data Context
+
+For complete data documentation, see the [Data Primer](../data-primer-1/data-primer-1.html).
+
+```{r}
+#| label: data-context-tables
+#| code-summary: "Outcome descriptive statistics"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-person
+#| code-summary: "Representative zero-absence and high-absence respondents"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: "Outcome band distribution"
+#| echo: true
+#| code-fold: true
+```
+
+# Analysis
+
+## Zero-Inflation Portrait (g1 family)
+
+`g1` collapses the full 0–90 range into five interpretable bands and highlights
+the structural zero cluster in red. The ~70% zero rate drives the entire modelling
+strategy.
+
+`g11` splits the same bands by survey cycle — if zero-inflation grew between
+2010/11 and 2013/14, that would be a substantively meaningful trend worth
+reporting.
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: "Outcome band counts, pooled and by cycle"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: g1
+#| fig-cap: "Zero-inflation portrait of days_absent_total. Red bar = structural zeros; blue bars = positive-count distribution."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g1_zero_inflation)
+```
+
+```{r}
+#| label: g11
+#| fig-cap: "Absence band distribution by survey cycle. Tests whether zero-inflation or positive tails shifted between cycles."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g11_by_cycle)
+```
+
+## LOP Component Decomposition (g2 family)
+
+`days_absent_total` is the sum of eight LOP (Limitation of activity-related
+work absences) components. `g2` shows how many days each component contributes
+on average (among positive cases) and how completely it is measured.
+
+`g21` shifts focus to data availability alone — some LOP components may be
+more commonly answered than others, affecting the reliability of the composite.
+
+```{r}
+#| label: g2-data-prep
+#| code-summary: "LOP component completeness and mean contribution"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: g2
+#| fig-cap: "Mean absence days per LOP component (positive cases). Fill = % non-missing. Longer bars indicate larger contribution to total absence."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g2_lop_components)
+```
+
+```{r}
+#| label: g21
+#| fig-cap: "LOP data availability — % non-missing per component. Components with low availability inflate missing rates in the composite."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g21_lop_completeness)
+```
+
+## Non-Zero Absence Distribution (g3 family)
+
+`g3` focuses on the positive-count sub-distribution (respondents with at least
+one absent day). Right skew, spikes at round numbers (5, 10, 15 days), and the
+position of the median all inform model choice and dispersion assumptions.
+
+`g31` facets this histogram by age group — a first bivariate signal that hints
+at whether older workers tend toward more severe or more frequent absences.
+
+```{r}
+#| label: g3-data-prep
+#| code-summary: "Restrict to positive-absence cases; compute median"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: g3
+#| fig-cap: "Distribution of work-absence days among positive-count respondents. Dashed line = median."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g3_nonzero_hist)
+```
+
+```{r}
+#| label: g31
+#| fig-cap: "Non-zero absence days faceted by age group. Reveals whether absence duration profiles differ across life stages."
+#| fig-height: 7
+#| echo: true
+#| code-fold: true
+print(g31_nonzero_by_age)
+```
+
+# Feedback Questions
+
+1. **Model selection**: The zero-inflation rate (~70%) and the right-skewed
+   positive count suggest Negative Binomial or a Hurdle model. Given that
+   `days_absent_chronic` (the sensitivity outcome using only LOP040) is
+   available, would you prefer to model the composite `days_absent_total`
+   or would you run parallel analyses on both outcomes?
+
+2. **LOP component granularity**: `g2` shows that some LOP components contribute
+   more days than others on average. Should the analysis report component-specific
+   results alongside the composite, or is the composite alone sufficient for the
+   research question?
+
+3. **Overdispersion check**: With mean ≈ median in the positive-count distribution
+   but a very long right tail, variance almost certainly exceeds the mean. Would
+   you like a formal overdispersion test (ratio of residual deviance to degrees
+   of freedom from a Poisson GLM) added to this notebook before the modelling
+   stage begins?

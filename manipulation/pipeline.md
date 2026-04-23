@@ -28,8 +28,8 @@ CCHS .sav files (data-private/raw/)
 | 1 | `manipulation/1-ferry.R` | Ferry | `data-private/derived/cchs-1.sqlite` + `cchs-1-raw/` Parquet backup |
 | 2 | `manipulation/2-ellis.R` | Ellis | `data-private/derived/cchs-2.sqlite` + `cchs-2-tables/` Parquet |
 | 3 | `manipulation/2-test-ellis-cache.R` | Test | Console test report (three-way alignment check) |
-| — | `manipulation/ferry-lane-example.R` | Example | `cchs-1.sqlite` (demo only; does not affect main pipeline) |
-| — | `manipulation/ellis-lane-example.R` | Example | `cchs-2.sqlite` (demo only; does not affect main pipeline) |
+| — | `manipulation/example/ferry-lane-example.R` | Example | `cchs-1.sqlite` (demo only; does not affect main pipeline) |
+| — | `manipulation/example/ellis-lane-example.R` | Example | `cchs-2.sqlite` (demo only; does not affect main pipeline) |
 
 > **Note on Ellis Lane 3**: Derived output directories `cchs-3-tables/` and `cchs-3.sqlite`
 > exist in `data-private/derived/` from a prior run of a clarity-layer script.
@@ -150,7 +150,7 @@ Paths are configured in `config.yml` under `raw_data`.
 
 | Artifact | Location | Format | Description |
 |----------|----------|--------|-------------|
-| `cchs_analytical.parquet` | `data-private/derived/cchs-2-tables/` | Parquet | Main analysis dataset (full pooled sample mode by default) |
+| `cchs_analytical.parquet` | `data-private/derived/cchs-2-tables/` | Parquet | Main analysis dataset (`apply_sample_exclusions = TRUE` by default; 63,843 rows, 62 cols) |
 | `sample_flow.parquet` | `data-private/derived/cchs-2-tables/` | Parquet | Exclusion audit trail (5 rows) |
 | `cchs-2.sqlite` | `data-private/derived/` | SQLite | Same tables as Parquet (factors as character) |
 
@@ -167,6 +167,19 @@ Paths are configured in `config.yml` under `raw_data`.
 
 ---
 
+## Pipeline Flags
+
+Three boolean flags in `2-ellis.R` → `# ---- declare-globals` control key pipeline behaviours.
+They can also be managed via the interactive runner (`scripts/ps1/run-interactive-flow.ps1`).
+
+| Flag | Default | Effect |
+|------|---------|--------|
+| `strict_cycle_integrity` | `FALSE` | If `TRUE`, stop with an error when either CCHS cycle loads as empty; otherwise emit a warning and continue with available cycles. |
+| `apply_sample_exclusions` | `TRUE` | If `TRUE`, apply §3.1 inclusion criteria (age 15–75, employed in past 3 months, non-proxy, non-missing outcome). If `FALSE`, retain full pooled sample (~126,431). |
+| `apply_completeness_exclusion` | `FALSE` | If `TRUE`, additionally drop any respondent with `NA` on any CCC indicator or key predictor. If `FALSE`, handle missing data downstream (e.g., multiple imputation). |
+
+---
+
 ## White-List Design
 
 Ellis uses a **two-tier white-list** to select only variables needed for the analysis.
@@ -177,8 +190,18 @@ This keeps the analysis-ready dataset focused and avoids processing ~1,400 irrel
 See `vars_confirmed` in `2-ellis.R` → `declare-globals` section.
 
 ### Tier 2: INFERRED (graceful warning if missing)
-~60 variables inferred from standard CCHS PUMF naming conventions. If any are absent,
+~48 variables inferred from standard CCHS PUMF naming conventions. If any are absent,
 Ellis logs a warning with a list of missing names and drops them. Analysis continues.
+Bootstrap weights (`bsw001`–`bsw500`) are pattern-matched separately.
+
+| Category | Example variables | Count |
+|----------|-------------------|-------|
+| CCC module (chronic conditions) | `ccc_031`, `ccc_041`, `ccc_051`, … `ccc_290` (+ `ccc_300`, `ccc_185` absent from PUMF) | 19 (17 found) |
+| Predisposing | `dhh_sex`, `dhhgms`, `edudh04`, `dhhdglvg`, `dhhdfc5`, `dhhdfc11`, `dhhdfc12p`, `sdcdgstud`, … | 11 (7 found) |
+| Facilitating | `incdghh`, `geodgprv`, `hcu_1aa`, `lbfdghp`, `gen_07`, `alcdgtyp`, `hwtdgbmi`, `noc_31`, … | 12 (9 found) |
+| Needs | `gen_01`, `gen_02a`, `gen_09`, `rac_1`, `inj_01` | 5 |
+| Identifiers | `adm_rno` | 1 |
+| Bootstrap weights | `bsw001`–`bsw500` (pattern `^bsw`) | 500 |
 
 **To update the white-list:**
 1. Open `manipulation/2-ellis.R`
@@ -190,20 +213,20 @@ Ellis logs a warning with a list of missing names and drops them. Analysis conti
 
 ## Exclusion Criteria (sample_flow)
 
-`2-ellis.R` now runs in **full pooled sample mode by default** (`apply_sample_exclusions = FALSE`).
-Legacy exclusion filtering is still available when explicitly enabled (`apply_sample_exclusions = TRUE`).
+`2-ellis.R` applies **§3.1 exclusion criteria by default** (`apply_sample_exclusions = TRUE`).
+Full pooled sample mode (no exclusions) is available by setting `apply_sample_exclusions = FALSE`.
 
 | Step | Criterion | Expected % retained |
 |------|-----------|---------------------|
 | 1 | Raw CCHS stacked sample | 100% |
-| 2 | Age 15–75 (`dhhgage %in% 2:15`) | ~85% |
-| 3 | Currently employed (`lop_015 == 1`) | ~55% |
-| 4 | Non-proxy respondent (`adm_prx != 1`) | ~99% of step 3 |
-| 5 | Complete outcome (any LOP var non-missing) | ~95% of step 4 |
+| 2 | Age 15–75 (`dhhgage %in% 2:15`) | ~89% |
+| 3 | Currently employed (`lop_015 == 1`) | ~51% |
+| 4 | Non-proxy respondent (`adm_prx != 1`) | ~51% |
+| 5 | Complete outcome (any LOP var non-missing) | ~50.5% |
 
 Reference final sample:
-- **Default mode (`apply_sample_exclusions = FALSE`)**: `126,431`
-- **Legacy exclusion mode (`apply_sample_exclusions = TRUE`)**: ~`64,141`
+- **Default mode (`apply_sample_exclusions = TRUE`)**: `63,843`
+- **Full pooled mode (`apply_sample_exclusions = FALSE`)**: `126,431`
 
 ---
 
@@ -226,12 +249,12 @@ After running `2-ellis.R`, verify these values match expectations:
 
 | Diagnostic | Reference |
 |------------|-----------|
-| Final sample size (default mode) | 126,431 |
-| Final sample size (legacy exclusion mode) | ~64,141 |
-| Weighted mean `days_absent_total` | ≈ 1.35 |
-| % zeros in `days_absent_total` | ≈ 70.6% |
-| Variance of `days_absent_total` | ≈ 17.7 |
-| White-list misses (INFERRED tier) | 0 ideally; warn if >5 |
+| Final sample size (default — exclusions applied) | 63,843 |
+| Final sample size (full pooled — no exclusions) | 126,431 |
+| Weighted mean `days_absent_total` | ≈ 1.25 |
+| % zeros in `days_absent_total` | ≈ 70.5% |
+| Variance of `days_absent_total` | ≈ 15.4 |
+| White-list misses (INFERRED tier) | 10 in current PUMF files (see Known Limitations in CACHE-manifest) |
 
 ---
 
@@ -261,10 +284,10 @@ After running `2-ellis.R`, verify these values match expectations:
 | File | Contents |
 |------|----------|
 | `data-public/metadata/INPUT-manifest.md` | Raw source file descriptions |
-| `data-public/metadata/CACHE-manifest.md` | Analysis-ready dataset descriptions (auto-updated by Ellis) |
+| `data-public/metadata/CACHE-manifest.md` | Analysis-ready dataset descriptions (manually maintained) |
 | `data-public/metadata/cchs-3-column-dictionary-uk.md` | Lane 3 column dictionary (Ukrainian) |
 | `manipulation/pipeline.md` | This file |
 
 ---
 
-*Last updated: 2026-02-22*
+*Last updated: 2026-03-20 (post Ellis revision — 62-column, 63,843-row output)*

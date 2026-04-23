@@ -264,11 +264,16 @@ This report documents the **Default Scenario** with real output and describes th
 | Survey design | Master weight, 500 bootstrap replicates, strata/cluster IDs |
 :::
 
-The white-list approach selects \~69 named variables plus \~500 bootstrap weight columns from the 600+ column ferry output. Variables are classified as:
+The white-list approach selects 55 named variables (plus any bootstrap weight columns found via pattern `^bsw`) from the 600+ column ferry output. Variables are classified as:
 
 -   **Confirmed** (13): explicitly verified in `data-public/derived/required-variables-and-sample.md`
--   **Inferred — CCC** (19): derived from CCHS PUMF naming conventions; trigger a WARNING if absent
--   **Inferred — other** (\~37): predisposing, facilitating, needs, and ID variables; also trigger a WARNING if absent
+-   **Inferred — CCC** (19 in white-list; 17 confirmed present in PUMF): `ccc_300` and `ccc_185` are NOT FOUND in either PUMF cycle — they trigger a WARNING during import and produce all-NA columns
+-   **Inferred — other** (29): predisposing (11) + facilitating (12) + needs (5) + id (1); absent inferred variables trigger a WARNING and are silently dropped
+
+::: {.callout-warning icon="false"}
+**10 inferred variables absent from both CCHS PUMF cycles**: `ccc_300`, `ccc_185`, `dhhdglvg`, `dhhdfc5`, `dhhdfc11`, `dhhdfc12p`, `sdcdgstud`, `alcdgtyp`, `hwtdgbmi`, `noc_31`.
+Five of these — `alcdgtyp`, `hwtdgbmi`, `dhhdglvg`, `sdcdgstud`, `noc_31` — are added back as all-NA columns by `ensure_columns()` to prevent downstream factor recode failures.
+:::
 
 ```{r}
 #| label: g-whitelist-ratio
@@ -281,16 +286,21 @@ The white-list approach selects \~69 named variables plus \~500 bootstrap weight
 
 Before white-list selection, `2-ellis.R` maps known cross-cycle variable name aliases to canonical names. If the canonical name is missing but an alias is found, the alias is copied in:
 
-| Canonical (white-list name) | Aliases checked      |
-|-----------------------------|----------------------|
-| `edudh04`                   | `edudr04`            |
-| `sdcdgcb`                   | `sdcgcgt`            |
-| `geodgprv`                  | `geogprv`            |
-| `hcu_1aa`                   | `hcu_1a`, `hcudgmd`  |
-| `lbfdghp`                   | `lbsg031`, `lbs_g31` |
-| `gen_02a`                   | `gen_02`, `gen_02a2` |
-| `gen_09`                    | `gen_03`             |
-| `inj_01`                    | `injdgyrs`           |
+| Canonical (white-list name) | Aliases checked      | SAV variable resolved |
+|-----------------------------|----------------------|-----------------------|
+| `edudh04`                   | `edudr04`            | `EDUDR04`             |
+| `sdcdgcb`                   | `sdcgcgt`            | `SDCGCGT`             |
+| `geodgprv`                  | `geogprv`            | `GEOGPRV`             |
+| `hcu_1aa`                   | `hcu_1a`, `hcudgmd`  | `HCU_1AA`             |
+| `lbfdghp`                   | `lbsg31`             | `LBSG31`              |
+| `lbfdgft`                   | `lbsdpft`            | `LBSDPFT`             |
+| `incdghh`                   | `incghh`             | `INCGHH`              |
+| `fvcdgtot`                  | `fvcgtot`            | `FVCGTOT`             |
+| `dhhdghsz`                  | `dhhghsz`            | `DHHGHSZ`             |
+| `gen_02a`                   | `gen_02b`            | `GEN_02B` (self-perceived mental health) |
+| `inj_01`                    | `injdgyrs`           | `INJ_01`              |
+
+> **Note**: `gen_02` (self-perceived health compared to 1 year ago) is a **separate white-list entry** with its own direct match — it is NOT an alias for `gen_02a` (self-perceived mental health). The two variables measure different constructs.
 
 ## B.4 Step 2 — Sample Exclusions
 
@@ -336,19 +346,19 @@ Steps 1–3 plus outcome completeness are applied. Step 4b (CCC + predictor comp
 ::: {.callout-tip icon="false"}
 **§3.1 DONE — Exclusion criteria applied in order (Default run)** ✓
 
-All §3.1 exclusion steps are applied sequentially with `n` recorded at each step. Starting pool matches §3.1 (62,909 + 63,522 = **126,431**). The **default run** (`apply_completeness_exclusion = FALSE`) applies steps 1–5 (age, employment, proxy, outcome completeness) and reaches **n ≈ 63,843** — close to the §3.1 thesis target of 64,141. Step 4 (proxy) removed 0 rows because `adm_prx` was not found in the CCHS files.
+All §3.1 exclusion steps are applied sequentially with `n` recorded at each step. Starting pool matches §3.1 (62,909 + 63,522 = **126,431**). The **default run** (`apply_completeness_exclusion = FALSE`) applies steps 1–5 (age, employment, proxy, outcome completeness) and reaches **n = 63,843** — close to the §3.1 thesis target of 64,141. Step 4 (proxy) removed 0 rows: `adm_prx` IS a confirmed column; no respondents in the analytical pool carried the proxy flag (adm_prx = 1).
 
-**All-TRUE run** (`apply_completeness_exclusion = TRUE`): adds full predictor-completeness exclusion at step 6 — actual result **n = 41,372** (22,769 fewer). The gap arises because 17 inferred predictor variables were absent from the CCHS data (e.g., `incdghh`, `hwtdgbmi`, `alcdgtyp`, `noc_31`) and were added as `NA` columns; the completeness filter then excludes all such respondents. To close the gap to the §3.1 target: update inferred variable names in `2-ellis.R` against the CCHS data dictionaries.
+**All-TRUE run** (`apply_completeness_exclusion = TRUE`): adds full predictor-completeness exclusion at step 6 — approximate result **n ≈ 41,372** (from an earlier run with the pre-correction white-list). The gap reflects NA values in predictor columns present in the pre-recode dataset. Note: `incdghh`, `lbfdghp`, `lbfdgft`, `fvcdgtot`, `dhhdghsz` are now populated via the alias map; confirmed absent variables are `alcdgtyp`, `hwtdgbmi`, `dhhdglvg`, `sdcdgstud`, `noc_31`, `ccc_300`, `ccc_185`. Re-run with `apply_completeness_exclusion = TRUE` to obtain the current actual n.
 :::
 
 ### All-TRUE Scenario (`apply_completeness_exclusion = TRUE`)
 
-When `apply_completeness_exclusion = TRUE`, an additional step removes respondents with any `NA` on the 19 CCC conditions or any predictor variable (full §3.1 criterion 4b). The actual run produced **n = 41,372** — differing from the §3.1 thesis target of 64,141 by **22,769 respondents**. The gap arises because 17 inferred variables were absent from both CCHS cycles (e.g., `incdghh`, `hwtdgbmi`, `alcdgtyp`, `noc_31`) and were added as `NA` columns; the completeness filter then excludes all respondents with those NA values. The proxy filter removed 0 respondents because `adm_prx` was also not found. Update the inferred variable name list in `2-ellis.R` (declare-globals section) to resolve these mismatches against the CCHS data dictionaries.
+When `apply_completeness_exclusion = TRUE`, an additional step removes respondents with any `NA` on the 17 available CCC conditions or any predictor variable present in the pre-recode dataset (full §3.1 criterion 4b). The approximate result **n ≈ 41,372** is from an earlier run with the pre-correction white-list. The gap from the default run (63,843) reflects NA values in predictor columns that contain structural NAs (e.g., variables present in one cycle but not the other). Note: `adm_prx` IS a confirmed column — 0 proxy respondents were found. Variables confirmed absent from both CCHS PUMF cycles: `alcdgtyp`, `hwtdgbmi`, `dhhdglvg`, `sdcdgstud`, `noc_31`, `ccc_300`, `ccc_185`. Re-run with `apply_completeness_exclusion = TRUE` after the whitelist corrections to obtain the current actual n.
 
 | Scenario | Actual final n | n vs. §3.1 target (64,141) | Completeness criterion |
 |------------------|------------------|------------------|------------------|
-| Default (`apply_completeness_exclusion = FALSE`) | 63,843 (actual run) | −281 | Outcome only |
-| All-TRUE (`apply_completeness_exclusion = TRUE`) | **41,372** (actual run) | −22,769 | Outcome + all CCC + all predictors |
+| Default (`apply_completeness_exclusion = FALSE`) | 63,843 (actual run) | −298 | Outcome only |
+| All-TRUE (`apply_completeness_exclusion = TRUE`) | **≈ 41,372** (pre-correction run) | approx. −22,769 | Outcome + all CCC + all predictors |
 
 ## B.5 Step 3 — Cycle Pooling & Harmonization
 
@@ -398,10 +408,12 @@ Key recoded variables:
 | `dhh_sex` | `sex` | `Male` / `Female` |
 | `dhhgms` | `marital_status` | Single / Married / Common-law / Widowed-Divorced-Separated |
 | `edudh04` | `education` | 4 ordered levels (\< secondary → post-secondary graduate) |
-| `incdghh` | `income_5cat` | 5 ordered income bands (\< \$20k → \$80k+) |
-| `smkdsty` | `smoking_status` | Never / Former / Occasional / Daily (ordered) |
-| `hwtdgbmi` | `bmi_category` | Underweight / Normal / Overweight / Obese (ordered) |
-| `ccc_015`–`ccc_300` | `ccc_015_yn`–`ccc_300_yn` | `Yes` / `No` (all 19 CCC conditions) |
+| `incdghh` (alias: `incghh`) | `income_5cat` | 5 ordered income bands (\< \$20k → \$80k+) |
+| `smkdsty` | `smoking_status` | Never / Former / Occasional / Daily (ordered; 6 raw codes collapsed to 4) |
+| `hwtdgbmi` | `bmi_category` | **ALL-NA** — absent from both PUMF cycles; added by `ensure_columns()` |
+| `alcdgtyp` | `alcohol_type` | **ALL-NA** — absent from both PUMF cycles; added by `ensure_columns()` |
+| `ccc_031`–`ccc_290` | `cc_asthma`, `cc_fibromyalgia`, … `cc_anxiety_disorder` | `Yes` / `No` (17 verified CCC conditions; output named `cc_<condition>`) |
+| `ccc_300`, `ccc_185` | `cc_other_mental_ill`, `cc_digestive_disease` | **ALL-NA** — not found in either PUMF cycle |
 
 ```{r}
 #| label: inspect-analytical

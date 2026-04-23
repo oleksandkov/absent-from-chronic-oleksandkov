@@ -22,6 +22,9 @@ altair>=6.0.0              # Declarative grammar of graphics (Vega-Altair)
 pandas>=3.0.0              # DataFrames – required by most viz libraries
 numpy>=2.4.0               # Numerical arrays
 
+# ── PDF Extraction ───────────────────────────────────────────────────────────
+pdfplumber>=0.11.0         # PDF text extraction (data dictionary ingestion); pure Python, no system deps
+
 # ── Notebook / Report Integration ────────────────────────────────────────────
 ipykernel>=7.0.0           # Jupyter kernel so VS Code notebooks work
 nbformat>=5.10.0           # Notebook file format support

@@ -1,0 +1,2456 @@
+"cycle","variable_name","variable_label","has_value_labels","n_value_labels"
+"2013-2014","ACCG12N","Difficulty - other - (G)",TRUE,6
+"2013-2014","ACCG22B","Diff. getting appt / diagnosis - (G)",TRUE,6
+"2013-2014","ACCG22D","Diff. - wait too long for diag. test / h",TRUE,6
+"2013-2014","ACCG22O","Diff. - other - (G)",TRUE,6
+"2013-2014","ACCG32F","Diff. - not avail. time required/area -",TRUE,6
+"2013-2014","ACCG32N","Diff. - other - (G)",TRUE,6
+"2013-2014","ACCG43B","Diff. - contact physician-nurse / no pho",TRUE,6
+"2013-2014","ACCG43I","Diff. - other - (G)",TRUE,6
+"2013-2014","ACCG45B","Diff. - contact physician-nurse / no pho",TRUE,6
+"2013-2014","ACCG45I","Diff. - other - (G)",TRUE,6
+"2013-2014","ACCG47C","Diff. - contact / tel num / get through",TRUE,6
+"2013-2014","ACCG47I","Diff. - other - (G)",TRUE,6
+"2013-2014","ACCG53G","Diff. - no fam phys / not avail in area",TRUE,6
+"2013-2014","ACCG53J","Diff. - transport / lang. / cost - (G)",TRUE,6
+"2013-2014","ACCG53M","Diff. - other - (G)",TRUE,6
+"2013-2014","ACCG55G","Diff. - no fam phys / not avail in area",TRUE,6
+"2013-2014","ACCG55M","Diff. - other - (G)",TRUE,6
+"2013-2014","ACCG63G","Diff. - no fam phys / not avail in area",TRUE,6
+"2013-2014","ACCG63L","Diff. - did not know where / unable to l",TRUE,6
+"2013-2014","ACCG63M","Diff. - other - (G)",TRUE,6
+"2013-2014","ACCG65G","Diff. - no fam phys / not avail in area",TRUE,6
+"2013-2014","ACCG65M","Diff. - other - (G)",TRUE,6
+"2013-2014","ACCG67E","Diff. - wait too long for appt./see doc.",TRUE,6
+"2013-2014","ACCG67M","Diff. - other - (G)",TRUE,6
+"2010-2011","ACC_10","Rep. strain - body part affected",TRUE,6
+"2013-2014","ACC_10","Required visit to medical specialist",TRUE,6
+"2010-2011","ACC_11","Diff. getting specialist care",TRUE,6
+"2013-2014","ACC_11","Diff. getting specialist care",TRUE,6
+"2010-2011","ACC_12A","Diff. - getting a referral",TRUE,6
+"2013-2014","ACC_12A","Diff. - getting a referral",TRUE,6
+"2010-2011","ACC_12B","Diff. - getting an appointment",TRUE,6
+"2013-2014","ACC_12B","Diff. - getting an appointment",TRUE,6
+"2010-2011","ACC_12C","Diff. - no specalists in area",TRUE,6
+"2013-2014","ACC_12C","Diff. - no specalists in area",TRUE,6
+"2010-2011","ACC_12D","Diff. - waited too long for appointment",TRUE,6
+"2013-2014","ACC_12D","Diff. - waited too long for appointment",TRUE,6
+"2010-2011","ACC_12E","Diff. - waited too long /see doc.",TRUE,6
+"2013-2014","ACC_12E","Diff. - waited too long /see doc.",TRUE,6
+"2010-2011","ACC_12F","Diff. - transportation",TRUE,6
+"2013-2014","ACC_12F","Diff. - transportation",TRUE,6
+"2010-2011","ACC_12G","Diff. - language",TRUE,6
+"2010-2011","ACC_12H","Diff. - cost",TRUE,6
+"2010-2011","ACC_12I","Diff. - pers./family responsibilities",TRUE,6
+"2010-2011","ACC_12J","Diff. - deterioration of health",TRUE,6
+"2013-2014","ACC_12J","Diff. - deterioration of health",TRUE,6
+"2010-2011","ACC_12K","Diff. - appointment cancelled/deferred",TRUE,6
+"2013-2014","ACC_12K","Diff. - appointment cancelled/deferred",TRUE,6
+"2010-2011","ACC_12L","Diff. - still waiting for visit",TRUE,6
+"2013-2014","ACC_12L","Diff. - still waiting for visit",TRUE,6
+"2010-2011","ACC_12M","Diff. - unable leave house/health",TRUE,6
+"2010-2011","ACC_12N","Diff. - other",TRUE,6
+"2010-2011","ACC_20","Required non-emergency surgery",TRUE,6
+"2013-2014","ACC_20","Required non-emergency surgery",TRUE,6
+"2010-2011","ACC_21","Diff. getting non-emerg. surg.",TRUE,6
+"2013-2014","ACC_21","Diff. getting non-emerg. surg.",TRUE,6
+"2010-2011","ACC_22A","Diff. - getting an appointment",TRUE,6
+"2010-2011","ACC_22B","Diff. - getting a diagnosis",TRUE,6
+"2010-2011","ACC_22C","Diff. - wait too long/diag. test",TRUE,6
+"2010-2011","ACC_22D","Diff. - waited too long/hosp. bed",TRUE,6
+"2010-2011","ACC_22E","Diff. - waited too long/surgery",TRUE,6
+"2013-2014","ACC_22E","Diff. - waited too long/surgery",TRUE,6
+"2010-2011","ACC_22F","Diff. - service not available/area",TRUE,6
+"2010-2011","ACC_22G","Diff. - transportation",TRUE,6
+"2010-2011","ACC_22H","Diff. - language",TRUE,6
+"2013-2014","ACC_22H","Diff. - language",TRUE,6
+"2010-2011","ACC_22I","Diff. - cost",TRUE,6
+"2010-2011","ACC_22J","Diff. - pers./family responsibilities",TRUE,6
+"2013-2014","ACC_22J","Diff. - pers./family responsibilities",TRUE,6
+"2010-2011","ACC_22K","Diff. - deterioration of health",TRUE,6
+"2010-2011","ACC_22L","Diff. - appointment cancelled/deferred",TRUE,6
+"2013-2014","ACC_22L","Diff. - appointment cancelled/deferred",TRUE,6
+"2010-2011","ACC_22M","Diff. - still waiting for surgery",TRUE,6
+"2013-2014","ACC_22M","Diff. - still waiting for surgery",TRUE,6
+"2010-2011","ACC_22N","Diff. - unable leave house/health",TRUE,6
+"2010-2011","ACC_22O","Diff. - other",TRUE,6
+"2010-2011","ACC_30","Required MRI, CT Scan, angiography",TRUE,6
+"2013-2014","ACC_30","Required MRI, CT Scan, angiography",TRUE,6
+"2010-2011","ACC_31","Difficulties getting test",TRUE,6
+"2013-2014","ACC_31","Difficulties getting test",TRUE,6
+"2010-2011","ACC_32A","Diff. - getting a referral",TRUE,6
+"2013-2014","ACC_32A","Diff. - getting a referral",TRUE,6
+"2010-2011","ACC_32B","Diff. - getting an appointment",TRUE,6
+"2013-2014","ACC_32B","Diff. - getting an appointment",TRUE,6
+"2010-2011","ACC_32C","Diff. - waited too long for appt.",TRUE,6
+"2013-2014","ACC_32C","Diff. - waited too long for appt.",TRUE,6
+"2010-2011","ACC_32D","Diff. - waited too long/get test",TRUE,6
+"2013-2014","ACC_32D","Diff. - waited too long/get test",TRUE,6
+"2010-2011","ACC_32E","Diff. - not available at time required",TRUE,6
+"2010-2011","ACC_32F","Diff. - not available/area",TRUE,6
+"2010-2011","ACC_32G","Diff. - transportation",TRUE,6
+"2010-2011","ACC_32H","Diff. - language",TRUE,6
+"2013-2014","ACC_32H","Diff. - language",TRUE,6
+"2010-2011","ACC_32I","Diff. - cost",TRUE,6
+"2010-2011","ACC_32J","Diff. - deterioration of health",TRUE,6
+"2013-2014","ACC_32J","Diff. - deterioration of health",TRUE,6
+"2010-2011","ACC_32K","Diff. - did not know where to go",TRUE,6
+"2013-2014","ACC_32K","Diff. - did not know where to go",TRUE,6
+"2010-2011","ACC_32L","Diff. - still waiting for test",TRUE,6
+"2013-2014","ACC_32L","Diff. - still waiting for test",TRUE,6
+"2010-2011","ACC_32M","Diff. - unable leave house /health",TRUE,6
+"2013-2014","ACC_32M","Diff. - unable leave house /health",TRUE,6
+"2010-2011","ACC_32N","Diff. - other",TRUE,6
+"2010-2011","ACC_40","Required health information",TRUE,6
+"2013-2014","ACC_40","Required health information",TRUE,6
+"2010-2011","ACC_40A","Contact/health info - doctor",TRUE,6
+"2013-2014","ACC_40A","Contact/health info - doctor",TRUE,6
+"2010-2011","ACC_40B","Contact/health info - community hlth ctr",TRUE,6
+"2013-2014","ACC_40B","Contact/health info - community hlth ctr",TRUE,6
+"2010-2011","ACC_40C","Contact/health info - walk-in clinic",TRUE,6
+"2013-2014","ACC_40C","Contact/health info - walk-in clinic",TRUE,6
+"2010-2011","ACC_40D","Contact/health info - health line",TRUE,6
+"2013-2014","ACC_40D","Contact/health info - health line",TRUE,6
+"2010-2011","ACC_40E","Contact/health info - emergency room",TRUE,6
+"2013-2014","ACC_40E","Contact/health info - emergency room",TRUE,6
+"2010-2011","ACC_40F","Contact/health info - other hosp. serv.",TRUE,6
+"2013-2014","ACC_40F","Contact/health info - other hosp. serv.",TRUE,6
+"2010-2011","ACC_40G","Contact/health info - other",TRUE,6
+"2013-2014","ACC_40G","Contact/health info - other",TRUE,6
+"2010-2011","ACC_41","Diff. getting health information",TRUE,6
+"2013-2014","ACC_41","Diff. getting health information",TRUE,6
+"2010-2011","ACC_42","Exp. diff. during regular hrs.",TRUE,7
+"2013-2014","ACC_42","Exp. diff. during regular hrs.",TRUE,7
+"2010-2011","ACC_43A","Diff. - contact a physician/nurse",TRUE,6
+"2010-2011","ACC_43B","Diff. - did not have a phone number",TRUE,6
+"2010-2011","ACC_43C","Diff. - could not get through",TRUE,6
+"2013-2014","ACC_43C","Diff. - could not get through",TRUE,6
+"2010-2011","ACC_43D","Diff. - waited too long to speak",TRUE,6
+"2013-2014","ACC_43D","Diff. - waited too long to speak",TRUE,6
+"2010-2011","ACC_43E","Diff. - inadequate information",TRUE,6
+"2013-2014","ACC_43E","Diff. - inadequate information",TRUE,6
+"2010-2011","ACC_43F","Diff. - language",TRUE,6
+"2010-2011","ACC_43G","Diff. - did not know where to go/call",TRUE,6
+"2013-2014","ACC_43G","Diff. - did not know where to go/call",TRUE,6
+"2010-2011","ACC_43H","Diff. - unable to leave house/health",TRUE,6
+"2010-2011","ACC_43I","Diff. - other",TRUE,6
+"2010-2011","ACC_44","Exp. diff. during evening/weekends",TRUE,7
+"2013-2014","ACC_44","Exp. diff. during evening/weekends",TRUE,7
+"2010-2011","ACC_45A","Diff. - contact a physician/nurse",TRUE,6
+"2010-2011","ACC_45B","Diff. - did not have a phone number",TRUE,6
+"2010-2011","ACC_45C","Diff. - could not get through",TRUE,6
+"2013-2014","ACC_45C","Diff. - could not get through",TRUE,6
+"2010-2011","ACC_45D","Diff. - waited too long to speak",TRUE,6
+"2013-2014","ACC_45D","Diff. - waited too long to speak",TRUE,6
+"2010-2011","ACC_45E","Diff. - inadequate information",TRUE,6
+"2013-2014","ACC_45E","Diff. - inadequate information",TRUE,6
+"2010-2011","ACC_45F","Diff. - language",TRUE,6
+"2010-2011","ACC_45G","Diff. - did not know where to go/call",TRUE,6
+"2010-2011","ACC_45H","Diff. - unable to leave/health",TRUE,6
+"2010-2011","ACC_45I","Diff. - other",TRUE,6
+"2010-2011","ACC_46","Exp. diff. during middle of night",TRUE,7
+"2013-2014","ACC_46","Exp. diff. during middle of night",TRUE,7
+"2010-2011","ACC_47A","Diff. - contact a physician/nurse",TRUE,6
+"2010-2011","ACC_47B","Diff. - did not have a phone number",TRUE,6
+"2010-2011","ACC_47C","Diff. - could not get through",TRUE,6
+"2010-2011","ACC_47D","Diff. - waited too long/to speak",TRUE,6
+"2013-2014","ACC_47D","Diff. - waited too long/to speak",TRUE,6
+"2010-2011","ACC_47E","Diff. - inadequate information",TRUE,6
+"2013-2014","ACC_47E","Diff. - inadequate information",TRUE,6
+"2010-2011","ACC_47F","Diff. - language",TRUE,6
+"2013-2014","ACC_47F","Diff. - language",TRUE,6
+"2010-2011","ACC_47G","Diff. - did not know where to go/call",TRUE,6
+"2010-2011","ACC_47H","Diff. - unable to leave/health",TRUE,6
+"2010-2011","ACC_47I","Diff. - other",TRUE,6
+"2010-2011","ACC_50","Required routine care for self/family",TRUE,6
+"2013-2014","ACC_50","Required routine care for self/family",TRUE,6
+"2010-2011","ACC_50A","Has a regular family doctor",TRUE,6
+"2013-2014","ACC_50A","Has a regular family doctor",TRUE,6
+"2010-2011","ACC_51","Exp. diff. getting on-going care",TRUE,6
+"2013-2014","ACC_51","Exp. diff. getting on-going care",TRUE,6
+"2010-2011","ACC_52","Experienced diff. during regular hours",TRUE,7
+"2013-2014","ACC_52","Experienced diff. during regular hours",TRUE,7
+"2010-2011","ACC_53A","Diff. - contact a physician",TRUE,6
+"2013-2014","ACC_53A","Diff. - contact a physician",TRUE,6
+"2010-2011","ACC_53B","Diff. - getting an appointment",TRUE,6
+"2013-2014","ACC_53B","Diff. - getting an appointment",TRUE,6
+"2010-2011","ACC_53C","Diff. - do not have family physician",TRUE,6
+"2010-2011","ACC_53D","Diff. - waited too long for appointment",TRUE,6
+"2013-2014","ACC_53D","Diff. - waited too long for appointment",TRUE,6
+"2010-2011","ACC_53E","Diff. - waited too long/see doc.",TRUE,6
+"2013-2014","ACC_53E","Diff. - waited too long/see doc.",TRUE,6
+"2010-2011","ACC_53F","Diff. - not available at time required",TRUE,6
+"2013-2014","ACC_53F","Diff. - not available at time required",TRUE,6
+"2010-2011","ACC_53G","Diff. - not available in the area",TRUE,6
+"2010-2011","ACC_53H","Diff. - transportation",TRUE,6
+"2010-2011","ACC_53I","Diff. - language",TRUE,6
+"2010-2011","ACC_53J","Diff. - cost",TRUE,6
+"2010-2011","ACC_53K","Diff. - did not know where to go",TRUE,6
+"2010-2011","ACC_53L","Diff. - unable to leave house/health",TRUE,6
+"2010-2011","ACC_53M","Diff. - other",TRUE,6
+"2010-2011","ACC_54","Exp. diff. during evening/weekends",TRUE,7
+"2013-2014","ACC_54","Exp. diff. during evening/weekends",TRUE,7
+"2010-2011","ACC_55A","Diff. - contact a physician",TRUE,6
+"2013-2014","ACC_55A","Diff. - contact a physician",TRUE,6
+"2010-2011","ACC_55B","Diff. - getting an appointment",TRUE,6
+"2013-2014","ACC_55B","Diff. - getting an appointment",TRUE,6
+"2010-2011","ACC_55C","Diff. - do not have family physician",TRUE,6
+"2010-2011","ACC_55D","Diff. - waited too long for appointment",TRUE,6
+"2013-2014","ACC_55D","Diff. - waited too long for appointment",TRUE,6
+"2010-2011","ACC_55E","Diff. - waited too long/see doc",TRUE,6
+"2013-2014","ACC_55E","Diff. - waited too long/see doc",TRUE,6
+"2010-2011","ACC_55F","Diff. - not available at time required",TRUE,6
+"2013-2014","ACC_55F","Diff. - not available at time required",TRUE,6
+"2010-2011","ACC_55G","Diff. - not available/area",TRUE,6
+"2010-2011","ACC_55H","Diff. - transportation",TRUE,6
+"2010-2011","ACC_55I","Diff. - language",TRUE,6
+"2013-2014","ACC_55I","Diff. - language",TRUE,6
+"2010-2011","ACC_55J","Diff. - cost",TRUE,6
+"2010-2011","ACC_55K","Diff. - did not know where to go",TRUE,6
+"2010-2011","ACC_55L","Diff. - unable to leave house/health",TRUE,6
+"2013-2014","ACC_55L","Diff. - unable to leave house/health",TRUE,6
+"2010-2011","ACC_55M","Diff. - other",TRUE,6
+"2010-2011","ACC_60","Required immediate care - self/family",TRUE,6
+"2013-2014","ACC_60","Required immediate care - self/family",TRUE,6
+"2010-2011","ACC_61","Exp. diff. getting immediate care",TRUE,6
+"2013-2014","ACC_61","Exp. diff. getting immediate care",TRUE,6
+"2010-2011","ACC_62","Experienced diff. during regular hours",TRUE,7
+"2013-2014","ACC_62","Experienced diff. during regular hours",TRUE,7
+"2010-2011","ACC_63A","Diff. - contact a physician",TRUE,6
+"2013-2014","ACC_63A","Diff. - contact a physician",TRUE,6
+"2010-2011","ACC_63B","Diff. - getting an appointment",TRUE,6
+"2013-2014","ACC_63B","Diff. - getting an appointment",TRUE,6
+"2010-2011","ACC_63C","Diff. - do not have family physician",TRUE,6
+"2010-2011","ACC_63D","Diff. - waited too long/for appointment",TRUE,6
+"2013-2014","ACC_63D","Diff. - waited too long/for appointment",TRUE,6
+"2010-2011","ACC_63E","Diff. - waited too long/see doc",TRUE,6
+"2013-2014","ACC_63E","Diff. - waited too long/see doc",TRUE,6
+"2010-2011","ACC_63F","Diff. - not available at time required",TRUE,6
+"2013-2014","ACC_63F","Diff. - not available at time required",TRUE,6
+"2010-2011","ACC_63G","Diff. - not available/area",TRUE,6
+"2010-2011","ACC_63H","Diff. - transportation",TRUE,6
+"2010-2011","ACC_63I","Diff. - language",TRUE,6
+"2010-2011","ACC_63J","Diff. - cost",TRUE,6
+"2010-2011","ACC_63K","Diff. - did not know where to go",TRUE,6
+"2010-2011","ACC_63L","Diff. - unable to leave house/health",TRUE,6
+"2010-2011","ACC_63M","Diff. - other",TRUE,6
+"2010-2011","ACC_64","Exp. diff. during evening/weekends",TRUE,7
+"2013-2014","ACC_64","Exp. diff. during evening/weekends",TRUE,7
+"2010-2011","ACC_65A","Diff. - contact a physician",TRUE,6
+"2013-2014","ACC_65A","Diff. - contact a physician",TRUE,6
+"2010-2011","ACC_65B","Diff. - getting an appointment",TRUE,6
+"2013-2014","ACC_65B","Diff. - getting an appointment",TRUE,6
+"2010-2011","ACC_65C","Diff. - do not have family physician",TRUE,6
+"2010-2011","ACC_65D","Diff. - waited too long/for appointment",TRUE,6
+"2013-2014","ACC_65D","Diff. - waited too long/for appointment",TRUE,6
+"2010-2011","ACC_65E","Diff. - waited too long/see doc",TRUE,6
+"2013-2014","ACC_65E","Diff. - waited too long/see doc",TRUE,6
+"2010-2011","ACC_65F","Diff. - not available at time required",TRUE,6
+"2013-2014","ACC_65F","Diff. - not available at time required",TRUE,6
+"2010-2011","ACC_65G","Diff. - not available/area",TRUE,6
+"2010-2011","ACC_65H","Diff. - transportation",TRUE,6
+"2010-2011","ACC_65I","Diff. - language",TRUE,6
+"2010-2011","ACC_65J","Diff. - cost",TRUE,6
+"2010-2011","ACC_65K","Diff. - did not know where to go",TRUE,6
+"2010-2011","ACC_65L","Diff. - unable to leave house/health",TRUE,6
+"2010-2011","ACC_65M","Diff. - other",TRUE,6
+"2010-2011","ACC_66","Exp. diff. during middle of night",TRUE,7
+"2013-2014","ACC_66","Exp. diff. during middle of night",TRUE,7
+"2010-2011","ACC_67A","Diff. - contact a physician",TRUE,6
+"2010-2011","ACC_67B","Diff. - getting an appointment",TRUE,6
+"2010-2011","ACC_67C","Diff. - do not have family physician",TRUE,6
+"2010-2011","ACC_67D","Diff. - waited too long/for appointment",TRUE,6
+"2010-2011","ACC_67E","Diff. - waited too long/see doc",TRUE,6
+"2010-2011","ACC_67F","Diff. - not available at time required",TRUE,6
+"2010-2011","ACC_67G","Diff. - not available/area",TRUE,6
+"2010-2011","ACC_67H","Diff. - transportation",TRUE,6
+"2010-2011","ACC_67I","Diff. - language",TRUE,6
+"2013-2014","ACC_67I","Diff. - language",TRUE,6
+"2010-2011","ACC_67J","Diff. - cost",TRUE,6
+"2013-2014","ACC_67J","Diff. - cost",TRUE,6
+"2010-2011","ACC_67K","Diff. - did not know where to go",TRUE,6
+"2010-2011","ACC_67L","Diff. - unable to leave house/health",TRUE,6
+"2010-2011","ACC_67M","Diff. - other",TRUE,6
+"2010-2011","ADLF6R","Help needed for tasks - (F)",TRUE,6
+"2013-2014","ADLF6R","Help needed for tasks - (F)",TRUE,6
+"2010-2011","ADL_01","Needs help - preparing meals",TRUE,6
+"2013-2014","ADL_01","Needs help - preparing meals",TRUE,6
+"2010-2011","ADL_02","Needs help - getting to appointments",TRUE,6
+"2013-2014","ADL_02","Needs help - getting to appointments",TRUE,6
+"2010-2011","ADL_03","Needs help - doing housework",TRUE,6
+"2013-2014","ADL_03","Needs help - doing housework",TRUE,6
+"2010-2011","ADL_04","Needs help - personal care",TRUE,6
+"2013-2014","ADL_04","Needs help - personal care",TRUE,6
+"2010-2011","ADL_05","Needs help - moving about inside house",TRUE,6
+"2013-2014","ADL_05","Needs help - moving about inside house",TRUE,6
+"2010-2011","ADL_06","Needs help - looking after finances",TRUE,6
+"2013-2014","ADL_06","Needs help - looking after finances",TRUE,6
+"2010-2011","ADM_N09","Interview by telephone/in person",TRUE,7
+"2013-2014","ADM_N09","Interview by telephone/in person",TRUE,7
+"2010-2011","ADM_N10","Respondent alone during interview",TRUE,6
+"2013-2014","ADM_N10","Respondent alone during interview",TRUE,6
+"2010-2011","ADM_N11","Answers aff./presence of another person",TRUE,6
+"2013-2014","ADM_N11","Answers aff./presence of another person",TRUE,6
+"2010-2011","ADM_PRX","Health Component completed by proxy",TRUE,6
+"2013-2014","ADM_PRX","Health Component completed by proxy",TRUE,6
+"2010-2011","ADM_RNO","Sequential record number",FALSE,0
+"2013-2014","ADM_RNO","Sequential record number",FALSE,0
+"2010-2011","ALCDTTM","Type of drinker (12 months)",TRUE,7
+"2013-2014","ALCDTTM","Type of drinker (12 months)",TRUE,7
+"2010-2011","ALC_1","Drank alcohol - past 12 months",TRUE,6
+"2013-2014","ALC_1","Drank alcohol - past 12 months",TRUE,6
+"2010-2011","ALC_2","Frequency of drinking alcohol",TRUE,11
+"2013-2014","ALC_2","Frequency of drinking alcohol",TRUE,11
+"2010-2011","ALC_3","Frequency of having 5 or more drinks",TRUE,10
+"2013-2014","ALC_3","Freq. drinking 4(female)/ 5(male)drinks",TRUE,10
+"2013-2014","ALDDINT","Alcohol interference - mean - 12 mo (D)",TRUE,4
+"2013-2014","ALDDPP","Probability of caseness to resp.s - (D)",TRUE,9
+"2013-2014","ALDFINT","Alcohol interference - 12 mo - (F)",TRUE,6
+"2013-2014","ALDGSF","Alcohol dep. scale - short frm score (D)",TRUE,12
+"2010-2011","ALWDDLY","Average daily alcohol consumption",TRUE,4
+"2013-2014","ALWDDLY","Average daily alcohol consumption",TRUE,4
+"2010-2011","ALWDWKY","Weekly consumption",TRUE,5
+"2013-2014","ALWDWKY","Weekly consumption",TRUE,5
+"2010-2011","ALW_1","Drank alcohol in past week",TRUE,6
+"2013-2014","ALW_1","Drank alcohol in past week",TRUE,6
+"2010-2011","ALW_2A1","No. of drinks - Sunday",TRUE,4
+"2013-2014","ALW_2A1","No. of drinks - Sunday",TRUE,4
+"2010-2011","ALW_2A2","No. of drinks - Monday",TRUE,4
+"2013-2014","ALW_2A2","No. of drinks - Monday",TRUE,4
+"2010-2011","ALW_2A3","No. of drinks - Tuesday",TRUE,4
+"2013-2014","ALW_2A3","No. of drinks - Tuesday",TRUE,4
+"2010-2011","ALW_2A4","No. of drinks - Wednesday",TRUE,4
+"2013-2014","ALW_2A4","No. of drinks - Wednesday",TRUE,4
+"2010-2011","ALW_2A5","No. of drinks - Thursday",TRUE,4
+"2013-2014","ALW_2A5","No. of drinks - Thursday",TRUE,4
+"2010-2011","ALW_2A6","No. of drinks - Friday",TRUE,4
+"2013-2014","ALW_2A6","No. of drinks - Friday",TRUE,4
+"2010-2011","ALW_2A7","No. of drinks - Saturday",TRUE,4
+"2013-2014","ALW_2A7","No. of drinks - Saturday",TRUE,4
+"2013-2014","BPCG16M","B.p. not taken - other - (G)",TRUE,6
+"2010-2011","BPC_010","Ever had blood pressure taken",TRUE,6
+"2013-2014","BPC_010","Ever had blood pressure taken",TRUE,6
+"2010-2011","BPC_012","Last time blood pressure was taken",TRUE,9
+"2013-2014","BPC_012","Last time blood pressure was taken",TRUE,9
+"2010-2011","BPC_013","Pregnant - blood pressure taken",TRUE,6
+"2013-2014","BPC_013","Pregnant - blood pressure taken",TRUE,6
+"2010-2011","BPC_16A","B.p. not taken - not gotten around to it",TRUE,6
+"2013-2014","BPC_16A","B.p. not taken - not gotten around to it",TRUE,6
+"2010-2011","BPC_16B","B.p. not taken - resp. didn't think nec.",TRUE,6
+"2013-2014","BPC_16B","B.p. not taken - resp. didn't think nec.",TRUE,6
+"2010-2011","BPC_16C","B.p. not taken - dr. didn't think nec.",TRUE,6
+"2013-2014","BPC_16C","B.p. not taken - dr. didn't think nec.",TRUE,6
+"2010-2011","BPC_16D","B.p. not taken - personal/family resp.",TRUE,6
+"2010-2011","BPC_16E","B.p. not taken - not available when req.",TRUE,6
+"2010-2011","BPC_16F","B.p. not taken - not available in area",TRUE,6
+"2010-2011","BPC_16G","B.p. not taken - waiting time too long",TRUE,6
+"2010-2011","BPC_16H","B.p. not taken - transportation problems",TRUE,6
+"2013-2014","BPC_16H","B.p. not taken - transportation problems",TRUE,6
+"2010-2011","BPC_16I","B.p. not taken - language problem",TRUE,6
+"2013-2014","BPC_16I","B.p. not taken - language problem",TRUE,6
+"2010-2011","BPC_16J","B.p. not taken - cost",TRUE,6
+"2010-2011","BPC_16K","B.p. not taken - didn't know where to go",TRUE,6
+"2010-2011","BPC_16L","B.p. not taken - fear",TRUE,6
+"2010-2011","BPC_16M","B.p. not taken - other",TRUE,6
+"2010-2011","BPC_16N","B.p. not taken - unable leave house",TRUE,6
+"2013-2014","BPC_16N","B.p. not taken - unable leave house",TRUE,6
+"2010-2011","BRX_110","Had breasts examined by health prof.",TRUE,6
+"2010-2011","BRX_112","Last time breasts examined for lumps",TRUE,9
+"2010-2011","BRX_16A","No breast ex. - havn't gotten around/it",TRUE,6
+"2010-2011","BRX_16B","No breast ex. - resp. didn't think nec.",TRUE,6
+"2010-2011","BRX_16C","No breast ex. - doctor didn't think nec.",TRUE,6
+"2010-2011","BRX_16D","No breast ex. - personal/family resp.",TRUE,6
+"2010-2011","BRX_16E","No breast ex. - not avail. when req'd",TRUE,6
+"2010-2011","BRX_16F","No breast ex. - not available in area",TRUE,6
+"2010-2011","BRX_16G","No breast ex. - waiting time too long",TRUE,6
+"2010-2011","BRX_16H","No breast ex. - transportation problems",TRUE,6
+"2010-2011","BRX_16I","No breast ex. - language problem",TRUE,6
+"2010-2011","BRX_16J","No breast ex. - cost",TRUE,6
+"2010-2011","BRX_16K","No breast ex. - did not know where to go",TRUE,6
+"2010-2011","BRX_16L","No breast ex. - fear",TRUE,6
+"2010-2011","BRX_16M","No breast ex. - other",TRUE,6
+"2010-2011","BRX_16N","No breast ex. - unable to leave house",TRUE,6
+"2010-2011","BRX_16O","No breast - breast removed/mastectomy",TRUE,6
+"2010-2011","CCCDDIA","Diabetes type",TRUE,8
+"2013-2014","CCCDDIA","Diabetes type",TRUE,8
+"2010-2011","CCCG102","Diabetes - age first diagnosed - (G)",TRUE,19
+"2013-2014","CCCG102","Diabetes - age first diagnosed - (G)",TRUE,19
+"2010-2011","CCC_031","Has asthma",TRUE,6
+"2013-2014","CCC_031","Has asthma",TRUE,6
+"2010-2011","CCC_035","Asthma - had symptoms/attacks",TRUE,6
+"2013-2014","CCC_035","Asthma - had symptoms/attacks",TRUE,6
+"2010-2011","CCC_036","Asthma - took medication",TRUE,6
+"2013-2014","CCC_036","Asthma - took medication",TRUE,6
+"2010-2011","CCC_041","Has fibromyalgia",TRUE,6
+"2013-2014","CCC_041","Has fibromyalgia",TRUE,6
+"2010-2011","CCC_051","Has arthritis",TRUE,6
+"2013-2014","CCC_051","Has arthritis",TRUE,6
+"2010-2011","CCC_061","Has back problems/excl. fibro/arthritis",TRUE,6
+"2013-2014","CCC_061","Has back problems/excl. fibro/arthritis",TRUE,6
+"2010-2011","CCC_071","Has high blood pressure",TRUE,6
+"2013-2014","CCC_071","Has high blood pressure",TRUE,6
+"2010-2011","CCC_072","Ever diagnosed with high blood pressure",TRUE,6
+"2013-2014","CCC_072","Ever diagnosed with high blood pressure",TRUE,6
+"2010-2011","CCC_073","Medication - high blood pressure",TRUE,6
+"2013-2014","CCC_073","Medication - high blood pressure",TRUE,6
+"2010-2011","CCC_073A","Preg. - diag. high blood press. 1st time",TRUE,6
+"2013-2014","CCC_073A","Preg. - diag. high blood press. 1st time",TRUE,6
+"2010-2011","CCC_073B","Not pregnant - diagn. high blood press.",TRUE,6
+"2013-2014","CCC_073B","Not pregnant - diagn. high blood press.",TRUE,6
+"2010-2011","CCC_081","Has migraine headaches",TRUE,6
+"2013-2014","CCC_081","Has migraine headaches",TRUE,6
+"2010-2011","CCC_091","Has a COPD",TRUE,6
+"2013-2014","CCC_091","Has a COPD",TRUE,6
+"2010-2011","CCC_101","Has diabetes",TRUE,6
+"2013-2014","CCC_101","Has diabetes",TRUE,6
+"2010-2011","CCC_105","Diabetes - currently takes insulin",TRUE,6
+"2013-2014","CCC_105","Diabetes - currently takes insulin",TRUE,6
+"2010-2011","CCC_106","Diabetes - pills to control blood sugar",TRUE,6
+"2013-2014","CCC_106","Diabetes - pills to control blood sugar",TRUE,6
+"2010-2011","CCC_10A","Diabetes diagnosed when pregnant",TRUE,6
+"2013-2014","CCC_10A","Diabetes diagnosed when pregnant",TRUE,6
+"2010-2011","CCC_10B","Diabetes diagnosed - other than pregnant",TRUE,6
+"2013-2014","CCC_10B","Diabetes diagnosed - other than pregnant",TRUE,6
+"2010-2011","CCC_10C","Diabetes diag. - when started w/insulin",TRUE,10
+"2013-2014","CCC_10C","Diabetes diag. - when started w/insulin",TRUE,10
+"2010-2011","CCC_121","Has heart disease",TRUE,6
+"2013-2014","CCC_121","Has heart disease",TRUE,6
+"2010-2011","CCC_131","Has cancer",TRUE,6
+"2013-2014","CCC_131","Has cancer",TRUE,6
+"2010-2011","CCC_141","Has stomach or intestinal ulcers",TRUE,6
+"2013-2014","CCC_141","Has stomach or intestinal ulcers",TRUE,6
+"2010-2011","CCC_151","Suffers from the effects of a stroke",TRUE,6
+"2013-2014","CCC_151","Suffers from the effects of a stroke",TRUE,6
+"2010-2011","CCC_161","Has urinary incontinence",TRUE,6
+"2013-2014","CCC_161","Has urinary incontinence",TRUE,6
+"2010-2011","CCC_171","Has bowel disorder",TRUE,6
+"2013-2014","CCC_171","Has bowel disorder",TRUE,6
+"2013-2014","CCC_173","Diagnosed with scoliosis",TRUE,6
+"2010-2011","CCC_17A","Type of bowel disease",TRUE,9
+"2013-2014","CCC_17A","Type of bowel disease",TRUE,9
+"2010-2011","CCC_251","Has chronic fatigue syndrome",TRUE,6
+"2013-2014","CCC_251","Has chronic fatigue syndrome",TRUE,6
+"2010-2011","CCC_261","Suffers multiple chemical sensitivities",TRUE,6
+"2013-2014","CCC_261","Suffers multiple chemical sensitivities",TRUE,6
+"2010-2011","CCC_280","Has a mood disorder",TRUE,6
+"2013-2014","CCC_280","Has a mood disorder",TRUE,6
+"2010-2011","CCC_290","Has an anxiety disorder",TRUE,6
+"2013-2014","CCC_290","Has an anxiety disorder",TRUE,6
+"2010-2011","CCC_31A","Ever had cancer",TRUE,6
+"2013-2014","CCC_31A","Ever had cancer",TRUE,6
+"2010-2011","CCS_180","Had an FOBT test",TRUE,6
+"2013-2014","CCS_180","Had an FOBT test",TRUE,6
+"2010-2011","CCS_182","Last time FOBT test done",TRUE,10
+"2013-2014","CCS_182","Last time FOBT test done",TRUE,10
+"2010-2011","CCS_184","Had colonoscopy or sigmoidoscopy",TRUE,6
+"2013-2014","CCS_184","Had colonoscopy or sigmoidoscopy",TRUE,6
+"2010-2011","CCS_185","Last time had colonoscopy/sigmoidoscopy",TRUE,10
+"2013-2014","CCS_185","Last time had colonoscopy/sigmoidoscopy",TRUE,10
+"2010-2011","CCS_187","Colonoscopy/sigmoidoscopy - FOBT test",TRUE,6
+"2013-2014","CCS_187","Colonoscopy/sigmoidoscopy - FOBT test",TRUE,6
+"2010-2011","CCS_83A","Had FOBT - family history",TRUE,6
+"2013-2014","CCS_83A","Had FOBT - family history",TRUE,6
+"2010-2011","CCS_83B","Had FOBT - regular check-up",TRUE,6
+"2013-2014","CCS_83B","Had FOBT - regular check-up",TRUE,6
+"2010-2011","CCS_83C","Had FOBT - age",TRUE,6
+"2013-2014","CCS_83C","Had FOBT - age",TRUE,6
+"2010-2011","CCS_83D","Had FOBT - follow-up of problem",TRUE,6
+"2013-2014","CCS_83D","Had FOBT - follow-up of problem",TRUE,6
+"2010-2011","CCS_83E","Had FOBT - follow-up of treatment",TRUE,6
+"2013-2014","CCS_83E","Had FOBT - follow-up of treatment",TRUE,6
+"2010-2011","CCS_83F","Had FOBT - other",TRUE,6
+"2013-2014","CCS_83F","Had FOBT - other",TRUE,6
+"2010-2011","CCS_86A","Had colonoscopy - family history",TRUE,6
+"2013-2014","CCS_86A","Had colonoscopy - family history",TRUE,6
+"2010-2011","CCS_86B","Had colonoscopy - regular check-up",TRUE,6
+"2013-2014","CCS_86B","Had colonoscopy - regular check-up",TRUE,6
+"2010-2011","CCS_86C","Had colonoscopy - age",TRUE,6
+"2013-2014","CCS_86C","Had colonoscopy - age",TRUE,6
+"2010-2011","CCS_86D","Had colonoscopy - follow-up of problem",TRUE,6
+"2013-2014","CCS_86D","Had colonoscopy - follow-up of problem",TRUE,6
+"2010-2011","CCS_86E","Had colonoscopy - follow-up of treatment",TRUE,6
+"2013-2014","CCS_86E","Had colonoscopy - follow-up of treatment",TRUE,6
+"2010-2011","CCS_86F","Had colonoscopy - other",TRUE,6
+"2013-2014","CCS_86F","Had colonoscopy - other",TRUE,6
+"2010-2011","CHPFCOP","Consultations - hlth professionals - (F)",TRUE,6
+"2010-2011","CHPG02","No. of nights as patient - (G)",TRUE,5
+"2013-2014","CHPG02","No. of nights as patient - (G)",TRUE,5
+"2010-2011","CHPG04","No. of consult. - family doctor - (G)",TRUE,5
+"2013-2014","CHPG04","No. of consult. - family doctor - (G)",TRUE,5
+"2010-2011","CHPG05","Where was most recent contact - (G)",TRUE,13
+"2013-2014","CHPG05","Where was most recent contact - (G)",TRUE,13
+"2010-2011","CHPG07","No. of consult. - eye specialist - (G)",TRUE,5
+"2013-2014","CHPG07","No. of consult. - eye specialist - (G)",TRUE,5
+"2010-2011","CHPG09","No. of consult. - other doctor - (G)",TRUE,5
+"2013-2014","CHPG09","No. of consult. - other doctor - (G)",TRUE,5
+"2010-2011","CHPG10","Where was most recent contact - (G)",TRUE,13
+"2013-2014","CHPG10","Where was most recent contact - (G)",TRUE,13
+"2010-2011","CHPG12","No. of consult. - nurse - (G)",TRUE,5
+"2013-2014","CHPG12","No. of consult. - nurse - (G)",TRUE,5
+"2010-2011","CHPG13","Where was most recent contact - (G)",TRUE,13
+"2013-2014","CHPG13","Where was most recent contact - (G)",TRUE,13
+"2010-2011","CHPG15","No. of consult. - dentist/orthod. - (G)",TRUE,5
+"2013-2014","CHPG15","No. of consult. - dentist/orthod. - (G)",TRUE,5
+"2010-2011","CHPG17","No. of consult. - chiropractor - (G)",TRUE,5
+"2013-2014","CHPG17","No. of consult. - chiropractor - (G)",TRUE,5
+"2010-2011","CHPG19","No. of consult. - physiotherapist - (G)",TRUE,5
+"2013-2014","CHPG19","No. of consult. - physiotherapist - (G)",TRUE,5
+"2010-2011","CHPG21","No. of consult. - psychologist - (G)",TRUE,5
+"2013-2014","CHPG21","No. of consult. - psychologist - (G)",TRUE,5
+"2010-2011","CHPG23","No. of consult. - social worker - (G)",TRUE,5
+"2013-2014","CHPG23","No. of consult. - social worker - (G)",TRUE,5
+"2010-2011","CHPG25","No. of consult. speech/aud./occ.th.(G)",TRUE,5
+"2013-2014","CHPG25","No. of consult. speech/aud./occ.th.(G)",TRUE,5
+"2010-2011","CHPGMDC","No. of consult. w/medical doctor (D,G)",TRUE,5
+"2013-2014","CHPGMDC","No. of consult. w/medical doctor (D,G)",TRUE,5
+"2010-2011","CHP_01","Overnight patient",TRUE,6
+"2013-2014","CHP_01","Overnight patient",TRUE,6
+"2010-2011","CHP_03","Consulted fam. doctor/gen. practitioner",TRUE,6
+"2013-2014","CHP_03","Consulted fam. doctor/gen. practitioner",TRUE,6
+"2010-2011","CHP_06","Consulted with eye specialist",TRUE,6
+"2013-2014","CHP_06","Consulted with eye specialist",TRUE,6
+"2010-2011","CHP_08","Consulted with other medical doctor",TRUE,6
+"2013-2014","CHP_08","Consulted with other medical doctor",TRUE,6
+"2010-2011","CHP_11","Consulted with nurse",TRUE,6
+"2013-2014","CHP_11","Consulted with nurse",TRUE,6
+"2010-2011","CHP_14","Consulted with dentist or orthodontist",TRUE,6
+"2013-2014","CHP_14","Consulted with dentist or orthodontist",TRUE,6
+"2010-2011","CHP_16","Consulted with chiropractor",TRUE,6
+"2013-2014","CHP_16","Consulted with chiropractor",TRUE,6
+"2010-2011","CHP_18","Consulted with physiotherapist",TRUE,6
+"2013-2014","CHP_18","Consulted with physiotherapist",TRUE,6
+"2010-2011","CHP_20","Consulted with psychologist",TRUE,6
+"2013-2014","CHP_20","Consulted with psychologist",TRUE,6
+"2010-2011","CHP_22","Consulted with social worker/counsellor",TRUE,6
+"2013-2014","CHP_22","Consulted with social worker/counsellor",TRUE,6
+"2010-2011","CHP_24","Consulted with speech/aud./occ. ther.",TRUE,6
+"2013-2014","CHP_24","Consulted with speech/aud./occ. ther.",TRUE,6
+"2010-2011","CIH_1","Did something to improve health",TRUE,6
+"2013-2014","CIH_1","Did something to improve health",TRUE,6
+"2010-2011","CIH_2","Most important change to improve health",TRUE,13
+"2013-2014","CIH_2","Most important change to improve health",TRUE,13
+"2010-2011","CIH_3","Thinks should do something to improve hl",TRUE,6
+"2013-2014","CIH_3","Thinks should do something to improve hl",TRUE,6
+"2010-2011","CIH_4","Most important thing to improve health",TRUE,13
+"2013-2014","CIH_4","Most important thing to improve health",TRUE,13
+"2010-2011","CIH_5","Barrier to improving health",TRUE,6
+"2013-2014","CIH_5","Barrier to improving health",TRUE,6
+"2010-2011","CIH_6A","Barrier improve hlth - lack will power",TRUE,6
+"2013-2014","CIH_6A","Barrier improve hlth - lack will power",TRUE,6
+"2010-2011","CIH_6B","Barrier improve hlth - lwork schedule",TRUE,6
+"2013-2014","CIH_6B","Barrier improve hlth - lwork schedule",TRUE,6
+"2010-2011","CIH_6E","Barrier improve health - too costly",TRUE,6
+"2013-2014","CIH_6E","Barrier improve health - too costly",TRUE,6
+"2010-2011","CIH_6F","Barrier improve health - too stressed",TRUE,6
+"2013-2014","CIH_6F","Barrier improve health - too stressed",TRUE,6
+"2010-2011","CIH_6G","Barrier improve hlth - disability",TRUE,6
+"2013-2014","CIH_6G","Barrier improve hlth - disability",TRUE,6
+"2010-2011","CIH_6H","Barrier improve health - other",TRUE,6
+"2013-2014","CIH_6H","Barrier improve health - other",TRUE,6
+"2010-2011","CIH_6I","Barrier improve health - family respons.",TRUE,6
+"2013-2014","CIH_6I","Barrier improve health - family respons.",TRUE,6
+"2010-2011","CIH_6J","Barrier improve health -add. drugs/alc.",TRUE,6
+"2013-2014","CIH_6J","Barrier improve health -add. drugs/alc.",TRUE,6
+"2010-2011","CIH_6K","Barrier improve health - phys. condition",TRUE,6
+"2013-2014","CIH_6K","Barrier improve health - phys. condition",TRUE,6
+"2010-2011","CIH_6L","Barrier improve health - not avail./area",TRUE,6
+"2013-2014","CIH_6L","Barrier improve health - not avail./area",TRUE,6
+"2010-2011","CIH_6M","Barrier improve health - trans. problems",TRUE,6
+"2013-2014","CIH_6M","Barrier improve health - trans. problems",TRUE,6
+"2010-2011","CIH_6N","Barrier improve health - weather prob.",TRUE,6
+"2013-2014","CIH_6N","Barrier improve health - weather prob.",TRUE,6
+"2010-2011","CIH_7","Intending to improve health over next yr",TRUE,6
+"2013-2014","CIH_7","Intending to improve health over next yr",TRUE,6
+"2010-2011","CIH_8A","Health improvement - more exercise",TRUE,6
+"2013-2014","CIH_8A","Health improvement - more exercise",TRUE,6
+"2010-2011","CIH_8B","Health improvement - lose weight",TRUE,6
+"2013-2014","CIH_8B","Health improvement - lose weight",TRUE,6
+"2010-2011","CIH_8C","Health improvement - eating habits",TRUE,6
+"2013-2014","CIH_8C","Health improvement - eating habits",TRUE,6
+"2010-2011","CIH_8G","Health improvement - reduce stress",TRUE,6
+"2013-2014","CIH_8G","Health improvement - reduce stress",TRUE,6
+"2010-2011","CIH_8H","Health improvement - take vitamins",TRUE,6
+"2013-2014","CIH_8H","Health improvement - take vitamins",TRUE,6
+"2010-2011","CIH_8I","Health improvement - other",TRUE,6
+"2013-2014","CIH_8I","Health improvement - other",TRUE,6
+"2010-2011","CIH_8J","Health improvement - quit smoking",TRUE,6
+"2013-2014","CIH_8J","Health improvement - quit smoking",TRUE,6
+"2010-2011","CIH_8K","Health improvement - drink less alcohol",TRUE,6
+"2013-2014","CIH_8K","Health improvement - drink less alcohol",TRUE,6
+"2010-2011","CIH_8L","Health improv.- receive med. treatment",TRUE,6
+"2013-2014","CIH_8L","Health improv.- receive med. treatment",TRUE,6
+"2010-2011","CMHG01L","Cons. mental hlth prof. - no. times -(G)",TRUE,16
+"2013-2014","CMHG01L","Cons. mental hlth prof. - no. times -(G)",TRUE,16
+"2010-2011","CMH_01K","Consulted mental health professional",TRUE,6
+"2013-2014","CMH_01K","Consulted mental health professional",TRUE,6
+"2010-2011","CMH_1MA","Consulted mental hlth prof. - fam. doc.",TRUE,6
+"2013-2014","CMH_1MA","Consulted mental hlth prof. - fam. doc.",TRUE,6
+"2010-2011","CMH_1MB","Consulted men. hlth prof. - psychiatrist",TRUE,6
+"2013-2014","CMH_1MB","Consulted men. hlth prof. - psychiatrist",TRUE,6
+"2010-2011","CMH_1MC","Consulted men. hlth prof. - psychologist",TRUE,6
+"2013-2014","CMH_1MC","Consulted men. hlth prof. - psychologist",TRUE,6
+"2010-2011","CMH_1MD","Consulted mental hlth prof. - nurse",TRUE,6
+"2013-2014","CMH_1MD","Consulted mental hlth prof. - nurse",TRUE,6
+"2010-2011","CMH_1ME","Consulted men. hlth prof.- social worker",TRUE,6
+"2013-2014","CMH_1ME","Consulted men. hlth prof.- social worker",TRUE,6
+"2010-2011","CMH_1MF","Consulted mental hlth prof. - other",TRUE,6
+"2013-2014","CMH_1MF","Consulted mental hlth prof. - other",TRUE,6
+"2010-2011","CPGDACT","No. of diff. types of gamb. act. - (D)",TRUE,4
+"2013-2014","CPGDACT","No. of diff. types of gamb. act. - (D)",TRUE,4
+"2010-2011","CPGDINT","Gambling Interference - Mean",FALSE,0
+"2013-2014","CPGDINT","Gambling Interference - Mean",TRUE,4
+"2010-2011","CPGDSEV","Problem gambling severity index - (D)",TRUE,5
+"2013-2014","CPGDSEV","Problem gambling severity index - (D)",TRUE,5
+"2010-2011","CPGDTYP","Type of gambler - (D)",TRUE,10
+"2013-2014","CPGDTYP","Type of gambler - (D)",TRUE,10
+"2010-2011","CPGFGAM","Gambling activity - (F)",TRUE,6
+"2013-2014","CPGFGAM","Gambling activity - (F)",TRUE,6
+"2010-2011","CPGFINT","Gambling Interference - (F)",TRUE,6
+"2013-2014","CPGFINT","Gambling Interference - (F)",TRUE,6
+"2013-2014","DENG36N","No dent. vis. - other - (G)",TRUE,6
+"2010-2011","DEN_130","Visited dentist",TRUE,6
+"2013-2014","DEN_130","Visited dentist",TRUE,6
+"2010-2011","DEN_132","Last time visited dentist",TRUE,11
+"2013-2014","DEN_132","Last time visited dentist",TRUE,11
+"2010-2011","DEN_36A","No dent. vis. - haven't got around to it",TRUE,6
+"2013-2014","DEN_36A","No dent. vis. - haven't got around to it",TRUE,6
+"2010-2011","DEN_36B","No dent. vis. - resp. didn't think nec.",TRUE,6
+"2013-2014","DEN_36B","No dent. vis. - resp. didn't think nec.",TRUE,6
+"2010-2011","DEN_36C","No dent. vis. - dent. didn't think nec.",TRUE,6
+"2013-2014","DEN_36C","No dent. vis. - dent. didn't think nec.",TRUE,6
+"2010-2011","DEN_36D","No dent. vis. - pers./family respons.",TRUE,6
+"2013-2014","DEN_36D","No dent. vis. - pers./family respons.",TRUE,6
+"2010-2011","DEN_36E","No dent. vis. - not avail. when req'd.",TRUE,6
+"2013-2014","DEN_36E","No dent. vis. - not avail. when req'd.",TRUE,6
+"2010-2011","DEN_36F","No dent. vis. - not available in area",TRUE,6
+"2013-2014","DEN_36F","No dent. vis. - not available in area",TRUE,6
+"2010-2011","DEN_36G","No dent. vis. - waiting time too long",TRUE,6
+"2010-2011","DEN_36H","No dent. vis. - transportation problems",TRUE,6
+"2013-2014","DEN_36H","No dent. vis. - transportation problems",TRUE,6
+"2010-2011","DEN_36I","No dent. vis. - language problem",TRUE,6
+"2013-2014","DEN_36I","No dent. vis. - language problem",TRUE,6
+"2010-2011","DEN_36J","No dent. vis. - cost",TRUE,6
+"2013-2014","DEN_36J","No dent. vis. - cost",TRUE,6
+"2010-2011","DEN_36K","No dent. vis. - didn't know where to go",TRUE,6
+"2013-2014","DEN_36K","No dent. vis. - didn't know where to go",TRUE,6
+"2010-2011","DEN_36L","No dent. vis. - fear",TRUE,6
+"2013-2014","DEN_36L","No dent. vis. - fear",TRUE,6
+"2010-2011","DEN_36M","No dent. vis. - wears dentures",TRUE,6
+"2013-2014","DEN_36M","No dent. vis. - wears dentures",TRUE,6
+"2010-2011","DEN_36N","No dent. vis. - other",TRUE,6
+"2010-2011","DEN_36O","No dent. vis. - unable to leave house",TRUE,6
+"2010-2011","DHHG611","No. persons 6-11 years/in hhld - (D,G)",TRUE,6
+"2013-2014","DHHG611","No. persons 6-11 years/in hhld - (D,G)",TRUE,6
+"2010-2011","DHHGAGE","Age - (G)",TRUE,16
+"2013-2014","DHHGAGE","Age - (G)",TRUE,16
+"2010-2011","DHHGHSZ","Household size - (D, G)",TRUE,9
+"2013-2014","DHHGHSZ","Household size - (D, G)",TRUE,9
+"2010-2011","DHHGL12","No. pers. < 12 years old in hhld - (D,G)",TRUE,6
+"2013-2014","DHHGL12","No. pers. < 12 years old in hhld - (D,G)",TRUE,6
+"2010-2011","DHHGLE5","No. pers. <= 5 years old in hhld - (D,G)",TRUE,6
+"2013-2014","DHHGLE5","No. pers. <= 5 years old in hhld - (D,G)",TRUE,6
+"2010-2011","DHHGLVG","Living arrangements/selected resp -(D,G)",TRUE,10
+"2013-2014","DHHGLVG","Living arrangements/selected resp -(D,G)",TRUE,10
+"2010-2011","DHHGMS","Marital status - (G)",TRUE,8
+"2013-2014","DHHGMS","Marital status - (G)",TRUE,8
+"2010-2011","DHH_OWN","Dwelling - owned by a member of hhld",TRUE,6
+"2013-2014","DHH_OWN","Owned, Rented",TRUE,6
+"2010-2011","DHH_SEX","Sex",TRUE,6
+"2013-2014","DHH_SEX","Sex",TRUE,6
+"2010-2011","DIA_01","Tested for ""A-one-C"" haemoglobin",TRUE,6
+"2013-2014","DIA_01","Tested for ""A-one-C"" haemoglobin",TRUE,6
+"2010-2011","DIA_02","No. of times - tested for ""A-one-C""",TRUE,4
+"2013-2014","DIA_02","No. of times - tested for ""A-one-C""",TRUE,4
+"2010-2011","DIA_03","Feet checked by health professional",TRUE,7
+"2013-2014","DIA_03","Feet checked by health professional",TRUE,7
+"2010-2011","DIA_04","No of times - feet checked by hlth prof.",TRUE,4
+"2013-2014","DIA_04","No of times - feet checked by hlth prof.",TRUE,4
+"2010-2011","DIA_05","Urine tested for protein by health prof.",TRUE,6
+"2013-2014","DIA_05","Urine tested for protein by health prof.",TRUE,6
+"2010-2011","DIA_06","Ever had eye exam with pupils dilated",TRUE,6
+"2013-2014","DIA_06","Ever had eye exam with pupils dilated",TRUE,6
+"2010-2011","DIA_07","Eye exam with pupils dilated - last time",TRUE,8
+"2013-2014","DIA_07","Eye exam with pupils dilated - last time",TRUE,8
+"2010-2011","DIA_08","Checks glucose level/self-reporting unit",TRUE,9
+"2013-2014","DIA_08","Checks glucose level/self-reporting unit",TRUE,9
+"2010-2011","DIA_09","Checks feet / self-reporting unit",TRUE,9
+"2013-2014","DIA_09","Checks feet / self-reporting unit",TRUE,9
+"2010-2011","DIA_10","Medication - ASA - past month",TRUE,6
+"2013-2014","DIA_10","Medication - ASA - past month",TRUE,6
+"2010-2011","DIA_11","Medication -blood cholesterol-past month",TRUE,6
+"2013-2014","DIA_11","Medication -blood cholesterol-past month",TRUE,6
+"2010-2011","DIA_N8B","Checks glucose level/self-no times day",TRUE,4
+"2013-2014","DIA_N8B","Checks glucose level/self-no times day",TRUE,4
+"2010-2011","DIA_N8C","Checks glucose level - no times per week",TRUE,4
+"2013-2014","DIA_N8C","Checks glucose level - no times per week",TRUE,4
+"2010-2011","DIA_N8D","Checks glucose level -no times per month",TRUE,4
+"2013-2014","DIA_N8D","Checks glucose level -no times per month",TRUE,4
+"2010-2011","DIA_N8E","Checks glucose level -no times per year",TRUE,4
+"2013-2014","DIA_N8E","Checks glucose level -no times per year",TRUE,4
+"2010-2011","DIA_N9B","Checks feet/self-number of times per day",TRUE,4
+"2013-2014","DIA_N9B","Checks feet/self-number of times per day",TRUE,4
+"2010-2011","DIA_N9C","Checks feet/self-number of times week",TRUE,4
+"2013-2014","DIA_N9C","Checks feet/self-number of times week",TRUE,4
+"2010-2011","DIA_N9D","Checks feet/self-number of times month",TRUE,4
+"2013-2014","DIA_N9D","Checks feet/self-number of times month",TRUE,4
+"2010-2011","DIA_N9E","Checks feet/self-number of times year",TRUE,4
+"2013-2014","DIA_N9E","Checks feet/self-number of times year",TRUE,4
+"2010-2011","DISDCHR","Chronicity of distress/impair. scale (D)",TRUE,12
+"2013-2014","DISDCHR","Chronicity of distress/impair. scale (D)",TRUE,12
+"2010-2011","DISDDSX","Distress scale - K10 - past month - (D)",TRUE,4
+"2013-2014","DISDDSX","Distress scale - K10 - past month - (D)",TRUE,4
+"2010-2011","DISDK6","Distress scale - K6 - past month - (D)",TRUE,4
+"2013-2014","DISDK6","Distress scale - K6 - past month - (D)",TRUE,4
+"2010-2011","DIS_10A","Frequency/distress:tired out-past month",TRUE,9
+"2013-2014","DIS_10A","Frequency/distress:tired out-past month",TRUE,9
+"2010-2011","DIS_10B","Freq./distress: felt nervous - past mo",TRUE,9
+"2013-2014","DIS_10B","Freq./distress: felt nervous - past mo",TRUE,9
+"2010-2011","DIS_10C","Freq./distress:so nervous - past month",TRUE,9
+"2013-2014","DIS_10C","Freq./distress:so nervous - past month",TRUE,9
+"2010-2011","DIS_10D","Freq./distress: felt hopeless - past mo",TRUE,9
+"2013-2014","DIS_10D","Freq./distress: felt hopeless - past mo",TRUE,9
+"2010-2011","DIS_10E","Freq./distress: felt restless - past mo",TRUE,9
+"2013-2014","DIS_10E","Freq./distress: felt restless - past mo",TRUE,9
+"2010-2011","DIS_10F","Frequency/distress:could not sit still",TRUE,9
+"2013-2014","DIS_10F","Frequency/distress:could not sit still",TRUE,9
+"2010-2011","DIS_10G","Freq./distress: sad,depressed - past mo",TRUE,9
+"2013-2014","DIS_10G","Freq./distress: sad,depressed - past mo",TRUE,9
+"2010-2011","DIS_10H","Freq./d.:dep,nothing cheer up - past mo.",TRUE,9
+"2013-2014","DIS_10H","Freq./d.:dep,nothing cheer up - past mo.",TRUE,9
+"2010-2011","DIS_10I","Freq./distr: every. was effort - past mo",TRUE,9
+"2013-2014","DIS_10I","Freq./distr: every. was effort - past mo",TRUE,9
+"2010-2011","DIS_10J","Freq./distr.: felt worthless - past mo",TRUE,9
+"2013-2014","DIS_10J","Freq./distr.: felt worthless - past mo",TRUE,9
+"2010-2011","DIS_10K","Freq. of distress feelings - past mo",TRUE,8
+"2013-2014","DIS_10K","Freq. of distress feelings - past mo",TRUE,8
+"2010-2011","DIS_10L","Freq. of distress feelings (more often)",TRUE,7
+"2013-2014","DIS_10L","Freq. of distress feelings (more often)",TRUE,7
+"2010-2011","DIS_10M","Freq. of distress feelings (less often)",TRUE,7
+"2013-2014","DIS_10M","Freq. of distress feelings (less often)",TRUE,7
+"2010-2011","DIS_10N","Freq./distr. feelings int. w/life-p.m.",TRUE,8
+"2013-2014","DIS_10N","Freq./distr. feelings int. w/life-p.m.",TRUE,8
+"2010-2011","DOACC","Module: ACC - (F)",TRUE,6
+"2013-2014","DOACC","Module: ACC - (F)",TRUE,6
+"2010-2011","DOADL","Content module - ADL (F)",TRUE,6
+"2013-2014","DOADL","Content module - ADL (F)",TRUE,6
+"2010-2011","DOALW","Module: ALW - (F)",TRUE,6
+"2013-2014","DOALW","Module: ALW - (F)",TRUE,6
+"2010-2011","DOBPC","Module: BPC - (F)",TRUE,6
+"2013-2014","DOBPC","Module: BPC - (F)",TRUE,6
+"2010-2011","DOBRX","Module: BRX - (F)",TRUE,6
+"2010-2011","DOCCS","Module: CCS - (F)",TRUE,6
+"2013-2014","DOCCS","Module: CCS - (F)",TRUE,6
+"2010-2011","DOCIH","Module.: Changes made to improve hlth",TRUE,6
+"2013-2014","DOCIH","Module.: Changes made to improve hlth",TRUE,6
+"2010-2011","DOCMH","Module: CMH - (F)",TRUE,6
+"2013-2014","DOCMH","Module: CMH - (F)",TRUE,6
+"2013-2014","DOCP2","Module: CP2 - (F)",TRUE,6
+"2010-2011","DOCPG","Module: CPG - (F)",TRUE,6
+"2013-2014","DOCPG","Module: CPG - (F)",TRUE,6
+"2010-2011","DODEN","Module: DEN - (F)",TRUE,6
+"2013-2014","DODEN","Module: DEN - (F)",TRUE,6
+"2010-2011","DODEP","Module: DPS - (F)",TRUE,6
+"2013-2014","DODEP","Module: DPS - (F)",TRUE,6
+"2010-2011","DODIA","Module: DIA - (F)",TRUE,6
+"2013-2014","DODIA","Module: DIA - (F)",TRUE,6
+"2010-2011","DODIS","Module: DIS - (F)",TRUE,6
+"2013-2014","DODIS","Module: DIS - (F)",TRUE,6
+"2010-2011","DODRG","Module: DRG - (F)",TRUE,6
+"2010-2011","DODRV","Module: DRV - (F)",TRUE,6
+"2013-2014","DODRV","Module: DRV - (F)",TRUE,6
+"2010-2011","DOEYX","Module: EYX - (F)",TRUE,6
+"2013-2014","DOEYX","Module: EYX - (F)",TRUE,6
+"2010-2011","DOFDC","Module: FDC - (F)",TRUE,6
+"2013-2014","DOFDC","Module: FDC - (F)",TRUE,6
+"2010-2011","DOFSC","Module: Food security",TRUE,6
+"2013-2014","DOFSC","Module: Food security",TRUE,6
+"2010-2011","DOH1N","Module: H1N1 Flu shot",TRUE,6
+"2010-2011","DOHCS","Module: HCS - (F)",TRUE,6
+"2013-2014","DOHCS","Module: HCS - (F)",TRUE,6
+"2010-2011","DOHUI","Module: HUI - (F)",TRUE,6
+"2013-2014","DOHUI","Module: HUI - (F)",TRUE,6
+"2013-2014","DOIDG","Illicit drugs use - Inclusion Flag - (F)",TRUE,6
+"2010-2011","DOINJ","Module: INJ - (F)",TRUE,6
+"2013-2014","DOINJ","Module: INJ - (F)",TRUE,6
+"2013-2014","DOINS","Module: INS - (F)",TRUE,6
+"2010-2011","DOLOP","Module: LOP - (F)",TRUE,6
+"2013-2014","DOLOP","Module: LOP - (F)",TRUE,6
+"2010-2011","DOMAM","Module: Mammography - (F)",TRUE,6
+"2013-2014","DOMAM","Module: Mammography - (F)",TRUE,6
+"2010-2011","DOMAS","Module: MAS - (F)",TRUE,6
+"2013-2014","DOMDB","Module: MDB - (F)",TRUE,6
+"2013-2014","DOMEX","Module flag: MEX - (F)",TRUE,6
+"2010-2011","DOMXA","Optional MXA - (F)",TRUE,6
+"2013-2014","DOMXA","Optional MXA - (F)",TRUE,6
+"2010-2011","DOMXS","Module: MXS - (F)",TRUE,6
+"2013-2014","DOMXS","Module: MXS - (F)",TRUE,6
+"2010-2011","DONEU","Module: NEU - (F)",TRUE,6
+"2013-2014","DOOH1","Theme module: Oral health 1",TRUE,6
+"2010-2011","DOOH2","Module: OH2 - (F)",TRUE,6
+"2013-2014","DOOH2","Module: OH2 - (F)",TRUE,6
+"2010-2011","DOORG","Module: ORG - (F)",TRUE,6
+"2010-2011","DOPAF","Module: Phys. Act. - Facili. at work",TRUE,6
+"2010-2011","DOPAP","Module: PAP smear test - (F)",TRUE,6
+"2013-2014","DOPAP","Module: PAP smear test - (F)",TRUE,6
+"2010-2011","DOPAS","Module: PAS - (F)",TRUE,6
+"2013-2014","DOPAS","Module: PAS - (F)",TRUE,6
+"2010-2011","DOPSA","Module: PSA - (F)",TRUE,6
+"2013-2014","DOPSA","Module: PSA - (F)",TRUE,6
+"2010-2011","DOPSC","Module: PSC - (F)",TRUE,6
+"2013-2014","DOPSC","Module: PSC - (F)",TRUE,6
+"2010-2011","DOPWB","Module: PWB - (F)",TRUE,6
+"2010-2011","DOSAC","Module: Sedentary activities",TRUE,6
+"2013-2014","DOSAC","Module: Sedentary activities",TRUE,6
+"2013-2014","DOSCA","Module: SCA - (F)",TRUE,6
+"2010-2011","DOSCH","Module: SCH - (F)",TRUE,6
+"2013-2014","DOSCH","Module: SCH - (F)",TRUE,6
+"2013-2014","DOSCP","Module: SCP - (F)",TRUE,6
+"2010-2011","DOSFE","Module: SFE - (F)",TRUE,6
+"2010-2011","DOSFR","Module: SFR - (F)",TRUE,6
+"2013-2014","DOSLP","Optional module: SLP - (F)",TRUE,6
+"2010-2011","DOSPC","Module: SPC - (F)",TRUE,6
+"2013-2014","DOSPC","Module: SPC - (F)",TRUE,6
+"2013-2014","DOSPS","Module: SPS - (F)",TRUE,6
+"2010-2011","DOSSA","Module: SSA - (F)",TRUE,6
+"2010-2011","DOSSB","Module: SSB - (F)",TRUE,6
+"2013-2014","DOSSB","Module: SSB - (F)",TRUE,6
+"2010-2011","DOSSU","Module: SSU - (F)",TRUE,6
+"2010-2011","DOSUI","Module: SUI - (F)",TRUE,6
+"2013-2014","DOSUI","Module: SUI - (F)",TRUE,6
+"2010-2011","DOSWL","Module: SWL - (F)",TRUE,6
+"2010-2011","DOSXB","Module: SXB - (F)",TRUE,6
+"2013-2014","DOSXB","Module: SXB - (F)",TRUE,6
+"2010-2011","DOTAL","Module: TAL - (F)",TRUE,6
+"2013-2014","DOTAL","Module: TAL - (F)",TRUE,6
+"2010-2011","DOUCN","Module: UCN - (F)",TRUE,6
+"2013-2014","DOUCN","Module: UCN - (F)",TRUE,6
+"2010-2011","DOUPE","Module: UPE - (F)",TRUE,6
+"2013-2014","DOUPE","Module: UPE - (F)",TRUE,6
+"2010-2011","DOWTM","Module: WTM - (F)",TRUE,6
+"2013-2014","DOWTM","Module: WTM - (F)",TRUE,6
+"2013-2014","DOYSM","Optional module: YSM - (F)",TRUE,6
+"2010-2011","DPSDMT","Mth last felt depr.- 2 wks in a row -(D)",TRUE,16
+"2013-2014","DPSDMT","Mth last felt depr.- 2 wks in a row -(D)",TRUE,16
+"2010-2011","DPSDPP","Depr. scale - predicted prob. - (D)",FALSE,0
+"2013-2014","DPSDPP","Depr. scale - predicted prob. - (D)",TRUE,10
+"2010-2011","DPSDSF","Depr. scale - short form score - (D)",TRUE,4
+"2013-2014","DPSDSF","Depr. scale - short form score - (D)",TRUE,4
+"2010-2011","DPSDWK","No. of weeks felt depressed - (D)",TRUE,4
+"2013-2014","DPSDWK","No. of weeks felt depressed - (D)",TRUE,4
+"2010-2011","DPS_02","Depressed >= 2 weeks - 12 mo",TRUE,6
+"2010-2011","DPS_03","Dep. -length/time feelings lasted - 2 wk",TRUE,8
+"2010-2011","DPS_04","Depressed - frequence - 2 wk",TRUE,7
+"2010-2011","DPS_05","Dep.-lost interest in most things - 2 wk",TRUE,6
+"2010-2011","DPS_06","Dep. - felt tired all of the time - 2 wk",TRUE,6
+"2010-2011","DPS_07","Depressed - weight change - 2 wk",TRUE,8
+"2010-2011","DPS_08A","Depressed -weight change (amount) - 2 wk",TRUE,4
+"2010-2011","DPS_08B","Depressed - weight change (lb/kg) - 2 wk",TRUE,6
+"2010-2011","DPS_09","Depressed - trouble fall asleep - 2 wk",TRUE,6
+"2010-2011","DPS_10","Depr. - fall asleep (freq.) - 2 wk",TRUE,7
+"2010-2011","DPS_11","Depressed - trouble concentrating - 2 wk",TRUE,6
+"2010-2011","DPS_12","Depressed - felt down on self - 2 wk",TRUE,6
+"2010-2011","DPS_13","Depr.- thought a lot about death - 2 wk",TRUE,6
+"2010-2011","DPS_14","Depressed - number of weeks - 12 mo",TRUE,4
+"2010-2011","DPS_15","Depressed - most recent month - 2 wk",TRUE,16
+"2010-2011","DPS_16","Loss int. - things give pleasure - 12 mo",TRUE,6
+"2010-2011","DPS_17","Loss interest - freq. - 12 mo",TRUE,8
+"2010-2011","DPS_18","Loss interest - freq. - 2 wk",TRUE,7
+"2010-2011","DPS_19","Loss int. -felt tired all the time -2 wk",TRUE,6
+"2010-2011","DPS_20","Loss interest - weight change - 2 wk",TRUE,8
+"2010-2011","DPS_21A","Loss interest - weight change (amount)",TRUE,4
+"2010-2011","DPS_21B","Loss int. - weight change (lb/kg) - 2 wk",TRUE,6
+"2010-2011","DPS_22","Loss interest -trouble fall asleep -2 wk",TRUE,6
+"2010-2011","DPS_23","Loss int. -trouble to sleep (freq) -2 wk",TRUE,7
+"2010-2011","DPS_24","Loss int.- trouble concentrating - 2 wk",TRUE,6
+"2010-2011","DPS_25","Loss interest - felt down on self - 2 wk",TRUE,6
+"2010-2011","DPS_26","Loss int.- thought a lot/death - 2 wk",TRUE,6
+"2010-2011","DPS_27","Loss interest - nombre of weeks - 12 mo",TRUE,4
+"2010-2011","DPS_28","Loss interest - most recent month - 2 wk",TRUE,16
+"2010-2011","DRVFSBU","Passenger seat belt use - motor vehicle",TRUE,6
+"2013-2014","DRVFSBU","Passenger seat belt use - motor vehicle",TRUE,6
+"2010-2011","DRV_01A","Drove a motor vehicle",TRUE,6
+"2013-2014","DRV_01A","Drove a motor vehicle",TRUE,6
+"2010-2011","DRV_01B","Drove a motorcycle",TRUE,6
+"2013-2014","DRV_01B","Drove a motorcycle",TRUE,6
+"2010-2011","DRV_02","Freq. - seat belt when driving",TRUE,8
+"2013-2014","DRV_02","Freq. - seat belt when driving",TRUE,8
+"2010-2011","DRV_03A","Use of a cell phone while driving",TRUE,8
+"2013-2014","DRV_03A","Use of a cell phone while driving",TRUE,8
+"2010-2011","DRV_03B","Use of a hands-free while driving",TRUE,8
+"2013-2014","DRV_03B","Use of a hands-free while driving",TRUE,8
+"2010-2011","DRV_04","Freq. - tired when driving",TRUE,8
+"2013-2014","DRV_04","Freq. - tired when driving",TRUE,8
+"2010-2011","DRV_05","Driving speed compared to others",TRUE,9
+"2013-2014","DRV_05","Driving speed compared to others",TRUE,9
+"2010-2011","DRV_06","Driving aggression compared to others",TRUE,9
+"2013-2014","DRV_06","Driving aggression compared to others",TRUE,9
+"2010-2011","DRV_07","Drove a motor vehicle after 2+ drinks",TRUE,6
+"2013-2014","DRV_07","No. of times - drove after 2+ drinks",TRUE,6
+"2010-2011","DRV_07A","No. of times - drove after 2+ drinks",TRUE,4
+"2013-2014","DRV_07A","No. of times - drove after 2+ drinks",TRUE,4
+"2010-2011","DRV_08A","Freq. - seat belt - front seat pass.",TRUE,9
+"2013-2014","DRV_08A","Freq. - seat belt - front seat pass.",TRUE,9
+"2010-2011","DRV_08B","Freq. - seat belt - back seat pass.",TRUE,9
+"2013-2014","DRV_08B","Freq. - seat belt - back seat pass.",TRUE,9
+"2010-2011","DRV_09","Freq. - seat belt - in taxi",TRUE,9
+"2013-2014","DRV_09","Freq. - seat belt - in taxi",TRUE,9
+"2010-2011","DRV_10","Passenger/driver had 2+ drinks",TRUE,6
+"2013-2014","DRV_10","No. times - pass./driver after 2+ drinks",TRUE,6
+"2010-2011","DRV_10A","No. times - pass./driver after 2+ drinks",TRUE,4
+"2013-2014","DRV_10A","No. times - pass./driver after 2+ drinks",TRUE,4
+"2010-2011","DRV_11A","Driver/pass. - snowmobile/motor boat",TRUE,6
+"2013-2014","DRV_11A","Driver/pass. - snowmobile/motor boat",TRUE,6
+"2010-2011","DRV_11B","Driver/pass. - ATV",TRUE,6
+"2013-2014","DRV_11B","Driver/pass. - ATV",TRUE,6
+"2010-2011","DRV_12","Freq. - wears helmet - ATV",TRUE,8
+"2013-2014","DRV_12","Freq. - wears helmet - ATV",TRUE,8
+"2010-2011","DRV_13","With driver had 2+ drinks - ATV/snow.",TRUE,6
+"2013-2014","DRV_13","No. times - With driver 2+ drinks - ATV",TRUE,6
+"2010-2011","DRV_13A","No. times - With driver 2+ drinks - ATV",TRUE,4
+"2013-2014","DRV_13A","No. times - With driver 2+ drinks - ATV",TRUE,4
+"2010-2011","DRV_14","Drove snowmobile/ATV after 2+ drinks",TRUE,6
+"2013-2014","DRV_14","No. times - drove snow./ATV aft. 2+ drks",TRUE,6
+"2010-2011","DRV_14A","No. times - drove snow./ATV aft. 2+ drks",TRUE,4
+"2013-2014","DRV_14A","No. times - drove snow./ATV aft. 2+ drks",TRUE,4
+"2010-2011","EDUDH04","Highest level/edu. - HH 4 levels - (D)",TRUE,8
+"2013-2014","EDUDH04","Highest level/edu. - HH 4 levels - (D)",TRUE,8
+"2010-2011","EDUDR04","Highest level/edu. - respond. 4 levels -",TRUE,8
+"2013-2014","EDUDR04","Highest level/edu. - respond. 4 levels -",TRUE,8
+"2010-2011","ETSG11","No. of people who smoke inside home -(G)",TRUE,8
+"2013-2014","ETSG11","No. of people who smoke inside home -(G)",TRUE,8
+"2010-2011","ETS_10","Someone smokes inside home",TRUE,6
+"2013-2014","ETS_10","Someone smokes inside home",TRUE,6
+"2010-2011","ETS_20","Exposed to 2nd-hand smoke - private veh.",TRUE,6
+"2013-2014","ETS_20","Exposed to 2nd-hand smoke - private veh.",TRUE,6
+"2010-2011","ETS_20B","Exposed to 2nd-hand smoke -public places",TRUE,6
+"2013-2014","ETS_20B","Exposed to 2nd-hand smoke -public places",TRUE,6
+"2010-2011","ETS_35","Smoking allowed - House",TRUE,6
+"2013-2014","ETS_35","Smoking allowed - House",TRUE,6
+"2010-2011","ETS_36","Smoking restrictions",TRUE,6
+"2013-2014","ETS_36","Smoking restrictions",TRUE,6
+"2010-2011","ETS_37A","Type of restrictions -certain rooms only",TRUE,6
+"2013-2014","ETS_37A","Type of restrictions -certain rooms only",TRUE,6
+"2010-2011","ETS_37B","Type of restrictions - young children",TRUE,6
+"2013-2014","ETS_37B","Type of restrictions - young children",TRUE,6
+"2010-2011","ETS_37C","Type of restrictions - windows open",TRUE,6
+"2013-2014","ETS_37C","Type of restrictions - windows open",TRUE,6
+"2010-2011","ETS_37D","Type of restrictions - Other",TRUE,6
+"2013-2014","ETS_37D","Type of restrictions - Other",TRUE,6
+"2013-2014","EYXG46M","No eye exam - other - (G)",TRUE,6
+"2010-2011","EYX_140","Visit eye doctor - 12 m",TRUE,6
+"2013-2014","EYX_140","Visit eye doctor - 12 m",TRUE,6
+"2010-2011","EYX_142","Last time eye examination",TRUE,9
+"2013-2014","EYX_142","Last time eye examination",TRUE,9
+"2010-2011","EYX_46A","No eye exam - haven't got around to it",TRUE,6
+"2013-2014","EYX_46A","No eye exam - haven't got around to it",TRUE,6
+"2010-2011","EYX_46B","No eye exam - resp. think not nec.",TRUE,6
+"2013-2014","EYX_46B","No eye exam - resp. think not nec.",TRUE,6
+"2010-2011","EYX_46C","No eye exam - dr. think not nec.",TRUE,6
+"2013-2014","EYX_46C","No eye exam - dr. think not nec.",TRUE,6
+"2010-2011","EYX_46D","No eye exam - pers./family resp.",TRUE,6
+"2013-2014","EYX_46D","No eye exam - pers./family resp.",TRUE,6
+"2010-2011","EYX_46E","No eye exam - not av. when require",TRUE,6
+"2013-2014","EYX_46E","No eye exam - not av. when require",TRUE,6
+"2010-2011","EYX_46F","No eye exam - not available/area",TRUE,6
+"2013-2014","EYX_46F","No eye exam - not available/area",TRUE,6
+"2010-2011","EYX_46G","No eye exam - wait. time too long",TRUE,6
+"2013-2014","EYX_46G","No eye exam - wait. time too long",TRUE,6
+"2010-2011","EYX_46H","No eye exam - transportation problems",TRUE,6
+"2013-2014","EYX_46H","No eye exam - transportation problems",TRUE,6
+"2010-2011","EYX_46I","No eye exam - language problem",TRUE,6
+"2010-2011","EYX_46J","No eye exam - cost",TRUE,6
+"2013-2014","EYX_46J","No eye exam - cost",TRUE,6
+"2010-2011","EYX_46K","No eye exam - did not know where to go",TRUE,6
+"2013-2014","EYX_46K","No eye exam - did not know where to go",TRUE,6
+"2010-2011","EYX_46L","No eye exam - fear",TRUE,6
+"2013-2014","EYX_46L","No eye exam - fear",TRUE,6
+"2010-2011","EYX_46M","No eye exam - other",TRUE,6
+"2010-2011","EYX_46N","No eye exam - health problem",TRUE,6
+"2013-2014","EYX_46N","No eye exam - health problem",TRUE,6
+"2010-2011","FDCFAVD","Avoids foods for content reasons - (F)",TRUE,6
+"2013-2014","FDCFAVD","Avoids foods for content reasons - (F)",TRUE,6
+"2010-2011","FDCFCAH","Chooses/avoids foods hlth concerns - (F)",TRUE,6
+"2013-2014","FDCFCAH","Chooses/avoids foods hlth concerns - (F)",TRUE,6
+"2010-2011","FDCFCHO","Chooses foods for content reasons - (F)",TRUE,6
+"2013-2014","FDCFCHO","Chooses foods for content reasons - (F)",TRUE,6
+"2010-2011","FDC_1A","Chooses/avoids foods - weight concern",TRUE,6
+"2013-2014","FDC_1A","Chooses/avoids foods - weight concern",TRUE,6
+"2010-2011","FDC_1B","Chooses/avoids foods - heart disease",TRUE,6
+"2013-2014","FDC_1B","Chooses/avoids foods - heart disease",TRUE,6
+"2010-2011","FDC_1C","Chooses/avoids foods - cancer",TRUE,6
+"2013-2014","FDC_1C","Chooses/avoids foods - cancer",TRUE,6
+"2010-2011","FDC_1D","Chooses/avoids foods - osteoporosis",TRUE,6
+"2013-2014","FDC_1D","Chooses/avoids foods - osteoporosis",TRUE,6
+"2010-2011","FDC_2A","Reason/choose foods - lower fat content",TRUE,6
+"2013-2014","FDC_2A","Reason/choose foods - lower fat content",TRUE,6
+"2010-2011","FDC_2B","Reason/choose foods - fibre content",TRUE,6
+"2013-2014","FDC_2B","Reason/choose foods - fibre content",TRUE,6
+"2010-2011","FDC_2C","Reason/choose foods - calcium content",TRUE,6
+"2013-2014","FDC_2C","Reason/choose foods - calcium content",TRUE,6
+"2010-2011","FDC_3A","Reason/avoid foods - fat content",TRUE,6
+"2013-2014","FDC_3A","Reason/avoid foods - fat content",TRUE,6
+"2010-2011","FDC_3B","Reason/avoid foods - type of fat",TRUE,6
+"2013-2014","FDC_3B","Reason/avoid foods - type of fat",TRUE,6
+"2010-2011","FDC_3C","Reason/avoid foods - salt content",TRUE,6
+"2013-2014","FDC_3C","Reason/avoid foods - salt content",TRUE,6
+"2010-2011","FDC_3D","Reason/avoid foods - cholesterol content",TRUE,6
+"2013-2014","FDC_3D","Reason/avoid foods - cholesterol content",TRUE,6
+"2010-2011","FDC_3E","Reason/avoid foods - calorie content",TRUE,6
+"2013-2014","FDC_3E","Reason/avoid foods - calorie content",TRUE,6
+"2010-2011","FLU_160","Ever had a flu shot",TRUE,6
+"2013-2014","FLU_160","Ever had a flu shot",TRUE,6
+"2010-2011","FLU_162","Had flu shot - last time",TRUE,7
+"2013-2014","FLU_162","Had flu shot - last time",TRUE,7
+"2010-2011","FLU_164","Had flu shot - which month",TRUE,16
+"2013-2014","FLU_164","Had flu shot - which month",TRUE,16
+"2010-2011","FLU_165","Had flu shot - current/last year",TRUE,6
+"2013-2014","FLU_165","Had flu shot - current/last year",TRUE,6
+"2010-2011","FLU_66A","No flu shot - have not gotten around it",TRUE,6
+"2013-2014","FLU_66A","No flu shot - have not gotten around it",TRUE,6
+"2010-2011","FLU_66B","No flu shot - resp. didn't think nec.",TRUE,6
+"2013-2014","FLU_66B","No flu shot - resp. didn't think nec.",TRUE,6
+"2010-2011","FLU_66C","No flu shot - doctor didn't think nec.",TRUE,6
+"2013-2014","FLU_66C","No flu shot - doctor didn't think nec.",TRUE,6
+"2010-2011","FLU_66D","No flu shot - personal/family resp.",TRUE,6
+"2013-2014","FLU_66D","No flu shot - personal/family resp.",TRUE,6
+"2010-2011","FLU_66E","No flu shot - not available when req'd",TRUE,6
+"2013-2014","FLU_66E","No flu shot - not available when req'd",TRUE,6
+"2010-2011","FLU_66F","No flu shot - not available in area",TRUE,6
+"2013-2014","FLU_66F","No flu shot - not available in area",TRUE,6
+"2010-2011","FLU_66G","No flu shot - waiting time was too long",TRUE,6
+"2013-2014","FLU_66G","No flu shot - waiting time was too long",TRUE,6
+"2010-2011","FLU_66H","No flu shot - transportation problems",TRUE,6
+"2013-2014","FLU_66H","No flu shot - transportation problems",TRUE,6
+"2010-2011","FLU_66I","No flu shot - language problem",TRUE,6
+"2013-2014","FLU_66I","No flu shot - language problem",TRUE,6
+"2010-2011","FLU_66J","No flu shot - cost",TRUE,6
+"2013-2014","FLU_66J","No flu shot - cost",TRUE,6
+"2010-2011","FLU_66K","No flu shot - did not know where to go",TRUE,6
+"2013-2014","FLU_66K","No flu shot - did not know where to go",TRUE,6
+"2010-2011","FLU_66L","No flu shot - fear",TRUE,6
+"2013-2014","FLU_66L","No flu shot - fear",TRUE,6
+"2010-2011","FLU_66M","No flu shot - bad reaction to prev. shot",TRUE,6
+"2013-2014","FLU_66M","No flu shot - bad reaction to prev. shot",TRUE,6
+"2010-2011","FLU_66N","No flu shot - other",TRUE,6
+"2013-2014","FLU_66N","No flu shot - other",TRUE,6
+"2010-2011","FLU_66O","No flu shot - unable leave house/hlth",TRUE,6
+"2013-2014","FLU_66O","No flu shot - unable leave house/hlth",TRUE,6
+"2010-2011","FSCDAFS2","Food Security - Adult Status",TRUE,7
+"2013-2014","FSCDAFS2","Food Security - Adult Status",TRUE,7
+"2010-2011","FSCDCFS2","Food Security - Child Status",TRUE,7
+"2013-2014","FSCDCFS2","Food Security - Child Status",TRUE,7
+"2010-2011","FSCDHFS2","Household Food Security Status (HC)",TRUE,7
+"2013-2014","FSCDHFS2","Household Food Security Status (HC)",TRUE,7
+"2010-2011","FSC_010","Food situation in household - 12 mo",TRUE,8
+"2013-2014","FSC_010","Food situation in household - 12 mo",TRUE,8
+"2010-2011","FSC_020","Worried food would run out - 12 mo",TRUE,7
+"2013-2014","FSC_020","Worried food would run out - 12 mo",TRUE,7
+"2010-2011","FSC_030","No food and no money for more - 12 mo",TRUE,7
+"2013-2014","FSC_030","No food and no money for more - 12 mo",TRUE,7
+"2010-2011","FSC_040","Could not afford balanced meals - 12 mo",TRUE,7
+"2013-2014","FSC_040","Could not afford balanced meals - 12 mo",TRUE,7
+"2010-2011","FSC_050","Few kinds low-cost food for kids -12 mo",TRUE,7
+"2013-2014","FSC_050","Few kinds low-cost food for kids -12 mo",TRUE,7
+"2010-2011","FSC_060","Couldn't feed child. bal. meal - 12 mo",TRUE,7
+"2013-2014","FSC_060","Couldn't feed child. bal. meal - 12 mo",TRUE,7
+"2010-2011","FSC_070","Children were not eating enough - 12 mo",TRUE,7
+"2013-2014","FSC_070","Children were not eating enough - 12 mo",TRUE,7
+"2010-2011","FSC_080","Adults cut or skipped meals - 12 mo",TRUE,6
+"2013-2014","FSC_080","Adults cut or skipped meals - 12 mo",TRUE,6
+"2010-2011","FSC_081","Adults skipped meals (freq) - 12 mo",TRUE,7
+"2013-2014","FSC_081","Adults skipped meals (freq) - 12 mo",TRUE,7
+"2010-2011","FSC_090","Ate less than felt should - 12 mo",TRUE,6
+"2013-2014","FSC_090","Ate less than felt should - 12 mo",TRUE,6
+"2010-2011","FSC_100","Was hungry but could not eat - 12 mo",TRUE,6
+"2013-2014","FSC_100","Was hungry but could not eat - 12 mo",TRUE,6
+"2010-2011","FSC_110","Lost weight no money for food- 12 mo",TRUE,6
+"2013-2014","FSC_110","Lost weight no money for food- 12 mo",TRUE,6
+"2010-2011","FSC_120","Adults did not eat whole day - 12 mo",TRUE,6
+"2013-2014","FSC_120","Adults did not eat whole day - 12 mo",TRUE,6
+"2010-2011","FSC_121","Adults not eat whole day (freq) - 12 mo",TRUE,7
+"2013-2014","FSC_121","Adults not eat whole day (freq) - 12 mo",TRUE,7
+"2010-2011","FSC_130","Cut size of children's meals - 12 mo",TRUE,6
+"2013-2014","FSC_130","Cut size of children's meals - 12 mo",TRUE,6
+"2010-2011","FSC_140","Children skipped meals - 12 mo",TRUE,6
+"2013-2014","FSC_140","Children skipped meals - 12 mo",TRUE,6
+"2010-2011","FSC_141","Freq. - child. skipped meals - 12 mo",TRUE,7
+"2013-2014","FSC_141","Freq. - child. skipped meals - 12 mo",TRUE,7
+"2010-2011","FSC_150","Children were hungry - 12 mo",TRUE,6
+"2013-2014","FSC_150","Children were hungry - 12 mo",TRUE,6
+"2010-2011","FSC_160","Children did not eat whole day - 12 mo",TRUE,6
+"2013-2014","FSC_160","Children did not eat whole day - 12 mo",TRUE,6
+"2010-2011","FVCDCAR","Daily consumption - carrots - (D)",FALSE,0
+"2013-2014","FVCDCAR","Daily consumption - carrots - (D)",TRUE,4
+"2010-2011","FVCDFRU","Daily consumption - fruit - (D)",FALSE,0
+"2013-2014","FVCDFRU","Daily consumption - fruit - (D)",TRUE,4
+"2010-2011","FVCDJUI","Daily consumption - fruit juice - (D)",FALSE,0
+"2013-2014","FVCDJUI","Daily consumption - fruit juice - (D)",TRUE,4
+"2010-2011","FVCDPOT","Daily consumption - potatoes - (D)",FALSE,0
+"2013-2014","FVCDPOT","Daily consumption - potatoes - (D)",TRUE,4
+"2010-2011","FVCDSAL","Daily consumption - green salad - (D)",FALSE,0
+"2013-2014","FVCDSAL","Daily consumption - green salad - (D)",TRUE,4
+"2010-2011","FVCDTOT","Daily cons. - total fruits and veg. - D)",FALSE,0
+"2013-2014","FVCDTOT","Daily cons. - total fruits and veg. - D)",TRUE,4
+"2010-2011","FVCDVEG","Daily consumption other vegetables - (D)",FALSE,0
+"2013-2014","FVCDVEG","Daily consumption other vegetables - (D)",TRUE,4
+"2010-2011","FVCGTOT","Daily cons. total fruits/veg. - (D, G)",TRUE,7
+"2013-2014","FVCGTOT","Daily cons. total fruits/veg. - (D, G)",TRUE,7
+"2010-2011","GENDHDI","Perceived Health - (D)",TRUE,9
+"2013-2014","GENDHDI","Perceived Health - (D)",TRUE,9
+"2010-2011","GENDMHI","Perceived Mental Health - (D)",TRUE,9
+"2013-2014","GENDMHI","Perceived Mental Health - (D)",TRUE,9
+"2010-2011","GENGSWL","Satisfaction with life in general",TRUE,9
+"2013-2014","GENGSWL","Satisfaction with life in general",TRUE,9
+"2010-2011","GEN_01","Self-perceived health",TRUE,9
+"2013-2014","GEN_01","Self-perceived health",TRUE,9
+"2010-2011","GEN_02","Self-perceived hlth - compared 1 yr ago",TRUE,9
+"2013-2014","GEN_02","Self-perceived hlth - compared 1 yr ago",TRUE,9
+"2010-2011","GEN_02A2","Satisfaction with life in general",TRUE,15
+"2013-2014","GEN_02A2","Satisfaction with life in general",TRUE,15
+"2010-2011","GEN_02B","Self-perceived mental health",TRUE,9
+"2013-2014","GEN_02B","Self-perceived mental health",TRUE,9
+"2010-2011","GEN_07","Perceived life stress",TRUE,9
+"2013-2014","GEN_07","Perceived life stress",TRUE,9
+"2010-2011","GEN_08","Worked at job",TRUE,6
+"2013-2014","GEN_08","Worked at job",TRUE,6
+"2010-2011","GEN_09","Self perceived work stress",TRUE,9
+"2013-2014","GEN_09","Self perceived work stress",TRUE,9
+"2010-2011","GEN_10","Sense of belonging - local community",TRUE,8
+"2013-2014","GEN_10","Sense of belonging - local community",TRUE,8
+"2010-2011","GEODBCHA","B.C. Health Authority (BCHA) - (D)",TRUE,9
+"2013-2014","GEODBCHA","B.C. Health Authority (BCHA) - (D)",TRUE,9
+"2010-2011","GEODPMF","Health Region - (G)",TRUE,102
+"2013-2014","GEODPMF","Health Region - (G)",TRUE,113
+"2010-2011","GEOGPRV","Province of residence of respondent-(G)",TRUE,15
+"2013-2014","GEOGPRV","Province of residence of respondent-(G)",TRUE,15
+"2010-2011","H1N_160","Ever had a H1N1 flue shot",TRUE,6
+"2010-2011","H1N_164","Had H1N1 flu shot - which month",TRUE,16
+"2010-2011","H1N_165","Had H1N1 flu shot - current/last year",TRUE,6
+"2010-2011","H1N_66A","No H1N1 shot - have not gotten around it",TRUE,6
+"2010-2011","H1N_66B","No H1N1 shot - resp. didn't think nec.",TRUE,6
+"2010-2011","H1N_66C","No H1N1 shot - doctor didn't think nec.",TRUE,6
+"2010-2011","H1N_66D","No H1N1 flu shot - personal/family resp.",TRUE,6
+"2010-2011","H1N_66E","No H1N1 shot - not available when req'd",TRUE,6
+"2010-2011","H1N_66F","No H1N1 flu shot - not available in area",TRUE,6
+"2010-2011","H1N_66G","No H1N1 shot - waiting time too long",TRUE,6
+"2010-2011","H1N_66H","No H1N1 shot - transportation problems",TRUE,6
+"2010-2011","H1N_66I","No H1N1 flu shot - language problem",TRUE,6
+"2010-2011","H1N_66J","No H1N1 flu shot - cost",TRUE,6
+"2010-2011","H1N_66K","No H1N1 shot - did not know where to go",TRUE,6
+"2010-2011","H1N_66L","No H1N1 flu shot - fear",TRUE,6
+"2010-2011","H1N_66M","No H1N1 shot -bad reaction to prev. shot",TRUE,6
+"2010-2011","H1N_66N","No H1N1 flu shot - other",TRUE,6
+"2010-2011","H1N_66O","No H1N1 flu shot - unable to leave/hlth",TRUE,6
+"2010-2011","HCS_1","Rating of availability hlth care - prov",TRUE,8
+"2013-2014","HCS_1","Rating of availability hlth care - prov",TRUE,8
+"2010-2011","HCS_2","Rating of quality of health care - prov",TRUE,8
+"2013-2014","HCS_2","Rating of quality of health care - prov",TRUE,8
+"2010-2011","HCS_3","Rating of availability hlth care - comm.",TRUE,8
+"2013-2014","HCS_3","Rating of availability hlth care - comm.",TRUE,8
+"2010-2011","HCS_4","Rating of quality of hlth care - comm.",TRUE,8
+"2013-2014","HCS_4","Rating of quality of hlth care - comm.",TRUE,8
+"2010-2011","HCU_1A1","Has place to go when sick/health advice",TRUE,6
+"2013-2014","HCU_1A1","Regular medical doctor",TRUE,6
+"2010-2011","HCU_1A2","Kind of place",TRUE,12
+"2013-2014","HCU_1A2","Kind of place",TRUE,12
+"2010-2011","HCU_1AA","Has regular medical doctor",TRUE,6
+"2013-2014","HCU_1AA","Has regular medical doctor",TRUE,6
+"2010-2011","HCU_1BA","Reason no dr - no one available in area",TRUE,6
+"2013-2014","HCU_1BA","Reason no dr - no one available in area",TRUE,6
+"2010-2011","HCU_1BB","Reason no dr - none taking new patients",TRUE,6
+"2013-2014","HCU_1BB","Reason no dr - none taking new patients",TRUE,6
+"2010-2011","HCU_1BC","Reason no dr - not tried to contact one",TRUE,6
+"2013-2014","HCU_1BC","Reason no dr - not tried to contact one",TRUE,6
+"2010-2011","HCU_1BD","Reason no dr - has left/retired",TRUE,6
+"2013-2014","HCU_1BD","Reason no dr - has left/retired",TRUE,6
+"2010-2011","HCU_1BE","Reason no dr - other",TRUE,6
+"2013-2014","HCU_1BE","Reason no dr - other",TRUE,6
+"2010-2011","HUIDCOG","Cognition prob. - function code - (D)",TRUE,10
+"2013-2014","HUIDCOG","Cognition prob. - function code - (D)",TRUE,10
+"2010-2011","HUIDEMO","Emotion (function code)",TRUE,9
+"2013-2014","HUIDEMO","Emotion (function code)",TRUE,9
+"2010-2011","HUIDHSI","Health utilities index",FALSE,0
+"2013-2014","HUIDHSI","Health utilities index",TRUE,4
+"2010-2011","HUIGDEX","Dexterity trouble - function code -(D,G)",TRUE,5
+"2013-2014","HUIGDEX","Dexterity trouble - function code -(D,G)",TRUE,5
+"2010-2011","HUIGHER","Hearing problems - function code - (D,G)",TRUE,5
+"2013-2014","HUIGHER","Hearing problems - function code - (D,G)",TRUE,5
+"2010-2011","HUIGMOB","Mobility trouble - function code - (D,G)",TRUE,6
+"2013-2014","HUIGMOB","Mobility trouble - function code - (D,G)",TRUE,6
+"2010-2011","HUIGSPE","Speech trouble - function code - (D,G)",TRUE,4
+"2013-2014","HUIGSPE","Speech trouble - function code - (D,G)",TRUE,4
+"2010-2011","HUIGVIS","Vision trouble - function code - (D,G)",TRUE,7
+"2013-2014","HUIGVIS","Vision trouble - function code - (D,G)",TRUE,7
+"2010-2011","HUPDPAD","Pain (function code)",TRUE,9
+"2013-2014","HUPDPAD","Pain (function code)",TRUE,9
+"2010-2011","HWTDCOL","BMI class. (12-17) / self-report. - (D)",TRUE,7
+"2013-2014","HWTDCOL","BMI class. (12-17) / self-report. - (D)",TRUE,7
+"2013-2014","HWTDWHO","Youth BMI / self-report - (D)",TRUE,8
+"2010-2011","HWTGBMI","BMI / self-report - (D,G)",FALSE,0
+"2013-2014","HWTGBMI","BMI / self-report - (D,G)",TRUE,4
+"2010-2011","HWTGHTM","Height (metres) / self-reported - (D,G)",FALSE,0
+"2013-2014","HWTGHTM","Height (metres) / self-reported - (D,G)",TRUE,53
+"2010-2011","HWTGISW","BMI class. (18 +) / self-report - (D,G)",TRUE,8
+"2013-2014","HWTGISW","BMI class. (18 +) / self-report - (D,G)",TRUE,8
+"2010-2011","HWTGWTK","Weight (kilograms)/self-reported - (D,G)",FALSE,0
+"2013-2014","HWTGWTK","Weight (kilograms)/self-reported - (D,G)",TRUE,4
+"2010-2011","HWT_4","Opinion of own weight - self-reported",TRUE,7
+"2013-2014","HWT_4","Opinion of own weight - self-reported",TRUE,7
+"2010-2011","IDGDINT","Illicit drug interference mean - 12 mo",FALSE,0
+"2013-2014","IDGDINT","Illicit drug interference mean - 12 mo",TRUE,4
+"2010-2011","IDGFINT","Illicit drug interference - 12 mo - (F)",TRUE,6
+"2013-2014","IDGFINT","Illicit drug interference - 12 mo - (F)",TRUE,6
+"2010-2011","IDGFLA","Illicit drg use/incl. 1 time cann. - (F)",TRUE,6
+"2013-2014","IDGFLA","Illicit drg use/incl. 1 time cann. - (F)",TRUE,6
+"2010-2011","IDGFLAC","Illicit drug use/excl.1 time cann. - (F)",TRUE,6
+"2013-2014","IDGFLAC","Illicit drug use/excl.1 time cann. - (F)",TRUE,6
+"2010-2011","IDGFLCA","Cannabis drug use/incl.1 time only - (F)",TRUE,6
+"2013-2014","IDGFLCA","Cannabis drug use/incl.1 time only - (F)",TRUE,6
+"2010-2011","IDGFLCM","Cannabis drug use/excl.1 time only - (F)",TRUE,6
+"2013-2014","IDGFLCM","Cannabis drug use/excl.1 time only - (F)",TRUE,6
+"2010-2011","IDGFYA","Illicit drg /incl.1 time can.-12 mo -(F)",TRUE,6
+"2013-2014","IDGFYA","Illicit drg /incl.1 time can.-12 mo -(F)",TRUE,6
+"2010-2011","IDGFYAC","Illi.drg use/excl.1 time can.-12 mo -(F)",TRUE,6
+"2013-2014","IDGFYAC","Illi.drg use/excl.1 time can.-12 mo -(F)",TRUE,6
+"2010-2011","IDGFYCM","Can.drg use/excl.1 time only -12 mo -(F)",TRUE,6
+"2013-2014","IDGFYCM","Can.drg use/excl.1 time only -12 mo -(F)",TRUE,6
+"2010-2011","INCDRCA","Household income distribution - (D)",TRUE,14
+"2013-2014","INCDRCA","Household income distribution - (D)",TRUE,14
+"2010-2011","INCDRPR","Hhld inc. distribution-prov. level - (D)",TRUE,14
+"2013-2014","INCDRPR","Hhld inc. distribution-prov. level - (D)",TRUE,14
+"2010-2011","INCDRRS","Hhld inc. distribution- hr level - (D)",TRUE,14
+"2013-2014","INCDRRS","Hhld inc. distribution- hr level - (D)",TRUE,14
+"2010-2011","INCG2","Total hhld inc. - main source - (G)",TRUE,8
+"2013-2014","INCG2","Total hhld inc. - main source - (G)",TRUE,8
+"2010-2011","INCG7","Main source of personal income - (G)",TRUE,8
+"2013-2014","INCG7","Main source of personal income - (G)",TRUE,8
+"2010-2011","INCGHH","Total hhld inc. from all sources - (D,G)",TRUE,9
+"2013-2014","INCGHH","Total hhld inc. from all sources - (D,G)",TRUE,9
+"2010-2011","INCGPER","Total pers. inc. from all sources (D,G)",TRUE,10
+"2013-2014","INCGPER","Total pers. inc. from all sources (D,G)",TRUE,10
+"2010-2011","INJDSTT","Injury Status - (D)",TRUE,8
+"2013-2014","INJDSTT","Injury Status - (D)",TRUE,8
+"2010-2011","INJG02","No. of injuries in past 12 mo - (G)",TRUE,8
+"2013-2014","INJG02","No. of injuries in past 12 mo - (G)",TRUE,8
+"2010-2011","INJG05","Most serious injury - type - (G)",TRUE,13
+"2013-2014","INJG05","Most serious injury - type - (G)",TRUE,13
+"2010-2011","INJG06","Most serious inj. - body part aff. - (G)",TRUE,14
+"2013-2014","INJG06","Most serious inj. - body part aff. - (G)",TRUE,14
+"2010-2011","INJG08","Most serious injury - place - (G)",TRUE,12
+"2013-2014","INJG08","Most serious injury - place - (G)",TRUE,12
+"2010-2011","INJG092","Most serious inj.- activity when inj.(G)",TRUE,11
+"2013-2014","INJG092","Most serious inj.- activity when inj.(G)",TRUE,11
+"2010-2011","INJG11A","How did you fall - (G)",TRUE,10
+"2013-2014","INJG11A","How did you fall - (G)",TRUE,10
+"2010-2011","INJG14C","Most serious inj.- treated in clinic (G)",TRUE,6
+"2013-2014","INJG14C","Most serious inj.- treated in clinic (G)",TRUE,6
+"2010-2011","INJG14J2","Most ser.inj.-physio/mass/chiro/other(G)",TRUE,6
+"2013-2014","INJG14J2","Most ser.inj.-physio/mass/chiro/other(G)",TRUE,6
+"2010-2011","INJG17","Other injuries - number - (G)",TRUE,7
+"2013-2014","INJG17","Other injuries - number - (G)",TRUE,7
+"2010-2011","INJGCAU","Cause of injury - (D,G)",TRUE,11
+"2013-2014","INJGCAU","Cause of injury - (D,G)",TRUE,11
+"2010-2011","INJ_01","Injured in past 12 mo",TRUE,6
+"2013-2014","INJ_01","Injured in past 12 mo",TRUE,6
+"2010-2011","INJ_10","Most serious injury - result of a fall",TRUE,6
+"2013-2014","INJ_10","Most serious injury - result of a fall",TRUE,6
+"2010-2011","INJ_13","Most serious inj. - rec'd treat./48 hrs.",TRUE,6
+"2013-2014","INJ_13","Most serious inj. - rec'd treat./48 hrs.",TRUE,6
+"2010-2011","INJ_14A","Receive treatment in the 48 hours",TRUE,6
+"2013-2014","INJ_14A","Receive treatment in the 48 hours",TRUE,6
+"2010-2011","INJ_14B","Receive treatment in the 48 hours",TRUE,6
+"2013-2014","INJ_14B","Receive treatment in the 48 hours",TRUE,6
+"2010-2011","INJ_14O","Receive treatment in the 48 hours",TRUE,6
+"2013-2014","INJ_14O","Receive treatment in the 48 hours",TRUE,6
+"2010-2011","INJ_15","Most serious injury - hospital admission",TRUE,6
+"2013-2014","INJ_15","Follow-up care because of injury",TRUE,6
+"2010-2011","INJ_15A","Follow-up care because of injury",TRUE,6
+"2013-2014","INJ_15A","Follow-up care because of injury",TRUE,6
+"2010-2011","INJ_16","Other injuries - treated / not limiting",TRUE,6
+"2013-2014","INJ_16","Other injuries - treated / not limiting",TRUE,6
+"2013-2014","INS_1","Insurance - prescription medications",TRUE,6
+"2013-2014","INS_1A","Type of plan -gov. - sponsored (med)",TRUE,6
+"2013-2014","INS_1B","Type of plan - employer-sponsored (med)",TRUE,6
+"2013-2014","INS_1C","Type of plan - private (med)",TRUE,6
+"2013-2014","INS_2","Insurance - dental expenses",TRUE,6
+"2013-2014","INS_2A","Type of plan -gov. - sponsored (dental)",TRUE,6
+"2013-2014","INS_2B","Type of plan - employer-spons. (dental)",TRUE,6
+"2013-2014","INS_2C","Type of plan - private (dental)",TRUE,6
+"2013-2014","INS_3","Insurance - eye glasses/contact lenses",TRUE,6
+"2013-2014","INS_3A","Type of plan -gov. - sponsored (eyes)",TRUE,6
+"2013-2014","INS_3B","Type of plan - employer-spons. (eyes)",TRUE,6
+"2013-2014","INS_3C","Type of plan - private (eyes)",TRUE,6
+"2013-2014","INS_4","Insurance - hospital charges",TRUE,6
+"2013-2014","INS_4A","Type of plan -gov. - sponsored (hosp.)",TRUE,6
+"2013-2014","INS_4B","Type of plan - employer-spons. (hosp.)",TRUE,6
+"2013-2014","INS_4C","Type of plan - private (hosp.)",TRUE,6
+"2010-2011","INWGSOC","Occup. group (SOC) where inj. occ. - (G)",TRUE,9
+"2013-2014","INWGSOC","Occup. group (SOC) where inj. occ. - (G)",TRUE,9
+"2010-2011","INW_01","Injury occured in current job",TRUE,6
+"2013-2014","INW_01","Injury occured in current job",TRUE,6
+"2010-2011","LBSDPFT","Full/part-time - current jobs - (D)",TRUE,6
+"2013-2014","LBSDPFT","Full/part-time - current jobs - (D)",TRUE,6
+"2010-2011","LBSDWSS","Working status last week - 4 grps - (D)",TRUE,8
+"2013-2014","LBSDWSS","Working status last week - 4 grps - (D)",TRUE,8
+"2010-2011","LBSG31","Employment status - 12 mo - (G)",TRUE,6
+"2013-2014","LBSG31","Employment status - 12 mo - (G)",TRUE,6
+"2010-2011","LBSGHPW","Total usual hrs. worked current - (D, G)",TRUE,5
+"2013-2014","LBSGHPW","Total usual hrs. worked current - (D, G)",TRUE,5
+"2010-2011","LBSGSOC","Occupation group - (G)",TRUE,9
+"2013-2014","LBSGSOC","Occupation group - (D,G)",TRUE,9
+"2010-2011","LOPG020","Reason for not working - (G)",TRUE,12
+"2013-2014","LOPG020","Reason for not working - (G)",TRUE,12
+"2010-2011","LOPG040","Work days lost due to chronic cond. (G)",TRUE,5
+"2013-2014","LOPG040","Work days lost due to chronic cond. (G)",TRUE,5
+"2010-2011","LOPG050","Chronic condition - (G)",TRUE,15
+"2013-2014","LOPG050","Chronic condition - (G)",TRUE,15
+"2010-2011","LOPG070","Work days missed due to injury - (G)",TRUE,5
+"2013-2014","LOPG070","Work days missed due to injury - (G)",TRUE,5
+"2010-2011","LOPG082","Work days missed due to cold - (G)",TRUE,5
+"2013-2014","LOPG082","Work days missed due to cold - (G)",TRUE,5
+"2010-2011","LOPG083","Work days missed due/ flu/influenza (G)",TRUE,5
+"2013-2014","LOPG083","Work days missed due/ flu/influenza (G)",TRUE,5
+"2010-2011","LOPG084","Work days missed due to stomach flu (G)",TRUE,5
+"2013-2014","LOPG084","Work days missed due to stomach flu (G)",TRUE,5
+"2010-2011","LOPG085","Work days missed due/ respir.infect. (G)",TRUE,5
+"2013-2014","LOPG085","Work days missed due/ respir.infect. (G)",TRUE,5
+"2010-2011","LOPG086","Wrk days missed due/other infect.dis.(G)",TRUE,5
+"2013-2014","LOPG086","Wrk days missed due/other infect.dis.(G)",TRUE,5
+"2010-2011","LOPG100","Work days missed related/ ph/m hlth (G)",TRUE,5
+"2013-2014","LOPG100","Work days missed related/ ph/m hlth (G)",TRUE,5
+"2010-2011","LOP_015","Employed in past 3 months",TRUE,6
+"2013-2014","LOP_015","Employed in past 3 months",TRUE,6
+"2010-2011","LOP_030","Couldn't work due to chronic condition",TRUE,6
+"2013-2014","LOP_030","Missed work due to chronic condition",TRUE,6
+"2010-2011","LOP_060","Missed work due to injury",TRUE,6
+"2013-2014","LOP_060","Missed work due to injury",TRUE,6
+"2010-2011","LOP_080","Missed work due to infectious disease",TRUE,6
+"2013-2014","LOP_080","Missed work due to infectious disease",TRUE,6
+"2010-2011","LOP_090","Missed work for reason /ph. Or m. health",TRUE,6
+"2013-2014","LOP_090","Missed work for reason /ph. Or m. health",TRUE,6
+"2010-2011","LOP_81A","Had a cold",TRUE,6
+"2013-2014","LOP_81A","Had a cold",TRUE,6
+"2010-2011","LOP_81B","Had the flu or influenze",TRUE,6
+"2013-2014","LOP_81B","Had the flu or influenze",TRUE,6
+"2010-2011","LOP_81C","Stomach Flu",TRUE,6
+"2013-2014","LOP_81C","Stomach Flu",TRUE,6
+"2010-2011","LOP_81D","Respiratory Flu",TRUE,6
+"2013-2014","LOP_81D","Respiratory Flu",TRUE,6
+"2010-2011","LOP_81E","Other",TRUE,6
+"2013-2014","LOP_81E","Other",TRUE,6
+"2013-2014","MAMG31H","Had mammogram - other - (G)",TRUE,6
+"2013-2014","MAMG36F","No mam. - not ava. when required/in area",TRUE,6
+"2013-2014","MAMG36M","No mam. - other - 2 yrs - (G)",TRUE,6
+"2010-2011","MAM_030","Ever had mammogram",TRUE,6
+"2013-2014","MAM_030","Ever had mammogram",TRUE,6
+"2010-2011","MAM_032","Last time mammogram was done",TRUE,9
+"2013-2014","MAM_032","Last time mammogram was done",TRUE,9
+"2010-2011","MAM_038","Had a hysterectomy",TRUE,6
+"2013-2014","MAM_038","Had a hysterectomy",TRUE,6
+"2010-2011","MAM_31A","Had mammogram - family history",TRUE,6
+"2013-2014","MAM_31A","Had mammogram - family history",TRUE,6
+"2010-2011","MAM_31B","Had mammogram - regular check-up",TRUE,6
+"2013-2014","MAM_31B","Had mammogram - regular check-up",TRUE,6
+"2010-2011","MAM_31C","Had mammogram - age",TRUE,6
+"2013-2014","MAM_31C","Had mammogram - age",TRUE,6
+"2010-2011","MAM_31D","Had mammogram - previously detected lump",TRUE,6
+"2013-2014","MAM_31D","Had mammogram - previously detected lump",TRUE,6
+"2010-2011","MAM_31E","Had mammogram - follow-up treatment",TRUE,6
+"2013-2014","MAM_31E","Had mammogram - follow-up treatment",TRUE,6
+"2010-2011","MAM_31F","Had mammogram - hormone replac. therapy",TRUE,6
+"2010-2011","MAM_31G","Had mammogram - breast problem",TRUE,6
+"2013-2014","MAM_31G","Had mammogram - breast problem",TRUE,6
+"2010-2011","MAM_31H","Had mammogram - other",TRUE,6
+"2010-2011","MAM_36A","No mam. -have not gotten ar.to it -2 yrs",TRUE,6
+"2013-2014","MAM_36A","No mam. -have not gotten ar.to it -2 yrs",TRUE,6
+"2010-2011","MAM_36B","No mam. resp.- didn't think nec. - 2 yrs",TRUE,6
+"2013-2014","MAM_36B","No mam. resp.- didn't think nec. - 2 yrs",TRUE,6
+"2010-2011","MAM_36C","No mam. -doctor didn't think nec. -2 yrs",TRUE,6
+"2013-2014","MAM_36C","No mam. -doctor didn't think nec. -2 yrs",TRUE,6
+"2010-2011","MAM_36D","No mam. - personal/family resp. - 2 yrs",TRUE,6
+"2013-2014","MAM_36D","No mam. - personal/family resp. - 2 yrs",TRUE,6
+"2010-2011","MAM_36E","No mam. - not ava. when required - 2 yrs",TRUE,6
+"2010-2011","MAM_36F","No mam. - not avai. in the area - 2 yrs",TRUE,6
+"2010-2011","MAM_36G","No mam. -wait. time was too long - 2 yrs",TRUE,6
+"2010-2011","MAM_36H","No mam. -transportation problems - 2 yrs",TRUE,6
+"2013-2014","MAM_36H","No mam. -transportation problems - 2 yrs",TRUE,6
+"2010-2011","MAM_36I","No mam. - language problem - 2 yrs",TRUE,6
+"2010-2011","MAM_36J","No mam. - cost - 2 yrs",TRUE,6
+"2010-2011","MAM_36K","No mam. -did not know where to go -2 yrs",TRUE,6
+"2013-2014","MAM_36K","No mam. -did not know where to go -2 yrs",TRUE,6
+"2010-2011","MAM_36L","No mam. - fear - 2 yrs",TRUE,6
+"2013-2014","MAM_36L","No mam. - fear - 2 yrs",TRUE,6
+"2010-2011","MAM_36M","No mam. - other - 2 yrs",TRUE,6
+"2010-2011","MAM_36N","No mam. -un. leave house/hlth pro -2 yrs",TRUE,6
+"2013-2014","MAM_36N","No mam. -un. leave house/hlth pro -2 yrs",TRUE,6
+"2010-2011","MAM_36O","No mam. -Breasts removed/Mastec. -2 yrs",TRUE,6
+"2013-2014","MAM_36O","No mam. -Breasts removed/Mastec. -2 yrs",TRUE,6
+"2010-2011","MASDM1","Mastery scale - (D)",TRUE,4
+"2010-2011","MAS_601","Mastery - lack of control",TRUE,9
+"2010-2011","MAS_602","Mastery - cannot solve problems",TRUE,9
+"2010-2011","MAS_603","Mastery - cannot change things",TRUE,9
+"2010-2011","MAS_604","Mastery - helpless",TRUE,9
+"2010-2011","MAS_605","Mastery - pushed around",TRUE,9
+"2010-2011","MAS_606","Mastery - fate depends upon self",TRUE,9
+"2010-2011","MAS_607","Mastery - can do anything",TRUE,9
+"2013-2014","MDBDBA1","Affect balance - method A - (D)",TRUE,4
+"2013-2014","MDBDBA2","Affect balance - method B - (D)",TRUE,7
+"2013-2014","MDBDNEG","Affect balance - negative mood - (D)",TRUE,4
+"2013-2014","MDBDPOS","Affect balance - positive mood - (D)",TRUE,4
+"2013-2014","MDB_1","Freq./felt on top of the world",TRUE,7
+"2013-2014","MDB_10","Freq./felt upset/someone criticized you",TRUE,7
+"2013-2014","MDB_11","Personnel self evaluation",TRUE,7
+"2013-2014","MDB_2","Freq./felt lonely/remote",TRUE,7
+"2013-2014","MDB_3","Freq./felt partic. excited/interested",TRUE,7
+"2013-2014","MDB_4","Freq./felt depressed or very unhappy",TRUE,7
+"2013-2014","MDB_5","Freq./felt pleased something accomplish",TRUE,7
+"2013-2014","MDB_6","Freq./felt bored",TRUE,7
+"2013-2014","MDB_7","Freq./felt proud",TRUE,7
+"2013-2014","MDB_8","Freq./felt so restless",TRUE,7
+"2013-2014","MDB_9","Freq./felt things were going your way",TRUE,7
+"2010-2011","MEXDEBF2","Duration of exclusive breastfeeding- (D)",TRUE,13
+"2013-2014","MEXDEBF2","Length of exclusive breastfeeding (D)",TRUE,13
+"2010-2011","MEXFEB6","Exclus. breastfeed for at least 6 months",TRUE,6
+"2013-2014","MEXFEB6","Exclus. breastfeed for at least 6 months",TRUE,6
+"2010-2011","MEXG04","Reason did not breastfeed - (G)",TRUE,12
+"2013-2014","MEXG04","Reason did not breastfeed - (G)",TRUE,12
+"2013-2014","MEXG08B","Main reason/add other liquids,solid food",TRUE,15
+"2013-2014","MEXG10","Main reason stopped breastfeeding - (G)",TRUE,16
+"2010-2011","MEX_01","Has given birth in the past 5 years",TRUE,6
+"2013-2014","MEX_01","Year of birth of last baby",TRUE,6
+"2010-2011","MEX_02","Took folic acid - before last pregnancy",TRUE,6
+"2013-2014","MEX_02","Took folic acid - before last pregnancy",TRUE,6
+"2010-2011","MEX_03","Breastfed/tried breastfeed/last child",TRUE,6
+"2013-2014","MEX_03","Breastfed/tried breastfeed/last child",TRUE,6
+"2010-2011","MEX_05","Still breastfeeding last child",TRUE,6
+"2013-2014","MEX_05","Still breastfeeding last child",TRUE,6
+"2010-2011","MEX_06","Duration of breastfeeding last child",TRUE,16
+"2013-2014","MEX_06","Duration of breastfeeding last child",TRUE,17
+"2013-2014","MEX_06A","Other liquids / baby's feeds",TRUE,6
+"2013-2014","MEX_06B","Age of last baby/other liquds",TRUE,17
+"2010-2011","MEX_07","Age of last baby - other foods added",TRUE,17
+"2010-2011","MEX_08","Main reason other foods added",TRUE,17
+"2013-2014","MEX_08A","Age of last baby/solid food",TRUE,17
+"2010-2011","MEX_09","Gave vitamin D - breast milk only",TRUE,6
+"2013-2014","MEX_09","Give Vitamin D to the baby",TRUE,6
+"2013-2014","MEX_09B","Frequency/giving the Vitamin D to baby",TRUE,8
+"2010-2011","MEX_10","Main reason stopped breastfeeding",TRUE,19
+"2013-2014","MXAG02","Frequency of drinking - last pregnancy -",TRUE,6
+"2013-2014","MXAG04","Freq. drinking - breastfeeding last baby",TRUE,9
+"2010-2011","MXA_01","Drank alcohol - last pregnancy",TRUE,6
+"2013-2014","MXA_01","Drank alcohol - last pregnancy",TRUE,6
+"2010-2011","MXA_02","Freq. of drinking - last pregnancy",TRUE,11
+"2010-2011","MXA_03","Drank alcohol - breastfeeding last baby",TRUE,6
+"2013-2014","MXA_03","Drank alcohol - breastfeeding last baby",TRUE,6
+"2010-2011","MXA_04","Freq. drinking - breastfeeding last baby",TRUE,11
+"2010-2011","MXSG02","No. daily - last preg. (daily smk)",TRUE,12
+"2013-2014","MXSG02","No. daily - last preg. (daily smk)",TRUE,12
+"2010-2011","MXSG03","No. daily - last preg. (occ. smk)",TRUE,10
+"2013-2014","MXSG03","No. daily - last preg. (occ. smk)",TRUE,10
+"2010-2011","MXSG05","No. daily - breastfeeding (daily smk)",TRUE,12
+"2013-2014","MXSG05","No. daily - breastfeeding (daily smk)",TRUE,12
+"2010-2011","MXSG06","No. daily - breastfeeding (occ. smk)",TRUE,10
+"2013-2014","MXSG06","No. daily - breastfeeding (occ. smk)",TRUE,10
+"2010-2011","MXS_01","Type of smoker - last pregnancy",TRUE,7
+"2013-2014","MXS_01","Type of smoker - last pregnancy",TRUE,7
+"2010-2011","MXS_04","Smoked while breastfeeding (occ. smoker)",TRUE,7
+"2013-2014","MXS_04","Smoked while breastfeeding (occ. smoker)",TRUE,7
+"2010-2011","MXS_07","2nd-hand smoke - during/after last preg.",TRUE,6
+"2013-2014","MXS_07","2nd-hand smoke - during/after last preg.",TRUE,6
+"2010-2011","NEUDNCH","Presence of neurological cond in hhld",TRUE,6
+"2010-2011","NEUDNCR","Has a neurological condition-sel. resp.",TRUE,6
+"2010-2011","NEUDSIR","Has neuro. cond.-spinal inj.-sel. resp.",TRUE,6
+"2013-2014","OH1_20","Self-perceived health of teeth and mouth",TRUE,9
+"2013-2014","OH1_21A","Ability to chew - firm foods",TRUE,6
+"2013-2014","OH1_21B","Ability to chew - fresh apple",TRUE,6
+"2013-2014","OH1_21C","Ability to chew - boiled vegetables",TRUE,6
+"2013-2014","OH1_22","Freq. - pain in teeth/gums - past mo.",TRUE,8
+"2010-2011","OH2FLIM","Ltd soc. due to oral hlth - 12 mo - (F)",TRUE,6
+"2013-2014","OH2FLIM","Ltd soc. due to oral hlth - 12 mo - (F)",TRUE,6
+"2010-2011","OH2FOFP","Oral/facial pain - past mo - (F)",TRUE,6
+"2013-2014","OH2FOFP","Oral/facial pain - past mo - (F)",TRUE,6
+"2010-2011","OH2_10","Freq. usually visits the dentist",TRUE,8
+"2013-2014","OH2_10","Freq. usually visits the dentist",TRUE,8
+"2010-2011","OH2_11","Insurance for dental expenses",TRUE,6
+"2013-2014","OH2_11","Insurance for dental expenses",TRUE,6
+"2010-2011","OH2_11A","Dental ins. - government-sponsored",TRUE,6
+"2013-2014","OH2_11A","Dental ins. - government-sponsored",TRUE,6
+"2010-2011","OH2_11B","Type of plan - employer-sponsored",TRUE,6
+"2013-2014","OH2_11B","Type of plan - employer-sponsored",TRUE,6
+"2010-2011","OH2_11C","Type of plan - private",TRUE,6
+"2013-2014","OH2_11C","Type of plan - private",TRUE,6
+"2010-2011","OH2_12","Teeth removed by dentist - 12 mo",TRUE,6
+"2013-2014","OH2_12","Teeth removed by dentist - 12 mo",TRUE,6
+"2010-2011","OH2_13","Teeth removed -decay/gum disease - 12 mo",TRUE,6
+"2013-2014","OH2_13","Teeth removed -decay/gum disease - 12 mo",TRUE,6
+"2010-2011","OH2_20","Has one or more of own teeth",TRUE,6
+"2013-2014","OH2_20","Has one or more of own teeth",TRUE,6
+"2010-2011","OH2_21","Wears dentures",TRUE,6
+"2013-2014","OH2_21","Wears dentures",TRUE,6
+"2010-2011","OH2_22","Mouth cond.- diff. speaking clearly",TRUE,6
+"2013-2014","OH2_22","Mouth cond.- diff. speaking clearly",TRUE,6
+"2010-2011","OH2_23","Cond. mouth - avoided conversat. - 12 mo",TRUE,8
+"2013-2014","OH2_23","Cond. mouth - avoided conversat. - 12 mo",TRUE,8
+"2010-2011","OH2_24","Mouth cond. -av. laughing/smiling -12 mo",TRUE,8
+"2013-2014","OH2_24","Mouth cond. -av. laughing/smiling -12 mo",TRUE,8
+"2010-2011","OH2_25A","Had a toothache - past mo",TRUE,6
+"2013-2014","OH2_25A","Had a toothache - past mo",TRUE,6
+"2010-2011","OH2_25B","Teeth sensitive to hot/cold - past mo",TRUE,6
+"2013-2014","OH2_25B","Teeth sensitive to hot/cold - past mo",TRUE,6
+"2010-2011","OH2_25C","Had pain - jaw joints - past mo",TRUE,6
+"2013-2014","OH2_25C","Had pain - jaw joints - past mo",TRUE,6
+"2010-2011","OH2_25D","Had pain - mouth/face - past mo",TRUE,6
+"2013-2014","OH2_25D","Had pain - mouth/face - past mo",TRUE,6
+"2010-2011","OH2_25E","Had bleeding gums - past mo",TRUE,6
+"2013-2014","OH2_25E","Had bleeding gums - past mo",TRUE,6
+"2010-2011","OH2_25F","Had dry mouth - past mo",TRUE,6
+"2013-2014","OH2_25F","Had dry mouth - past mo",TRUE,6
+"2010-2011","OH2_25G","Had bad breath - past mo",TRUE,6
+"2013-2014","OH2_25G","Had bad breath - past mo",TRUE,6
+"2010-2011","OH2_30","Frequency of brushing teeth",TRUE,10
+"2013-2014","OH2_30","Frequency of brushing teeth",TRUE,10
+"2010-2011","ORG_1","Member of a voluntary organization",TRUE,6
+"2010-2011","ORG_2","Frequency - participate in activities",TRUE,9
+"2010-2011","PACDEE","Daily energy expenditure - (D)",FALSE,0
+"2013-2014","PACDEE","Daily energy expenditure - (D)",TRUE,4
+"2010-2011","PACDFM","Monthly freq./phys. act. >15 min. - (D)",TRUE,4
+"2013-2014","PACDFM","Monthly freq./phys. act. >15 min. - (D)",TRUE,4
+"2010-2011","PACDFR","Freq. of all physical activity - (D)",TRUE,7
+"2013-2014","PACDFR","Freq. of all physical activity - (D)",TRUE,7
+"2010-2011","PACDLTI","Leisure and transp. phys. activity index",TRUE,7
+"2013-2014","PACDLTI","Leisure and transp. phys. activity index",TRUE,7
+"2010-2011","PACDPAI","Physical activity index - (D)",TRUE,7
+"2013-2014","PACDPAI","Physical activity index - (D)",TRUE,7
+"2010-2011","PACDTLE","Dai. ener. expen. - Tran. and leis. act.",FALSE,0
+"2013-2014","PACDTLE","Dai. ener. expen. - Tran. and leis. act.",TRUE,5
+"2010-2011","PACFD","Partic. daily phys. act. > 15 min. - (F)",TRUE,6
+"2013-2014","PACFD","Partic. daily phys. act. > 15 min. - (F)",TRUE,6
+"2010-2011","PACFLEI","Participant - leisure phys. activity-(F)",TRUE,6
+"2013-2014","PACFLEI","Participant - leisure phys. activity-(F)",TRUE,6
+"2010-2011","PACFLTI","Particip. - Leis. or trans. phys. activ.",TRUE,6
+"2013-2014","PACFLTI","Particip. - Leis. or trans. phys. activ.",TRUE,6
+"2010-2011","PACG2G","No. of times - ice hockey - (G",TRUE,3
+"2013-2014","PACG2G","No. of times - ice hockey - (G",TRUE,3
+"2010-2011","PAC_1A","Act./last 3 mo - walking",TRUE,6
+"2013-2014","PAC_1A","Act./last 3 mo - walking",TRUE,6
+"2010-2011","PAC_1B","Act./last 3 mo - gardening/yard work",TRUE,6
+"2013-2014","PAC_1B","Act./last 3 mo - gardening/yard work",TRUE,6
+"2010-2011","PAC_1C","Act./last 3 mo - swimming",TRUE,6
+"2013-2014","PAC_1C","Act./last 3 mo - swimming",TRUE,6
+"2010-2011","PAC_1D","Act./last 3 mo - bicycling",TRUE,6
+"2013-2014","PAC_1D","Act./last 3 mo - bicycling",TRUE,6
+"2010-2011","PAC_1E","Act./last 3 mo - popular/social dance",TRUE,6
+"2013-2014","PAC_1E","Act./last 3 mo - popular/social dance",TRUE,6
+"2010-2011","PAC_1F","Act./last 3 mo - home exercises",TRUE,6
+"2013-2014","PAC_1F","Act./last 3 mo - home exercises",TRUE,6
+"2010-2011","PAC_1G","Act./last 3 mo - ice hockey",TRUE,6
+"2013-2014","PAC_1G","Act./last 3 mo - ice hockey",TRUE,6
+"2010-2011","PAC_1H","Act./last 3 mo - ice skating",TRUE,6
+"2013-2014","PAC_1H","Act./last 3 mo - ice skating",TRUE,6
+"2010-2011","PAC_1I","Act./last 3 mo - in-line skating/roll.",TRUE,6
+"2013-2014","PAC_1I","Act./last 3 mo - in-line skating/roll.",TRUE,6
+"2010-2011","PAC_1J","Act./last 3 mo - jogging or running",TRUE,6
+"2013-2014","PAC_1J","Act./last 3 mo - jogging or running",TRUE,6
+"2010-2011","PAC_1K","Act./last 3 mo - golfing",TRUE,6
+"2013-2014","PAC_1K","Act./last 3 mo - golfing",TRUE,6
+"2010-2011","PAC_1L","Act./last 3 mo - exer. class/aerobics",TRUE,6
+"2013-2014","PAC_1L","Act./last 3 mo - exer. class/aerobics",TRUE,6
+"2010-2011","PAC_1M","Act./last 3 mo - skiing/snowboarding",TRUE,6
+"2013-2014","PAC_1M","Act./last 3 mo - skiing/snowboarding",TRUE,6
+"2010-2011","PAC_1N","Act./last 3 mo - bowling",TRUE,6
+"2013-2014","PAC_1N","Act./last 3 mo - bowling",TRUE,6
+"2010-2011","PAC_1O","Act./last 3 mo - baseball or softball",TRUE,6
+"2013-2014","PAC_1O","Act./last 3 mo - baseball or softball",TRUE,6
+"2010-2011","PAC_1P","Act./last 3 mo - tennis",TRUE,6
+"2013-2014","PAC_1P","Act./last 3 mo - tennis",TRUE,6
+"2010-2011","PAC_1Q","Act./last 3 mo - weight-training",TRUE,6
+"2013-2014","PAC_1Q","Act./last 3 mo - weight-training",TRUE,6
+"2010-2011","PAC_1R","Act./last 3 mo - fishing",TRUE,6
+"2013-2014","PAC_1R","Act./last 3 mo - fishing",TRUE,6
+"2010-2011","PAC_1S","Act./last 3 mo - volleyball",TRUE,6
+"2013-2014","PAC_1S","Act./last 3 mo - volleyball",TRUE,6
+"2010-2011","PAC_1T","Act./last 3 mo - basketball",TRUE,6
+"2013-2014","PAC_1T","Act./last 3 mo - basketball",TRUE,6
+"2010-2011","PAC_1U","Act./last 3 mo - Any other",TRUE,6
+"2013-2014","PAC_1U","Act./last 3 mo - Any other",TRUE,6
+"2010-2011","PAC_1V","Act./last 3 mo -  No physical activity",TRUE,6
+"2013-2014","PAC_1V","Act./last 3 mo -  No physical activity",TRUE,6
+"2010-2011","PAC_1W","Act./last 3 mo - other (#2)",TRUE,6
+"2013-2014","PAC_1W","Act./last 3 mo - other (#2)",TRUE,6
+"2010-2011","PAC_1X","Act./last 3 mo - other (#3)",TRUE,6
+"2013-2014","PAC_1X","Act./last 3 mo - other (#3)",TRUE,6
+"2010-2011","PAC_1Z","Act./last 3 mo - Soccer",TRUE,6
+"2013-2014","PAC_1Z","Act./last 3 mo - Soccer",TRUE,6
+"2010-2011","PAC_2A","No. of times - walking for exercise",TRUE,4
+"2013-2014","PAC_2A","No. of times - walking for exercise",TRUE,4
+"2010-2011","PAC_2B","No. of times - gardening/yard work",TRUE,4
+"2013-2014","PAC_2B","No. of times - gardening/yard work",TRUE,4
+"2010-2011","PAC_2C","No. of times - swimming",TRUE,4
+"2013-2014","PAC_2C","No. of times - swimming",TRUE,4
+"2010-2011","PAC_2D","No. of times - bicycling",TRUE,4
+"2013-2014","PAC_2D","No. of times - bicycling",TRUE,4
+"2010-2011","PAC_2E","No. of times - popular/social dance",TRUE,4
+"2013-2014","PAC_2E","No. of times - popular/social dance",TRUE,4
+"2010-2011","PAC_2F","No. of times - home exercises",TRUE,4
+"2013-2014","PAC_2F","No. of times - home exercises",TRUE,4
+"2010-2011","PAC_2H","No. of times - ice skating",TRUE,4
+"2013-2014","PAC_2H","No. of times - ice skating",TRUE,4
+"2010-2011","PAC_2I","No. of times - in-line skating/roller b.",TRUE,4
+"2013-2014","PAC_2I","No. of times - in-line skating/roller b.",TRUE,4
+"2010-2011","PAC_2J","No. of times - jogging or running",TRUE,4
+"2013-2014","PAC_2J","No. of times - jogging or running",TRUE,4
+"2010-2011","PAC_2K","No. of times - golfing",TRUE,4
+"2013-2014","PAC_2K","No. of times - golfing",TRUE,4
+"2010-2011","PAC_2L","No. of times- exercise class/aerobics",TRUE,4
+"2013-2014","PAC_2L","No. of times- exercise class/aerobics",TRUE,4
+"2010-2011","PAC_2M","No. of times - skiing/snowboarding",TRUE,4
+"2013-2014","PAC_2M","No. of times - skiing/snowboarding",TRUE,4
+"2010-2011","PAC_2N","No. of times - bowling",TRUE,4
+"2013-2014","PAC_2N","No. of times - bowling",TRUE,4
+"2010-2011","PAC_2O","No. of times - baseball/softball",TRUE,4
+"2013-2014","PAC_2O","No. of times - baseball/softball",TRUE,4
+"2010-2011","PAC_2P","No. of times - tennis",TRUE,4
+"2013-2014","PAC_2P","No. of times - tennis",TRUE,4
+"2010-2011","PAC_2Q","No. of times - weight-training",TRUE,4
+"2013-2014","PAC_2Q","No. of times - weight-training",TRUE,4
+"2010-2011","PAC_2R","No. of times - fishing",TRUE,4
+"2013-2014","PAC_2R","No. of times - fishing",TRUE,4
+"2010-2011","PAC_2S","No. of times - volleyball",TRUE,4
+"2013-2014","PAC_2S","No. of times - volleyball",TRUE,4
+"2010-2011","PAC_2T","No. of times - basketball",TRUE,4
+"2013-2014","PAC_2T","No. of times - basketball",TRUE,4
+"2010-2011","PAC_2U","No. of times - other activity (#1)",TRUE,4
+"2013-2014","PAC_2U","No. of times - other activity (#1)",TRUE,4
+"2010-2011","PAC_2W","No. of times - other activity (#2)",TRUE,4
+"2013-2014","PAC_2W","No. of times - other activity (#2)",TRUE,4
+"2010-2011","PAC_2X","No. of times - other activity (#3)",TRUE,4
+"2013-2014","PAC_2X","No. of times - other activity (#3)",TRUE,4
+"2010-2011","PAC_2Z","No. of times - soccer",TRUE,4
+"2013-2014","PAC_2Z","No. of times - soccer",TRUE,4
+"2010-2011","PAC_3A","Time spent - walking for exercise",TRUE,8
+"2013-2014","PAC_3A","Time spent - walking for exercise",TRUE,8
+"2010-2011","PAC_3B","Time spent - gardening/yard work",TRUE,8
+"2013-2014","PAC_3B","Time spent - gardening/yard work",TRUE,8
+"2010-2011","PAC_3C","Time spent - swimming",TRUE,8
+"2013-2014","PAC_3C","Time spent - swimming",TRUE,8
+"2010-2011","PAC_3D","Time spent - bicycling",TRUE,8
+"2013-2014","PAC_3D","Time spent - bicycling",TRUE,8
+"2010-2011","PAC_3E","Time spent - popular/social dance",TRUE,8
+"2013-2014","PAC_3E","Time spent - popular/social dance",TRUE,8
+"2010-2011","PAC_3F","Time spent - home exercises",TRUE,8
+"2013-2014","PAC_3F","Time spent - home exercises",TRUE,8
+"2010-2011","PAC_3G","Time spent - ice hockey",TRUE,8
+"2013-2014","PAC_3G","Time spent - ice hockey",TRUE,8
+"2010-2011","PAC_3H","Time spent - ice skating",TRUE,8
+"2013-2014","PAC_3H","Time spent - ice skating",TRUE,8
+"2010-2011","PAC_3I","Time spent - in-line skating/roller b.",TRUE,8
+"2013-2014","PAC_3I","Time spent - in-line skating/roller b.",TRUE,8
+"2010-2011","PAC_3J","Time spent - jogging or running",TRUE,8
+"2013-2014","PAC_3J","Time spent - jogging or running",TRUE,8
+"2010-2011","PAC_3K","Time spent - golfing",TRUE,8
+"2013-2014","PAC_3K","Time spent - golfing",TRUE,8
+"2010-2011","PAC_3L","Time spent - exercise class/aerobics",TRUE,8
+"2013-2014","PAC_3L","Time spent - exercise class/aerobics",TRUE,8
+"2010-2011","PAC_3M","Time spent - skiing/snowboarding",TRUE,8
+"2013-2014","PAC_3M","Time spent - skiing/snowboarding",TRUE,8
+"2010-2011","PAC_3N","Time spent - bowling",TRUE,8
+"2013-2014","PAC_3N","Time spent - bowling",TRUE,8
+"2010-2011","PAC_3O","Time spent - baseball/softball",TRUE,8
+"2013-2014","PAC_3O","Time spent - baseball/softball",TRUE,8
+"2010-2011","PAC_3P","Time spent - tennis",TRUE,8
+"2013-2014","PAC_3P","Time spent - tennis",TRUE,8
+"2010-2011","PAC_3Q","Time spent - weight-training",TRUE,8
+"2013-2014","PAC_3Q","Time spent - weight-training",TRUE,8
+"2010-2011","PAC_3R","Time spent - fishing",TRUE,8
+"2013-2014","PAC_3R","Time spent - fishing",TRUE,8
+"2010-2011","PAC_3S","Time spent - volleyball",TRUE,8
+"2013-2014","PAC_3S","Time spent - volleyball",TRUE,8
+"2010-2011","PAC_3T","Time spent - basketball",TRUE,8
+"2013-2014","PAC_3T","Time spent - basketball",TRUE,8
+"2010-2011","PAC_3U","Time spent - other activity (#1)",TRUE,8
+"2013-2014","PAC_3U","Time spent - other activity (#1)",TRUE,8
+"2010-2011","PAC_3W","Time spent - other activity (#2)",TRUE,8
+"2013-2014","PAC_3W","Time spent - other activity (#2)",TRUE,8
+"2010-2011","PAC_3X","Time spent - other activity (#3)",TRUE,8
+"2013-2014","PAC_3X","Time spent - other activity (#3)",TRUE,8
+"2010-2011","PAC_3Z","Time spent - soccer",TRUE,8
+"2013-2014","PAC_3Z","Time spent - soccer",TRUE,8
+"2010-2011","PAC_7","Walked to work or school / last 3 mo.",TRUE,7
+"2013-2014","PAC_7","Walked to work or school / last 3 mo.",TRUE,7
+"2010-2011","PAC_7A","No. of times/3 mo./walking work/school",TRUE,4
+"2013-2014","PAC_7A","No. of times/3 mo./walking work/school",TRUE,4
+"2010-2011","PAC_7B","Time spent - walking to go work/school",TRUE,8
+"2013-2014","PAC_7B","Time spent - walking from work or school",TRUE,8
+"2010-2011","PAC_8","Bicycled to work or school / last 3 mo.",TRUE,7
+"2013-2014","PAC_8","Bicycled to work or school / last 3 mo.",TRUE,7
+"2010-2011","PAC_8A","No. of times/3 mo./bicycl. work/school",TRUE,4
+"2013-2014","PAC_8A","No. of times/3 mo./bicycl. work/school",TRUE,4
+"2010-2011","PAC_8B","Time spent - bicycl. to go work/school",TRUE,8
+"2013-2014","PAC_8B","Time spent - bicycl. to go work/school",TRUE,8
+"2010-2011","PAFFACC","Access to phys. act. facilities at work",TRUE,6
+"2010-2011","PAF_01","Work at home",TRUE,6
+"2010-2011","PAF_02","At work - Pleasant place to walk",TRUE,6
+"2010-2011","PAF_03","At work - Access to playing fields",TRUE,6
+"2010-2011","PAF_04","At work - Access to a gym",TRUE,6
+"2010-2011","PAF_05","At work - Access to fitness classes",TRUE,6
+"2010-2011","PAF_06","At work - Organized sport teams",TRUE,6
+"2010-2011","PAF_07","At work - Showers / change rooms",TRUE,6
+"2010-2011","PAF_08","At work - Prog. to improve health",TRUE,6
+"2013-2014","PAPG26G","No PAP - not avail. when req. / wait too",TRUE,6
+"2013-2014","PAPG26O","No PAP smear - other - (G)",TRUE,6
+"2010-2011","PAP_020","Ever had PAP smear test",TRUE,6
+"2013-2014","PAP_020","Ever had PAP smear test",TRUE,6
+"2010-2011","PAP_022","Last time had PAP smear test",TRUE,9
+"2013-2014","PAP_022","Last time had PAP smear test",TRUE,9
+"2010-2011","PAP_26A","No PAP - have not gotten around to it",TRUE,6
+"2013-2014","PAP_26A","No PAP - have not gotten around to it",TRUE,6
+"2010-2011","PAP_26B","No PAP - resp. didn't think necessary",TRUE,6
+"2013-2014","PAP_26B","No PAP - resp. didn't think necessary",TRUE,6
+"2010-2011","PAP_26C","No PAP - doctor didn't think necessary",TRUE,6
+"2013-2014","PAP_26C","No PAP - doctor didn't think necessary",TRUE,6
+"2010-2011","PAP_26D","No PAP - personal/fam. responsibilities",TRUE,6
+"2010-2011","PAP_26E","No PAP - not available when required",TRUE,6
+"2010-2011","PAP_26F","No PAP - not available in area",TRUE,6
+"2010-2011","PAP_26G","No PAP - waiting time too long",TRUE,6
+"2010-2011","PAP_26H","No PAP - transportation problems",TRUE,6
+"2010-2011","PAP_26I","No PAP - language problem",TRUE,6
+"2010-2011","PAP_26J","No PAP - cost",TRUE,6
+"2010-2011","PAP_26K","No PAP - did not know where to go",TRUE,6
+"2013-2014","PAP_26K","No PAP - did not know where to go",TRUE,6
+"2010-2011","PAP_26L","No PAP - fear",TRUE,6
+"2013-2014","PAP_26L","No PAP - fear",TRUE,6
+"2010-2011","PAP_26M","No PAP - hysterectomy",TRUE,6
+"2013-2014","PAP_26M","No PAP - hysterectomy",TRUE,6
+"2010-2011","PAP_26N","No PAP - hate/dislike having one done",TRUE,6
+"2013-2014","PAP_26N","No PAP - hate/dislike having one done",TRUE,6
+"2010-2011","PAP_26O","No PAP - other",TRUE,6
+"2010-2011","PAP_26P","No PAP - unable leave house/hlth prob.",TRUE,6
+"2010-2011","PAS_11","Rec'd health care services",TRUE,6
+"2013-2014","PAS_11","Rec'd health care services",TRUE,6
+"2010-2011","PAS_12","Rating of quality of care rec'd",TRUE,8
+"2013-2014","PAS_12","Rating of quality of care rec'd",TRUE,8
+"2010-2011","PAS_13","Satisfaction with way care provided",TRUE,9
+"2013-2014","PAS_13","Satisfaction with way care provided",TRUE,9
+"2010-2011","PAS_21A","Rec'd health care services at hospital",TRUE,6
+"2013-2014","PAS_21A","Rec'd health care services at hospital",TRUE,6
+"2010-2011","PAS_21B","Type of patient - most recent visit",TRUE,7
+"2013-2014","PAS_21B","Type of patient - most recent visit",TRUE,7
+"2010-2011","PAS_22","Rating quality care rec'd - hospital",TRUE,8
+"2013-2014","PAS_22","Rating quality care rec'd - hospital",TRUE,8
+"2010-2011","PAS_23","Satisfaction w/way care provided - hosp.",TRUE,9
+"2013-2014","PAS_23","Satisfaction w/way care provided - hosp.",TRUE,9
+"2010-2011","PAS_31A","Rec'd physician care",TRUE,6
+"2013-2014","PAS_31A","Rec'd physician care",TRUE,6
+"2010-2011","PAS_31B","Type of physician - most recent care",TRUE,6
+"2013-2014","PAS_31B","Type of physician - most recent care",TRUE,6
+"2010-2011","PAS_32","Rating of quality of care rec'd - phy.",TRUE,8
+"2013-2014","PAS_32","Rating of quality of care rec'd - phy.",TRUE,8
+"2010-2011","PAS_33","Satisfaction w/way care provided - phy.",TRUE,9
+"2013-2014","PAS_33","Satisfaction w/way care provided - phy.",TRUE,9
+"2013-2014","PMKPROXY","Person most knowledgeable",TRUE,6
+"2010-2011","PSA_170","Ever had a PSA blood test",TRUE,6
+"2013-2014","PSA_170","Ever had a PSA blood test",TRUE,6
+"2010-2011","PSA_172","Last time had PSA blood test",TRUE,9
+"2013-2014","PSA_172","Last time had PSA blood test",TRUE,9
+"2010-2011","PSA_174","Had a digital rectal exam",TRUE,6
+"2013-2014","PSA_174","Had a digital rectal exam",TRUE,6
+"2010-2011","PSA_175","Last time had digital rectal exam",TRUE,9
+"2013-2014","PSA_175","Last time had digital rectal exam",TRUE,9
+"2010-2011","PSA_73A","Had PSA test - family history",TRUE,6
+"2013-2014","PSA_73A","Had PSA test - family history",TRUE,6
+"2010-2011","PSA_73B","Had PSA test - regular check-up",TRUE,6
+"2013-2014","PSA_73B","Had PSA test - regular check-up",TRUE,6
+"2010-2011","PSA_73C","Had PSA test - age",TRUE,6
+"2013-2014","PSA_73C","Had PSA test - age",TRUE,6
+"2010-2011","PSA_73D","Had PSA test - follow-up / problem",TRUE,6
+"2013-2014","PSA_73D","Had PSA test - follow-up / problem",TRUE,6
+"2010-2011","PSA_73E","Had PSA test - follow-up/prostate treat.",TRUE,6
+"2013-2014","PSA_73E","Had PSA test - follow-up/prostate treat.",TRUE,6
+"2010-2011","PSA_73F","Had PSA test - other",TRUE,6
+"2013-2014","PSA_73F","Had PSA test - other",TRUE,6
+"2010-2011","PSC_1","Received any community-based care",TRUE,6
+"2013-2014","PSC_1","Received any community-based care",TRUE,6
+"2010-2011","PSC_2","How rate quality of com.-based received",TRUE,8
+"2013-2014","PSC_2","How rate quality of com.-based received",TRUE,8
+"2010-2011","PSC_3","Satisf.the way com.-based care provided",TRUE,9
+"2013-2014","PSC_3","Satisf.the way com.-based care provided",TRUE,9
+"2010-2011","PWBDPWB","Psychological well-being scale - (D)",TRUE,4
+"2010-2011","PWB_01","Freq. - felt self-confident",TRUE,9
+"2010-2011","PWB_02","Freq. - satisfied w/accomplishments",TRUE,9
+"2010-2011","PWB_03","Freq. - took on lots of projects",TRUE,9
+"2010-2011","PWB_04","Freq. - felt emotionally balanced",TRUE,9
+"2010-2011","PWB_05","Freq. - felt loved and appreciated",TRUE,9
+"2010-2011","PWB_06","Freq. - had goals and ambitions",TRUE,9
+"2010-2011","PWB_07","Freq. - felt like having fun",TRUE,9
+"2010-2011","PWB_08","Freq. - felt useful",TRUE,9
+"2010-2011","PWB_09","Freq. - smiled easily",TRUE,9
+"2010-2011","PWB_10","Freq. - was true to self",TRUE,9
+"2010-2011","PWB_11","Freq. - listening to friends",TRUE,9
+"2010-2011","PWB_12","Freq. - curious and interested",TRUE,9
+"2010-2011","PWB_13","Freq. - was able to sort things out",TRUE,9
+"2010-2011","PWB_14","Freq. - found life exciting",TRUE,9
+"2010-2011","PWB_15","Freq. - life well-balanced",TRUE,9
+"2010-2011","PWB_16","Freq. - was calm and level-headed",TRUE,9
+"2010-2011","PWB_17","Freq. - easily found answers",TRUE,9
+"2010-2011","PWB_18","Freq. - got along well with others",TRUE,9
+"2010-2011","PWB_19","Freq. - lived at normal pace",TRUE,9
+"2010-2011","PWB_20","Freq. - impression of enjoying life",TRUE,9
+"2010-2011","PWB_21","Freq. - had good sense of humour",TRUE,9
+"2010-2011","PWB_22","Freq. - was at peace with self",TRUE,9
+"2010-2011","PWB_23","Freq. - felt healthy/in good shape",TRUE,9
+"2010-2011","PWB_24","Freq. - face situations positively",TRUE,9
+"2010-2011","PWB_25","Freq. - had good morale",TRUE,9
+"2010-2011","RACDIMP","Impact of health problems - (D)",TRUE,7
+"2013-2014","RACDIMP","Impact of health problems - (D)",TRUE,7
+"2010-2011","RACDPAL","Participation and activity limit. - (D)",TRUE,7
+"2013-2014","RACDPAL","Participation and activity limit. - (D)",TRUE,7
+"2010-2011","RACG5","Cause of health problem - (G)",TRUE,10
+"2013-2014","RACG5","Cause of health problem - (G)",TRUE,10
+"2010-2011","RAC_1","Has difficulty with activities",TRUE,7
+"2013-2014","RAC_1","Has difficulty with activities",TRUE,7
+"2010-2011","RAC_2A","Reduction kind/amount activities - home",TRUE,7
+"2013-2014","RAC_2A","Reduction kind/amount activities - home",TRUE,7
+"2010-2011","RAC_2B1","Reduction kind/amount activities- school",TRUE,8
+"2013-2014","RAC_2B1","Reduction kind/amount activities- school",TRUE,8
+"2010-2011","RAC_2B2","Reduction kind/amount act. - at work",TRUE,8
+"2013-2014","RAC_2B2","Reduction kind/amount act. - at work",TRUE,8
+"2010-2011","RAC_2C","Reduction kind/amount act. - other",TRUE,7
+"2013-2014","RAC_2C","Reduction kind/amount act. - other",TRUE,7
+"2010-2011","REPG3","Rep. strain - body part affected - (G)",TRUE,13
+"2013-2014","REPG3","Rep. strain - body part affected - (G)",TRUE,13
+"2010-2011","REP_1A","Repetitive strain injury",TRUE,6
+"2013-2014","REP_1A","Repetitive strain injury",TRUE,6
+"2010-2011","REP_2","Limit your normal activities",TRUE,6
+"2013-2014","REP_2","Limit your normal activities",TRUE,6
+"2010-2011","REP_3A","Rep. strain-activity causing injury",TRUE,6
+"2013-2014","REP_3A","Rep. strain-activity causing injury",TRUE,6
+"2010-2011","REP_4","Rep. strain - working at a job/business",TRUE,6
+"2013-2014","REP_4","Rep. strain - working at a job/business",TRUE,6
+"2010-2011","REP_5A","Activity - Walking",TRUE,6
+"2013-2014","REP_5A","Activity - Walking",TRUE,6
+"2010-2011","REP_5B","Activity - Sports",TRUE,6
+"2013-2014","REP_5B","Activity - Sports",TRUE,6
+"2010-2011","REP_5C","Activity - Leisure",TRUE,6
+"2013-2014","REP_5C","Activity - Leisure",TRUE,6
+"2010-2011","REP_5D","Activity - Household chores",TRUE,6
+"2013-2014","REP_5D","Activity - Household chores",TRUE,6
+"2010-2011","REP_5F","Activity - Computer",TRUE,6
+"2013-2014","REP_5F","Activity - Computer",TRUE,6
+"2010-2011","REP_5G","Activity  - Driving a motor vehicle",TRUE,6
+"2013-2014","REP_5G","Activity  - Driving a motor vehicle",TRUE,6
+"2010-2011","REP_5H","Activity - Lifting or carrying",TRUE,6
+"2013-2014","REP_5H","Activity - Lifting or carrying",TRUE,6
+"2010-2011","REP_5I","Activity - Other",TRUE,6
+"2013-2014","REP_5I","Activity - Other",TRUE,6
+"2010-2011","SACDTER","No. hrs / wk. (exc. read.) - seden. act.",TRUE,14
+"2013-2014","SACDTER","No. hrs / wk. (exc. read.) - seden. act.",TRUE,14
+"2010-2011","SACDTOT","Tot. hrs. -seden. activit. - 3 mo - (D)",TRUE,14
+"2013-2014","SACDTOT","Tot. hrs. -seden. activit. - 3 mo - (D)",TRUE,14
+"2010-2011","SACG1","No. of hrs.-on a computer -past3mo(G)",TRUE,11
+"2013-2014","SACG1","No. of hrs.-on a computer -past3mo(G)",TRUE,11
+"2010-2011","SACG2","No. of hrs.-play video games -past3mo(G)",TRUE,11
+"2013-2014","SACG2","No. of hrs.-play video games -past3mo(G)",TRUE,11
+"2010-2011","SACG3","No. of hrs.-watch tv/videos -past3mo(G)",TRUE,13
+"2013-2014","SACG3","No. of hrs.-watch tv/videos -past3mo(G)",TRUE,13
+"2010-2011","SACG4","No. of hrs.-read -past3mo(G)",TRUE,11
+"2013-2014","SACG4","No. of hrs.-read -past3mo(G)",TRUE,11
+"2013-2014","SCADQUI","Attempted to stop smoking - (D)",TRUE,8
+"2013-2014","SCAG10A","Usefulness of nicotine patch - (G)",TRUE,7
+"2013-2014","SCAG12A","Usefulness of medication - (G)",TRUE,7
+"2013-2014","SCA_10","Usefulness of nicotine patch",TRUE,6
+"2013-2014","SCA_11","Usefulness of nicotine gum/candy",TRUE,8
+"2013-2014","SCA_11A","Usefulness of nicotine gum/candy",TRUE,8
+"2013-2014","SCA_12","Usefulness of medication such as Zyban",TRUE,6
+"2013-2014","SCA_50","Stopped smoking for at least 24 hrs.",TRUE,6
+"2013-2014","SCA_60","Tried quit smoking - nicotine patch",TRUE,6
+"2013-2014","SCA_61","Tried quit smo. -nicot. gum/candy -12 mo",TRUE,6
+"2013-2014","SCA_62","Tried quit smoking - Zyban",TRUE,6
+"2010-2011","SCHDSTG","Smoking stage of change - (D)",TRUE,9
+"2013-2014","SCHDSTG","Smoking stage of change - (D)",TRUE,9
+"2010-2011","SCH_1","Quitting smoking - next 6 mo",TRUE,6
+"2013-2014","SCH_1","Quitting smoking - next 6 mo",TRUE,6
+"2010-2011","SCH_2","Quitting smoking - next 30 days",TRUE,6
+"2013-2014","SCH_2","Quitting smoking - next 30 days",TRUE,6
+"2010-2011","SCH_3","Stopped smok. for at least 24 hrs -12 mo",TRUE,6
+"2013-2014","SCH_3","Stopped smok. for at least 24 hrs -12 mo",TRUE,6
+"2010-2011","SCH_4","No.times stop.for at least 24 hrs -12 mo",TRUE,4
+"2013-2014","SCH_4","No.times stop.for at least 24 hrs -12 mo",TRUE,4
+"2013-2014","SCPDSTG","Stages of changes - physical activity",TRUE,9
+"2013-2014","SCP_01","level of physical activity/ every week",TRUE,8
+"2013-2014","SCP_02","increase of physical activity level",TRUE,6
+"2013-2014","SCP_03","increase of physical activity level",TRUE,6
+"2013-2014","SCP_04","increase of physical activity level",TRUE,6
+"2013-2014","SDCDFOLS","First official language spoken - (D)",TRUE,8
+"2010-2011","SDCFIMM","Immigrant - (F)",TRUE,6
+"2013-2014","SDCFIMM","Immigrant - (F)",TRUE,6
+"2013-2014","SDCG9","Full-time student or part-time student",TRUE,6
+"2013-2014","SDCGCB13","Country of birth - Canada/other",TRUE,6
+"2010-2011","SDCGCBG","Country of birth - Canada/other - (G)",TRUE,6
+"2010-2011","SDCGCGT","Cultural or racial origin - (D, G)",TRUE,6
+"2013-2014","SDCGCGT","Cultural or racial origin - (D, G)",TRUE,6
+"2010-2011","SDCGLHM","Language(s) spoken at home",TRUE,8
+"2013-2014","SDCGLHM","Language(s) spoken at home",TRUE,8
+"2010-2011","SDCGLNG","Languages - can converse - (D,G)",TRUE,8
+"2010-2011","SDCGRES","Length/time in Canada since imm. - (D,G)",TRUE,6
+"2013-2014","SDCGRES","Length/time in Canada since imm. - (D,G)",TRUE,6
+"2013-2014","SDC_5A_1","Knowledge of official languages",TRUE,8
+"2010-2011","SDC_8","Current student",TRUE,6
+"2013-2014","SDC_8","Current student",TRUE,6
+"2010-2011","SDC_9","Full-time student/part-time student",TRUE,6
+"2010-2011","SFEDE1","Self-esteem scale - (D)",TRUE,4
+"2010-2011","SFE_501","Self-esteem - has good qualities",TRUE,9
+"2010-2011","SFE_502","Self-esteem - is person of worth",TRUE,9
+"2010-2011","SFE_503","Self-esteem - is able to do things well",TRUE,9
+"2010-2011","SFE_504","Self-esteem - takes positive attitude",TRUE,9
+"2010-2011","SFE_505","Self-esteem - satisfied with self",TRUE,9
+"2010-2011","SFE_506","Self-esteem - feels is a failure",TRUE,9
+"2010-2011","SFRDBPS","Bodily pain scale - (D)",TRUE,4
+"2010-2011","SFRDGHP","General health perceptions scale - (D)",TRUE,4
+"2010-2011","SFRDGMH","General mental health scale - (D)",TRUE,4
+"2010-2011","SFRDMCS","Summary measure of mental health - (D)",TRUE,4
+"2010-2011","SFRDMRF","Role functioning (mental) scale - (D)",TRUE,4
+"2010-2011","SFRDPCS","Summary measure of physical health - (D)",TRUE,4
+"2010-2011","SFRDPFS","Physical functioning scale - (D)",TRUE,4
+"2010-2011","SFRDPRF","Role functioning (physical) scale - (D)",TRUE,4
+"2010-2011","SFRDSFS","Social functioning scale - (D)",TRUE,4
+"2010-2011","SFRDVTS","Vitality scale - (D)",TRUE,4
+"2013-2014","SLPG01","Nbr hours sleep per night - (G)",TRUE,15
+"2013-2014","SLP_02","Freq. - trouble sleeping",TRUE,9
+"2013-2014","SLP_03","Frequency - find sleep refreshing",TRUE,9
+"2013-2014","SLP_04","Frequency - difficult to stay awake",TRUE,9
+"2010-2011","SMKDSTY","Type of smoker - (D)",TRUE,10
+"2013-2014","SMKDSTY","Type of smoker - (D)",TRUE,10
+"2010-2011","SMKDYCS","Number of years smoked - (D)",TRUE,4
+"2013-2014","SMKDYCS","Number of years smoked - (D)",TRUE,4
+"2010-2011","SMKG01C","Age - smoked first whole cigarette - (G)",TRUE,15
+"2013-2014","SMKG01C","Age - smoked first whole cigarette - (G)",TRUE,15
+"2010-2011","SMKG06C","No. of years since stopped smoking - (G)",TRUE,7
+"2013-2014","SMKG06C","No. of years since stopped smoking - (G)",TRUE,7
+"2010-2011","SMKG09C","Years since stopped smoking daily - (G)",TRUE,7
+"2013-2014","SMKG09C","Years since stopped smoking daily - (G)",TRUE,7
+"2010-2011","SMKG10C","No. of years since stopped smoking - (G)",TRUE,7
+"2013-2014","SMKG10C","No. of years since stopped smoking - (G)",TRUE,7
+"2010-2011","SMKG203","Age start smok daily (daily smoker)-(G)",TRUE,15
+"2013-2014","SMKG203","Age start smok daily (daily smoker)-(G)",TRUE,15
+"2010-2011","SMKG207","Age - started smoking daily - (G)",TRUE,15
+"2013-2014","SMKG207","Age - started smoking daily - (G)",TRUE,15
+"2010-2011","SMKGSTP","No. of years stop smoking compl. (D,G)",TRUE,9
+"2013-2014","SMKGSTP","No. of years stop smoking compl. (D,G)",TRUE,9
+"2010-2011","SMK_01A","Smoked 100 or more cigarettes - life",TRUE,6
+"2013-2014","SMK_01A","Smoked 100 or more cigarettes - life",TRUE,6
+"2010-2011","SMK_01B","Ever smoked whole cigarette",TRUE,6
+"2013-2014","SMK_01B","Ever smoked whole cigarette",TRUE,6
+"2010-2011","SMK_05B","No. of cig. per day (occasional smoker)",TRUE,4
+"2013-2014","SMK_05B","No. of cig. per day (occasional smoker)",TRUE,4
+"2010-2011","SMK_05C","No. of days-1 cig. or more (occ. smoker)",TRUE,4
+"2013-2014","SMK_05C","No. of days-1 cig. or more (occ. smoker)",TRUE,4
+"2010-2011","SMK_05D","Ever smoked cigarettes daily",TRUE,6
+"2013-2014","SMK_05D","Ever smoked cigarettes daily",TRUE,6
+"2010-2011","SMK_06A","Stopped smoking-when (never daily smok.)",TRUE,8
+"2013-2014","SMK_06A","Stopped smoking-when (never daily smok.)",TRUE,8
+"2010-2011","SMK_09A","Stopped smoking daily - when",TRUE,8
+"2013-2014","SMK_09A","Stopped smoking daily - when",TRUE,8
+"2010-2011","SMK_10","Quit smoking completely",TRUE,6
+"2013-2014","SMK_10","Quit smoking completely",TRUE,6
+"2010-2011","SMK_10A","Stopped smoking completely - when",TRUE,8
+"2013-2014","SMK_10A","Stopped smoking completely - when",TRUE,8
+"2010-2011","SMK_202","Type of smoker",TRUE,7
+"2013-2014","SMK_202","Type of smoker",TRUE,7
+"2010-2011","SMK_204","No. of cig. smoked/day (daily smoker)",TRUE,4
+"2013-2014","SMK_204","No. of cig. smoked/day (daily smoker)",TRUE,4
+"2010-2011","SMK_208","No. of cig. smoked/day (former daily)",TRUE,4
+"2013-2014","SMK_208","No. of cig. smoked/day (former daily)",TRUE,4
+"2013-2014","SPCG14G","Type help - other - (G)",TRUE,6
+"2010-2011","SPC_10","Visited regular medical doctor",TRUE,6
+"2013-2014","SPC_10","Visited regular medical doctor",TRUE,6
+"2010-2011","SPC_11","Doctor - knows smokes/smoked",TRUE,6
+"2013-2014","SPC_11","Doctor - knows smokes/smoked",TRUE,6
+"2010-2011","SPC_12","Doctor - advised to quit",TRUE,6
+"2013-2014","SPC_12","Doctor - advised to quit",TRUE,6
+"2010-2011","SPC_13","Doctor - gave specific help",TRUE,6
+"2013-2014","SPC_13","Doctor - gave specific help",TRUE,6
+"2010-2011","SPC_14A","Type help - referral to one-on-one prog.",TRUE,6
+"2010-2011","SPC_14B","Type help - referral to group prog.",TRUE,6
+"2010-2011","SPC_14C","Type help - recommended nicotine patch",TRUE,6
+"2013-2014","SPC_14C","Type help - recommended nicotine patch",TRUE,6
+"2010-2011","SPC_14D","Type help - recommended Zyban/other med.",TRUE,6
+"2013-2014","SPC_14D","Type help - recommended Zyban/other med.",TRUE,6
+"2010-2011","SPC_14E","Type help - provided self-help info.",TRUE,6
+"2013-2014","SPC_14E","Type help - provided self-help info.",TRUE,6
+"2010-2011","SPC_14F","Type help - doctor offered couns.",TRUE,6
+"2010-2011","SPC_14G","Type help - other",TRUE,6
+"2010-2011","SPC_20","Visited dentist",TRUE,6
+"2013-2014","SPC_20","Visited dentist",TRUE,6
+"2010-2011","SPC_21","Dentist/hygienist - knows smokes/smoked",TRUE,6
+"2013-2014","SPC_21","Dentist/hygienist - knows smokes/smoked",TRUE,6
+"2010-2011","SPC_22","Dentist/hygienist - advised to quit",TRUE,6
+"2013-2014","SPC_22","Dentist/hygienist - advised to quit",TRUE,6
+"2013-2014","SPSDALL","Soc.Prov.Scale-Reliable alliance",TRUE,4
+"2013-2014","SPSDATT","Soc.Prov.Scale-Attachment",TRUE,4
+"2013-2014","SPSDCON","Soc.Prov.Scale-",TRUE,4
+"2013-2014","SPSDGUI","Soc.Prov.Scale-Guidance",TRUE,4
+"2013-2014","SPSDINT","Soc.Prov.Scale-Social integration",TRUE,4
+"2013-2014","SPSDWOR","Soc.Prov.Scale-Reassurance of worth",TRUE,4
+"2013-2014","SPS_01","Relationships -  people/help",TRUE,8
+"2013-2014","SPS_02","Relationships - social activities",TRUE,8
+"2013-2014","SPS_03","Relationship-emotional security/wellbein",TRUE,8
+"2013-2014","SPS_04","Relationships-important decisions",TRUE,8
+"2013-2014","SPS_05","Relationships - Competence and skill",TRUE,8
+"2013-2014","SPS_06","Relationships-trustworthy person/advice",TRUE,8
+"2013-2014","SPS_07","Relationships-share attitudes/beliefs",TRUE,8
+"2013-2014","SPS_08","Relationships - strong emotional bond",TRUE,8
+"2013-2014","SPS_09","Relationships-admire talents/abilities",TRUE,8
+"2013-2014","SPS_10","Relationships - people/emergency",TRUE,8
+"2010-2011","SSADAFF","Affection - MOS subscale - (D)",TRUE,4
+"2010-2011","SSADEMO","Emot./info. support - MOS subscale - (D)",TRUE,4
+"2010-2011","SSADSOC","Positive social interaction - MOS - (D)",TRUE,4
+"2010-2011","SSADTNG","Tangible social support - MOS - (D)",TRUE,4
+"2010-2011","SSA_01","No. of close friends and relatives",TRUE,4
+"2010-2011","SSA_02","Has someone to give help if confined bed",TRUE,9
+"2010-2011","SSA_03","Has someone to listen",TRUE,9
+"2010-2011","SSA_04","Has som. to receive advice about crisis",TRUE,9
+"2010-2011","SSA_05","Has someone to take to doctor",TRUE,9
+"2010-2011","SSA_06","Has someone who shows love and affection",TRUE,9
+"2010-2011","SSA_07","Has someone to have a good time with",TRUE,9
+"2010-2011","SSA_08","Has some. to receive info/help situation",TRUE,9
+"2010-2011","SSA_09","Has someone to confide in",TRUE,9
+"2010-2011","SSA_10","Has someone who gives hugs",TRUE,9
+"2010-2011","SSA_11","Has someone to get together w/for relax.",TRUE,9
+"2010-2011","SSA_12","Has someone to prepare meals",TRUE,9
+"2010-2011","SSA_13","Has someone to give advice",TRUE,9
+"2010-2011","SSA_14","Has someone to do things to get mind off",TRUE,9
+"2010-2011","SSA_15","Has someone to help with daily chores",TRUE,9
+"2010-2011","SSA_16","Has someone to share most priv. worries",TRUE,9
+"2010-2011","SSA_17","Has someone to turn to for suggestions",TRUE,9
+"2010-2011","SSA_18","Has someone to do something enjoyable",TRUE,9
+"2010-2011","SSA_19","Has someone who understands problems",TRUE,9
+"2010-2011","SSA_20","Has someone who loves/makes feel wanted",TRUE,9
+"2010-2011","SSB_01","Been surnburnt - past 12 months",TRUE,6
+"2013-2014","SSB_01","Been surnburnt - past 12 months",TRUE,6
+"2010-2011","SSB_02","Sunburn involved blistering",TRUE,6
+"2013-2014","SSB_02","Sunburn involved blistering",TRUE,6
+"2010-2011","SSB_03","Sunburns involved pain - more than 1 day",TRUE,6
+"2013-2014","SSB_03","Sunburns involved pain - more than 1 day",TRUE,6
+"2010-2011","SSB_06","Amount time in the sun - 11 am to 4 pm",TRUE,12
+"2013-2014","SSB_06","Amount time in the sun - 11 am to 4 pm",TRUE,12
+"2010-2011","SSB_07","Frequency - seek shade",TRUE,9
+"2013-2014","SSB_07","Frequency - seek shade",TRUE,9
+"2010-2011","SSB_08","Frequency - wear hat in the sun",TRUE,9
+"2013-2014","SSB_08","Frequency - wear hat in the sun",TRUE,9
+"2010-2011","SSB_09A","Frequency - wear long pants or skirt",TRUE,9
+"2013-2014","SSB_09A","Frequency - wear long pants or skirt",TRUE,9
+"2010-2011","SSB_09B","Frequency - use sunscreen on your face",TRUE,9
+"2013-2014","SSB_09B","Frequency - use sunscreen on your face",TRUE,9
+"2010-2011","SSB_10","SPF use - face",TRUE,7
+"2013-2014","SSB_10","SPF use - face",TRUE,7
+"2010-2011","SSB_11","Frequency - use sunscreen on your body",TRUE,9
+"2013-2014","SSB_11","Frequency - use sunscreen on your body",TRUE,9
+"2010-2011","SSB_12","SPF use - body",TRUE,7
+"2013-2014","SSB_12","SPF use - body",TRUE,7
+"2010-2011","SSU_21A","Received tangible social support",TRUE,6
+"2010-2011","SSU_21B","Freq. of tangible social support",TRUE,9
+"2010-2011","SSU_22A","Received affective support",TRUE,6
+"2010-2011","SSU_22B","Freq. of affective support",TRUE,9
+"2010-2011","SSU_23A","Rec'd pos. social interac. supp.",TRUE,6
+"2010-2011","SSU_23B","Freq. of pos. social interac. supp.",TRUE,9
+"2010-2011","SSU_24A","Received emotional/informational support",TRUE,6
+"2010-2011","SSU_24B","Freq. of emotional/info. support",TRUE,9
+"2010-2011","SUI_1","Has considered suicide - lifetime",TRUE,6
+"2013-2014","SUI_1","Has considered suicide - lifetime",TRUE,6
+"2010-2011","SUI_2","Has considered suicide - past 12 mo",TRUE,6
+"2013-2014","SUI_2","Has considered suicide - past 12 mo",TRUE,6
+"2010-2011","SWL_02","Satisfaction - job",TRUE,9
+"2010-2011","SWL_03","Satisfaction - leisure activities",TRUE,9
+"2010-2011","SWL_04","Satisfaction - financial situation",TRUE,9
+"2010-2011","SWL_05","Satisfaction - with self",TRUE,9
+"2010-2011","SWL_06","Satisfaction - way body looks",TRUE,9
+"2010-2011","SWL_07","Satisfaction - relationship with family",TRUE,9
+"2010-2011","SWL_08","Satisfaction - relationship with friends",TRUE,9
+"2010-2011","SWL_09","Satisfaction - housing",TRUE,9
+"2010-2011","SWL_10","Satisfaction - neighbourhood",TRUE,9
+"2010-2011","SXB_07","Ever diagnosed with STD",TRUE,6
+"2013-2014","SXB_07","Ever diagnosed with STD",TRUE,6
+"2010-2011","SXB_09","Important to avoid getting pregnant",TRUE,9
+"2013-2014","SXB_09","Important to avoid getting pregnant",TRUE,9
+"2010-2011","SXB_1","Ever had sexual intercourse",TRUE,6
+"2013-2014","SXB_1","Ever had sexual intercourse",TRUE,6
+"2010-2011","SXB_10","Important avoid getting partner pregnant",TRUE,11
+"2013-2014","SXB_10","Important avoid getting partner pregnant",TRUE,11
+"2010-2011","SXB_11","Usually use birth control - past 12 mo",TRUE,6
+"2013-2014","SXB_11","Usually use birth control - past 12 mo",TRUE,6
+"2010-2011","SXB_12A","Usual birth control method - condom",TRUE,6
+"2013-2014","SXB_12A","Usual birth control method - condom",TRUE,6
+"2010-2011","SXB_12B","Usual birth control method - the pill",TRUE,6
+"2013-2014","SXB_12B","Usual birth control method - the pill",TRUE,6
+"2010-2011","SXB_12C","Usual birth control method - diaphragm",TRUE,6
+"2013-2014","SXB_12C","Usual birth control method - diaphragm",TRUE,6
+"2010-2011","SXB_12D","Usual birth control method - spermicide",TRUE,6
+"2013-2014","SXB_12D","Usual birth control method - spermicide",TRUE,6
+"2010-2011","SXB_12E","Usual birth control method - other",TRUE,6
+"2013-2014","SXB_12E","Usual birth control method - other",TRUE,6
+"2010-2011","SXB_12F","Usual birth control method - injection",TRUE,6
+"2013-2014","SXB_12F","Usual birth control method - injection",TRUE,6
+"2010-2011","SXB_13A","B.c. method used last time - condom",TRUE,6
+"2013-2014","SXB_13A","B.c. method used last time - condom",TRUE,6
+"2010-2011","SXB_13B","B.c. method used last time - the pill",TRUE,6
+"2013-2014","SXB_13B","B.c. method used last time - the pill",TRUE,6
+"2010-2011","SXB_13C","B.c. method used last time - diaphragm",TRUE,6
+"2013-2014","SXB_13C","B.c. method used last time - diaphragm",TRUE,6
+"2010-2011","SXB_13D","B.c. method used last time - spermicide",TRUE,6
+"2013-2014","SXB_13D","B.c. method used last time - spermicide",TRUE,6
+"2010-2011","SXB_13E","B.c. method used last time - other",TRUE,6
+"2013-2014","SXB_13E","B.c. method used last time - other",TRUE,6
+"2010-2011","SXB_13F","B.c. method used last time - injection",TRUE,6
+"2013-2014","SXB_13F","B.c. method used last time - injection",TRUE,6
+"2010-2011","SXB_13G","Method used last time - nothing",TRUE,6
+"2013-2014","SXB_13G","Method used last time - nothing",TRUE,6
+"2010-2011","SXB_3","Had sexual intercourse - past 12 mo",TRUE,6
+"2013-2014","SXB_3","Had sexual intercourse - past 12 mo",TRUE,6
+"2010-2011","SXB_7A","Condom use - last time",TRUE,6
+"2013-2014","SXB_7A","Condom use - last time",TRUE,6
+"2010-2011","TAL_1","Smoked cigars - last month",TRUE,6
+"2013-2014","TAL_1","Smoked cigars - last month",TRUE,6
+"2010-2011","TAL_2","Smoked a pipe - last month",TRUE,6
+"2013-2014","TAL_2","Smoked a pipe - last month",TRUE,6
+"2010-2011","TAL_3","Used snuff - last month",TRUE,6
+"2013-2014","TAL_3","Used snuff - last month",TRUE,6
+"2010-2011","TAL_4","Used chewing tobacco - last month",TRUE,6
+"2013-2014","TAL_4","Used chewing tobacco - last month",TRUE,6
+"2010-2011","UCN_010","Unmet health care needs - self-perceived",TRUE,6
+"2013-2014","UCN_010","Unmet health care needs - self-perceived",TRUE,6
+"2010-2011","UCN_020A","Care not rec'd - not avail. in area",TRUE,6
+"2013-2014","UCN_020A","Care not rec'd - not avail. in area",TRUE,6
+"2010-2011","UCN_020B","Care not rec'd - not avail. time req'd",TRUE,6
+"2013-2014","UCN_020B","Care not rec'd - not avail. time req'd",TRUE,6
+"2010-2011","UCN_020C","Care not rec'd - wait too long",TRUE,6
+"2013-2014","UCN_020C","Care not rec'd - wait too long",TRUE,6
+"2010-2011","UCN_020D","Care not rec'd - felt be inadequate",TRUE,6
+"2013-2014","UCN_020D","Care not rec'd - felt be inadequate",TRUE,6
+"2010-2011","UCN_020E","Care not rec'd - cost",TRUE,6
+"2013-2014","UCN_020E","Care not rec'd - cost",TRUE,6
+"2010-2011","UCN_020F","Care not rec'd - too busy",TRUE,6
+"2013-2014","UCN_020F","Care not rec'd - too busy",TRUE,6
+"2010-2011","UCN_020G","Care not rec'd - didn't get around it",TRUE,6
+"2013-2014","UCN_020G","Care not rec'd - didn't get around it",TRUE,6
+"2010-2011","UCN_020H","Care not rec'd - decided not seek care",TRUE,6
+"2013-2014","UCN_020H","Care not rec'd - decided not seek care",TRUE,6
+"2010-2011","UCN_020I","Care not rec'd - doctor think not nec.",TRUE,6
+"2013-2014","UCN_020I","Care not rec'd - doctor think not nec.",TRUE,6
+"2010-2011","UCN_020J","Care not rec'd - other",TRUE,6
+"2013-2014","UCN_020J","Care not rec'd - other",TRUE,6
+"2010-2011","UCN_030A","Type care not rec'd - physical hlth prob",TRUE,6
+"2013-2014","UCN_030A","Type care not rec'd - physical hlth prob",TRUE,6
+"2010-2011","UCN_030B","Type care not rec'd - emotional problem",TRUE,6
+"2013-2014","UCN_030B","Type care not rec'd - emotional problem",TRUE,6
+"2010-2011","UCN_030C","Type care not rec'd - regular check-up",TRUE,6
+"2013-2014","UCN_030C","Type care not rec'd - regular check-up",TRUE,6
+"2010-2011","UCN_030D","Type care not rec'd - care of injury",TRUE,6
+"2013-2014","UCN_030D","Type care not rec'd - care of injury",TRUE,6
+"2010-2011","UCN_030E","Type care not rec'd - other",TRUE,6
+"2013-2014","UCN_030E","Type care not rec'd - other",TRUE,6
+"2010-2011","UCN_040A","Tried get serv. - doctor's office",TRUE,6
+"2013-2014","UCN_040A","Tried get serv. - doctor's office",TRUE,6
+"2010-2011","UCN_040B","Tried get serv. - comm. hlth centre/CLSC",TRUE,6
+"2013-2014","UCN_040B","Tried get serv. - comm. hlth centre/CLSC",TRUE,6
+"2010-2011","UCN_040C","Tried get serv. - walk-in clinic",TRUE,6
+"2013-2014","UCN_040C","Tried get serv. - walk-in clinic",TRUE,6
+"2010-2011","UCN_040D","Tried get serv. - appointment clinic",TRUE,6
+"2013-2014","UCN_040D","Tried get serv. - appointment clinic",TRUE,6
+"2010-2011","UCN_040E","Tried get serv. - hospital emergency",TRUE,6
+"2013-2014","UCN_040E","Tried get serv. - hospital emergency",TRUE,6
+"2010-2011","UCN_040F","Tried get serv. - hsp. outpatient clinic",TRUE,6
+"2013-2014","UCN_040F","Tried get serv. - hsp. outpatient clinic",TRUE,6
+"2010-2011","UCN_040G","Tried get serv. - other",TRUE,6
+"2013-2014","UCN_040G","Tried get serv. - other",TRUE,6
+"2010-2011","UPEFILS","Wears all prot. equip. - in-line skating",TRUE,6
+"2013-2014","UPEFILS","Wears all prot. equip. - in-line skating",TRUE,6
+"2010-2011","UPEFSKB","Wears all prot. equip. - skateb. - (F)",TRUE,6
+"2013-2014","UPEFSKB","Wears all prot. equip. - skateb. - (F)",TRUE,6
+"2010-2011","UPEFSNB","Wears all prot. equip. - snowb.- (F)",TRUE,6
+"2013-2014","UPEFSNB","Wears all prot. equip. - snowb.- (F)",TRUE,6
+"2010-2011","UPE_01","Freq. - helmet - bicycling",TRUE,8
+"2013-2014","UPE_01","Freq. - helmet - bicycling",TRUE,8
+"2010-2011","UPE_01A","Done any bicycling in past 12 months",TRUE,6
+"2013-2014","UPE_01A","Done any bicycling in past 12 months",TRUE,6
+"2010-2011","UPE_02","Done in-line skating in past 12 months",TRUE,6
+"2013-2014","UPE_02","Done in-line skating in past 12 months",TRUE,6
+"2010-2011","UPE_02A","Freq. - helmet - in-line skating",TRUE,8
+"2013-2014","UPE_02A","Freq. - helmet - in-line skating",TRUE,8
+"2010-2011","UPE_02B","Freq. - wrist guards - in-line skating",TRUE,8
+"2013-2014","UPE_02B","Freq. - wrist guards - in-line skating",TRUE,8
+"2010-2011","UPE_02C","Freq. - elbow pads - in-line skating",TRUE,8
+"2013-2014","UPE_02C","Freq. - elbow pads - in-line skating",TRUE,8
+"2010-2011","UPE_02D","Wear knee pads",TRUE,8
+"2013-2014","UPE_02D","Wear knee pads",TRUE,8
+"2010-2011","UPE_03A","Downhill skiing/snowboarding - 3 mo",TRUE,8
+"2013-2014","UPE_03A","Downhill skiing/snowboarding - 3 mo",TRUE,8
+"2010-2011","UPE_03B","Downhill skiing/snowboarding - 12 mo",TRUE,8
+"2013-2014","UPE_03B","Downhill skiing/snowboarding - 12 mo",TRUE,8
+"2010-2011","UPE_04A","Freq. - helmet - downhill skiing",TRUE,8
+"2013-2014","UPE_04A","Freq. - helmet - downhill skiing",TRUE,8
+"2010-2011","UPE_05A","Freq. - helmet - snowboarding",TRUE,8
+"2013-2014","UPE_05A","Freq. - helmet - snowboarding",TRUE,8
+"2010-2011","UPE_05B","Freq. - wrist guards - snowboarding",TRUE,8
+"2013-2014","UPE_05B","Freq. - wrist guards - snowboarding",TRUE,8
+"2010-2011","UPE_06","Has done skateboarding - past 12 mo",TRUE,6
+"2013-2014","UPE_06","Has done skateboarding - past 12 mo",TRUE,6
+"2010-2011","UPE_06A","Freq. - helmet - skateboarding",TRUE,8
+"2013-2014","UPE_06A","Freq. - helmet - skateboarding",TRUE,8
+"2010-2011","UPE_06B","Freq. - wrist guards - skateboarding",TRUE,8
+"2013-2014","UPE_06B","Freq. - wrist guards - skateboarding",TRUE,8
+"2010-2011","UPE_06C","Freq. - elbow pads - skateboarding",TRUE,8
+"2013-2014","UPE_06C","Freq. - elbow pads - skateboarding",TRUE,8
+"2010-2011","UPE_07","Played ice hockey past 12 months",TRUE,6
+"2013-2014","UPE_07","Played ice hockey past 12 months",TRUE,6
+"2010-2011","UPE_07A","Wear a mouth guard",TRUE,8
+"2013-2014","UPE_07A","Wear a mouth guard",TRUE,8
+"2010-2011","VERDATE","Date of file creation",FALSE,0
+"2013-2014","VERDATE","Date of file creation",FALSE,0
+"2010-2011","WTMDCA","# days accept. wait -n-emer. surg.- (D)",TRUE,4
+"2013-2014","WTMDCA","# days accept. wait -n-emer. surg.- (D)",TRUE,4
+"2010-2011","WTMDCN","# days wait - non-urg. surg-not done(D)",TRUE,4
+"2013-2014","WTMDCN","# days wait - non-urg. surg-not done(D)",TRUE,4
+"2010-2011","WTMDCO","# days wait-non-urg. surg -surg. done(D)",TRUE,4
+"2013-2014","WTMDCO","# days wait-non-urg. surg -surg. done(D)",TRUE,4
+"2010-2011","WTMDSA","# days accept. wait - med. spec. (D)",TRUE,4
+"2013-2014","WTMDSA","# days accept. wait - med. spec. (D)",TRUE,4
+"2010-2011","WTMDSN","# days wait/med. spec. - not seen - (D)",TRUE,4
+"2013-2014","WTMDSN","# days wait/med. spec. - not seen - (D)",TRUE,4
+"2010-2011","WTMDSO","# days wait/med. spec. -seen spec. - (D)",TRUE,4
+"2013-2014","WTMDSO","# days wait/med. spec. -seen spec. - (D)",TRUE,4
+"2010-2011","WTMDTA","# days accept. wait - diag. test -(D)",TRUE,4
+"2013-2014","WTMDTA","# days accept. wait - diag. test -(D)",TRUE,4
+"2010-2011","WTMDTN","# days wait - diag. test -not done -(D)",TRUE,4
+"2013-2014","WTMDTN","# days wait - diag. test -not done -(D)",TRUE,4
+"2010-2011","WTMDTO","# days wait - diag. test - done - (D)",TRUE,4
+"2013-2014","WTMDTO","# days wait - diag. test - done - (D)",TRUE,4
+"2013-2014","WTMG06B","Diff. - getting referral/appt. - (G)",TRUE,6
+"2013-2014","WTMG06M","Diff. - other - (G)",TRUE,6
+"2013-2014","WTMG10","Respondent's opinion of waiting time - (",TRUE,6
+"2013-2014","WTMG13C","Visit cancelled/postponed - respondent /",TRUE,6
+"2013-2014","WTMG15F","Life affected by wait - loss of work / i",TRUE,6
+"2013-2014","WTMG15K","Life affected by wait - health improved",TRUE,6
+"2013-2014","WTMG20N","Diff. - other - (G)",TRUE,6
+"2013-2014","WTMG24","Respondent's opinion of waiting time - (",TRUE,6
+"2013-2014","WTMG27C","Surgery cancelled/postponed - surgeon /",TRUE,6
+"2013-2014","WTMG27D","Surgery cancelled/postponed - respondent",TRUE,6
+"2013-2014","WTMG29B","Life affected by wait - worry / worry fo",TRUE,6
+"2013-2014","WTMG29L","Life affected by wait - other - (G)",TRUE,6
+"2013-2014","WTMG37M","What type of difficulties did you experi",TRUE,6
+"2013-2014","WTMG40","Respondent's opinion of waiting time - (",TRUE,6
+"2013-2014","WTMG43","Test cancelled or postponed by - (G)",TRUE,6
+"2013-2014","WTMG45F","Life affected by wait - lost work/income",TRUE,6
+"2013-2014","WTMG45L","Life affected by wait - other - (G)",TRUE,6
+"2010-2011","WTM_01","Required visit to medical specialist",TRUE,6
+"2013-2014","WTM_01","Required visit to medical specialist",TRUE,6
+"2010-2011","WTM_02","Req. vis. med. spec. - type of condition",TRUE,13
+"2013-2014","WTM_02","Req. vis. med. spec. - type of condition",TRUE,13
+"2010-2011","WTM_03","Person who referred resp. to med. spec.",TRUE,8
+"2013-2014","WTM_03","Person who referred resp. to med. spec.",TRUE,8
+"2010-2011","WTM_04","Already visited the medical specialist",TRUE,6
+"2013-2014","WTM_04","Already visited the medical specialist",TRUE,6
+"2010-2011","WTM_05","Difficulty seeing medical specialist",TRUE,6
+"2013-2014","WTM_05","Difficulty seeing medical specialist",TRUE,6
+"2010-2011","WTM_06A","Diff. - getting referral",TRUE,6
+"2010-2011","WTM_06B","Diff. - getting an appointment",TRUE,6
+"2010-2011","WTM_06C","Diff. - no specialists in area",TRUE,6
+"2010-2011","WTM_06D","Diff. - waited too long for appointment",TRUE,6
+"2013-2014","WTM_06D","Diff. - waited too long for appointment",TRUE,6
+"2010-2011","WTM_06E","Diff. - waited too long to see doc.",TRUE,6
+"2013-2014","WTM_06E","Diff. - waited too long to see doc.",TRUE,6
+"2010-2011","WTM_06F","Diff. - transportation",TRUE,6
+"2013-2014","WTM_06F","Diff. - transportation",TRUE,6
+"2010-2011","WTM_06G","Diff. - language",TRUE,6
+"2013-2014","WTM_06G","Diff. - language",TRUE,6
+"2010-2011","WTM_06H","Diff. - cost",TRUE,6
+"2013-2014","WTM_06H","Diff. - cost",TRUE,6
+"2010-2011","WTM_06I","Diff. - pers./family responsibilities",TRUE,6
+"2013-2014","WTM_06I","Diff. - pers./family responsibilities",TRUE,6
+"2010-2011","WTM_06J","Diff. - deterioration of health",TRUE,6
+"2013-2014","WTM_06J","Diff. - deterioration of health",TRUE,6
+"2010-2011","WTM_06K","Diff. - appointment cancelled/deferred",TRUE,6
+"2010-2011","WTM_06L","Diff. - unable leave house/health",TRUE,6
+"2013-2014","WTM_06L","Diff. - unable leave house/health",TRUE,6
+"2010-2011","WTM_06M","Diff. - other",TRUE,6
+"2010-2011","WTM_07A","Length of wait to see specialist",TRUE,4
+"2013-2014","WTM_07A","Length of wait to see specialist",TRUE,4
+"2010-2011","WTM_07B","Length of wait to see specialist - unit",TRUE,7
+"2013-2014","WTM_07B","Length of wait to see specialist - unit",TRUE,7
+"2010-2011","WTM_08A","Length of time been waiting to see spec.",TRUE,4
+"2013-2014","WTM_08A","Length of time been waiting to see spec.",TRUE,4
+"2010-2011","WTM_08B","Length of time waiting/see spec. - unit",TRUE,7
+"2013-2014","WTM_08B","Length of time waiting/see spec. - unit",TRUE,7
+"2010-2011","WTM_10","Respondent's opinion of waiting time",TRUE,7
+"2010-2011","WTM_11A","Acceptable waiting time",TRUE,4
+"2013-2014","WTM_11A","Acceptable waiting time",TRUE,4
+"2010-2011","WTM_11B","Acceptable waiting time - unit",TRUE,7
+"2013-2014","WTM_11B","Acceptable waiting time - unit",TRUE,7
+"2010-2011","WTM_12","Visit to specialist cancelled/postponed",TRUE,6
+"2013-2014","WTM_12","Visit to specialist cancelled/postponed",TRUE,6
+"2010-2011","WTM_13A","Visit cancelled/postponed - respondent",TRUE,6
+"2010-2011","WTM_13B","Visit cancelled/postponed - specialist",TRUE,6
+"2013-2014","WTM_13B","Visit cancelled/postponed - specialist",TRUE,6
+"2010-2011","WTM_13C","Visit cancelled/postponed - other",TRUE,6
+"2010-2011","WTM_14","Life affected by wait/spec.",TRUE,6
+"2013-2014","WTM_14","Life affected by wait/spec.",TRUE,6
+"2010-2011","WTM_15A","Life affected by wait - worry",TRUE,6
+"2013-2014","WTM_15A","Life affected by wait - worry",TRUE,6
+"2010-2011","WTM_15B","Life affected by wait - worry for family",TRUE,6
+"2013-2014","WTM_15B","Life affected by wait - worry for family",TRUE,6
+"2010-2011","WTM_15C","Life affected by wait - pain",TRUE,6
+"2013-2014","WTM_15C","Life affected by wait - pain",TRUE,6
+"2010-2011","WTM_15D","Life affected by wait - prob. daily act.",TRUE,6
+"2013-2014","WTM_15D","Life affected by wait - prob. daily act.",TRUE,6
+"2010-2011","WTM_15E","Life affected by wait - loss of work",TRUE,6
+"2010-2011","WTM_15F","Life affected by wait - loss of income",TRUE,6
+"2010-2011","WTM_15G","Life affected by wait - incr. dependence",TRUE,6
+"2013-2014","WTM_15G","Life affected by wait - incr. dependence",TRUE,6
+"2010-2011","WTM_15H","Life affected by wait - incr. use med.",TRUE,6
+"2013-2014","WTM_15H","Life affected by wait - incr. use med.",TRUE,6
+"2010-2011","WTM_15I","Life affected by wait - health deter.",TRUE,6
+"2013-2014","WTM_15I","Life affected by wait - health deter.",TRUE,6
+"2010-2011","WTM_15J","Life affected by wait - health improved",TRUE,6
+"2010-2011","WTM_15K","Life affected by wait - pers. rel.",TRUE,6
+"2010-2011","WTM_15L","Life affected by wait - other",TRUE,6
+"2013-2014","WTM_15L","Life affected by wait - other",TRUE,6
+"2010-2011","WTM_17","Already had the surgery",TRUE,6
+"2013-2014","WTM_17","Already had the surgery",TRUE,6
+"2010-2011","WTM_18","Surgery required overnight hospital stay",TRUE,6
+"2013-2014","WTM_18","Surgery required overnight hospital stay",TRUE,6
+"2010-2011","WTM_19","Diff. getting this surgery",TRUE,6
+"2013-2014","WTM_19","Diff. getting this surgery",TRUE,6
+"2010-2011","WTM_20A","Diff. - getting an appointment",TRUE,6
+"2010-2011","WTM_20B","Diff. - getting a diagnosis",TRUE,6
+"2010-2011","WTM_20C","Diff. - wait too long for diag. test",TRUE,6
+"2010-2011","WTM_20D","Diff. - waited too long for hosp. bed",TRUE,6
+"2010-2011","WTM_20E","Diff. - waited too long/surgery",TRUE,6
+"2013-2014","WTM_20E","Diff. - waited too long/surgery",TRUE,6
+"2010-2011","WTM_20F","Diff. - service not available/area",TRUE,6
+"2010-2011","WTM_20G","Diff. - transportation",TRUE,6
+"2010-2011","WTM_20H","Diff. - language",TRUE,6
+"2013-2014","WTM_20H","Diff. - language",TRUE,6
+"2010-2011","WTM_20I","Diff. - cost",TRUE,6
+"2010-2011","WTM_20J","Diff. - pers./family responsibilities",TRUE,6
+"2013-2014","WTM_20J","Diff. - pers./family responsibilities",TRUE,6
+"2010-2011","WTM_20K","Diff. - deterioration of health",TRUE,6
+"2013-2014","WTM_20K","Diff. - deterioration of health",TRUE,6
+"2010-2011","WTM_20L","Diff. - appt. cancelled/deferred",TRUE,6
+"2010-2011","WTM_20M","Diff. - unable leave house/health",TRUE,6
+"2013-2014","WTM_20M","Diff. - unable leave house/health",TRUE,6
+"2010-2011","WTM_20N","Diff. - other",TRUE,6
+"2010-2011","WTM_21A","Length of wait/surgery",TRUE,4
+"2013-2014","WTM_21A","Length of wait/surgery",TRUE,4
+"2010-2011","WTM_21B","Length of wait/surgery - unit",TRUE,7
+"2013-2014","WTM_21B","Length of wait/surgery - unit",TRUE,7
+"2010-2011","WTM_22","Surg. will require overnight hosp. stay",TRUE,6
+"2013-2014","WTM_22","Surg. will require overnight hosp. stay",TRUE,6
+"2010-2011","WTM_23A","Time since decision/have surgery",TRUE,4
+"2013-2014","WTM_23A","Time since decision/have surgery",TRUE,4
+"2010-2011","WTM_23B","Time since decision/have surgery - unit",TRUE,7
+"2013-2014","WTM_23B","Time since decision/have surgery - unit",TRUE,7
+"2010-2011","WTM_24","Respondent's opinion of waiting time",TRUE,7
+"2010-2011","WTM_25A","Acceptable waiting time",TRUE,4
+"2013-2014","WTM_25A","Acceptable waiting time",TRUE,4
+"2010-2011","WTM_25B","Acceptable waiting time - unit",TRUE,7
+"2013-2014","WTM_25B","Acceptable waiting time - unit",TRUE,7
+"2010-2011","WTM_26","Surgery cancelled or postponed",TRUE,6
+"2013-2014","WTM_26","Surgery cancelled or postponed",TRUE,6
+"2010-2011","WTM_27A","Surgery cancelled/postponed - respondent",TRUE,6
+"2010-2011","WTM_27B","Surgery cancelled/postponed - surgeon",TRUE,6
+"2010-2011","WTM_27C","Surgery cancelled/postponed - hospital",TRUE,6
+"2010-2011","WTM_27D","Surgery cancelled/postponed - other",TRUE,6
+"2010-2011","WTM_28","Life affected by wait for surgery",TRUE,6
+"2013-2014","WTM_28","Life affected by wait for surgery",TRUE,6
+"2010-2011","WTM_29A","Life affected by wait - worry",TRUE,6
+"2010-2011","WTM_29B","Life affected by wait - worry/family",TRUE,6
+"2010-2011","WTM_29C","Life affected by wait - pain",TRUE,6
+"2013-2014","WTM_29C","Life affected by wait - pain",TRUE,6
+"2010-2011","WTM_29D","Life affected by wait - prob. daily act.",TRUE,6
+"2013-2014","WTM_29D","Life affected by wait - prob. daily act.",TRUE,6
+"2010-2011","WTM_29E","Life affected by wait - loss of work",TRUE,6
+"2010-2011","WTM_29F","Life affected by wait - loss of income",TRUE,6
+"2013-2014","WTM_29F","Life affected by wait - loss of income",TRUE,6
+"2010-2011","WTM_29G","Life affected by wait - incr. dependence",TRUE,6
+"2010-2011","WTM_29H","Life affected by wait - incr. use med.",TRUE,6
+"2010-2011","WTM_29I","Life affected by wait - health deter.",TRUE,6
+"2013-2014","WTM_29I","Life affected by wait - health deter.",TRUE,6
+"2010-2011","WTM_29J","Life affected by wait - health improved",TRUE,6
+"2013-2014","WTM_29J","Life affected by wait - health improved",TRUE,6
+"2010-2011","WTM_29K","Life affected by wait - pers. rel.",TRUE,6
+"2010-2011","WTM_29L","Life affected by wait - other",TRUE,6
+"2010-2011","WTM_30","Type of diagnostic test required",TRUE,7
+"2013-2014","WTM_30","Type of diagnostic test required",TRUE,7
+"2010-2011","WTM_31","Required diag. test - type of condition",TRUE,9
+"2013-2014","WTM_31","Required diag. test - type of condition",TRUE,9
+"2010-2011","WTM_32","Already had diagnostic test",TRUE,6
+"2013-2014","WTM_32","Already had diagnostic test",TRUE,6
+"2010-2011","WTM_33","Location of test",TRUE,8
+"2013-2014","WTM_33","Location of test",TRUE,8
+"2010-2011","WTM_34","Location of clinic",TRUE,7
+"2010-2011","WTM_35","Patient in hospital at time of test",TRUE,6
+"2013-2014","WTM_35","Patient in hospital at time of test",TRUE,6
+"2010-2011","WTM_36","Diff. getting diagnostic test",TRUE,6
+"2013-2014","WTM_36","Diff. getting diagnostic test",TRUE,6
+"2010-2011","WTM_37A","Diff. - getting referral",TRUE,6
+"2013-2014","WTM_37A","Diff. - getting referral",TRUE,6
+"2010-2011","WTM_37B","Diff. - getting an appointment",TRUE,6
+"2010-2011","WTM_37C","Diff. - waited too long to get an appt.",TRUE,6
+"2013-2014","WTM_37C","Diff. - waited too long to get an appt.",TRUE,6
+"2010-2011","WTM_37D","Diff. - waited too long/get test",TRUE,6
+"2010-2011","WTM_37E","Diff. - service not avail./time required",TRUE,6
+"2013-2014","WTM_37E","Diff. - service not avail./time required",TRUE,6
+"2010-2011","WTM_37F","Diff. - service not available/area",TRUE,6
+"2010-2011","WTM_37G","Diff. - transportation",TRUE,6
+"2013-2014","WTM_37G","Diff. - transportation",TRUE,6
+"2010-2011","WTM_37H","Diff. - language",TRUE,6
+"2013-2014","WTM_37H","Diff. - language",TRUE,6
+"2010-2011","WTM_37I","Diff. - cost",TRUE,6
+"2013-2014","WTM_37I","Diff. - cost",TRUE,6
+"2010-2011","WTM_37J","Diff. - deterioration of health",TRUE,6
+"2013-2014","WTM_37J","Diff. - deterioration of health",TRUE,6
+"2010-2011","WTM_37K","Diff. - did not know where to go",TRUE,6
+"2013-2014","WTM_37K","Diff. - did not know where to go",TRUE,6
+"2010-2011","WTM_37L","Diff. - unable leave house/health",TRUE,6
+"2013-2014","WTM_37L","Diff. - unable leave house/health",TRUE,6
+"2010-2011","WTM_37M","Diff. - other",TRUE,6
+"2010-2011","WTM_38A","Length of wait / test",TRUE,4
+"2013-2014","WTM_38A","Length of wait / test",TRUE,4
+"2010-2011","WTM_38B","Lgth wait decision and test - unit",TRUE,7
+"2013-2014","WTM_38B","Lgth wait decision and test - unit",TRUE,7
+"2010-2011","WTM_39A","Length of time been waiting/diag. test",TRUE,4
+"2013-2014","WTM_39A","Length of time been waiting/diag. test",TRUE,4
+"2010-2011","WTM_39B","Lgth time been waiting for test - unit",TRUE,7
+"2013-2014","WTM_39B","Lgth time been waiting for test - unit",TRUE,7
+"2010-2011","WTM_40","Respondent's opinion of waiting time",TRUE,7
+"2010-2011","WTM_41A","Acceptable waiting time",TRUE,4
+"2013-2014","WTM_41A","Acceptable waiting time",TRUE,4
+"2010-2011","WTM_41B","Acceptable waiting time - unit",TRUE,7
+"2013-2014","WTM_41B","Acceptable waiting time - unit",TRUE,7
+"2010-2011","WTM_42","Test cancelled or postponed",TRUE,6
+"2013-2014","WTM_42","Test cancelled or postponed",TRUE,6
+"2010-2011","WTM_43","Test cancelled or postponed by",TRUE,9
+"2010-2011","WTM_44","Life affected by wait/test",TRUE,6
+"2013-2014","WTM_44","Life affected by wait/test",TRUE,6
+"2010-2011","WTM_45A","Life affected by wait - worry",TRUE,6
+"2013-2014","WTM_45A","Life affected by wait - worry",TRUE,6
+"2010-2011","WTM_45B","Life affected by wait - worry for family",TRUE,6
+"2013-2014","WTM_45B","Life affected by wait - worry for family",TRUE,6
+"2010-2011","WTM_45C","Life affected by wait - pain",TRUE,6
+"2013-2014","WTM_45C","Life affected by wait - pain",TRUE,6
+"2010-2011","WTM_45D","Life affected by wait - prob. daily act.",TRUE,6
+"2013-2014","WTM_45D","Life affected by wait - prob. daily act.",TRUE,6
+"2010-2011","WTM_45E","Life affected by wait - loss of work",TRUE,6
+"2010-2011","WTM_45F","Life affected by wait - loss of income",TRUE,6
+"2010-2011","WTM_45G","Life affected by wait - incr. dependence",TRUE,6
+"2010-2011","WTM_45H","Life affected by wait-incr. use med.",TRUE,6
+"2010-2011","WTM_45I","Life affected by wait - health deter.",TRUE,6
+"2013-2014","WTM_45I","Life affected by wait - health deter.",TRUE,6
+"2010-2011","WTM_45J","Life affected by wait - health improved",TRUE,6
+"2010-2011","WTM_45K","Life affected by wait - pers. rel.",TRUE,6
+"2010-2011","WTM_45L","Life affected by wait - other",TRUE,6
+"2010-2011","WTS_M","Weights - Master",FALSE,0
+"2013-2014","WTS_M","Weights - Master",FALSE,0
+"2010-2011","YCCHS",NA,FALSE,0
+"2013-2014","YSMG1","Source of cigarettes - (G)",TRUE,7
+"2013-2014","YSM_3","Age asked when buying cig. in store",TRUE,6
+"2013-2014","YSM_5","Asked a stranger to buy cigarettes",TRUE,6

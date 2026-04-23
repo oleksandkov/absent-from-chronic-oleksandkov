@@ -1,6 +1,0 @@
----
-title: "Data Pipeline"
-subtitle: "Ferry → Ellis execution guide for the CCHS work-absenteeism dataset"
----
-
-{{< include ../manipulation/pipeline.md >}}

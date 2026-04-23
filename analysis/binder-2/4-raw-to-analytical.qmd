@@ -1,0 +1,274 @@
+---
+title: "Raw to Analytical: Tracing Variable Transformations"
+subtitle: "Binder 2 — Notebook 4 · CCHS Ferry (SQLite) → Ellis (Parquet)"
+author: "Research Analyst"
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    code-fold: show
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission
+
+Analytical results are only trustworthy if the data pipeline is transparent.
+This notebook draws on **both raw and analytical data** to trace three variable
+transformations end-to-end:
+
+| Raw variable | Source table | Analytical variable | What Ellis does |
+|---|---|---|---|
+| `GENDHDI` | `cchs_2010_raw` / `cchs_2014_raw` | `self_health_general` | Recodes 6–9 → NA; applies ordered factor |
+| `SMKDSCTY` | same raw tables | `smoking_status` | Recodes special codes → NA; reverses level order |
+| `INCDGHH` (or equivalent) | same raw tables | `income_5cat` | Recodes refusals → NA; harmonizes across cycles |
+
+For each variable the **g1/g11**, **g2/g21**, and **g3/g31** families show a
+*before* chart (raw Ferry codes) and an *after* chart (analytical factor from
+Ellis), making the transformation visible.
+
+# Environment
+
+```{r}
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir = normalizePath("../../"))
+```
+
+```{r}
+#| label: set-options
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results    = "show",
+  message    = FALSE,
+  warning    = FALSE,
+  comment    = NA,
+  tidy       = FALSE,
+  out.width  = "960px",
+  fig.width  = 10,
+  fig.height = 6,
+  fig.path   = "figure-png-iso/"
+)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/binder-2/4-raw-to-analytical.R")
+```
+
+```{r}
+#| label: load-packages
+#| code-summary: "Packages: arrow, DBI, RSQLite, ggplot2, dplyr, tidyr, forcats, scales"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: "Project-level helper functions"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: "Paths, palette, special-code list"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| code-summary: "label_special() and raw_freq() helpers"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-data
+#| code-summary: "Load cchs_analytical.parquet + both raw SQLite tables"
+#| echo: true
+#| results: show
+#| message: true
+#| code-fold: true
+```
+
+```{r}
+#| label: tweak-data-0
+#| echo: false
+#| results: hide
+```
+
+# Data Context
+
+For complete data documentation, see the [Data Primer](../data-primer-1/data-primer-1.html).
+
+```{r}
+#| label: data-context-tables
+#| code-summary: "Available raw variables — discovery check"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-person
+#| code-summary: "Raw values for one respondent"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: "Analytical distributions of self_health_general and smoking_status"
+#| echo: true
+#| code-fold: true
+```
+
+# Analysis
+
+## Self-Rated Health: GENDHDI → self_health_general (g1 family)
+
+CCHS uses a 1–5 scale (1 = Excellent … 5 = Poor) plus special codes 6, 7, 8,
+9 for situations like refusal or "not applicable." Ellis recodes specials to NA
+and applies an ordered factor with the correct level sequence.
+
+`g1` shows the *raw* code frequency from the Ferry SQLite tables, with grey
+bars identifying the special codes. `g11` shows the *analytical* distribution
+after transformation — the factor levels properly ordered, specials gone.
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: "Tabulate GENDHDI raw codes by cycle from SQLite"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: g1
+#| fig-cap: "Before Ellis: raw GENDHDI frequency by cycle. Grey bars = special codes to be removed."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g1_raw_health)
+```
+
+```{r}
+#| label: g11
+#| fig-cap: "After Ellis: self_health_general ordered factor. Special codes removed; level ordering Excellent → Poor preserved."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g11_analytical_health)
+```
+
+## Smoking Status: SMKDSCTY → smoking_status (g2 family)
+
+Raw SMKDSCTY codes follow a 1 (Daily) → 4 (Never) ordering that runs *counter*
+to the natural "low exposure to high exposure" direction used in regression.
+Ellis both removes special codes and reverses the level order, giving the
+convention Never < Former < Occasional < Daily for model coefficients.
+
+`g2` shows raw codes; `g21` shows the re-levelled analytical factor.
+
+```{r}
+#| label: g2-data-prep
+#| code-summary: "Tabulate SMKDSCTY raw codes by cycle from SQLite"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: g2
+#| fig-cap: "Before Ellis: raw SMKDSCTY frequency by cycle. Grey bars = special codes."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g2_raw_smoking)
+```
+
+```{r}
+#| label: g21
+#| fig-cap: "After Ellis: smoking_status ordered factor (Never → Daily). Level order reversed relative to raw codes."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g21_analytical_smoking)
+```
+
+## Household Income: Raw codes → income_5cat (g3 family)
+
+The income variable in the CCHS PUMF uses numeric codes that vary slightly
+between cycles. Ellis identifies the correct variable, recodes refusal /
+"not stated" codes to NA, and harmonizes both cycles into a shared 5-category
+ordered factor.
+
+The `data-context` chunk performs a live discovery of which raw income column
+is present — the graph title reflects that finding at render time.
+
+```{r}
+#| label: g3-data-prep
+#| code-summary: "Discover raw income variable; tabulate by cycle"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: g3
+#| fig-cap: "Before Ellis: raw household income codes by cycle. Grey bars = refusal / not-stated codes."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g3_raw_income)
+```
+
+```{r}
+#| label: g31
+#| fig-cap: "After Ellis: income_5cat ordered factor. Cross-cycle harmonization and refusal removal completed."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g31_analytical_income)
+```
+
+# Feedback Questions
+
+1. **Special-code magnitude**: Across the three variables, do the special-code
+   rates (grey bars in the "Before" charts) reach a level where listwise deletion
+   could introduce meaningful selection bias — and would multiple imputation
+   be appropriate to assess whether the analytic estimates are sensitive to
+   that exclusion?
+
+2. **Cross-cycle harmonization**: `g31` shows the analytical income distribution
+   by cycle after harmonization. Do you see substantial distributional shifts
+   between 2010/11 and 2013/14 that suggest the raw income codes mapped to
+   different real-income thresholds, and would you recommend reporting results
+   with and without a cycle × income interaction?
+
+3. **Traceability gap**: This notebook demonstrates distributional tracing
+   (before/after marginal frequencies) but cannot show row-level tracing
+   because the PUMF data do not include a persistent respondent ID.
+   Would you consider adding a column-level crosswalk table (raw code → 
+   analytical level) to the Ellis documentation to make the mapping fully
+   auditable without row-level matching?

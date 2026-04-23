@@ -173,29 +173,35 @@ vars_confirmed <- c(
 
 vars_inferred_ccc <- c(
   # --- CCC module: 19 chronic conditions (binary Yes/No each) ---
-  # VERIFY exact variable names against CCHS data dictionary PDFs
-  # Standard CCHS PUMF CCC numbering below; codes 1=Yes, 2=No
-  "ccc_015",   # INFERRED: asthma
-  "ccc_031",   # INFERRED: arthritis (excluding fibromyalgia)
-  "ccc_051",   # INFERRED: back problems (excluding fibromyalgia/arthritis)
-  "ccc_071",   # INFERRED: hypertension (high blood pressure)
-  "ccc_081",   # INFERRED: migraine headaches
-  "ccc_091",   # INFERRED: COPD / chronic bronchitis / emphysema
-  "ccc_101",   # INFERRED: diabetes
-  "ccc_121",   # INFERRED: heart disease
-  "ccc_131",   # INFERRED: cancer (any type)
-  "ccc_141",   # INFERRED: intestinal / stomach ulcer
-  "ccc_151",   # INFERRED: effects of stroke
-  "ccc_171",   # INFERRED: bowel disorder (Crohn's disease / colitis / IBS)
-  "ccc_011",   # INFERRED: fibromyalgia
-  "ccc_041",   # INFERRED: chronic fatigue syndrome (CFS)
-  "ccc_061",   # INFERRED: multiple chemical sensitivities (MCS)
-  "ccc_280",   # INFERRED: mood disorder (depression / bipolar / mania / dysthymia)
-  "ccc_290",   # INFERRED: anxiety disorder (phobia / OCD / panic disorder)
-  "ccc_300",   # INFERRED: other mental illness (schizophrenia, etc.)
-                #          NOTE: thesis Appendix 3 may group differently — verify
-  "ccc_185"    # INFERRED: digestive diseases (other than ulcer/bowel disorder)
-                #          NOTE: may be a different code or combined — verify
+  # Codes 1=Yes, 2=No; special NAs: 6=Not applicable, 7=DK, 8=Refusal, 9=Not stated
+  #
+  # METADATA STATUS per cchs_variable_labels.csv (extract-metadata.R):
+  #   VERIFIED  = variable and label confirmed in both SAV cycles
+  #   NOT FOUND = absent from both SAV files; verify against PDF data dictionaries
+  #
+  "ccc_031",   # VERIFIED: asthma                                   (CCC_031; both cycles)
+  "ccc_041",   # VERIFIED: fibromyalgia                             (CCC_041; both cycles)
+  "ccc_051",   # VERIFIED: arthritis (excl. fibromyalgia)           (CCC_051; both cycles)
+  "ccc_061",   # VERIFIED: back problems (excl. fibro/arthritis)    (CCC_061; both cycles)
+  "ccc_071",   # VERIFIED: hypertension (high blood pressure)       (CCC_071; both cycles)
+  "ccc_081",   # VERIFIED: migraine headaches                       (CCC_081; both cycles)
+  "ccc_091",   # VERIFIED: COPD / chronic bronchitis / emphysema    (CCC_091; both cycles)
+  "ccc_101",   # VERIFIED: diabetes                                 (CCC_101; both cycles)
+  "ccc_121",   # VERIFIED: heart disease                            (CCC_121; both cycles)
+  "ccc_131",   # VERIFIED: cancer (any type)                        (CCC_131; both cycles)
+  "ccc_141",   # VERIFIED: intestinal / stomach ulcer               (CCC_141; both cycles)
+  "ccc_151",   # VERIFIED: effects of stroke                        (CCC_151; both cycles)
+  "ccc_171",   # VERIFIED: bowel disorder (Crohn's/colitis/IBS)     (CCC_171; both cycles)
+  "ccc_251",   # VERIFIED: chronic fatigue syndrome (CFS)           (CCC_251; both cycles)
+  "ccc_261",   # VERIFIED: multiple chemical sensitivities (MCS)    (CCC_261; both cycles)
+  "ccc_280",   # VERIFIED: mood disorder (depression/bipolar/etc.)  (CCC_280; both cycles)
+  "ccc_290",   # VERIFIED: anxiety disorder (phobia/OCD/panic)      (CCC_290; both cycles)
+  "ccc_300",   # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
+                #   Intended: other mental illness (schizophrenia etc.)
+                #   Verify against CCHS_2010_DataDictionary_Freqs-ver2.pdf
+  "ccc_185"    # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
+                #   Intended: digestive diseases (other than ulcer/bowel disorder)
+                #   Verify against CCHS_2010_DataDictionary_Freqs-ver2.pdf
 )
 
 vars_inferred_predisposing <- c(
@@ -204,73 +210,84 @@ vars_inferred_predisposing <- c(
   "dhh_sex",    # INFERRED: sex (1=Male, 2=Female)
   "dhhgms",     # INFERRED: marital status (1=Married, 2=Common-law,
                 #            3=Widowed/Divorced/Separated, 4=Single)
-  "dhhdghsz",   # INFERRED: household size (number of persons, continuous)
+  "dhhdghsz",   # VERIFIED: household size — alias resolves to dhhghsz (DHHGHSZ in SAV)
   "edudh04",    # INFERRED: education level (derived; 4 categories)
                 #            Alt candidate: "edudr04"
-  "sdcfimm",    # INFERRED: immigration status (1=Immigrant, 2=Non-immigrant)
-  "sdcdgcb",    # INFERRED: ethnic origin / visible minority (1=White/non-visible min,
-                #            2=Visible minority)  Alt: "sdcgcgt"
-  "dhhdglvg",   # INFERRED: homeownership / living arrangements
-                #            check if present or use different variable
+  "sdcfimm",    # VERIFIED: immigrant flag — SDCFIMM; codes 1=YES (immigrant), 2=NO
+                #   NOTE: SAV has only 2 codes; no code 3 in data (code 3 recode is dead)
+  "sdcdgcb",    # VERIFIED: visible minority — alias resolves to sdcgcgt (SDCGCGT in SAV)
+                #   codes: 1=WHITE, 2=VISIBLE MINORITY
+  "dhhdglvg",   # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
+                #   Intended: homeownership / living arrangements
+                #   Verify against CCHS_2010_DataDictionary_Freqs-ver2.pdf
   # --- Children in household by age group (§2.2 predisposing) ---
   # VERIFY exact variable names against CCHS data dictionaries;
   # standard CCHS PUMF may use a single derived variable or separate counts
-  "dhhdfc5",    # INFERRED: number of children < 5 yrs in household
-                #            Alt candidate: "dhhghc1", "dhh_hc1"
-  "dhhdfc11",   # INFERRED: number of children 6–11 yrs in household
-                #            Alt candidate: "dhhghc2", "dhh_hc2"
-  "dhhdfc12p",  # INFERRED: number of children ≥ 12 yrs in household
-                #            Alt candidate: "dhhghc3", "dhh_hc3"
+  "dhhdfc5",    # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
+                #   Intended: number of children < 5 yrs in household
+  "dhhdfc11",   # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
+                #   Intended: number of children 6–11 yrs in household
+  "dhhdfc12p",  # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
+                #   Intended: number of children ≥ 12 yrs in household
   # --- Student status (§2.2 predisposing) ---
-  "sdcdgstud"   # INFERRED: student status (1=Full-time, 2=Part-time, 3=Not student)
-                #            Alt candidate: "sdcdg045", "edu_050", "lbs_*"
-                #            NOTE: verify presence in both 2010 and 2014 PUMF
+  "sdcdgstud"   # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
+                #   Intended: student status (full-time / part-time / not a student)
 )
 
 vars_inferred_facilitating <- c(
   # --- Facilitating variables ---
-  "incdghh",   # INFERRED: household income, derived 5-category
-                #            (1=<$20k, 2=$20k-$39.9k, 3=$40k-$59.9k,
-                #             4=$60k-$79.9k, 5=$80k+)
-  "geodgprv",  # INFERRED: province/territory of residence (derived, 10 or 13 cats)
-               #            Alt: "geogprv" or check 2014 spelling
-  "hcu_1aa",   # INFERRED: has regular family doctor (1=Yes, 2=No)
-               #            Alt candidate: "hcu_1a" or "hcudgmd"
-  "lbfdghp",   # INFERRED: employment type — self-employed vs. employee (derived)
-               #            Alt: "lbsg031" or "lbs_g31"
-  "lbfdgft",   # INFERRED: work schedule — full-time vs. part-time (derived)
-               #            Alt: "lbf_020"
-  "fvcdgtot",  # INFERRED: total daily fruit & vegetable consumption (derived, count)
-  "alcdgtyp",  # INFERRED: type of drinker (derived: regular/occasional/former/never)
-               #            Alt: "alcg015" + "alcg020" raw
-  "smkdsty",   # INFERRED: smoking status (derived: daily/occasional/former/never)
-               #            Alt: "smkg015"
-  "hwtdgbmi",  # INFERRED: BMI category (derived: underweight/normal/overweight/obese)
-               #            Alt: "hwtgbmi" (continuous)
-  "pacdpai",   # INFERRED: physical activity index (derived)
-               #            Alt: "pacdee" (daily energy expenditure)
-  "gen_07",    # INFERRED: job stress level (GEN module)
-               #            NOTE: check if present in 2010 and 2014 PUMF
+  "incdghh",   # VERIFIED: household income 5-category — alias resolves to incghh (INCGHH in SAV)
+                #   codes: 1=<$20k, 2=$20k-$39.9k, 3=$40k-$59.9k, 4=$60k-$79.9k, 5=$80k+
+  "geodgprv",  # VERIFIED: province — alias resolves to geogprv (GEOGPRV in SAV)
+               #   codes: 10=NL, 11=PEI, 12=NS, 13=NB, 24=QC, 35=ON, 46=MB, 47=SK, 48=AB, 59=BC, 60=YT/NT/NU
+  "hcu_1aa",   # VERIFIED: has regular family doctor — HCU_1AA in SAV; codes 1=YES, 2=NO
+  "lbfdghp",   # VERIFIED: employment type — alias resolves to lbsg31 (LBSG31 in SAV)
+               #   codes: 1=EMPLOYEE, 2=SELF-EMPLOYED  (no code 3 in data; unpaid worker recode is dead)
+  "lbfdgft",   # VERIFIED: work schedule — alias resolves to lbsdpft (LBSDPFT in SAV)
+               #   codes: 1=FULL-TIME, 2=PART-TIME
+  "fvcdgtot",  # VERIFIED: fruit & veg intake — alias resolves to fvcgtot (FVCGTOT in SAV)
+               #   NOTE: FVCGTOT is a 3-category derived variable (1=<5/day, 2=5-10/day, 3=>10/day)
+               #   NOT a continuous count; treat as ordinal/categorical in analysis
+  "alcdgtyp",  # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
+               #   Intended: type of drinker (regular/occasional/former/never)
+               #   Verify against CCHS_2010_DataDictionary_Freqs-ver2.pdf
+  "smkdsty",   # VERIFIED: smoking status derived — SMKDSTY in SAV
+               #   codes: 1=DAILY, 2=OCCASIONAL (current), 3=ALWAYS OCCASIONAL (former),
+               #          4=FORMER DAILY, 5=FORMER OCCASIONAL, 6=NEVER SMOKED
+               #   special NAs: 96=NOT APPLICABLE, 97=DK, 98=REFUSAL, 99=NOT STATED
+  "hwtdgbmi",  # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
+               #   Intended: 4-category derived BMI (underweight/normal/overweight/obese)
+               #   SAV contains HWTGBMI (continuous BMI); derived categories not found
+               #   Verify HWTDGBMI against CCHS_2014_DataDictionary_Freqs.pdf
+  "pacdpai",   # VERIFIED: physical activity index — PACDPAI in SAV
+               #   codes: 1=ACTIVE, 2=MODERATE ACTIVE, 3=INACTIVE
+  "gen_07",    # VERIFIED: perceived life stress — GEN_07 in SAV
+               #   codes: 1=NOT AT ALL, 2=NOT VERY, 3=A BIT, 4=QUITE A BIT, 5=EXTREMELY
+               #   NOTE: GEN_07 = perceived LIFE stress; GEN_09 = perceived WORK stress
+               #   Confirm which is intended as 'job_stress' against stats_instructions
   # --- Occupation category (§2.2 facilitating) ---
-  "noc_31"     # INFERRED: occupation category (National Occupation Classification,
-               #            major group 2-digit; derived)
-               #            Alt candidates: "lbfg01", "nocg10", "ochg10"
-               #            VERIFY naming and categories against data dictionaries
+  "noc_31"     # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
+               #   LBSGSOC (in SAV) is a 5-cat occupation group (1=Mgmt/Art/Education,
+               #   2=Business/Finance, 3=Sales/Service, 4=Trades/Transport, 5=Prim.Ind./Processing)
+               #   This does NOT match the 10-category NOC structure coded in Ellis.
+               #   Verify whether noc_31 exists or lbsgsoc should be used with revised categories.
 )
 
 vars_inferred_needs <- c(
   # --- Needs variables ---
-  "gen_01",    # INFERRED: self-perceived general health
-               #            (1=Excellent, 2=Very good, 3=Good, 4=Fair, 5=Poor)
-  "gen_02a",   # INFERRED: self-perceived mental health (same scale)
-               #            Alt candidates: "gen_02", "gen_02a2"
-  "gen_09",    # INFERRED: self-perceived health compared to 1 year ago
-               #            (1=Much better ... 5=Much worse)
-               #            Alt: "gen_03"
-  "rac_1",     # INFERRED: activity limitations / functional limitations
-               #            (1=Yes limited, 2=No)   Alt: "rac_2a1", "racdpal"
-  "inj_01"     # INFERRED: injury status in past 12 months (1=Yes, 2=No)
-               #            Alt: "injdgyrs"
+  "gen_01",    # VERIFIED: self-perceived general health — GEN_01 in SAV
+               #   codes: 1=EXCELLENT, 2=VERY GOOD, 3=GOOD, 4=FAIR, 5=POOR
+  "gen_02a",   # VERIFIED: self-perceived mental health — alias resolves to gen_02b (GEN_02B in SAV)
+               #   codes: 1=EXCELLENT, 2=VERY GOOD, 3=GOOD, 4=FAIR, 5=POOR
+               #   WARNING: GEN_02 is "health compared to 1 yr ago" (NOT mental health);
+               #            GEN_02A2 is "life satisfaction" 0-10 scale (NOT mental health)
+  "gen_02",    # VERIFIED: self-perceived health compared to 1 year ago — GEN_02 in SAV
+               #   codes: 1=MUCH BETTER, 2=SOMEWHAT BETTER, 3=ABOUT THE SAME,
+               #          4=SOMEWHAT WORSE, 5=MUCH WORSE
+  "rac_1",     # VERIFIED: activity limitations — RAC_1 in SAV
+               #   ACTUAL CODES (3-category): 1=SOMETIMES, 2=OFTEN, 3=NEVER
+               #   WARNING: prior recode used binary (1=Yes, 2=No) — WRONG; corrected below
+  "inj_01"     # VERIFIED: injury in past 12 months — INJ_01 in SAV; 1=YES, 2=NO
 )
 
 vars_inferred_id <- c(
@@ -438,15 +455,20 @@ if (nrow(ds_2010_raw) == 0L || nrow(ds_2014_raw) == 0L) {
 }
 
 # Harmonize known alias names before white-list selection.
+# Entries verified against cchs_value_labels.csv (extract-metadata.R).
 alias_map <- list(
-  edudh04  = c("edudr04"),
-  sdcdgcb  = c("sdcgcgt"),
-  geodgprv = c("geogprv"),
-  hcu_1aa  = c("hcu_1a", "hcudgmd"),
-  lbfdghp  = c("lbsg031", "lbs_g31"),
-  gen_02a  = c("gen_02", "gen_02a2"),
-  gen_09   = c("gen_03"),
-  inj_01   = c("injdgyrs")
+  edudh04  = c("edudr04"),          # EDUDR04 present in both SAV cycles
+  sdcdgcb  = c("sdcgcgt"),          # VERIFIED: SDCGCGT = visible minority (1=White, 2=Visible minority)
+  geodgprv = c("geogprv"),          # VERIFIED: GEOGPRV = province of residence
+  hcu_1aa  = c("hcu_1a", "hcudgmd"),# VERIFIED: HCU_1AA in SAV (1=YES, 2=NO)
+  lbfdghp  = c("lbsg31"),           # VERIFIED: LBSG31 in SAV (1=EMPLOYEE, 2=SELF-EMPLOYED; no code 3)
+  lbfdgft  = c("lbsdpft"),          # VERIFIED: LBSDPFT in SAV (1=FULL-TIME, 2=PART-TIME)
+  incdghh  = c("incghh"),           # VERIFIED: INCGHH in SAV (5-category household income)
+  fvcdgtot = c("fvcgtot"),          # VERIFIED: FVCGTOT in SAV (3-cat: <5/5-10/>10 per day)
+  dhhdghsz = c("dhhghsz"),          # VERIFIED: DHHGHSZ in SAV (household size 1-5+)
+  gen_02a  = c("gen_02b"),          # VERIFIED: GEN_02B = self-perceived mental health
+                                    #   (GEN_02 = health vs. 1 yr ago — NOT mental health)
+  inj_01   = c("injdgyrs")          # VERIFIED: INJ_01 in SAV (1=YES, 2=NO)
 )
 
 ds_2010_raw <- harmonize_aliases(ds_2010_raw, alias_map, cycle_label = "CCHS2010")
@@ -614,7 +636,8 @@ vcat("\n🔧 Step 2: Sample inclusion mode\n")
 # If apply_sample_exclusions=FALSE (default), retain full pooled sample
 # from ferry output (employed + unemployed + not stated), after white-listing.
 #
-# CCHS DHHGAGE codes (VERIFY against data dictionary):
+# CCHS DHHGAGE codes (VERIFIED: extracted from attr(DHHGAGE, 'labels') in both SAV files;
+#   identical across 2010-2011 and 2013-2014 cycles):
 #   1=12-14yrs, 2=15-17yrs, 3=18-19yrs, 4=20-24yrs, 5=25-29yrs, 6=30-34yrs,
 #   7=35-39yrs, 8=40-44yrs, 9=45-49yrs, 10=50-54yrs, 11=55-59yrs, 12=60-64yrs,
 #   13=65-69yrs, 14=70-74yrs, 15=75-79yrs, 16=80+yrs
@@ -828,7 +851,7 @@ special_na_codes <- c(6, 7, 8, 9, 96, 97, 98, 99)
 recode_source_vars <- c(
   "dhhgage", "dhh_sex", "dhhgms", "edudh04", "sdcfimm", "sdcdgcb",
   "incdghh", "hcu_1aa", "lbfdghp", "lbfdgft", "alcdgtyp", "smkdsty",
-  "hwtdgbmi", "pacdpai", "gen_01", "gen_02a", "gen_09", "rac_1", "inj_01",
+  "hwtdgbmi", "pacdpai", "gen_01", "gen_02a", "gen_02", "rac_1", "inj_01",
   # Added: previously missing from recode pipeline
   "dhhdglvg",   # homeownership
   "gen_07",     # job stress level
@@ -844,7 +867,7 @@ ds3 <- ds2 %>%
     # --- Age group (3 categories per stats_instructions_v3) ---
     # DHHGAGE codes: 2=15-17, 3=18-19, 4=20-24, 5=25-29, 6=30-34, 7=35-39,
     #   8=40-44, 9=45-49, 10=50-54, 11=55-59, 12=60-64, 13=65-69, 14=70-74,
-    #   15=75-79  (verify — codes vary by cycle)
+    #   15=75-79  (VERIFIED: identical in both cycles; extracted from SAV metadata)
     age_group = factor(
       case_when(
         dhhgage %in% 2:4  ~ "15-24",       # 15-24 yrs
@@ -883,13 +906,29 @@ ds3 <- ds2 %>%
     ),
 
     # --- Education (derived 4-category, EDUDH04 or EDUDR04) ---
-    # Typical CCHS coding: 1=Less than secondary, 2=Secondary graduate,
-    #   3=Some post-secondary, 4=Post-secondary graduate
+    # Numeric codes are consistent across cycles; label wording differs:
+    #   Code | 2010-2011 label          | 2013-2014 label
+    #   -----+--------------------------+---------------------------
+    #     1  | < THAN SECONDARY         | < SEC. SCHOOL GR       (cosmetic)
+    #     2  | SECONDARY GRAD.          | SEC. SCHOOL. GR.       (cosmetic)
+    #     3  | OTHER POST-SEC.          | SOME POST-SEC ED        *** CONCEPTUAL ***
+    #     4  | POST-SEC. GRAD.          | POST-SEC CERT          (cosmetic)
+    #
+    # ⚠️  CROSS-CYCLE DISCREPANCY — Code 3 decision:
+    #   2010: "Other post-secondary" implies incomplete/non-degree programs
+    #         (certificates, diplomas, vocational) but NOT "some college".
+    #   2014: "Some post-secondary" implies partial post-secondary attendance.
+    #   These are plausibly the same population (non-graduate post-secondary
+    #   participants), but there is conceptual ambiguity. The label "Some
+    #   post-secondary" is adopted here as the common denominator.
+    #   ► This decision must be flagged in the Methods section and treated
+    #     as a limitation for the education predictor interpretation.
+    #     See cchs_value_label_diffs.csv (EDUDR04) for the source comparison.
     education = factor(
       case_when(
         edudh04 == 1 ~ "Less than secondary",
         edudh04 == 2 ~ "Secondary graduate",
-        edudh04 == 3 ~ "Some post-secondary",
+        edudh04 == 3 ~ "Some post-secondary",   # see note above re: cross-cycle ambiguity
         edudh04 == 4 ~ "Post-secondary graduate",
         edudh04 %in% special_na_codes ~ NA_character_,
         TRUE ~ NA_character_
@@ -995,9 +1034,11 @@ ds3 <- ds2 %>%
     ),
 
     # --- Smoking status (derived) ---
-    # SMKDSTY: 1=Daily smoker, 2=Occasional smoker, 3=Former daily+occ,
-    #          4=Former daily only, 5=Former occasional only, 6=Never smoker
-    #   → Collapsed: Daily / Occasional / Former / Never
+    # SMKDSTY — VERIFIED: both SAV cycles.
+    #   Actual codes: 1=DAILY, 2=OCCASIONAL (current), 3=ALWAYS OCCASIONAL (former),
+    #                 4=FORMER DAILY, 5=FORMER OCCASIONAL, 6=NEVER SMOKED
+    #   Special NAs: 96/97/98/99 (NOT 6/7/8/9 — code 6=Never must come before special_na_codes)
+    #   → Collapsed: Daily / Occasional / Former (3+4+5) / Never
     smoking_status = factor(
       case_when(
         smkdsty == 1 ~ "Daily",
@@ -1058,7 +1099,11 @@ ds3 <- ds2 %>%
     ),
 
     # --- Self-perceived mental health ---
-    # GEN_02 (or GEN_02A): same scale as GEN_01
+    # GEN_02B: 1=Excellent, 2=Very good, 3=Good, 4=Fair, 5=Poor
+    # VERIFIED: GEN_02B label = "Self-perceived mental health" in both SAV cycles.
+    # alias_map resolves gen_02a → gen_02b when gen_02a is absent from raw data.
+    # ALERT: GEN_02 is "health compared to 1 yr ago" (NOT mental health);
+    #        GEN_02A2 is "satisfaction with life" 0-10 scale (NOT mental health).
     self_health_mental = factor(
       case_when(
         gen_02a == 1 ~ "Excellent",
@@ -1074,16 +1119,17 @@ ds3 <- ds2 %>%
     ),
 
     # --- Health compared to 1 year ago ---
-    # GEN_09 (or GEN_03): 1=Much better, 2=Somewhat better, 3=About same,
-    #                     4=Somewhat worse, 5=Much worse
+    # GEN_02: 1=Much better, 2=Somewhat better, 3=About the same,
+    #         4=Somewhat worse, 5=Much worse
+    # VERIFIED: GEN_02 label = "Self-perceived hlth - compared 1 yr ago" in both SAV cycles.
     health_vs_lastyear = factor(
       case_when(
-        gen_09 == 1 ~ "Much better",
-        gen_09 == 2 ~ "Somewhat better",
-        gen_09 == 3 ~ "About the same",
-        gen_09 == 4 ~ "Somewhat worse",
-        gen_09 == 5 ~ "Much worse",
-        gen_09 %in% special_na_codes ~ NA_character_,
+        gen_02 == 1 ~ "Much better",
+        gen_02 == 2 ~ "Somewhat better",
+        gen_02 == 3 ~ "About the same",
+        gen_02 == 4 ~ "Somewhat worse",
+        gen_02 == 5 ~ "Much worse",
+        gen_02 %in% special_na_codes ~ NA_character_,
         TRUE ~ NA_character_
       ),
       levels = c("Much better", "Somewhat better", "About the same",
@@ -1092,11 +1138,15 @@ ds3 <- ds2 %>%
     ),
 
     # --- Functional limitations / activity limitations ---
-    # RAC_1: 1=Yes limited, 2=No  (verify — may have different codes)
+    # RAC_1 — VERIFIED: 3-category variable in both SAV cycles.
+    #   Actual codes: 1=SOMETIMES (limited), 2=OFTEN (limited), 3=NEVER (limited)
+    #   Codes 1 and 2 are both affirmative (limited), code 3 = not limited.
+    #   Former binary recode (1=Yes, 2=No) was WRONG — code 2=OFTEN was silently
+    #   mapped to NA, losing all "often limited" respondents.
     activity_limitation = factor(
       case_when(
-        rac_1 == 1 ~ "Yes",
-        rac_1 == 2 ~ "No",
+        rac_1 %in% c(1, 2) ~ "Yes",   # 1=SOMETIMES or 2=OFTEN → limited
+        rac_1 == 3          ~ "No",    # 3=NEVER → not limited
         rac_1 %in% special_na_codes ~ NA_character_,
         TRUE ~ NA_character_
       ),
@@ -1198,26 +1248,30 @@ ds3 <- ds2 %>%
 # Factor recoding for 19 chronic condition variables
 # CCC variables: 1=Yes, 2=No, 6=Not applicable, 7=DK, 8=Refusal, 9=Not stated
 ccc_vars_found <- intersect(vars_inferred_ccc, names(ds3))
+# CCC label map — VERIFIED against cchs_variable_labels.csv (extract-metadata.R)
+# Maps clean white-list variable name → short analytical label (used as cc_<label>).
+# Prior version had wrong assignments: ccc_015/ccc_011/ccc_051/ccc_061 were
+# mis-numbered. Corrected below based on SAV metadata.
 ccc_labels <- c(
-  ccc_015 = "asthma",
-  ccc_031 = "arthritis",
-  ccc_051 = "back_problems",
-  ccc_071 = "hypertension",
-  ccc_081 = "migraine",
-  ccc_091 = "copd",
-  ccc_101 = "diabetes",
-  ccc_121 = "heart_disease",
-  ccc_131 = "cancer",
-  ccc_141 = "ulcer",
-  ccc_151 = "stroke",
-  ccc_171 = "bowel_disorder",
-  ccc_011 = "fibromyalgia",
-  ccc_041 = "chronic_fatigue",
-  ccc_061 = "chemical_sensitiv",
-  ccc_280 = "mood_disorder",
-  ccc_290 = "anxiety_disorder",
-  ccc_300 = "other_mental_ill",
-  ccc_185 = "digestive_disease"
+  ccc_031 = "asthma",           # VERIFIED: CCC_031 = "Has asthma" (both cycles)
+  ccc_041 = "fibromyalgia",     # VERIFIED: CCC_041 = "Has fibromyalgia" (both cycles)
+  ccc_051 = "arthritis",        # VERIFIED: CCC_051 = "Has arthritis" (both cycles)
+  ccc_061 = "back_problems",    # VERIFIED: CCC_061 = "Has back problems/excl. fibro/arthritis"
+  ccc_071 = "hypertension",     # VERIFIED: CCC_071 = "Has high blood pressure"
+  ccc_081 = "migraine",         # VERIFIED: CCC_081 = "Has migraine headaches"
+  ccc_091 = "copd",             # VERIFIED: CCC_091 = "Has a COPD"
+  ccc_101 = "diabetes",         # VERIFIED: CCC_101 = "Has diabetes"
+  ccc_121 = "heart_disease",    # VERIFIED: CCC_121 = "Has heart disease"
+  ccc_131 = "cancer",           # VERIFIED: CCC_131 = "Has cancer"
+  ccc_141 = "ulcer",            # VERIFIED: CCC_141 = "Has stomach or intestinal ulcers"
+  ccc_151 = "stroke",           # VERIFIED: CCC_151 = "Suffers from the effects of a stroke"
+  ccc_171 = "bowel_disorder",   # VERIFIED: CCC_171 = "Has bowel disorder"
+  ccc_251 = "chronic_fatigue",  # VERIFIED: CCC_251 = "Has chronic fatigue syndrome"
+  ccc_261 = "chemical_sensitiv",# VERIFIED: CCC_261 = "Suffers multiple chemical sensitivities"
+  ccc_280 = "mood_disorder",    # VERIFIED: CCC_280 = "Has a mood disorder"
+  ccc_290 = "anxiety_disorder", # VERIFIED: CCC_290 = "Has an anxiety disorder"
+  ccc_300 = "other_mental_ill", # NOT FOUND in SAV — NEEDS EXTERNAL DICT VERIFICATION
+  ccc_185 = "digestive_disease" # NOT FOUND in SAV — NEEDS EXTERNAL DICT VERIFICATION
 )
 
 if (verbose) {

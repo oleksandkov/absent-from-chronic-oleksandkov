@@ -81,7 +81,7 @@ get_persona_configs <- function() {
     ),
     "research-scientist" = list(
       file = get_persona_path("research-scientist.md"),
-      default_context = c()
+      default_context = c("project/mission", "project/method", "project/glossary")
     ),
     "devops-engineer" = list(
       file = get_persona_path("devops-engineer.md"),

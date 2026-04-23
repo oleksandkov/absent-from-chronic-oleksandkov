@@ -1,0 +1,242 @@
+---
+title: "Sociodemographic Fabric: Who Are the Workers in This Sample?"
+subtitle: "Binder 2 — Notebook 2 · CCHS Pooled 2010/11 + 2013/14"
+author: "Research Analyst"
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    code-fold: show
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission
+
+Statistical models are only as interpretable as our understanding of *who* is in the sample. This notebook paints a sociodemographic portrait of the 63,843 employed Canadians in `cchs_analytical`, answering:
+
+-   What is the age, sex, education, income, immigration, and minority-status profile?
+-   Are these profiles consistent across the two survey cycles?
+-   How are employment type and work schedule distributed — and do they differ by sex?
+-   Which provinces contribute the most respondents, and is provincial representation stable across cycles?
+
+# Environment
+
+```{r}
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir = normalizePath("../../"))
+```
+
+```{r}
+#| label: set-options
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results    = "show",
+  message    = FALSE,
+  warning    = FALSE,
+  comment    = NA,
+  tidy       = FALSE,
+  out.width  = "960px",
+  fig.width  = 10,
+  fig.height = 6,
+  fig.path   = "figure-png-iso/"
+)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/binder-2/2-sociodemographic-fabric.R")
+```
+
+```{r}
+#| label: load-packages
+#| code-summary: "Packages loaded for this notebook"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: "Project-level helper functions"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: "Paths, palette, variable lists, province lookup"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| echo: false
+#| results: hide
+```
+
+```{r}
+#| label: load-data
+#| code-summary: "Load cchs_analytical.parquet"
+#| echo: true
+#| results: show
+#| message: true
+#| code-fold: true
+```
+
+```{r}
+#| label: tweak-data-0
+#| code-summary: "Add province label column from geodgprv codes"
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+# Data Context
+
+For complete data documentation, see the [Data Primer](../data-primer-1/data-primer-1.html).
+
+```{r}
+#| label: data-context-tables
+#| code-summary: "Cycle breakdown table"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-person
+#| code-summary: "Representative respondent — one row per cycle"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: "Quick-look: age group and sex distributions"
+#| echo: true
+#| code-fold: true
+```
+
+# Analysis
+
+## Six-Dimension Demographic Portrait (g1 family)
+
+`g1` assembles six demographic variables into a single faceted view — one panel per variable, bars sorted by frequency. This is the fastest way to read the sample composition without flipping between six separate charts.
+
+`g11` layers in the cycle dimension: parallel bars per level let the analyst check whether demographic proportions shifted between 2010/11 and 2013/14. Large discrepancies would warrant investigation before pooling.
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: "Pivot 6 demographic vars into long format; compute proportions"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: g1
+#| fig-cap: "Sociodemographic portrait of the pooled analytical sample. Six demographic variables displayed as faceted horizontal bars."
+#| fig-height: 9
+#| echo: true
+#| code-fold: true
+print(g1_demo_portrait)
+```
+
+```{r}
+#| label: g11
+#| fig-cap: "Demographic profile by survey cycle — bars coloured by cycle test for cross-cycle consistency."
+#| fig-height: 9
+#| echo: true
+#| code-fold: true
+print(g11_cycle_consistency)
+```
+
+## Employment Structure (g2 family)
+
+`g2` cross-tabulates employment type (Employee / Self-employed / Unpaid) against work schedule (Full-time / Part-time) to reveal the dominant labour-market positions in the sample.
+
+`g21` stacks employment types within sex, highlighting structural gender differences in self-employment and unpaid family work — both relevant potential moderators of absenteeism.
+
+```{r}
+#| label: g2-data-prep
+#| code-summary: "Employment type × work schedule cross-tab"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: g2
+#| fig-cap: "Employment type by work schedule. Grouped bars show the full 3 × 2 cross-tab."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g2_employment_schedule)
+```
+
+```{r}
+#| label: g21
+#| fig-cap: "Employment type composition by sex. Stacked proportions reveal gender differences in self-employment."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g21_employment_by_sex)
+```
+
+## Geographic Distribution (g3 family)
+
+`g3` ranks provinces by total respondent count — a quick read of where the analytical power lives.
+
+`g31` checks cycle-to-cycle provincial balance: if provincial shares are stable across cycles, the pooled design is defensible. Substantial deviations would suggest either targeted oversampling in one cycle or changes in frame coverage.
+
+```{r}
+#| label: g3-data-prep
+#| code-summary: "Province distribution, total and by cycle"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: g3
+#| fig-cap: "Sample size by province / territory, pooled. Sorted by total count."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g3_province)
+```
+
+```{r}
+#| label: g31
+#| fig-cap: "Provincial share within each cycle. Consistent proportions across cycles support pooling."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g31_province_cycle)
+```
+
+# Feedback Questions
+
+1.  **Missing predictors in the portrait**: `homeownership`, `student_status`, `alcohol_type`, `bmi_category`, and `occupation_category` are all ALL-NA in this PUMF version. Of these, which would you expect to have the strongest theoretical link to work absenteeism, and would you pursue supplemental data sources to recover them?
+
+2.  **Cycle consistency**: Looking at `g11`, is any demographic shift between 2010/11 and 2013/14 large enough to warrant a cycle-by-covariate interaction term in the regression model, or are the differences analytically negligible?
+
+3.  **Employment type as predictor vs. sample filter**: The current sample includes employees, self-employed, *and* unpaid workers. Should the primary analysis restrict to employees only (as LOP is most meaningful for wage-earners), or is it analytically important to retain all three groups?

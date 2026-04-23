@@ -1,0 +1,248 @@
+---
+title: "Table Anatomy: A Structural First Look at cchs_analytical"
+subtitle: "Binder 2 — Notebook 1 · CCHS Pooled 2010/11 + 2013/14"
+author: "Research Analyst"
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    code-fold: show
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission
+
+Before any variable is analysed, this notebook answers the most basic question a
+tidy-trained analyst should ask: **what exactly is `cchs_analytical`?**
+
+We walk through:
+
+- How many rows and columns does the pooled table contain, and what domains do they represent?
+- Which variables are fully available, and which are suppressed in the PUMF (public-use microdata)?
+- How are the two survey cycles distributed — unweighted and weighted?
+- What R types are used for each analytical domain, and do ordered factors carry the right structure?
+
+The code follows the **graph family protocol**: each `gN-data-prep` chunk builds a shared
+ancestor dataset; `gN` and `gN1`, `gN2`… draw multiple perspectives from the same source.
+
+# Environment
+
+```{r}
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir = normalizePath("../../")) # must be its own chunk so root.dir is active for read_chunk()
+```
+
+```{r}
+#| label: set-options
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results    = "show",
+  message    = FALSE,
+  warning    = FALSE,
+  comment    = NA,
+  tidy       = FALSE,
+  out.width  = "960px",
+  fig.width  = 10,
+  fig.height = 6,
+  fig.path   = "figure-png-iso/"
+)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/binder-2/1-table-anatomy.R")
+```
+
+```{r}
+#| label: load-packages
+#| code-summary: "Packages loaded for this notebook"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: "Project-level helper functions"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: "Paths, palette, and domain classification map"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| code-summary: "classify_var_type() helper"
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-data
+#| code-summary: "Load cchs_analytical.parquet"
+#| echo: true
+#| results: show
+#| message: true
+#| code-fold: true
+```
+
+```{r}
+#| label: tweak-data-0
+#| echo: false
+#| results: hide
+```
+
+# Data Context
+
+For complete data documentation, see the [Data Primer](../data-primer-1/data-primer-1.html).
+
+```{r}
+#| label: data-context-tables
+#| code-summary: "Table dimensions and cycle breakdown"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-person
+#| code-summary: "Representative respondent — one row per cycle"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: "Column completeness summary"
+#| echo: true
+#| code-fold: true
+```
+
+# Analysis
+
+## Variable Completeness by Domain (g1 family)
+
+`g1` maps *all 62 columns* simultaneously — grouping by domain and colouring by
+domain so the eye can spot patterns within analytical zones.  
+`g11` re-sorts the same data by completeness alone, pushing ALL-NA variables to
+the bottom where they are impossible to miss.
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: "Build completeness + domain tibble for all 62 cols"
+#| echo: true
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: g1
+#| fig-cap: "Variable completeness map — 62 columns grouped by analytical domain. Bars at 0% are PUMF-suppressed."
+#| fig-height: 11
+#| echo: true
+#| code-fold: true
+print(g1_variable_map)
+```
+
+```{r}
+#| label: g11
+#| fig-cap: "Same data ranked by completeness — PUMF gaps (ALL-NA variables) cluster at the bottom."
+#| fig-height: 11
+#| echo: true
+#| code-fold: true
+print(g11_missing_ranked)
+```
+
+## Sample Size and Pooling Check (g2 family)
+
+`g2` shows unweighted observation counts per cycle.  
+`g21` compares weighted vs unweighted cycle shares to verify that the `wts_m / 2`
+pooling rule was applied — both shares should land near 50%.
+
+```{r}
+#| label: g2-data-prep
+#| code-summary: "Compute unweighted counts and weighted population sums by cycle"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: g2
+#| fig-cap: "Unweighted sample size by survey cycle."
+#| fig-height: 5
+#| echo: true
+#| code-fold: true
+print(g2_sample_by_cycle)
+```
+
+```{r}
+#| label: g21
+#| fig-cap: "Weighted vs unweighted cycle shares — both should be ~50%, confirming the halved-weight pooling rule."
+#| fig-height: 5
+#| echo: true
+#| code-fold: true
+print(g21_pooling_check)
+```
+
+## Variable Type Inventory (g3 family)
+
+`g3` answers: for each analytical domain, what R types are used? Ordered factors are
+critical for correct ordinal regression; this chart confirms their presence.
+
+```{r}
+#| label: g3-data-prep
+#| code-summary: "Count variable types by analytical domain"
+#| echo: true
+#| code-fold: true
+```
+
+```{r}
+#| label: g3
+#| fig-cap: "Stacked bar: variable types by analytical domain. Ordered factors indicate proper ordinal structure."
+#| fig-height: 5.5
+#| echo: true
+#| code-fold: true
+print(g3_type_inventory)
+```
+
+# Feedback Questions
+
+1. **PUMF gaps**: The variable map immediately reveals 5+ columns that are ALL-NA
+   (PUMF-suppressed). Which of these missing predictors would you consider most
+   analytically consequential — and would you like a sensitivity analysis that
+   models what those variables *might* have contributed?
+
+2. **Domain classification**: The `domain_map` hard-codes assignments for 60 columns;
+   2 fall through to "Other". Are there reclassifications you'd want (e.g., should
+   `geodgprv` be "Survey Design" rather than "Facilitating")?
+
+3. **Pooling verification**: `g21` shows both shares near 50%. If they were *not*
+   equal, what would that imply about the weighting strategy, and what corrective
+   step would you take before any weighted analysis?

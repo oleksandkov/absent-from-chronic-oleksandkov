@@ -37,8 +37,8 @@ This directory contains the CCHS work-absenteeism data pipeline. Scripts are num
 | `1-ferry.R` | Ferry | `data-private/raw/2026-02-19/*.sav` | `data-private/derived/cchs-1.sqlite` + `cchs-1-raw/` Parquet | `source("manipulation/1-ferry.R")` |
 | `2-ellis.R` | Ellis | `data-private/derived/cchs-1.sqlite` | `data-private/derived/cchs-2.sqlite` + `cchs-2-tables/` Parquet | `source("manipulation/2-ellis.R")` |
 | `2-test-ellis-cache.R` | Test | `cchs-2-tables/`, `cchs-2.sqlite`, `CACHE-manifest.md` | Console pass/fail report | `source("manipulation/2-test-ellis-cache.R")` |
-| `ferry-lane-example.R` | Example | Template data | Demo outputs (not used by pipeline) | `source("manipulation/ferry-lane-example.R")` |
-| `ellis-lane-example.R` | Example | Template data | Demo outputs (not used by pipeline) | `source("manipulation/ellis-lane-example.R")` |
+| `example/ferry-lane-example.R` | Example | Template data | Demo outputs (not used by pipeline) | `source("manipulation/example/ferry-lane-example.R")` |
+| `example/ellis-lane-example.R` | Example | Template data | Demo outputs (not used by pipeline) | `source("manipulation/example/ellis-lane-example.R")` |
 
 ## What each script does
 
@@ -114,7 +114,7 @@ troubleshooting tips, and output schemas.
 
 **Output**: Raw or minimally-processed staging data ready for Ellis transformation.
 
-### Ellis Pattern: Data Transformation (`ellis-lane-example.R`)
+### Ellis Pattern: Data Transformation (`example/ellis-lane-example.R`)
 
 **Metaphor**: Ellis Island processed immigrants—inspecting, documenting, standardizing—before entry into the new system.
 

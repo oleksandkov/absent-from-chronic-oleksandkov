@@ -1,0 +1,462 @@
+---
+title: "EDA 4 — Section 4.1 (Alternative Take): LOP Component Decomposition"
+subtitle: "eda-5 — Dissecting the Primary Outcome Variable into Its 8 Reason Categories"
+author: "Analysis Team"
+date: "2026-03-22"
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    code-fold: true
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission
+
+This report provides an **alternative take on Section 4.1** (Outcome Variable Construction) of `stats_instructions_v3.md`. Where eda-3 compared the primary outcome (`days_absent_total`) to the sensitivity outcome (`days_absent_chronic`) and reported the required distributional statistics, this EDA opens the "black box" of the total by examining the 8 individual LOP reason categories from which it is constructed.
+
+**Research Questions:**
+
+1.  What is the weighted prevalence of each of the 8 LOP reason categories (what proportion of workers report ≥1 absent day for each reason)?
+2.  How much does each LOP component contribute to the weighted mean of `days_absent_total` in absolute and relative terms?
+3.  How many reason categories does a typical respondent report simultaneously, and what is the co-occurrence pattern across reason pairs?
+
+Following the dual-file development pattern, all analytical code lives in `analysis/eda-5/eda-5.R`. This document sources those chunks for presentation.
+
+# Definition of Terms
+
+**LOP module**: Loss of Productivity module from the CCHS. Respondents are asked how many workdays they missed in the past 3 months due to each of 8 distinct health-related reasons.
+
+**days_absent_total**: The primary outcome. Row-wise sum of all 8 LOP component variables (`lopg040` + `lopg070` + `lopg082` through `lopg086` + `lopg100`), capped at 90 days.
+
+**LOP reason categories (8 components):**
+
+| Variable  | Reason                                |
+|-----------|---------------------------------------|
+| `lopg040` | Own chronic condition                 |
+| `lopg070` | Injury                                |
+| `lopg082` | Cold                                  |
+| `lopg083` | Flu / influenza                       |
+| `lopg084` | Gastroenteritis (stomach flu)         |
+| `lopg085` | Respiratory infection                 |
+| `lopg086` | Other infectious disease              |
+| `lopg100` | Other physical / mental health reason |
+
+```{r}
+#| label: knitr-root
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir = '../../')
+```
+
+```{r}
+#| label: set_options
+#| code-summary: Report-wide formatting options
+#| echo: false
+#| results: hide
+#| message: false
+cat("Working directory: ", getwd())
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results      = 'show',
+  message      = FALSE,
+  warning      = FALSE,
+  comment      = NA,
+  tidy         = FALSE,
+  out.width    = "960px",
+  fig.width    = 10,
+  fig.height   = 6,
+  fig.path     = 'figure-png-iso/'
+)
+options(width = 100)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/eda-5/eda-5.R")
+```
+
+# Environment
+
+```{r}
+#| label: load-packages
+#| code-summary: Packages used in this report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: Project-level utilities
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: Paths, LOP component map, constants
+#| echo: true
+#| results: show
+#| code-fold: true
+```
+
+```{r}
+#| label: load-data
+#| code-summary: Load cchs_analytical.parquet
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+# Data Context
+
+For complete data documentation, see the [Data Primer](../data-primer-1/data-primer-1.html).
+
+```{r}
+#| label: data-context-tables
+#| code-summary: Tables used in this EDA
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: data-context-person
+#| code-summary: Representative individual — all LOP components visible
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: Non-missing counts and raw prevalence per component
+#| echo: true
+#| results: show
+```
+
+```{r}
+#| label: tweak-data-0
+#| code-summary: Reshape to long-form LOP dataset
+#| echo: true
+#| cache: true
+#| results: hide
+```
+
+# Analysis
+
+## G0 — Zero vs Non-Zero Absenteeism
+
+**Framing question**: How does the analytical sample split between workers who reported no missed days and those who missed at least one?
+
+```{r}
+#| label: g0-data-prep
+#| code-summary: Compute zero / non-zero group counts and weighted shares
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: g0
+#| code-summary: Horizontal stacked bar — zero vs ≥1 absent day
+#| echo: true
+#| cache: true
+#| fig-width: 10
+#| fig-height: 3
+#| fig-cap: "Horizontal stacked bar showing the split between workers with no missed days and those with ≥1 missed day. Each segment shows the unweighted count (n) and unweighted percentage share."
+```
+
+```{r}
+#| label: g01-data-prep
+#| code-summary: Restrict to ≥1-day group and assign shared day-range colour palette
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: g01
+#| code-summary: Histogram — total days missed, bars coloured by day-range category
+#| echo: true
+#| cache: true
+#| fig-width: 10
+#| fig-height: 5
+#| fig-cap: "Frequency histogram of total missed days for respondents reporting ≥1 day. Bar colour maps to the same five day-range categories used in G02, making the two graphs visually consistent."
+```
+
+```{r}
+#| label: g02-data-prep
+#| code-summary: Summarise ≥1-day group by day-range category
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: g02
+#| code-summary: Horizontal stacked bar — day-range breakdown (1–5, 6–10, 11–15, 16–30, 31+)
+#| echo: true
+#| fig-width: 10
+#| fig-height: 4
+#| fig-cap: "Horizontal stacked bar showing the proportion of the ≥1-day group in each day-range band (1–5, 6–10, 11–15, 16–30, 31+). Colours match the histogram in G01."
+#| cache: false
+```
+
+## G1 — Prevalence of Each LOP Reason Category
+
+**Research Question 1**: What proportion of workers missed ≥1 workday for each of the 8 reason categories?
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: Compute weighted prevalence per reason
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: g1
+#| code-summary: Horizontal bar chart — weighted prevalence, ordered
+#| echo: true
+#| cache: true
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Weighted % of respondents reporting ≥1 absent day per LOP reason. Chronic condition and 'other physical/mental health' dominate."
+```
+
+```{r}
+#| label: g11
+#| code-summary: Prevalence by survey cycle (2011 vs 2014)
+#| echo: true
+#| cache: true
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Cycle comparison. Differences between waves can indicate question-wording changes or real temporal shifts."
+```
+
+## G2 — Contribution of Each Component to the Total Outcome
+
+**Research Question 2**: How much does each LOP reason contribute to the weighted mean of `days_absent_total`?
+
+```{r}
+#| label: g2-data-prep
+#| code-summary: Weighted mean days per reason category
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: g2
+#| code-summary: Dot-strip plot — absolute mean days per reason with % share
+#| echo: true
+#| cache: true
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Each dot shows the weighted mean days absent attributed to that reason across all respondents. Chronic condition typically contributes the largest share."
+```
+
+```{r}
+#| label: g21
+#| code-summary: Stacked bar — relative shares of component sum
+#| echo: true
+#| cache: true
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Relative share of each LOP reason in the total absent-day burden (weighted means). Useful for seeing which reasons dominate the composite outcome."
+```
+
+## G3 — Co-occurrence of Reason Categories
+
+**Research Question 3**: How many categories does a typical respondent report, and which reason pairs co-occur most often?
+
+```{r}
+#| label: g3-data-prep
+#| code-summary: Compute per-respondent reason counts and pairwise co-occurrence matrix
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: g3
+#| code-summary: Histogram — number of reason categories per respondent
+#| echo: true
+#| cache: true
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Most respondents report 0 or 1 reason categories. The long tail informs whether the additive construction of the total outcome is dominated by single-reason reporters."
+```
+
+```{r}
+#| label: g31
+#| code-summary: Pairwise co-occurrence heatmap
+#| echo: true
+#| cache: true
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Cell values show % of respondents reporting ≥1 day for both reasons in the row/column pair. Diagonal entries equal univariate prevalence."
+```
+
+# Analysis-Positron
+
+This section characterises the outcome variable (`days_absent_total`) and its primary chronic-condition component (`days_absent_chronic`) through six complementary visualisations. Together they address: how common each reason is, how many days each reason typically produces, how the full distribution of total absence looks, how total and chronic-only compare, and what structural role the chronic component plays relative to the total.
+
+## gB1 — Prevalence of Each Absence Reason
+
+**Question**: What percentage of the full sample reported at least one absent day for each of the eight reasons?
+
+```{r}
+#| label: gB1-data-prep
+#| code-summary: Weighted prevalence per reason (full sample)
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: gB1
+#| code-summary: Horizontal bar chart — weighted prevalence by reason
+#| echo: true
+#| cache: true
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Weighted % of all respondents reporting ≥1 absent day per health reason. Establishes which reasons are most prevalent in the population, independent of days produced."
+```
+
+## gB2 — Distribution of Total Absent Days (non-zeros, log y)
+
+**Question**: What does the distribution of `days_absent_total` look like among those who missed at least one day?
+
+```{r}
+#| label: gB2-data-prep
+#| code-summary: Filter non-zero total days; count by integer value
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: gB2
+#| code-summary: Bar chart — days_absent_total distribution, log y-scale
+#| echo: true
+#| cache: true
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "One bar per integer value of days_absent_total (non-zeros only). Log y-axis reveals the heavy right tail. Title annotates the number and percentage of zeros excluded."
+```
+
+## gB3 — Total vs. Chronic-Only Distributions (log y, faceted)
+
+**Question**: How does the distribution of `days_absent_chronic` compare to `days_absent_total`?
+
+```{r}
+#| label: gB3-data-prep
+#| code-summary: Faceted long-form data for total vs chronic comparison
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: gB3
+#| code-summary: Faceted log-y bar charts — total vs chronic distributions
+#| echo: true
+#| cache: true
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Side-by-side distributions of days_absent_total and days_absent_chronic (non-zeros, log y). Chronic-only is narrower and more concentrated since it represents one of eight reasons."
+```
+
+## gB4 — Mean and Median Days Absent per Reason (reporters only)
+
+**Question**: Among those who reported a given reason, how many days did that reason typically produce?
+
+```{r}
+#| label: gB4-data-prep
+#| code-summary: Mean and median days per reason, restricted to reporters
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: gB4
+#| code-summary: Horizontal bar (mean) + diamond overlay (median)
+#| echo: true
+#| cache: true
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Mean (bar) and median (red diamond) days absent per reason, computed only among respondents who reported that reason. Mean >> median signals right-skewed distributions."
+```
+
+## gB5 — Role of Chronic Absence Among Those With Any Absence
+
+**Question**: Among workers who missed at least one day, how central is the chronic-condition component?
+
+```{r}
+#| label: gB5-data-prep
+#| code-summary: Classify absent respondents into three chronic-role groups
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: gB5
+#| code-summary: Bar chart — three chronic-role groups
+#| echo: true
+#| cache: true
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Proportions of the absent subgroup (days_absent_total > 0) classified as: no chronic days, entirely chronic, or mixed. Frames how central the chronic component is among absent workers."
+```
+
+## gB6 — Chronic Days vs. Total Days (bubble chart, 1:1 line)
+
+**Question**: What is the joint structure of `days_absent_chronic` and `days_absent_total` among those with both values positive?
+
+```{r}
+#| label: gB6-data-prep
+#| code-summary: Count each (total, chronic) day combination (both > 0)
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: gB6
+#| code-summary: Bubble chart — chronic vs total days, 1:1 reference line
+#| echo: true
+#| cache: true
+#| fig-width: 7
+#| fig-height: 7
+#| fig-cap: "Each bubble represents a unique (total, chronic) day combination; size ∝ number of respondents. Points on the dashed 1:1 line indicate all absence is chronic; points below show additional non-chronic days."
+```
+
+# Session Info
+
+```{r}
+#| label: session-info
+#| code-summary: Reproducibility record
+#| echo: true
+#| results: show
+#| code-fold: true
+cat("Rendered:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
+sessionInfo()
+```

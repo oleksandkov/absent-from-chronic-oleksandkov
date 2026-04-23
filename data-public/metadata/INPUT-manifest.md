@@ -1,7 +1,7 @@
 # INPUT Manifest
 
 Describes the raw input datasets consumed by the data pipeline **before** Ferry/Ellis processing.  
-Updated: 2026-02-22
+Updated: 2026-03-20
 
 ---
 
@@ -58,8 +58,8 @@ The Ellis lane (`2-ellis.R`) applies a **white-list** selecting only variables r
 work-absenteeism analysis. White-listed variables fall into two tiers:
 
 Current Lane 2 sample mode:
-- Default: **full pooled sample retained** (`apply_sample_exclusions = FALSE`)
-- Optional legacy mode: sequential exclusions enabled (`apply_sample_exclusions = TRUE`)
+- Default: **exclusion criteria applied** (`apply_sample_exclusions = TRUE`) — ~64,141 respondents
+- Optional full-pooled mode: exclusions disabled (`apply_sample_exclusions = FALSE`) — 126,431 respondents
 
 ### Tier 1: CONFIRMED (error if missing)
 Variables verified against the PDF data dictionaries and the study's
@@ -67,31 +67,34 @@ Variables verified against the PDF data dictionaries and the study's
 
 | CCHS Variable | Description | Source Module |
 |---------------|-------------|---------------|
-| `LOPG010` | Days absent — personal illness/injury | LOP |
-| `LOPG020` | Days absent — family responsibilities | LOP |
-| `LOPG025` | Days absent — own maternity/parental leave | LOP |
-| `LOPG027` | Days absent — medical/dental appointments | LOP |
-| `LOPG030` | Days absent — personal needs | LOP |
-| `LOPG035` | Days absent — other reasons | LOP |
-| `LOPG040` | Days absent — own chronic condition (primary outcome) | LOP |
-| `LOPG045` | Days absent — long-term disability | LOP |
-| `LOP_015`  | Currently employed (1=Yes) | LOP |
-| `DHHGAGE`  | Age group (coded 1–16) | DHH |
-| `ADM_PRX`  | Proxy respondent flag (1=proxy) | ADM |
-| `GEODPMF`  | Province of residence | GEO |
-| `WTS_M`    | Survey weight (master weight) | WTS |
+| `LOPG040` | Days absent — own chronic condition (primary outcome; also sensitivity outcome) | LOP |
+| `LOPG070` | Days absent — injury | LOP |
+| `LOPG082` | Days absent — cold | LOP |
+| `LOPG083` | Days absent — flu / influenza | LOP |
+| `LOPG084` | Days absent — stomach flu (gastroenteritis) | LOP |
+| `LOPG085` | Days absent — respiratory infection | LOP |
+| `LOPG086` | Days absent — other infectious disease | LOP |
+| `LOPG100` | Days absent — other physical / mental health reason | LOP |
+| `LOP_015`  | Currently employed in past 3 months (1=Yes; inclusion criterion) | LOP |
+| `DHHGAGE`  | Age group (coded 1–16; inclusion: codes 2–15, approx. age 15–75) | DHH |
+| `ADM_PRX`  | Proxy respondent flag (1=Proxy; exclusion criterion) | ADM |
+| `GEODPMF`  | Health region / strata identifier | GEO |
+| `WTS_M`    | Survey weight (master weight; labelled WGHT_FINAL in stat instructions) | WTS |
 
 ### Tier 2: INFERRED (warning if missing — graceful drop)
 Variables inferred from standard CCHS PUMF naming conventions.  
 **Verify exact names against the data dictionary PDFs** if any are missing after running `2-ellis.R`.
 
-- **CCC module (19 vars):** `CCC_015`, `CCC_020`, `CCC_025`, `CCC_030`, `CCC_035`, `CCC_040`,
-  `CCC_060`, `CCC_095`, `CCC_100`, `CCC_110`, `CCC_115`, `CCC_120`, `CCC_125`, `CCC_130`,
-  `CCC_135`, `CCC_140`, `CCC_145`, `CCC_150`, `CCC_185`
-- **Predisposing (7 vars):** `DHH_SEX`, `DHHGMS`, `DHHDGHSZ`, `EDUDH04`, `SDCFIMM`,
-  `SDCDGCB`, `DHHDGLVG`
-- **Facilitating (11 vars):** `INCDGHH`, `HCU_1AA`, `LBFDGHP`, `LBFDGFT`, `FVCDGTOT`,
-  `ALCDGTYP`, `SMKDSTY`, `HWTDGBMI`, `PACDPAI`, `GEN_07`
+- **CCC module (19 vars):** `CCC_015` (asthma), `CCC_031` (arthritis), `CCC_051` (back problems),
+  `CCC_071` (hypertension), `CCC_081` (migraine), `CCC_091` (COPD), `CCC_101` (diabetes),
+  `CCC_121` (heart disease), `CCC_131` (cancer), `CCC_141` (ulcer), `CCC_151` (stroke),
+  `CCC_171` (bowel disorder), `CCC_011` (fibromyalgia), `CCC_041` (chronic fatigue),
+  `CCC_061` (chemical sensitivities), `CCC_280` (mood disorder), `CCC_290` (anxiety disorder),
+  `CCC_300` (other mental illness), `CCC_185` (digestive disease)
+- **Predisposing (11 vars):** `DHH_SEX`, `DHHGMS`, `DHHDGHSZ`, `EDUDH04`, `SDCFIMM`,
+  `SDCDGCB`, `DHHDGLVG`, `DHHDFC5`, `DHHDFC11`, `DHHDFC12P`, `SDCDGSTUD`
+- **Facilitating (12 vars):** `INCDGHH`, `GEODGPRV`, `HCU_1AA`, `LBFDGHP`, `LBFDGFT`, `FVCDGTOT`,
+  `ALCDGTYP`, `SMKDSTY`, `HWTDGBMI`, `PACDPAI`, `GEN_07`, `NOC_31`
 - **Needs (5 vars):** `GEN_01`, `GEN_02A`, `GEN_09`, `RAC_1`, `INJ_01`
 - **ID (1 var):** `ADM_RNO`
 - **Bootstrap weights (500 vars):** `BSW001`–`BSW500` (pattern `^BSW`)

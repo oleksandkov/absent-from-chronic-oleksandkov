@@ -1,32 +1,23 @@
-# Project Mission (Template)
+# Project Mission 
 
-Provide a clear, concise articulation of the project's purpose, target users, and intended analytical impact.
+The project's mission is perform the statistical analysis request in data-private\raw\2026-02-19\stats_instructions_v3.md (aka stat instructions)
 
 ## Objectives
 
-- Establish a reusable scaffold for data analysis workflows.
-- Demonstrate AI-assisted context, persona, and memory integration.
-- Support rapid onboarding with minimal friction.
-- Maintain separation between portable logic and project-specific storage.
+- deliver a frontend containing the exhaustive response to stat instructions.
 
 ## Success Metrics
 
-- Time-to-first-successful analysis < 30 minutes.
-- Persona activation yields relevant guidance without manual edits.
-- Memory system captures decisions within normal workflow (<= 3 commands).
-- Context refresh operations complete < 2 seconds for core files.
+- Each bullet point of the stat instructions is addressed
+- Each requirement or ask is implemented or addressed
 
 ## Non-Goals
 
-- Domain-specific modeling guidance.
-- Heavy dependency management beyond base R/Python tooling.
-- Automated cloud deployment.
+TBD
 
 ## Stakeholders
 
-- Data analysts: need reproducible templates.
-- Research engineers: need portable AI scaffolding.
-- Project managers: need visibility into mission/method/glossary.
+Marc-Andre Blanchette - research scientist. 
 
 ---
 *Populate with project-specific mission statements before production use.*

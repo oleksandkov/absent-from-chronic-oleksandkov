@@ -47,9 +47,9 @@ path_sampleflow_pq   <- file.path(path_cchs2_parquet, "sample_flow.parquet")
 
 # White-list variable counts (from 2-ellis.R globals — for documentation charts)
 n_confirmed          <- 13L   # vars_confirmed
-n_inferred_ccc       <- 19L   # vars_inferred_ccc
-n_inferred_other     <- 37L   # predisposing (12) + facilitating (12) + needs (5) + id (1) + ~7 misc
-# bootstrap weights are pattern-selected (~500), not in white-list count
+n_inferred_ccc       <- 19L   # vars_inferred_ccc (white-list intent: 17 verified in PUMF; ccc_300 and ccc_185 NOT FOUND — trigger WARNING)
+n_inferred_other     <- 29L   # predisposing (11) + facilitating (12) + needs (5) + id (1)
+# bootstrap weights are pattern-selected (^bsw), not in white-list count
 # CCHS 2010 SPSS file has ~600+ columns; CCHS 2014 similar size
 # (update these when actual ferry output is available)
 
@@ -361,9 +361,9 @@ if (file.exists(path_sampleflow_pq)) {
     step             = c("Starting pool", "After age 15-75",
                          "After employed filter", "After proxy exclusion",
                          "After complete outcome"),
-    n_remaining      = c(126431L, 117842L, 71504L, 70891L, 70103L),
-    n_excluded       = c(0L, 8589L, 46338L, 613L, 788L),
-    pct_remaining    = c(100, 93.2, 56.6, 56.1, 55.5)
+    n_remaining      = c(126431L, 117842L, 64813L, 64813L, 63843L),  # intermediate values approx; final n=63,843 verified (default run)
+    n_excluded       = c(0L, 8589L, 53029L, 0L, 970L),
+    pct_remaining    = c(100.0, 93.2, 51.3, 51.3, 50.5)
   )
   message("  Using documented placeholder values for sample_flow.")
 }
@@ -449,10 +449,13 @@ cat("\nFull exclusion step breakdown:\n")
 print(sample_flow)
 cat(sprintf("\n→ DEFAULT run (apply_completeness_exclusion = FALSE): n = %s (§3.1 target: 64,141; diff: %+d).\n",
             format(final_n_default, big.mark = ","), final_n_default - target_final_n))
-cat("  Step 4 (proxy exclusion) removed 0 rows because adm_prx column was not found in data.\n")
-cat("\n→ ALL-TRUE run (apply_completeness_exclusion = TRUE): n = 41,372 (−22,769 vs default).\n")
-cat("  Gap: 17 inferred predictor vars missing from CCHS (incdghh, hwtdgbmi, alcdgtyp, noc_31,\n")
-cat("  etc.) were added as NA → completeness filter excluded all respondents with those NAs.\n")
+cat("  Step 4 (proxy exclusion) removed 0 rows. adm_prx IS a confirmed column; no respondents in the analytical pool were coded as proxy respondents (adm_prx = 1).\n")
+cat("\n→ ALL-TRUE run (apply_completeness_exclusion = TRUE): n ≈ 41,372 (approximate; from pre-correction whitelist run).\n")
+cat("  Gap from default reflects structural NAs in the pre-recode dataset (ds2).\n")
+cat("  Confirmed absent from both CCHS PUMF cycles: ccc_300, ccc_185, alcdgtyp,\n")
+cat("  hwtdgbmi, dhhdglvg, sdcdgstud, noc_31. Note: incdghh, lbfdghp, lbfdgft,\n")
+cat("  fvcdgtot, dhhdghsz are NOW populated via the alias map.\n")
+cat("  Re-run with apply_completeness_exclusion=TRUE for the updated actual n.\n")
 
 # ==============================================================================
 # GRAPH: g-cycle-split
