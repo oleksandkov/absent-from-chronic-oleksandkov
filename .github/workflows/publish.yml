@@ -35,10 +35,35 @@ jobs:
         working-directory: _frontend-1
         run: quarto render
 
+      - name: Locate rendered site directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Workspace: $PWD"
+          echo "Top-level folders:"
+          ls -la
+
+          CANDIDATES=(
+            "_frontend-1/_site"
+            "_site"
+          )
+
+          for d in "${CANDIDATES[@]}"; do
+            if [ -d "$d" ]; then
+              echo "Found site directory: $d"
+              echo "SITE_DIR=$d" >> "$GITHUB_ENV"
+              exit 0
+            fi
+          done
+
+          echo "Could not find rendered site directory. Search results:"
+          find . -maxdepth 5 -type d -name "_site" -print || true
+          exit 1
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _frontend-1/_site/
+          path: ${{ env.SITE_DIR }}
 
   deploy:
     needs: build
