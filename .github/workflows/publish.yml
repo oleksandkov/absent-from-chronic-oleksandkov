@@ -32,6 +32,7 @@ jobs:
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: '4.5.1'
+          use-public-rspm: true
 
       - name: Install system dependencies for R packages
         run: |
@@ -41,12 +42,21 @@ jobs:
             libcurl4-openssl-dev \
             libssl-dev \
             libxml2-dev \
-            libgit2-dev
+            libgit2-dev \
+            pandoc
 
-      - name: Restore R dependencies from renv.lock
-        uses: r-lib/actions/setup-renv@v2
+      - name: Cache R packages
+        uses: actions/cache@v3
         with:
-          cache-version: 1
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-r-${{ matrix.config.r }}-${{ hashFiles('.github/r-depends.rds') }}
+          restore-keys: ${{ runner.os }}-r-${{ matrix.config.r }}-
+
+      - name: Restore and install R dependencies
+        run: |
+          if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
+          renv::restore(clean = FALSE, prompt = FALSE)
+        shell: Rscript {0}
 
       - name: Render _frontend-1 site
         working-directory: _frontend-1
