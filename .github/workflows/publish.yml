@@ -5,8 +5,9 @@ on:
     branches: [main]
     paths:
       - '_frontend-1/**'
+      - '_site/**'
       - '.github/workflows/publish.yml'
-  workflow_dispatch:      # optional manual trigger from the Actions tab
+  workflow_dispatch:     
 
 permissions:
   contents: read
