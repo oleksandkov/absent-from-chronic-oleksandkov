@@ -34,7 +34,7 @@ jobs:
           r-version: '4.5.1'
           use-public-rspm: true
 
-      - name: Install system dependencies for R packages
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -45,17 +45,9 @@ jobs:
             libgit2-dev \
             pandoc
 
-      - name: Cache R packages
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-r-${{ matrix.config.r }}-${{ hashFiles('.github/r-depends.rds') }}
-          restore-keys: ${{ runner.os }}-r-${{ matrix.config.r }}-
-
-      - name: Restore and install R dependencies
+      - name: Install minimal R packages for Quarto
         run: |
-          if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
-          renv::restore(clean = FALSE, prompt = FALSE)
+          install.packages(c("tidyverse", "rmarkdown", "knitr"), repos = "https://packagemanager.posit.co/cran/latest")
         shell: Rscript {0}
 
       - name: Render _frontend-1 site
