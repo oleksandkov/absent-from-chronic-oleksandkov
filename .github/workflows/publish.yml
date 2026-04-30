@@ -40,24 +40,19 @@ jobs:
         run: |
           set -euo pipefail
           echo "Workspace: $PWD"
-          echo "Top-level folders:"
-          ls -la
-
-          CANDIDATES=(
-            "_frontend-1/_site"
-            "_site"
-          )
-
-          for d in "${CANDIDATES[@]}"; do
-            if [ -d "$d" ]; then
-              echo "Found site directory: $d"
-              echo "SITE_DIR=$d" >> "$GITHUB_ENV"
-              exit 0
-            fi
-          done
-
-          echo "Could not find rendered site directory. Search results:"
-          find . -maxdepth 5 -type d -name "_site" -print || true
+          echo "Checking for _site directory..."
+          
+          # After rendering in _frontend-1, the site is at _frontend-1/_site
+          if [ -d "_frontend-1/_site" ]; then
+            echo "✓ Found site at _frontend-1/_site"
+            echo "SITE_DIR=_frontend-1/_site" >> "$GITHUB_ENV"
+            ls -la _frontend-1/_site | head -20
+            exit 0
+          fi
+          
+          echo "✗ Could not find _site directory"
+          echo "Directory structure:"
+          ls -la _frontend-1/ || true
           exit 1
 
       - name: Upload Pages artifact
