@@ -30,6 +30,18 @@ jobs:
 
       - name: Set up R (required by Quarto pre/post-render hooks)
         uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.5.1'
+
+      - name: Install system dependencies for R packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libcurl4-openssl-dev \
+            libssl-dev \
+            libxml2-dev \
+            libgit2-dev
 
       - name: Restore R dependencies from renv.lock
         uses: r-lib/actions/setup-renv@v2
