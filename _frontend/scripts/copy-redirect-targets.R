@@ -48,14 +48,19 @@ redirect_targets <- list(
     label = "Univariate Distributions",
     dest_rel = "analysis/data-primer-1/univariate-distributions.html",
     source_candidates = c(
-      "analysis/data-primer-1/univariate-distributions.html"
+      "edited_content/analysis/univariate-distributions.html",
+      "analysis/data-primer-1/univariate-distributions.html",
+      "_site/edited_content/analysis/univariate-distributions.html",
+      "_site/analysis/data-primer-1/univariate-distributions.html"
     )
   ),
   list(
     label = "EDA-2",
     dest_rel = "analysis/eda-2/eda-2.html",
     source_candidates = c(
+      "edited_content/analysis/eda-2.html",
       "analysis/eda-2/eda-2.html",
+      "_site/edited_content/analysis/eda-2.html",
       "_site/analysis/eda-2/eda-2.html"
     )
   ),
@@ -63,7 +68,9 @@ redirect_targets <- list(
     label = "EDA-5",
     dest_rel = "analysis/eda-5/eda-5.html",
     source_candidates = c(
+      "edited_content/analysis/eda-5.html",
       "analysis/eda-5/eda-5.html",
+      "_site/edited_content/analysis/eda-5.html",
       "_site/analysis/eda-5/eda-5.html"
     )
   ),
