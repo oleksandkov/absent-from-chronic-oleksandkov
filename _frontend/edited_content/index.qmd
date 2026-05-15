@@ -1,0 +1,21 @@
+---
+title: "Absent from Chronic — Research Documentation"
+---
+
+This site documents the statistical analysis workflow for *Predictors of Work Absenteeism Associated with Chronic Conditions Among Canadian Workers*.
+
+**Hero figure unavailable:** `analysis/eda-5/prints/g01_lop_days_histogram.png` was not found at build time.
+
+The documentation is organized as a verification path from statistical instructions to implemented analysis artifacts. It is intended for direct review by the principal investigator.
+
+The analytical dataset currently documented in the CACHE Manifest contains **63,843 rows** and **62 columns**, pooling two CCHS cycles (2010–2011 and 2013–2014).
+
+Source grounding: `README.md`; `data-public/metadata/CACHE-manifest.md`.
+
+## How to use this site
+
+- **Project**: the original statistical instructions that define required outputs.
+- **Pipeline**: the transport-and-transformation documentation, plus manifest references.
+- **Data Primer**: variable inclusion traceability and univariate profile access.
+- **Analysis**: EDA and binder report outputs used to inspect outcome structure and sample composition.
+- **Docs**: project synopsis and site map for navigation and requirement coverage.

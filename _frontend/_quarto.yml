@@ -1,0 +1,76 @@
+project:
+  type: website
+  output-dir: _site
+  pre-render:
+    - scripts/prep-content.R
+  post-render:
+    - scripts/copy-redirect-targets.R
+  render:
+    - edited_content/index.qmd
+    - edited_content/project/statistical-instructions.qmd
+    - edited_content/pipeline/pipeline-guide.qmd
+    - edited_content/pipeline/cache-manifest.qmd
+    - edited_content/pipeline/input-manifest.qmd
+    - edited_content/data-primer/variable-inclusion.qmd
+    - edited_content/data-primer/univariate-distributions.qmd
+    - edited_content/analysis/eda-2.qmd
+    - edited_content/analysis/eda-5.qmd
+    - edited_content/analysis/binder-2-table-anatomy.qmd
+    - edited_content/analysis/binder-2-sociodemographic-fabric.qmd
+    - edited_content/analysis/binder-2-outcome-anatomy.qmd
+    - edited_content/analysis/binder-2-raw-to-analytical.qmd
+    - edited_content/docs/readme.qmd
+    - edited_content/docs/site-map.qmd
+
+website:
+  title: "Absent from Chronic — Research Documentation"
+  repo-url: "https://github.com/[owner]/absent-from-chronic"
+  navbar:
+    left:
+      - text: "Home"
+        href: edited_content/index.qmd
+      - text: "Project"
+        href: edited_content/project/statistical-instructions.qmd
+      - text: "Pipeline"
+        menu:
+          - text: "Pipeline Guide"
+            href: edited_content/pipeline/pipeline-guide.qmd
+          - text: "CACHE Manifest"
+            href: edited_content/pipeline/cache-manifest.qmd
+          - text: "INPUT Manifest"
+            href: edited_content/pipeline/input-manifest.qmd
+      - text: "Data Primer"
+        menu:
+          - text: "Variable Inclusion"
+            href: edited_content/data-primer/variable-inclusion.qmd
+          - text: "Univariate Distributions"
+            href: edited_content/data-primer/univariate-distributions.qmd
+      - text: "Analysis"
+        menu:
+          - text: "EDA-2"
+            href: edited_content/analysis/eda-2.qmd
+          - text: "EDA-5"
+            href: edited_content/analysis/eda-5.qmd
+          - text: "Binder-2: Table Anatomy"
+            href: edited_content/analysis/binder-2-table-anatomy.qmd
+          - text: "Binder-2: Sociodemographic Fabric"
+            href: edited_content/analysis/binder-2-sociodemographic-fabric.qmd
+          - text: "Binder-2: Outcome Anatomy"
+            href: edited_content/analysis/binder-2-outcome-anatomy.qmd
+          - text: "Binder-2: Raw to Analytical"
+            href: edited_content/analysis/binder-2-raw-to-analytical.qmd
+      - text: "Docs"
+        menu:
+          - text: "README"
+            href: edited_content/docs/readme.qmd
+          - text: "Site Map"
+            href: edited_content/docs/site-map.qmd
+  page-footer:
+    center: "Absent from Chronic — Statistical Analysis Replication | Marc-Andre Blanchette, Research Scientist"
+
+format:
+  html:
+    theme: flatly
+    toc: true
+    mermaid:
+      theme: neutral

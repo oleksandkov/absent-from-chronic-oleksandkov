@@ -180,7 +180,7 @@ analysis/eda-2/figure-png-iso/g-whitelist-ratio-1.png
 /analysis/binder-*/*
 /analysis/binder-*/*.*
 !analysis/binder-*/*.[R|qmd|ipynb]
-/_frontend-*/*
+# /_frontend-*/*
 analysis/eda-2/figure-png-iso/g-whitelist-ratio-1.png
 analysis/eda-5/figure-png-iso/g0-1.png
 analysis/eda-5/figure-png-iso/g01-1.png

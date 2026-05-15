@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.24">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Pipeline Guide – Absent from Chronic — Research Documentation</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dc55a5b9e770e841cd82e46aadbfb9b0.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-ffa9a6279353761231ec249df0a7fdd3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Absent from Chronic — Research Documentation</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../edited_content/index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../edited_content/project/statistical-instructions.html"> 
+<span class="menu-text">Project</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-pipeline" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Pipeline</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-pipeline">    
+        <li>
+    <a class="dropdown-item" href="../../edited_content/pipeline/pipeline-guide.html">
+ <span class="dropdown-text">Pipeline Guide</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../edited_content/pipeline/cache-manifest.html">
+ <span class="dropdown-text">CACHE Manifest</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../edited_content/pipeline/input-manifest.html">
+ <span class="dropdown-text">INPUT Manifest</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-data-primer" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Data Primer</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-data-primer">    
+        <li>
+    <a class="dropdown-item" href="../../edited_content/data-primer/variable-inclusion.html">
+ <span class="dropdown-text">Variable Inclusion</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../edited_content/data-primer/univariate-distributions.html">
+ <span class="dropdown-text">Univariate Distributions</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-analysis" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Analysis</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-analysis">    
+        <li>
+    <a class="dropdown-item" href="../../edited_content/analysis/eda-2.html">
+ <span class="dropdown-text">EDA-2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../edited_content/analysis/eda-5.html">
+ <span class="dropdown-text">EDA-5</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-table-anatomy.html">
+ <span class="dropdown-text">Binder-2: Table Anatomy</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-sociodemographic-fabric.html">
+ <span class="dropdown-text">Binder-2: Sociodemographic Fabric</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-outcome-anatomy.html">
+ <span class="dropdown-text">Binder-2: Outcome Anatomy</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-raw-to-analytical.html">
+ <span class="dropdown-text">Binder-2: Raw to Analytical</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-docs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Docs</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-docs">    
+        <li>
+    <a class="dropdown-item" href="../../edited_content/docs/readme.html">
+ <span class="dropdown-text">README</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../edited_content/docs/site-map.html">
+ <span class="dropdown-text">Site Map</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#data-pipeline-absent-from-chronic" id="toc-data-pipeline-absent-from-chronic" class="nav-link active" data-scroll-target="#data-pipeline-absent-from-chronic">Data Pipeline: absent-from-chronic</a>
+  <ul class="collapse">
+  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#scripts" id="toc-scripts" class="nav-link" data-scroll-target="#scripts">Scripts</a></li>
+  <li><a href="#ferry" id="toc-ferry" class="nav-link" data-scroll-target="#ferry">1-ferry</a>
+  <ul class="collapse">
+  <li><a href="#high-level-summary" id="toc-high-level-summary" class="nav-link" data-scroll-target="#high-level-summary">High-Level Summary</a></li>
+  </ul></li>
+  <li><a href="#running-the-pipeline" id="toc-running-the-pipeline" class="nav-link" data-scroll-target="#running-the-pipeline">Running the Pipeline</a>
+  <ul class="collapse">
+  <li><a href="#option-a-full-pipeline-via-flow.r" id="toc-option-a-full-pipeline-via-flow.r" class="nav-link" data-scroll-target="#option-a-full-pipeline-via-flow.r">Option A: Full pipeline via flow.R</a></li>
+  <li><a href="#option-b-individual-scripts" id="toc-option-b-individual-scripts" class="nav-link" data-scroll-target="#option-b-individual-scripts">Option B: Individual scripts</a></li>
+  <li><a href="#option-c-vs-code-tasks" id="toc-option-c-vs-code-tasks" class="nav-link" data-scroll-target="#option-c-vs-code-tasks">Option C: VS Code Tasks</a></li>
+  <li><a href="#option-d-interactive-pipeline-run-interactive-flow.ps1" id="toc-option-d-interactive-pipeline-run-interactive-flow.ps1" class="nav-link" data-scroll-target="#option-d-interactive-pipeline-run-interactive-flow.ps1">Option D: Interactive Pipeline (run-interactive-flow.ps1)</a></li>
+  </ul></li>
+  <li><a href="#inputs" id="toc-inputs" class="nav-link" data-scroll-target="#inputs">Inputs</a></li>
+  <li><a href="#outputs" id="toc-outputs" class="nav-link" data-scroll-target="#outputs">Outputs</a>
+  <ul class="collapse">
+  <li><a href="#ferry-outputs-staging-not-for-analysis" id="toc-ferry-outputs-staging-not-for-analysis" class="nav-link" data-scroll-target="#ferry-outputs-staging-not-for-analysis">Ferry outputs (staging — not for analysis)</a></li>
+  <li><a href="#ellis-outputs-analysis-ready" id="toc-ellis-outputs-analysis-ready" class="nav-link" data-scroll-target="#ellis-outputs-analysis-ready">Ellis outputs (analysis-ready)</a></li>
+  <li><a href="#ellis-lane-3-outputs-clarity-layer-from-prior-run" id="toc-ellis-lane-3-outputs-clarity-layer-from-prior-run" class="nav-link" data-scroll-target="#ellis-lane-3-outputs-clarity-layer-from-prior-run">Ellis Lane 3 outputs (clarity layer — from prior run)</a></li>
+  </ul></li>
+  <li><a href="#pipeline-flags" id="toc-pipeline-flags" class="nav-link" data-scroll-target="#pipeline-flags">Pipeline Flags</a></li>
+  <li><a href="#white-list-design" id="toc-white-list-design" class="nav-link" data-scroll-target="#white-list-design">White-List Design</a>
+  <ul class="collapse">
+  <li><a href="#tier-1-confirmed-hard-error-if-missing" id="toc-tier-1-confirmed-hard-error-if-missing" class="nav-link" data-scroll-target="#tier-1-confirmed-hard-error-if-missing">Tier 1: CONFIRMED (hard error if missing)</a></li>
+  <li><a href="#tier-2-inferred-graceful-warning-if-missing" id="toc-tier-2-inferred-graceful-warning-if-missing" class="nav-link" data-scroll-target="#tier-2-inferred-graceful-warning-if-missing">Tier 2: INFERRED (graceful warning if missing)</a></li>
+  </ul></li>
+  <li><a href="#exclusion-criteria-sample_flow" id="toc-exclusion-criteria-sample_flow" class="nav-link" data-scroll-target="#exclusion-criteria-sample_flow">Exclusion Criteria (sample_flow)</a></li>
+  <li><a href="#survey-weight-pooling" id="toc-survey-weight-pooling" class="nav-link" data-scroll-target="#survey-weight-pooling">Survey Weight Pooling</a></li>
+  <li><a href="#diagnostic-checkpoints" id="toc-diagnostic-checkpoints" class="nav-link" data-scroll-target="#diagnostic-checkpoints">Diagnostic Checkpoints</a></li>
+  <li><a href="#troubleshooting" id="toc-troubleshooting" class="nav-link" data-scroll-target="#troubleshooting">Troubleshooting</a></li>
+  <li><a href="#data-documentation" id="toc-data-documentation" class="nav-link" data-scroll-target="#data-documentation">Data Documentation</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Pipeline Guide</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="data-pipeline-absent-from-chronic" class="level1">
+<h1>Data Pipeline: absent-from-chronic</h1>
+<p>Execution guide for the CCHS work-absenteeism data pipeline.</p>
+<hr>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<pre><code>CCHS .sav files (private data storage)
+         │
+         ▼  1-ferry.R   ← zero semantic transformation
+  cchs-1.sqlite + cchs-1-raw/*.parquet   (staging)
+         │
+         ▼  2-ellis.R   ← white-list + harmonize + recode
+  cchs-2.sqlite + cchs-2-tables/*.parquet   (analysis-ready)
+         │
+         ▼  2-test-ellis-cache.R   ← alignment verification
+  console report (pass/fail)</code></pre>
+<hr>
+</section>
+<section id="scripts" class="level2">
+<h2 class="anchored" data-anchor-id="scripts">Scripts</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 23%">
+<col style="width: 34%">
+<col style="width: 30%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>File</th>
+<th>Pattern</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><code>manipulation/1-ferry.R</code></td>
+<td>Ferry</td>
+<td>private data storage + <code>cchs-1-raw/</code> Parquet backup</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><code>manipulation/2-ellis.R</code></td>
+<td>Ellis</td>
+<td>private data storage + <code>cchs-2-tables/</code> Parquet</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><code>manipulation/2-test-ellis-cache.R</code></td>
+<td>Test</td>
+<td>Console test report (three-way alignment check)</td>
+</tr>
+<tr class="even">
+<td>—</td>
+<td><code>manipulation/example/ferry-lane-example.R</code></td>
+<td>Example</td>
+<td><code>cchs-1.sqlite</code> (demo only; does not affect main pipeline)</td>
+</tr>
+<tr class="odd">
+<td>—</td>
+<td><code>manipulation/example/ellis-lane-example.R</code></td>
+<td>Example</td>
+<td><code>cchs-2.sqlite</code> (demo only; does not affect main pipeline)</td>
+</tr>
+</tbody>
+</table>
+<p>A third Ellis lane produced additional derived outputs; documentation is in the CACHE Manifest.</p>
+</section>
+<section id="ferry" class="level2">
+<h2 class="anchored" data-anchor-id="ferry">1-ferry</h2>
+<section id="high-level-summary" class="level3">
+<h3 class="anchored" data-anchor-id="high-level-summary">High-Level Summary</h3>
+<p><code>1-ferry.R</code> is a <strong>pure transport</strong> script. Its sole job is to move raw CCHS PUMF microdata from SPSS (<code>.sav</code>) format into a local SQLite staging database, with a Parquet backup alongside. It does <strong>nothing analytical</strong>: no variable selection, no recoding, no filtering, no renaming beyond mechanical snake_case sanitization. The guiding discipline is that every decision about <em>what the data means</em> is deferred to the Ellis lane; Ferry only answers the question <em>“how do we get the data off disk into a queryable form?”</em>.</p>
+<p>Two CCHS cycles are handled in one script:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Cycle</th>
+<th>Source file</th>
+<th>SQLite table</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2010–2011</td>
+<td><code>CCHS2010_LOP.sav</code></td>
+<td><code>cchs_2010_raw</code></td>
+</tr>
+<tr class="even">
+<td>2013–2014</td>
+<td><code>CCHS_2014_EN_PUMF.sav</code></td>
+<td><code>cchs_2014_raw</code></td>
+</tr>
+</tbody>
+</table>
+<p>If the 2014 file is absent, the script continues with a zero-row placeholder (same schema as 2010) so that downstream scripts can still be developed and tested against a structurally complete database.</p>
+<p><strong>Permitted operations</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 32%">
+<col style="width: 17%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Operation</th>
+<th>Tool</th>
+<th>Reason permitted</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Read SPSS</td>
+<td><code>haven::read_sav()</code></td>
+<td>Ingestion only</td>
+</tr>
+<tr class="even">
+<td>Strip value/variable labels</td>
+<td><code>haven::zap_labels()</code> / <code>haven::zap_label()</code></td>
+<td>SQLite cannot store SPSS label attributes</td>
+</tr>
+<tr class="odd">
+<td>Sanitize column names</td>
+<td><code>janitor::clean_names()</code></td>
+<td>Mechanical normalization, no meaning change</td>
+</tr>
+<tr class="even">
+<td>Write SQLite</td>
+<td><code>DBI::dbWriteTable()</code></td>
+<td>Primary staging output</td>
+</tr>
+<tr class="odd">
+<td>Write Parquet</td>
+<td><code>arrow::write_parquet()</code></td>
+<td>Backup / fast-read fallback</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Forbidden operations</strong> (all deferred to Ellis)</p>
+<ul>
+<li>Variable selection / white-listing</li>
+<li>Renaming beyond <code>clean_names</code> normalization</li>
+<li>Factor or value recoding</li>
+<li>Sample exclusions or filtering</li>
+<li>Derived variable construction</li>
+</ul>
+<hr>
+<hr>
+</section>
+</section>
+<section id="running-the-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="running-the-pipeline">Running the Pipeline</h2>
+<section id="option-a-full-pipeline-via-flow.r" class="level3">
+<h3 class="anchored" data-anchor-id="option-a-full-pipeline-via-flow.r">Option A: Full pipeline via flow.R</h3>
+<p>Runs ferry → ellis → all downstream analyses in sequence.</p>
+</section>
+<section id="option-b-individual-scripts" class="level3">
+<h3 class="anchored" data-anchor-id="option-b-individual-scripts">Option B: Individual scripts</h3>
+</section>
+<section id="option-c-vs-code-tasks" class="level3">
+<h3 class="anchored" data-anchor-id="option-c-vs-code-tasks">Option C: VS Code Tasks</h3>
+<p>Use the tasks defined in <code>.vscode/tasks.json</code>: - <strong>Run Ferry Lane 1</strong> — <code>Rscript manipulation/1-ferry.R</code> - <strong>Run Ellis Lane 2</strong> — <code>Rscript manipulation/2-ellis.R</code> - <strong>Test Ellis ↔︎ CACHE-Manifest Alignment</strong> — <code>Rscript manipulation/2-test-ellis-cache.R</code></p>
+</section>
+<section id="option-d-interactive-pipeline-run-interactive-flow.ps1" class="level3">
+<h3 class="anchored" data-anchor-id="option-d-interactive-pipeline-run-interactive-flow.ps1">Option D: Interactive Pipeline (run-interactive-flow.ps1)</h3>
+<p>The interactive runner asks three questions before launching <code>flow.R</code>:</p>
+<p><strong>Q1 — Ellis mode</strong> (<code>run-as-is</code> / <code>default</code> / <code>strict</code>): controls three pipeline flags in <code>2-ellis.R</code> (<code>strict_cycle_integrity</code>, <code>apply_sample_exclusions</code>, <code>apply_completeness_exclusion</code>).</p>
+<p><strong>Q2 — EDA selection</strong>: dynamically scans <code>analysis/</code> for folders that contain both an <code>.R</code> file and a <code>.qmd</code> file, and lets you choose which EDAs to activate (uncomment) in <code>flow.R</code>. Selecting <strong>None (0)</strong> comments out <strong>all</strong> active EDA lines in <code>flow.R</code> so they will be skipped.</p>
+<p><strong>Q3 — Run mode</strong>: apply all changes and launch, or run <code>flow.R</code> as-is.</p>
+<hr>
+</section>
+</section>
+<section id="inputs" class="level2">
+<h2 class="anchored" data-anchor-id="inputs">Inputs</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>File</th>
+<th>Location</th>
+<th>Cycle</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>CCHS2010_LOP.sav</code></td>
+<td>private data storage</td>
+<td>2010–2011</td>
+</tr>
+<tr class="even">
+<td><code>CCHS_2014_EN_PUMF.sav</code></td>
+<td>private data storage</td>
+<td>2013–2014</td>
+</tr>
+</tbody>
+</table>
+<p>Paths are configured in <code>config.yml</code> under <code>raw_data</code>.</p>
+<hr>
+</section>
+<section id="outputs" class="level2">
+<h2 class="anchored" data-anchor-id="outputs">Outputs</h2>
+<section id="ferry-outputs-staging-not-for-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="ferry-outputs-staging-not-for-analysis">Ferry outputs (staging — not for analysis)</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 30%">
+<col style="width: 39%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Artifact</th>
+<th>Location</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>cchs-1.sqlite</code></td>
+<td>private data storage</td>
+<td>Raw tables: <code>cchs_2010_raw</code>, <code>cchs_2014_raw</code></td>
+</tr>
+<tr class="even">
+<td><code>cchs-1-raw/*.parquet</code></td>
+<td>private data storage</td>
+<td>Parquet backups of raw tables</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="ellis-outputs-analysis-ready" class="level3">
+<h3 class="anchored" data-anchor-id="ellis-outputs-analysis-ready">Ellis outputs (analysis-ready)</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 24%">
+<col style="width: 19%">
+<col style="width: 31%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Artifact</th>
+<th>Location</th>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>cchs_analytical.parquet</code></td>
+<td>private data storage</td>
+<td>Parquet</td>
+<td>Main analysis dataset (<code>apply_sample_exclusions = TRUE</code> by default; 63,843 rows, 62 cols)</td>
+</tr>
+<tr class="even">
+<td><code>sample_flow.parquet</code></td>
+<td>private data storage</td>
+<td>Parquet</td>
+<td>Exclusion audit trail (5 rows)</td>
+</tr>
+<tr class="odd">
+<td><code>cchs-2.sqlite</code></td>
+<td>private data storage</td>
+<td>SQLite</td>
+<td>Same tables as Parquet (factors as character)</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="ellis-lane-3-outputs-clarity-layer-from-prior-run" class="level3">
+<h3 class="anchored" data-anchor-id="ellis-lane-3-outputs-clarity-layer-from-prior-run">Ellis Lane 3 outputs (clarity layer — from prior run)</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 24%">
+<col style="width: 19%">
+<col style="width: 31%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Artifact</th>
+<th>Location</th>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>cchs_analytical.parquet</code></td>
+<td>private data storage</td>
+<td>Parquet</td>
+<td>Full pooled sample (mirrors Lane 2)</td>
+</tr>
+<tr class="even">
+<td><code>cchs_employed.parquet</code></td>
+<td>private data storage</td>
+<td>Parquet</td>
+<td>Employed-respondent split</td>
+</tr>
+<tr class="odd">
+<td><code>cchs_unemployed.parquet</code></td>
+<td>private data storage</td>
+<td>Parquet</td>
+<td>Non-employed-respondent split</td>
+</tr>
+<tr class="even">
+<td><code>data_dictionary.parquet</code></td>
+<td>private data storage</td>
+<td>Parquet</td>
+<td>Variable-level metadata / data dictionary</td>
+</tr>
+<tr class="odd">
+<td><code>sample_flow.parquet</code></td>
+<td>private data storage</td>
+<td>Parquet</td>
+<td>Exclusion audit trail</td>
+</tr>
+<tr class="even">
+<td><code>cchs-3.sqlite</code></td>
+<td>private data storage</td>
+<td>SQLite</td>
+<td>Same tables as above (factors as character)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="pipeline-flags" class="level2">
+<h2 class="anchored" data-anchor-id="pipeline-flags">Pipeline Flags</h2>
+<p>Three boolean flags in <code>2-ellis.R</code> → <code># ---- declare-globals</code> control key pipeline behaviours. They can also be managed via the interactive runner (<code>scripts/ps1/run-interactive-flow.ps1</code>).</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 26%">
+<col style="width: 39%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Flag</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>strict_cycle_integrity</code></td>
+<td><code>FALSE</code></td>
+<td>If <code>TRUE</code>, stop with an error when either CCHS cycle loads as empty; otherwise emit a warning and continue with available cycles.</td>
+</tr>
+<tr class="even">
+<td><code>apply_sample_exclusions</code></td>
+<td><code>TRUE</code></td>
+<td>If <code>TRUE</code>, apply §3.1 inclusion criteria (age 15–75, employed in past 3 months, non-proxy, non-missing outcome). If <code>FALSE</code>, retain full pooled sample (~126,431).</td>
+</tr>
+<tr class="odd">
+<td><code>apply_completeness_exclusion</code></td>
+<td><code>FALSE</code></td>
+<td>If <code>TRUE</code>, additionally drop any respondent with <code>NA</code> on any CCC indicator or key predictor. If <code>FALSE</code>, handle missing data downstream (e.g., multiple imputation).</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="white-list-design" class="level2">
+<h2 class="anchored" data-anchor-id="white-list-design">White-List Design</h2>
+<p>Ellis uses a <strong>two-tier white-list</strong> to select only variables needed for the analysis. This keeps the analysis-ready dataset focused and avoids processing ~1,400 irrelevant columns.</p>
+<section id="tier-1-confirmed-hard-error-if-missing" class="level3">
+<h3 class="anchored" data-anchor-id="tier-1-confirmed-hard-error-if-missing">Tier 1: CONFIRMED (hard error if missing)</h3>
+<p>13 variables verified against PDF data dictionaries. If any are absent, Ellis fails loudly. See <code>vars_confirmed</code> in <code>2-ellis.R</code> → <code>declare-globals</code> section.</p>
+</section>
+<section id="tier-2-inferred-graceful-warning-if-missing" class="level3">
+<h3 class="anchored" data-anchor-id="tier-2-inferred-graceful-warning-if-missing">Tier 2: INFERRED (graceful warning if missing)</h3>
+<p>~48 variables inferred from standard CCHS PUMF naming conventions. If any are absent, Ellis logs a warning with a list of missing names and drops them. Analysis continues. Bootstrap weights (<code>bsw001</code>–<code>bsw500</code>) are pattern-matched separately.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 52%">
+<col style="width: 19%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Category</th>
+<th>Example variables</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CCC module (chronic conditions)</td>
+<td><code>ccc_031</code>, <code>ccc_041</code>, <code>ccc_051</code>, … <code>ccc_290</code> (+ <code>ccc_300</code>, <code>ccc_185</code> absent from PUMF)</td>
+<td>19 (17 found)</td>
+</tr>
+<tr class="even">
+<td>Predisposing</td>
+<td><code>dhh_sex</code>, <code>dhhgms</code>, <code>edudh04</code>, <code>dhhdglvg</code>, <code>dhhdfc5</code>, <code>dhhdfc11</code>, <code>dhhdfc12p</code>, <code>sdcdgstud</code>, …</td>
+<td>11 (7 found)</td>
+</tr>
+<tr class="odd">
+<td>Facilitating</td>
+<td><code>incdghh</code>, <code>geodgprv</code>, <code>hcu_1aa</code>, <code>lbfdghp</code>, <code>gen_07</code>, <code>alcdgtyp</code>, <code>hwtdgbmi</code>, <code>noc_31</code>, …</td>
+<td>12 (9 found)</td>
+</tr>
+<tr class="even">
+<td>Needs</td>
+<td><code>gen_01</code>, <code>gen_02a</code>, <code>gen_09</code>, <code>rac_1</code>, <code>inj_01</code></td>
+<td>5</td>
+</tr>
+<tr class="odd">
+<td>Identifiers</td>
+<td><code>adm_rno</code></td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>Bootstrap weights</td>
+<td><code>bsw001</code>–<code>bsw500</code> (pattern <code>^bsw</code>)</td>
+<td>500</td>
+</tr>
+</tbody>
+</table>
+<p><strong>To update the white-list:</strong> 1. Open <code>manipulation/2-ellis.R</code> 2. Navigate to <code># ---- declare-globals</code> 3. Modify <code>vars_confirmed</code> or the relevant <code>vars_inferred_*</code> vector 4. Re-run Ellis and the test script</p>
+<hr>
+</section>
+</section>
+<section id="exclusion-criteria-sample_flow" class="level2">
+<h2 class="anchored" data-anchor-id="exclusion-criteria-sample_flow">Exclusion Criteria (sample_flow)</h2>
+<p><code>2-ellis.R</code> applies <strong>§3.1 exclusion criteria by default</strong> (<code>apply_sample_exclusions = TRUE</code>). Full pooled sample mode (no exclusions) is available by setting <code>apply_sample_exclusions = FALSE</code>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>Criterion</th>
+<th>Expected % retained</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Raw CCHS stacked sample</td>
+<td>100%</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Age 15–75 (<code>dhhgage %in% 2:15</code>)</td>
+<td>~89%</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Currently employed (<code>lop_015 == 1</code>)</td>
+<td>~51%</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Non-proxy respondent (<code>adm_prx != 1</code>)</td>
+<td>~51%</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Complete outcome (any LOP var non-missing)</td>
+<td>~50.5%</td>
+</tr>
+</tbody>
+</table>
+<p>Reference final sample: - <strong>Default mode (<code>apply_sample_exclusions = TRUE</code>)</strong>: <code>63,843</code> - <strong>Full pooled mode (<code>apply_sample_exclusions = FALSE</code>)</strong>: <code>126,431</code></p>
+<hr>
+</section>
+<section id="survey-weight-pooling" class="level2">
+<h2 class="anchored" data-anchor-id="survey-weight-pooling">Survey Weight Pooling</h2>
+<p>Two CCHS cycles are pooled into a single dataset. Per Statistics Canada guidelines:</p>
+<pre><code>wts_m_pooled = wts_m / 2     # for each respondent
+bsw001_pooled = bsw001 / 2   # same for all 500 bootstrap weights</code></pre>
+<p><code>wts_m_original</code> is kept alongside <code>wts_m_pooled</code> for verification.</p>
+<hr>
+</section>
+<section id="diagnostic-checkpoints" class="level2">
+<h2 class="anchored" data-anchor-id="diagnostic-checkpoints">Diagnostic Checkpoints</h2>
+<p>After running <code>2-ellis.R</code>, verify these values match expectations:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 52%">
+<col style="width: 47%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Diagnostic</th>
+<th>Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Final sample size (default — exclusions applied)</td>
+<td>63,843</td>
+</tr>
+<tr class="even">
+<td>Final sample size (full pooled — no exclusions)</td>
+<td>126,431</td>
+</tr>
+<tr class="odd">
+<td>Weighted mean <code>days_absent_total</code></td>
+<td>≈ 1.25</td>
+</tr>
+<tr class="even">
+<td>% zeros in <code>days_absent_total</code></td>
+<td>≈ 70.5%</td>
+</tr>
+<tr class="odd">
+<td>Variance of <code>days_absent_total</code></td>
+<td>≈ 15.4</td>
+</tr>
+<tr class="even">
+<td>White-list misses (INFERRED tier)</td>
+<td>10 in current PUMF files (see Known Limitations in CACHE-manifest)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="troubleshooting" class="level2">
+<h2 class="anchored" data-anchor-id="troubleshooting">Troubleshooting</h2>
+<p><strong>“Variable X not found” (confirmed tier)</strong><br>
+→ The variable was renamed in this cycle’s PUMF. Check the PDF data dictionary and add a harmonization step in <code>2-ellis.R</code> under <code># ---- SECTION 1 / harmonize</code>.</p>
+<p><strong>White-list inferred warnings</strong><br>
+→ Some CCHS predictor variables may have slightly different names (e.g., <code>GEN_02</code> vs <code>GEN_02A</code>). Open the data dictionary for that module and update <code>vars_inferred_*</code> in <code>2-ellis.R</code> → <code>declare-globals</code>.</p>
+<p><strong>DHHGAGE codes outside 2–15 seen in data</strong><br>
+→ Verify age category coding against the PDF data dictionary for each cycle. Adjust <code>dhhgage %in% 2:15</code> in <code>tweak-data-2-exclusions</code> accordingly.</p>
+<p><strong>SQLite and Parquet row counts don’t match</strong><br>
+→ Run <code>manipulation/2-test-ellis-cache.R</code> — it will identify the parity failure specifically. Re-run <code>2-ellis.R</code> to regenerate both outputs atomically.</p>
+<hr>
+</section>
+<section id="data-documentation" class="level2">
+<h2 class="anchored" data-anchor-id="data-documentation">Data Documentation</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 37%">
+<col style="width: 62%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>File</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>data-public/metadata/INPUT-manifest.md</code></td>
+<td>Raw source file descriptions</td>
+</tr>
+<tr class="even">
+<td><code>data-public/metadata/CACHE-manifest.md</code></td>
+<td>Analysis-ready dataset descriptions (manually maintained)</td>
+</tr>
+<tr class="odd">
+<td><code>data-public/metadata/cchs-3-column-dictionary-uk.md</code></td>
+<td>Lane 3 column dictionary (Ukrainian)</td>
+</tr>
+<tr class="even">
+<td><code>manipulation/pipeline.md</code></td>
+<td>This file</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>Last updated: 2026-03-20 (post Ellis revision — 62-column, 63,843-row output)</em></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>Absent from Chronic — Statistical Analysis Replication | Marc-Andre Blanchette, Research Scientist</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
