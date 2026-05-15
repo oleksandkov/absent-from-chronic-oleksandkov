@@ -59,7 +59,13 @@ redirect_targets <- list(
     dest_rel = "analysis/eda-2/eda-2.html",
     source_candidates = c(
       "edited_content/analysis/eda-2.html",
+      "_frontend/edited_content/analysis/eda-2.html",
+      "_frontend/_site/edited_content/analysis/eda-2.html",
       "_site/edited_content/analysis/eda-2.html",
+      "analysis/eda-2/eda-2.html",
+      "_frontend/analysis/eda-2/eda-2.html",
+      "_frontend/_site/analysis/eda-2/eda-2.html",
+      "_site/analysis/eda-2/eda-2.html",
     )
   ),
   list(
@@ -67,7 +73,13 @@ redirect_targets <- list(
     dest_rel = "analysis/eda-5/eda-5.html",
     source_candidates = c(
       "edited_content/analysis/eda-5.html",
+      "_frontend/edited_content/analysis/eda-5.html",
+      "_frontend/_site/edited_content/analysis/eda-5.html",
       "_site/edited_content/analysis/eda-5.html",
+      "analysis/eda-5/eda-5.html",
+      "_frontend/analysis/eda-5/eda-5.html",
+      "_frontend/_site/analysis/eda-5/eda-5.html",
+      "_site/analysis/eda-5/eda-5.html",
     )
   ),
   list(
