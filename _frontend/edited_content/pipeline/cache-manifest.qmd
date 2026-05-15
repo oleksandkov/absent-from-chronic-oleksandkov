@@ -1,5 +1,0 @@
----
-title: "CACHE Manifest"
----
-
-{{< include cache-manifest-source.md >}}

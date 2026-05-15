@@ -34,15 +34,15 @@ jobs:
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "Checking for committed _site directory..."
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          if [ -d "_frontend/_site" ]; then
-            echo "✓ FOUND: _frontend/_site"
-            echo "SITE_DIR=_frontend/_site" >> "$GITHUB_ENV"
+          if [ -d "_frontend-1/_site" ]; then
+            echo "✓ FOUND: _frontend-1/_site"
+            echo "SITE_DIR=_frontend-1/_site" >> "$GITHUB_ENV"
             echo "Site contents:"
-            ls -lh _frontend/_site | head -20
+            ls -lh _frontend-1/_site | head -20
             exit 0
           fi
 
-          echo "✗ ERROR: Could not find committed _frontend/_site directory"
+          echo "✗ ERROR: Could not find committed _frontend-1/_site directory"
           echo "If you want CI to build the site, switch the workflow back to rendering with Quarto."
           exit 1
 

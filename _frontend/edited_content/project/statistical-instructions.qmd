@@ -1,5 +1,0 @@
----
-title: "Statistical Instructions"
----
-
-{{< include statistical-instructions-source.md >}}

@@ -1,5 +1,0 @@
----
-title: "INPUT Manifest"
----
-
-{{< include input-manifest-source.md >}}
