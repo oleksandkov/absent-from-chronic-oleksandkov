@@ -163,7 +163,7 @@ t_chronic_conditions <- prevalence_table(ds0, cc_vars, labels = cc_labels)
 # Discrete predisposing variables
 pred_discrete_vars <- c(
   "age_group", "sex", "marital_status", "education",
-  "immigration_status", "visible_minority", "homeownership", "student_status"
+  "immigration_status", "visible_minority", "living_arrangements", "student_status"
 )
 
 # Named list of frequency tables (one per variable)
@@ -172,6 +172,15 @@ names(t_pred_freq) <- pred_discrete_vars
 
 # Raw dhhgage (integer age group code from PUMF) - continuous
 t_dhhgage_summary <- summarize_continuous(ds0, "dhhgage")
+
+# Children in household by age group (numeric; 0=None, 1=1+)
+children_vars <- c("dhhgle5", "dhhg611")
+children_vars_found <- intersect(children_vars, names(ds0))
+t_children_summary <- if (length(children_vars_found) > 0) {
+  summarize_continuous(ds0, children_vars_found)
+} else {
+  data.frame()
+}
 
 # ---- section-facilitating ----------------------------------------------------
 facil_discrete_vars <- c(
@@ -227,6 +236,7 @@ saveRDS(list(
   t_chronic_conditions     = t_chronic_conditions,
   t_pred_freq              = t_pred_freq,
   t_dhhgage_summary        = t_dhhgage_summary,
+  t_children_summary       = t_children_summary,
   t_facil_freq             = t_facil_freq,
   t_province_summary       = t_province_summary,
   t_province_freq          = t_province_freq,

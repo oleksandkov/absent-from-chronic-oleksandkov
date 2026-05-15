@@ -145,7 +145,7 @@ knitr::kable(
 
 # 3. Predisposing Variables
 
-Predisposing variables characterise the respondent's socio-demographic background. Homeownership and student status are all-NA in the current output (source variables absent from PUMF). Children-by-age-group variables (`dhhgle5`, `dhhg611`) require a whitelist fix and are absent.
+Predisposing variables characterise the respondent's socio-demographic background. Student status is all-NA in the current output (source variable `sdcdgstud` absent from PUMF). Children-by-age-group variables (`dhhgle5`, `dhhg611`) are now populated; `dhhdfc12p` (children ≥ 12 yrs) has no PUMF equivalent and remains absent.
 
 ```{r section-predisposing}
 ```
@@ -223,23 +223,22 @@ knitr::kable(
 )
 ```
 
-### Homeownership
+### Living Arrangements
 
-```{r display-homeownership}
+```{r display-living-arrangements}
 #| echo: false
-n_miss_hw <- attr(t_pred_freq[["homeownership"]], "n_miss")
-n_valid_hw <- attr(t_pred_freq[["homeownership"]], "n_valid")
-if (n_valid_hw == 0) {
+n_miss_la <- attr(t_pred_freq[["living_arrangements"]], "n_miss")
+n_valid_la <- attr(t_pred_freq[["living_arrangements"]], "n_valid")
+if (n_valid_la == 0) {
   cat(sprintf(
-    "**All-NA variable.** `homeownership` is all-missing in the current output (%d missing, %d valid). ",
-    n_miss_hw, n_valid_hw
+    "**All-NA variable.** `living_arrangements` is all-missing in the current output (%d missing, %d valid).",
+    n_miss_la, n_valid_la
   ))
-  cat("A whitelist alias fix (`dhhdglvg` → `dhhglvg`) is required in `manipulation/2-ellis.R`.")
 } else {
   knitr::kable(
-    t_pred_freq[["homeownership"]],
-    col.names = c("Homeownership", "N", "% (of valid)"),
-    caption   = "homeownership — Living arrangement / homeownership status"
+    t_pred_freq[["living_arrangements"]],
+    col.names = c("Living arrangements", "N", "% (of valid)"),
+    caption   = "living_arrangements — Household living arrangement (8-level)"
   )
 }
 ```
@@ -285,7 +284,7 @@ knitr::kable(
 
 # 4. Facilitating Variables
 
-Facilitating variables describe health-system access, health behaviours, and labour-market context. Three variables are all-NA due to absent PUMF source variables: `alcohol_type` (`alcdgtyp`), `bmi_category` (`hwtdgbmi`), and `occupation_category` (`noc_31`). Income, employment type, and work schedule are populated via alias resolution.
+Facilitating variables describe health-system access, health behaviours, and labour-market context. All 12 facilitating variables are now populated in the analytical dataset. Income, employment type, and work schedule resolve via alias map; alcohol use (`alcdttm`), BMI (`hwtgisw`), and occupation (`lbsgsoc`) are directly white-listed.
 
 ```{r section-facilitating}
 ```
@@ -378,7 +377,7 @@ knitr::kable(
 n_valid_al <- attr(t_facil_freq[["alcohol_type"]], "n_valid")
 if (n_valid_al == 0) {
   cat("**All-NA variable.** `alcohol_type` is all-missing. ",
-      "Whitelist alias fix (`alcdgtyp` → `alcdttm`) required in `manipulation/2-ellis.R`.")
+      "Source variable `alcdttm` may be absent from PUMF.")
 } else {
   knitr::kable(
     t_facil_freq[["alcohol_type"]],
@@ -395,7 +394,7 @@ if (n_valid_al == 0) {
 n_valid_bmi <- attr(t_facil_freq[["bmi_category"]], "n_valid")
 if (n_valid_bmi == 0) {
   cat("**All-NA variable.** `bmi_category` is all-missing. ",
-      "Whitelist alias fix (`hwtdgbmi` → `hwtgisw`) required in `manipulation/2-ellis.R`.")
+      "Source variable `hwtgisw` may be absent from PUMF.")
 } else {
   knitr::kable(
     t_facil_freq[["bmi_category"]],
@@ -412,12 +411,12 @@ if (n_valid_bmi == 0) {
 n_valid_oc <- attr(t_facil_freq[["occupation_category"]], "n_valid")
 if (n_valid_oc == 0) {
   cat("**All-NA variable.** `occupation_category` is all-missing. ",
-      "`noc_31` (NOC major group) is suppressed in the CCHS PUMF; requires RDC access.")
+      "Source variable `lbsgsoc` may be absent from PUMF.")
 } else {
   knitr::kable(
     t_facil_freq[["occupation_category"]],
     col.names = c("Occupation category", "N", "% (of valid)"),
-    caption   = "occupation_category — NOC major group"
+    caption   = "occupation_category — 5-category PUMF occupation group (LBSGSOC)"
   )
 }
 ```

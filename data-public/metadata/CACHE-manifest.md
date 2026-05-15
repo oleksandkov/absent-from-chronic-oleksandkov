@@ -4,7 +4,7 @@ Definitive reference for datasets produced by the Ellis lane (`manipulation/2-el
 Describes file structure, variable inventory, factor levels, and transformation logic.
 Manually maintained — update after re-running Ellis with changed flags or white-list.
 
-Updated: 2026-03-20
+Updated: 2026-05-15
 
 ---
 
@@ -40,10 +40,10 @@ bsw001_pooled  = bsw001 / 2     # same rule applied to all 500 bootstrap weights
 
 ## Reference Diagnostics (`cchs_analytical`, default mode)
 
-Verified from actual run on 2026-03-20. Ten INFERRED white-list variables were absent from both
-CCHS PUMF cycles (`ccc_300`, `ccc_185`, `dhhdglvg`, `dhhdfc5`, `dhhdfc11`, `dhhdfc12p`, `sdcdgstud`,
-`alcdgtyp`, `hwtdgbmi`, `noc_31`); five of these are added as NA columns for factor recode
-compatibility; two CCC conditions and three household child-count variables are entirely absent.
+Verified from actual run on 2026-05-15. Four INFERRED white-list variables are absent from both
+CCHS PUMF cycles (`ccc_300`, `ccc_185`, `dhhdfc12p`, `sdcdgstud`); two of these (`sdcdgstud`,
+`dhhdfc12p`) are added as NA columns for factor recode compatibility; two CCC conditions
+(`ccc_300`, `ccc_185`) are entirely absent from the dataset.
 Bootstrap weights (`bsw*`) were also absent. Diagnostics reflect the current data files.
 
 | Diagnostic | Actual value |
@@ -106,7 +106,6 @@ are suppressed in the PUMF and entirely absent from this dataset.
 | `cc_ulcer` | Intestinal / stomach ulcer |
 | `cc_stroke` | Effects of stroke |
 | `cc_bowel_disorder` | Bowel disorder (Crohn's disease / colitis / IBS) |
-| `cc_fibromyalgia` | Fibromyalgia |
 | `cc_chronic_fatigue` | Chronic fatigue syndrome (CFS) |
 | `cc_chemical_sensitiv` | Multiple chemical sensitivities (MCS) |
 | `cc_mood_disorder` | Mood disorder (depression / bipolar / mania / dysthymia) |
@@ -127,19 +126,19 @@ Two absent from PUMF: `ccc_300` (other mental illness), `ccc_185` (digestive dis
 |--------|------|----------------|
 | `age_group` | ordered factor | `"15-24"` < `"25-54"` < `"55-75"` |
 | `sex` | factor | `"Male"`, `"Female"` |
-| `marital_status` | ordered factor | `"Single"` < `"Married"` < `"Common-law"` < `"Widowed-Div-Sep"` |
+| `marital_status` | ordered factor | `"Single"` < `"Married"` < `"Common-law"` < `"Widowed/Divorced/Separated"` |
 | `education` | ordered factor | `"Less than secondary"` < `"Secondary graduate"` < `"Some post-secondary"` < `"Post-secondary graduate"` |
 | `immigration_status` | factor | `"Non-immigrant"`, `"Immigrant"`, `"Non-permanent resident"` |
 | `visible_minority` | factor | `"White"`, `"Visible minority"` |
-| `homeownership` | factor | `"Owner"`, `"Renter/other"` — **ALL-NA** in current output (`dhhdglvg` absent from PUMF; correct name is `dhhglvg`) |
+| `living_arrangements` | factor | `"Unattached, alone"`, `"Unattached, with others"`, `"Spouse/partner only"`, `"Parent, spouse, and child"`, `"Single parent with child"`, `"Child in parent/sibling household"`, `"Child in two-parent household"`, `"Other"` |
 | `student_status` | factor | `"Not a student"`, `"Part-time student"`, `"Full-time student"` — **ALL-NA** (`sdcdgstud` absent from PUMF) |
-| `dhhdfc5` | — | **ABSENT** from dataset; `dhhdfc5` not in PUMF (correct name: `dhhgle5`) |
-| `dhhdfc11` | — | **ABSENT** from dataset; `dhhdfc11` not in PUMF (correct name: `dhhg611`) |
+| `dhhgle5` | integer / numeric | Number of persons ≤5 yrs in household (0=None, 1=1 or more) |
+| `dhhg611` | integer / numeric | Number of persons 6–11 yrs in household (0=None, 1=1 or more) |
 | `dhhdfc12p` | — | **ABSENT** from dataset; no PUMF equivalent found |
 | `dhhdghsz` | integer / numeric | Household size (number of persons; raw, continuous) |
 
 Source variables: `dhhgage`, `dhh_sex`, `dhhgms`, `edudh04`, `sdcfimm`, `sdcdgcb` (→ `sdcgcgt`),
-`dhhdglvg` (absent), `sdcdgstud` (absent), `dhhdghsz` (→ `dhhghsz`).
+`dhhglvg`, `dhhgle5`, `dhhg611`, `sdcdgstud` (absent), `dhhdghsz` (→ `dhhghsz`).
 
 ---
 
@@ -147,22 +146,22 @@ Source variables: `dhhgage`, `dhh_sex`, `dhhgms`, `edudh04`, `sdcfimm`, `sdcdgcb
 
 | Column | Type | Levels / Notes |
 |--------|------|----------------|
-| `income_5cat` | ordered factor | `"< $20k"` < `"$20k-$39k"` < `"$40k-$59k"` < `"$60k-$79k"` < `"$80k+"` |
+| `income_5cat` | ordered factor | `"< $20k"` < `"$20k - $39.9k"` < `"$40k - $59.9k"` < `"$60k - $79.9k"` < `"$80k+"` |
 | `has_family_doctor` | factor | `"Yes"`, `"No"` |
 | `employment_type` | factor | `"Employee"`, `"Self-employed"`, `"Unpaid family worker"` |
 | `work_schedule` | factor | `"Full-time"`, `"Part-time"` |
-| `alcohol_type` | ordered factor | `"Never drinker"` < `"Former drinker"` < `"Occasional drinker"` < `"Regular drinker"` — **ALL-NA** (`alcdgtyp` absent from PUMF; correct name: `alcdttm`) |
+| `alcohol_type` | factor | `"Former or never drinker"`, `"Occasional drinker"`, `"Regular drinker"` |
 | `smoking_status` | ordered factor | `"Never"` < `"Former"` < `"Occasional"` < `"Daily"` |
-| `bmi_category` | ordered factor | `"Underweight"` < `"Normal weight"` < `"Overweight"` < `"Obese"` — **ALL-NA** (`hwtdgbmi` absent from PUMF; correct name: `hwtgisw`) |
+| `bmi_category` | ordered factor | `"Underweight"` < `"Normal weight"` < `"Overweight"` < `"Obese"` |
 | `physical_activity` | ordered factor | `"Active"` < `"Moderately active"` < `"Inactive"` |
 | `job_stress` | ordered factor | `"Not at all stressful"` < `"Not very stressful"` < `"A bit stressful"` < `"Quite a bit stressful"` < `"Extremely stressful"` |
-| `occupation_category` | factor | 10 levels defined (Management → Manufacturing/Utilities) — **ALL-NA** (`noc_31` absent from PUMF; correct variable is `lbsgsoc`, 5-category) |
+| `occupation_category` | factor | `"Group 1"`, `"Group 2"`, `"Group 3"`, `"Group 4"`, `"Group 5"` (5-category PUMF occupation) |
 | `geodgprv` | integer | Province / territory of residence (raw code; 10–13 categories) |
-| `fvcdgtot` | numeric | Total daily fruit & vegetable servings (raw, continuous) |
+| `fvcdgtot` | numeric | Fruit & vegetable consumption (3-category derived: 1=<5/day, 2=5–10/day, 3=>10/day) |
 
 Source variables: `incdghh` (→ `incghh`), `geodgprv` (→ `geogprv`), `hcu_1aa`, `lbfdghp` (→ `lbsg31`),
-`lbfdgft` (→ `lbsdpft`), `fvcdgtot` (→ `fvcgtot`), `alcdgtyp` (absent), `smkdsty`, `hwtdgbmi` (absent),
-`pacdpai`, `gen_07`, `noc_31` (absent).
+`lbfdgft` (→ `lbsdpft`), `fvcdgtot` (→ `fvcgtot`), `alcdttm`, `smkdsty`, `hwtgisw`,
+`pacdpai`, `gen_07`, `lbsgsoc`.
 
 ---
 
@@ -176,7 +175,7 @@ Source variables: `incdghh` (→ `incghh`), `geodgprv` (→ `geogprv`), `hcu_1aa
 | `activity_limitation` | factor | `"Yes"`, `"No"` |
 | `injury_past_year` | factor | `"Yes"`, `"No"` |
 
-Source variables: `gen_01`, `gen_02a`, `gen_09`, `rac_1`, `inj_01`.
+Source variables: `gen_01`, `gen_02a` (→ `gen_02b`), `gen_02`, `rac_1`, `inj_01`.
 
 ---
 
@@ -270,13 +269,12 @@ If a variable is still not found after alias resolution, it is dropped with a wa
 
 ## Notes and Limitations
 
-- **10 INFERRED variables absent from both CCHS PUMF cycles** (as of 2026-03-20 run):
-  `ccc_300`, `ccc_185`, `dhhdglvg`, `dhhdfc5`, `dhhdfc11`, `dhhdfc12p`, `sdcdgstud`,
-  `alcdgtyp`, `hwtdgbmi`, `noc_31`. Of these, 5 (`alcdgtyp`, `hwtdgbmi`, `dhhdglvg`,
-  `sdcdgstud`, `noc_31`) are added as NA columns so that factor recode blocks do not error;
-  their output factor columns (`alcohol_type`, `bmi_category`, `homeownership`,
-  `student_status`, `occupation_category`) are all-NA. The remaining 5 (`ccc_300`, `ccc_185`,
-  `dhhdfc5`, `dhhdfc11`, `dhhdfc12p`) are entirely absent from the dataset.
+- **4 INFERRED variables absent from both CCHS PUMF cycles** (as of 2026-05-15 run):
+  `ccc_300`, `ccc_185`, `dhhdfc12p`, `sdcdgstud`. Of these, `sdcdgstud` is added as an
+  NA column so the factor recode block does not error; its output column (`student_status`)
+  is all-NA. `dhhdfc12p` is also added as NA (no PUMF equivalent found). The two CCC
+  conditions (`ccc_300` — other mental illness; `ccc_185` — digestive disease) are entirely
+  absent from the dataset (suppressed in PUMF for confidentiality).
 - **Bootstrap weights absent**: No `bsw*` columns found in either CCHS PUMF cycle.
   Bootstrap weights are required for correct variance estimation with the survey package.
   They are distributed as a separate supplemental file by Statistics Canada and were not

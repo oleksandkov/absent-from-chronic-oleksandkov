@@ -165,7 +165,7 @@ g1_raw_health <- if (nrow(g1_raw_data) > 0) {
     geom_col(width = 0.7, show.legend = FALSE) +
     facet_wrap(~cycle, nrow = 1) +
     scale_y_continuous(labels = scales::comma) +
-    scale_fill_manual(values = c("Valid response"  = clr["sky_blue"],
+    scale_fill_manual(values = c("Valid response"  = unname(clr["sky_blue"]),
                                  "Special / NA"    = "grey70")) +
     labs(
       title   = "Before Ellis: raw GENDHDI codes from Ferry output",
@@ -201,7 +201,7 @@ g11_analytical_health <- ds0 %>%
     labels = scales::percent_format(),
     expand = expansion(mult = c(0, 0.08))
   ) +
-  scale_fill_manual(values = c(clr["sky_blue"], clr["orange"])) +
+  scale_fill_manual(values = unname(c(clr["sky_blue"], clr["orange"]))) +
   labs(
     title   = "After Ellis: self_health_general — ordered factor, special codes removed",
     subtitle = "Levels are properly ordered Excellent → Poor; codes 6–9 excluded as NA",
@@ -251,7 +251,7 @@ g2_raw_smoking <- if (nrow(g2_raw_data) > 0) {
     geom_col(width = 0.7, show.legend = FALSE) +
     facet_wrap(~cycle, nrow = 1) +
     scale_y_continuous(labels = scales::comma) +
-    scale_fill_manual(values = c("Valid response" = clr["green"],
+    scale_fill_manual(values = c("Valid response" = unname(clr["green"]),
                                  "Special / NA"   = "grey70")) +
     labs(
       title   = "Before Ellis: raw SMKDSCTY codes from Ferry output",
@@ -288,7 +288,7 @@ g21_analytical_smoking <- ds0 %>%
     labels = scales::percent_format(),
     expand = expansion(mult = c(0, 0.08))
   ) +
-  scale_fill_manual(values = c(clr["sky_blue"], clr["orange"])) +
+  scale_fill_manual(values = unname(c(clr["sky_blue"], clr["orange"]))) +
   labs(
     title   = "After Ellis: smoking_status — ordered factor (Never → Daily)",
     subtitle = "Special codes removed; level order reversed vs raw for natural gradient",
@@ -333,7 +333,7 @@ g3_raw_income <- if (nrow(g3_raw_data) > 0) {
     geom_col(width = 0.7, show.legend = FALSE) +
     facet_wrap(~cycle, nrow = 1) +
     scale_y_continuous(labels = scales::comma) +
-    scale_fill_manual(values = c("Valid response" = clr["orange"],
+    scale_fill_manual(values = c("Valid response" = unname(clr["orange"]),
                                  "Special / NA"   = "grey70")) +
     labs(
       title   = "Before Ellis: raw household income codes from Ferry output",
@@ -370,7 +370,7 @@ g31_analytical_income <- ds0 %>%
     labels = scales::percent_format(),
     expand = expansion(mult = c(0, 0.08))
   ) +
-  scale_fill_manual(values = c(clr["sky_blue"], clr["orange"])) +
+  scale_fill_manual(values = unname(c(clr["sky_blue"], clr["orange"]))) +
   labs(
     title   = "After Ellis: income_5cat — ordered 5-level income factor",
     subtitle = "Cross-cycle harmonized into 5 comparable income bands; refusal codes removed",

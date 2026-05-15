@@ -128,9 +128,9 @@ or a re-grouping strategy (Appendix 3 of the thesis may specify acceptable subst
 > Main questionnaire*
 
 Age is available in PUMF only as a grouped derived variable (`dhhgage`); single-year
-resolution requires restricted RDC access. Several household-level derived variables
-(`dhhdfc5`, `dhhdfc11`, `dhhdfc12p`) use names that do not match the actual PUMF columns
-(`dhhgle5`, `dhhg611`). Student status (`sdcdgstud`) is suppressed in the PUMF.
+resolution requires restricted RDC access. One household-level variable
+(`dhhdfc12p`) has no PUMF equivalent found. Student status (`sdcdgstud`) is suppressed
+in the PUMF.
 
 | Requested | 2011 | 2014 | In Study | Note |
 |-----------|------|------|----------|------|
@@ -138,13 +138,13 @@ resolution requires restricted RDC access. Several household-level derived varia
 | Sex | `dhh_sex` | `dhh_sex` | `sex` | ✅ Factor: Male / Female |
 | Marital status | `dhhgms` | `dhhgms` | `marital_status` | ✅ Factor: Single / Married / Common-law / Widowed/Divorced/Separated |
 | Household size (number of persons) | `dhhghsz` | `dhhghsz` | `dhhdghsz` | ✅ Alias `dhhdghsz ← dhhghsz` resolves; numeric column present and populated |
-| Children < 5 yrs in household (count) | `dhhgle5` | `dhhgle5` | ❌ absent | ❌ White-list used `dhhdfc5` (wrong name); correct PUMF name is `dhhgle5`; requires whitelist fix |
-| Children 6–11 yrs in household (count) | `dhhg611` | `dhhg611` | ❌ absent | ❌ White-list used `dhhdfc11` (wrong name); correct PUMF name is `dhhg611`; requires whitelist fix |
+| Children ≤ 5 yrs in household | `dhhgle5` | `dhhgle5` | `dhhgle5` | ✅ Numeric (0=None, 1=1 or more); present and populated in both cycles |
+| Children 6–11 yrs in household | `dhhg611` | `dhhg611` | `dhhg611` | ✅ Numeric (0=None, 1=1 or more); present and populated in both cycles |
 | Children ≥ 12 yrs in household (count) | unknown | unknown | ❌ absent | ❌ White-list used `dhhdfc12p`; no PUMF equivalent found in either cycle |
 | Education level (4 categories) | `edudh04` | `edudh04` | `education` | ✅ Ordered factor: Less than secondary → Post-secondary graduate; `edudr04` (alternate) also present. ⚠️ Cross-cycle label discrepancy for code 3 ("Other post-secondary" in 2010 vs "Some post-secondary" in 2014; see `cchs_value_label_diffs.csv`) |
 | Immigration status | `sdcfimm` | `sdcfimm` | `immigration_status` | ✅ Factor: Non-immigrant / Immigrant / Non-permanent resident |
 | Ethnic origin (White vs. visible minority) | `sdcgcgt` | `sdcgcgt` | `visible_minority` | ✅ Alias `sdcdgcb ← sdcgcgt` resolves; Factor: White / Visible minority |
-| Homeownership / living arrangement | `dhhglvg` | `dhhglvg` | `homeownership` (all NA) | ⚠️ White-list used `dhhdglvg` (extra D); correct PUMF name is `dhhglvg` (8-cat living arrangement, not binary homeownership); column present but all-NA |
+| Living arrangements | `dhhglvg` | `dhhglvg` | `living_arrangements` | ✅ Factor (8 levels): Unattached alone / Unattached with others / Spouse-partner only / Parent+spouse+child / Single parent with child / Child in parent-sibling household / Child in two-parent household / Other |
 | Student status | ❌ absent | ❌ absent | `student_status` (all NA) | ❌ `sdcdgstud` not present in PUMF; column created by `ensure_columns()` but all-NA |
 
 ---
@@ -158,9 +158,7 @@ resolution requires restricted RDC access. Several household-level derived varia
 > Main questionnaire*
 file:///C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/data-primer-1/univariate-distributions.html
 Most facilitating variables are present in both cycles under identical PUMF names or resolve
-via the alias map. Five source variables are absent from the PUMF (`alcdgtyp`, `hwtdgbmi`,
-`noc_31`, and their factor output columns are all-NA). Three alias-resolved variables
-(`incdghh`, `lbfdghp`, `lbfdgft`) are populated.
+via the alias map. All 12 facilitating variables are now populated in the analytical dataset.
 
 | Requested | 2011 | 2014 | In Study | Note |
 |-----------|------|------|----------|------|
@@ -169,12 +167,12 @@ via the alias map. Five source variables are absent from the PUMF (`alcdgtyp`, `
 | Having a regular family doctor | `hcu_1aa` | `hcu_1aa` | `has_family_doctor` | ✅ Factor: Yes / No |
 | Employment type (self-employed vs. employee) | `lbsg31` | `lbsg31` | `employment_type` | ✅ Alias `lbfdghp ← lbsg31` resolves; Factor: Employee / Self-employed / Unpaid family worker |
 | Work schedule (full-time vs. part-time) | `lbsdpft` | `lbsdpft` | `work_schedule` | ✅ Alias `lbfdgft ← lbsdpft` resolves; Factor: Full-time / Part-time |
-| Occupation category (NOC major group) | ❌ absent | ❌ absent | `occupation_category` (all NA) | ❌ `noc_31` not present in PUMF; correct variable is `lbsgsoc` (5-cat); column created by `ensure_columns()` but all-NA |
+| Occupation category (5-group SOC) | `lbsgsoc` | `lbsgsoc` | `occupation_category` | ✅ Factor: Group 1 / Group 2 / Group 3 / Group 4 / Group 5 (5-category PUMF occupation) |
 | Job stress level | `gen_07` | `gen_07` | `job_stress` | ✅ Ordered factor: Not at all stressful → Extremely stressful. Note: GEN_07 is perceived LIFE stress; GEN_09 is perceived WORK stress — confirm intended variable |
-| Total daily fruit & vegetable consumption | `fvcgtot` | `fvcgtot` | `fvcdgtot` | ✅ Alias `fvcdgtot ← fvcgtot` resolves; numeric (3-cat derived: <5, 5-10, >10/day) |
-| Alcohol use (type of drinker — derived) | `alcdttm` | `alcdttm` | `alcohol_type` (all NA) | ⚠️ White-list used `alcdgtyp` (wrong name); correct PUMF name is `alcdttm`; column all-NA until whitelist fix |
+| Total daily fruit & vegetable consumption | `fvcgtot` | `fvcgtot` | `fvcdgtot` | ✅ Alias `fvcdgtot ← fvcgtot` resolves; 3-category derived ordinal (1=<5/day, 2=5-10/day, 3=>10/day) |
+| Alcohol use (type of drinker — derived) | `alcdttm` | `alcdttm` | `alcohol_type` | ✅ Factor (3 levels): Former or never drinker / Occasional drinker / Regular drinker |
 | Smoking status (derived) | `smkdsty` | `smkdsty` | `smoking_status` | ✅ Ordered factor: Never / Former / Occasional / Daily |
-| BMI category (derived) | `hwtgisw` | `hwtgisw` | `bmi_category` (all NA) | ⚠️ White-list used `hwtdgbmi` (wrong name); correct PUMF name is `hwtgisw`; column all-NA until whitelist fix |
+| BMI category (derived) | `hwtgisw` | `hwtgisw` | `bmi_category` | ✅ Ordered factor: Underweight / Normal weight / Overweight / Obese |
 | Physical activity index (derived) | `pacdpai` | `pacdpai` | `physical_activity` | ✅ Ordered factor: Active / Moderately active / Inactive |
 
 ---
@@ -233,16 +231,11 @@ strategies:
 | `ccc_300` — other mental illness | Suppressed in PUMF | 1 of 19 chronic conditions missing |
 | `ccc_185` — digestive disease | Suppressed in PUMF | 1 of 19 chronic conditions missing |
 | `sdcdgstud` — student status | Suppressed in PUMF | 1 predisposing predictor missing (all-NA) |
-| `noc_31` — occupation category (NOC) | Suppressed in PUMF; correct variable is `lbsgsoc` (5-cat) | 1 facilitating predictor missing (all-NA); fixing whitelist to `lbsgsoc` would recover it |
-| `alcdgtyp` — alcohol type | Wrong white-list name; correct PUMF name is `alcdttm` | 1 facilitating predictor all-NA; fixable |
-| `hwtdgbmi` — BMI category | Wrong white-list name; correct PUMF name is `hwtgisw` | 1 facilitating predictor all-NA; fixable |
-| `dhhdglvg` — homeownership/living arrangement | Wrong white-list name; correct PUMF name is `dhhglvg` | 1 predisposing predictor all-NA; fixable but semantics change (8-cat living arrangement, not binary homeownership) |
-| `dhhdfc5` — children < 5 yrs | Wrong white-list name; correct PUMF name is `dhhgle5` | 1 predisposing predictor absent; fixable |
-| `dhhdfc11` — children 6–11 yrs | Wrong white-list name; correct PUMF name is `dhhg611` | 1 predisposing predictor absent; fixable |
 | `dhhdfc12p` — children ≥ 12 yrs | No PUMF equivalent found | 1 predisposing predictor absent; may need derivation |
 | Bootstrap weights (`bsw001`–`bsw500`) | Separate supplemental file; not in PUMF `.sav` | **Critical**: §5.3–5.10 bootstrap CIs cannot be computed without this file |
 | Cluster / PSU identifier | Suppressed in PUMF | Full complex-sample variance estimation requires master file |
 
-**Summary**: Of the 10 missing INFERRED variables, **6 are fixable** by correcting the white-list
-names in `manipulation/2-ellis.R`. The remaining 4 (`ccc_300`, `ccc_185`, `sdcdgstud`,
-`dhhdfc12p`) are genuinely absent from the PUMF.
+**Summary**: Of the original 10 missing INFERRED variables identified in the March 2026 run,
+**6 have been fixed** by correcting white-list names in `manipulation/2-ellis.R`
+(`dhhglvg`, `dhhgle5`, `dhhg611`, `alcdttm`, `hwtgisw`, `lbsgsoc`). The remaining 4
+(`ccc_300`, `ccc_185`, `sdcdgstud`, `dhhdfc12p`) are genuinely absent from the PUMF.

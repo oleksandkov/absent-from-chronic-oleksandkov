@@ -452,9 +452,10 @@ cat(sprintf("\n→ DEFAULT run (apply_completeness_exclusion = FALSE): n = %s (�
 cat("  Step 4 (proxy exclusion) removed 0 rows. adm_prx IS a confirmed column; no respondents in the analytical pool were coded as proxy respondents (adm_prx = 1).\n")
 cat("\n→ ALL-TRUE run (apply_completeness_exclusion = TRUE): n ≈ 41,372 (approximate; from pre-correction whitelist run).\n")
 cat("  Gap from default reflects structural NAs in the pre-recode dataset (ds2).\n")
-cat("  Confirmed absent from both CCHS PUMF cycles: ccc_300, ccc_185, alcdgtyp,\n")
-cat("  hwtdgbmi, dhhdglvg, sdcdgstud, noc_31. Note: incdghh, lbfdghp, lbfdgft,\n")
-cat("  fvcdgtot, dhhdghsz are NOW populated via the alias map.\n")
+cat("  Confirmed absent from both CCHS PUMF cycles: ccc_300, ccc_185,\n")
+cat("  dhhdfc12p, sdcdgstud. Note: alcdgtyp->alcdttm, hwtdgbmi->hwtgisw,\n")
+cat("  dhhdglvg->dhhglvg, dhhdfc5->dhhgle5, dhhdfc11->dhhg611, noc_31->lbsgsoc\n")
+cat("  are now verified in both PUMF cycles and populate their recoded columns.\n")
 cat("  Re-run with apply_completeness_exclusion=TRUE for the updated actual n.\n")
 
 # ==============================================================================

@@ -199,7 +199,7 @@ g11_cycle_consistency <- g11_data %>%
     labels = scales::percent_format(accuracy = 1),
     expand = expansion(mult = c(0, 0.08))
   ) +
-  scale_fill_manual(values = c(clr["sky_blue"], clr["orange"])) +
+  scale_fill_manual(values = unname(c(clr["sky_blue"], clr["orange"]))) +
   labs(
     title   = "Demographic profile by survey cycle",
     subtitle = "Parallel bars test for demographic shifts between 2010/11 and 2013/14",
@@ -221,8 +221,10 @@ print(g11_cycle_consistency)
 
 # ---- g2-data-prep ------------------------------------------------------------
 # Employment type × work schedule cross-tabulation
+# droplevels() removes factor levels with zero observations (e.g. "Unpaid family worker")
 g2_data <- ds0 %>%
   filter(!is.na(employment_type), !is.na(work_schedule)) %>%
+  droplevels() %>%
   count(employment_type, work_schedule) %>%
   group_by(employment_type) %>%
   mutate(pct_within = n / sum(n)) %>%
@@ -240,7 +242,10 @@ g2_employment_schedule <- g2_data %>%
     labels = scales::comma,
     expand = expansion(mult = c(0, 0.12))
   ) +
-  scale_fill_manual(values = c(clr["blue"], clr["green"], clr["orange"])) +
+  scale_fill_manual(values = setNames(
+    unname(clr[c("blue", "green", "orange")])[seq_along(levels(g2_data$employment_type))],
+    levels(g2_data$employment_type)
+  )) +
   labs(
     title   = "Employment type by work schedule",
     subtitle = "Most employees work full-time; part-time is more common among self-employed",
@@ -260,6 +265,7 @@ print(g2_employment_schedule)
 # Employment type composition by sex — stacked proportions
 g21_employment_by_sex <- ds0 %>%
   filter(!is.na(employment_type), !is.na(sex)) %>%
+  droplevels() %>%
   count(sex, employment_type) %>%
   group_by(sex) %>%
   mutate(pct = n / sum(n)) %>%
@@ -270,7 +276,10 @@ g21_employment_by_sex <- ds0 %>%
             position = position_stack(vjust = 0.5),
             colour = "white", size = 3.5, fontface = "bold") +
   scale_y_continuous(labels = scales::percent_format()) +
-  scale_fill_manual(values = c(clr["blue"], clr["green"], clr["orange"])) +
+  scale_fill_manual(values = setNames(
+    unname(clr[c("blue", "green", "orange")])[seq_along(levels(g2_data$employment_type))],
+    levels(g2_data$employment_type)
+  )) +
   labs(
     title   = "Employment type composition by sex",
     subtitle = "Gender differences in self-employment and unpaid/family work",
@@ -331,7 +340,7 @@ g31_province_cycle <- g3_data %>%
     labels = scales::percent_format(accuracy = 0.1),
     expand = expansion(mult = c(0, 0.06))
   ) +
-  scale_fill_manual(values = c(clr["sky_blue"], clr["orange"])) +
+  scale_fill_manual(values = unname(c(clr["sky_blue"], clr["orange"]))) +
   labs(
     title   = "Provincial sample share by survey cycle",
     subtitle = "Consistent provincial representation across cycles confirms stable sampling frame",

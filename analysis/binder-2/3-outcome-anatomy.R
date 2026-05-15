@@ -51,19 +51,19 @@ absence_band_levels <- c("0 days", "1-5 days", "6-15 days",
                           "16-30 days", "31-90 days", "Missing")
 
 # LOP component variable names present in cchs_analytical
-lop_candidate_vars <- c("lopg040", "lopg045", "lopg050", "lopg055",
-                         "lopg060", "lopg065", "lopg070", "lopg100")
+lop_candidate_vars <- c("lopg040", "lopg070", "lopg082", "lopg083",
+                         "lopg084", "lopg085", "lopg086", "lopg100")
 
 # Short labels for LOP components (used in graphs)
 lop_short_labels <- c(
   lopg040 = "LOP040: Chronic condition",
-  lopg045 = "LOP045: Emotional/mental",
-  lopg050 = "LOP050: Acute/injury",
-  lopg055 = "LOP055: Unclassified",
-  lopg060 = "LOP060: Side effects",
-  lopg065 = "LOP065: Maternity",
-  lopg070 = "LOP070: Work-related",
-  lopg100 = "LOP100: Other reason"
+  lopg070 = "LOP070: Injury",
+  lopg082 = "LOP082: Cold",
+  lopg083 = "LOP083: Flu/influenza",
+  lopg084 = "LOP084: Stomach flu",
+  lopg085 = "LOP085: Respiratory infection",
+  lopg086 = "LOP086: Other infectious",
+  lopg100 = "LOP100: Other phys/mental"
 )
 
 # ---- declare-functions -------------------------------------------------------
@@ -149,8 +149,8 @@ g1_zero_inflation <- g1_pooled %>%
     labels = scales::percent_format(),
     expand = expansion(mult = c(0, 0.12))
   ) +
-  scale_fill_manual(values = c("FALSE" = clr["sky_blue"],
-                               "TRUE"  = clr["vermillon"])) +
+  scale_fill_manual(values = c("FALSE" = unname(clr["sky_blue"]),
+                               "TRUE"  = unname(clr["vermillon"]))) +
   labs(
     title   = "Distribution of work-absence days — zero-inflation portrait",
     subtitle = "Red bar = structural zero cluster (~70%); blue bars = positive-count distribution",
@@ -176,7 +176,7 @@ g11_by_cycle <- g1_data %>%
     labels = scales::percent_format(),
     expand = expansion(mult = c(0, 0.08))
   ) +
-  scale_fill_manual(values = c(clr["sky_blue"], clr["orange"])) +
+  scale_fill_manual(values = unname(c(clr["sky_blue"], clr["orange"]))) +
   labs(
     title   = "Absence band distribution by survey cycle",
     subtitle = "Parallel bars reveal whether zero-inflation and positive tails shifted between cycles",
@@ -315,7 +315,7 @@ g31_nonzero_by_age <- ds_positive %>%
   scale_x_continuous(breaks = seq(0, 90, 15),
                      expand = expansion(mult = c(0.01, 0.01))) +
   scale_y_continuous(labels = scales::comma) +
-  scale_fill_manual(values = c(clr["sky_blue"], clr["orange"], clr["green"])) +
+  scale_fill_manual(values = unname(c(clr["sky_blue"], clr["orange"], clr["green"]))) +
   labs(
     title   = "Non-zero absence days by age group",
     subtitle = "First bivariate signal — does the positive-count distribution shift with age?",

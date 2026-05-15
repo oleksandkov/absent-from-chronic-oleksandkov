@@ -254,17 +254,20 @@ print(g31_nonzero_by_age)
 
 1. **Model selection**: The zero-inflation rate (~70%) and the right-skewed
    positive count suggest Negative Binomial or a Hurdle model. Given that
-   `days_absent_chronic` (the sensitivity outcome using only LOP040) is
+   `days_absent_chronic` (the sensitivity outcome using only `lopg040`) is
    available, would you prefer to model the composite `days_absent_total`
    or would you run parallel analyses on both outcomes?
 
-2. **LOP component granularity**: `g2` shows that some LOP components contribute
-   more days than others on average. Should the analysis report component-specific
-   results alongside the composite, or is the composite alone sufficient for the
-   research question?
+2. **LOP component completeness asymmetry**: `g2` and `g21` reveal that `lopg040`
+   (chronic condition) has ~47% non-missing while other components (`lopg070`,
+   `lopg082–086`) have 1–4% non-missing. This reflects CCHS skip-pattern design
+   (only respondents who *had* an absence for that reason get a non-NA value).
+   Does this asymmetry affect interpretation of the composite outcome, and should
+   component-specific sub-analyses be restricted to `lopg040` given the others'
+   extreme sparsity?
 
 3. **Overdispersion check**: With mean ≈ median in the positive-count distribution
-   but a very long right tail, variance almost certainly exceeds the mean. Would
+   but a long right tail, variance almost certainly exceeds the mean. Would
    you like a formal overdispersion test (ratio of residual deviance to degrees
    of freedom from a Poisson GLM) added to this notebook before the modelling
    stage begins?

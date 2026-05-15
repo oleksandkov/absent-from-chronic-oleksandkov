@@ -234,15 +234,19 @@ print(g3_type_inventory)
 
 # Feedback Questions
 
-1. **PUMF gaps**: The variable map immediately reveals 5+ columns that are ALL-NA
-   (PUMF-suppressed). Which of these missing predictors would you consider most
-   analytically consequential — and would you like a sensitivity analysis that
-   models what those variables *might* have contributed?
+1. **PUMF gaps**: The variable map reveals that `student_status` is the only
+   ALL-NA column (PUMF-suppressed), while five LOP components (`lopg070`,
+   `lopg083–086`) have very low completeness (1–4%). Given that the composite
+   outcome sums these components NA-safely, does the near-total missingness of
+   individual components introduce bias into `days_absent_total` — or does the
+   skip-pattern design make structural zeros the expected norm?
 
-2. **Domain classification**: The `domain_map` hard-codes assignments for 60 columns;
-   2 fall through to "Other". Are there reclassifications you'd want (e.g., should
-   `geodgprv` be "Survey Design" rather than "Facilitating")?
+2. **Domain classification**: The `domain_map` covers 64 columns with 3 falling
+   through to "Other" (raw audit variables now classified under Survey Design).
+   Are there reclassifications you'd want — for example, should `geodgprv`
+   (province) remain "Facilitating" or move to "Survey Design"?
 
-3. **Pooling verification**: `g21` shows both shares near 50%. If they were *not*
-   equal, what would that imply about the weighting strategy, and what corrective
-   step would you take before any weighted analysis?
+3. **Pooling verification**: `g21` shows both weighted and unweighted shares near
+   50%. If they were *not* equal, what would that imply about the `wts_m / 2`
+   halving rule, and what corrective step would you take before any weighted
+   analysis?

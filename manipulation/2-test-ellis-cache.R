@@ -203,14 +203,16 @@ if (file.exists(parquet_analytical)) {
     checkmate::assert_true(n_cycle0 > 0L && n_cycle1 > 0L)
   ))
 
-  # Final sample size plausibility (reference: ~64,141)
+  # Final sample size plausibility (reference: ~63,843)
   run_test("Sample size plausible (40k–90k)", quote(
     checkmate::assert_true(n_total >= 40000L && n_total <= 90000L)
   ))
 
-  # Required columns
+  # Required columns (structural + key predictors)
   required_cols <- c("cycle", "days_absent_total", "days_absent_chronic",
-                     "wts_m_pooled", "wts_m_original", "geodpmf")
+                     "wts_m_pooled", "wts_m_original", "geodpmf",
+                     "living_arrangements", "alcohol_type", "bmi_category",
+                     "occupation_category", "dhhgle5", "dhhg611")
   run_test("Required columns present", quote(
     checkmate::assert_names(names(ds), must.include = required_cols)
   ))
@@ -235,19 +237,30 @@ if (file.exists(parquet_analytical)) {
     checkmate::assert_true(abs(wt_ratio - 0.5) < 0.001)
   ))
 
-  # Factor columns: check a few critical ones
-  factor_check <- c("age_group", "sex", "cycle_f")
+  # Factor columns: check critical ones (including formerly-ALL-NA columns now populated)
+  factor_check <- c("age_group", "sex", "cycle_f",
+                    "living_arrangements", "alcohol_type", "bmi_category",
+                    "occupation_category")
   for (fc in intersect(factor_check, names(ds))) {
     run_test(paste0("'", fc, "' is factor with levels"), quote(
       checkmate::assert_factor(ds[[fc]], any.missing = TRUE)
     ))
   }
 
+  # Verify formerly-ALL-NA factors now have non-NA values
+  populated_factors <- c("living_arrangements", "alcohol_type", "bmi_category",
+                         "occupation_category")
+  for (pf in intersect(populated_factors, names(ds))) {
+    n_non_na <- sum(!is.na(ds[[pf]]))
+    run_test(paste0("'", pf, "' has non-NA values (n=", format(n_non_na, big.mark=","), ")"), 
+             bquote(checkmate::assert_true(.(n_non_na) > 0L)))
+  }
+
   # Outcome distribution (soft check: warn if far from reference)
   mean_out <- weighted.mean(ds$days_absent_total, w = ds$wts_m_pooled, na.rm = TRUE)
   pct_zero <- mean(ds$days_absent_total == 0, na.rm = TRUE) * 100
-  cat(sprintf("   Weighted mean outcome: %.2f  (reference: 1.35)\n", mean_out))
-  cat(sprintf("   Percent zeros:         %.1f%%  (reference: 70.59%%)\n", pct_zero))
+  cat(sprintf("   Weighted mean outcome: %.2f  (reference: ≈1.25)\n", mean_out))
+  cat(sprintf("   Percent zeros:         %.1f%%  (reference: ≈70.5%%)\n", pct_zero))
   run_test("Outcome mean plausible (0.5–5.0)", quote(
     checkmate::assert_true(mean_out >= 0.5 && mean_out <= 5.0)
   ))

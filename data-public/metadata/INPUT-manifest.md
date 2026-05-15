@@ -58,7 +58,7 @@ The Ellis lane (`2-ellis.R`) applies a **white-list** selecting only variables r
 work-absenteeism analysis. White-listed variables fall into two tiers:
 
 Current Lane 2 sample mode:
-- Default: **exclusion criteria applied** (`apply_sample_exclusions = TRUE`) — ~64,141 respondents
+- Default: **exclusion criteria applied** (`apply_sample_exclusions = TRUE`) — ~63,843 respondents
 - Optional full-pooled mode: exclusions disabled (`apply_sample_exclusions = FALSE`) — 126,431 respondents
 
 ### Tier 1: CONFIRMED (error if missing)
@@ -85,17 +85,17 @@ Variables verified against the PDF data dictionaries and the study's
 Variables inferred from standard CCHS PUMF naming conventions.  
 **Verify exact names against the data dictionary PDFs** if any are missing after running `2-ellis.R`.
 
-- **CCC module (19 vars):** `CCC_015` (asthma), `CCC_031` (arthritis), `CCC_051` (back problems),
-  `CCC_071` (hypertension), `CCC_081` (migraine), `CCC_091` (COPD), `CCC_101` (diabetes),
-  `CCC_121` (heart disease), `CCC_131` (cancer), `CCC_141` (ulcer), `CCC_151` (stroke),
-  `CCC_171` (bowel disorder), `CCC_011` (fibromyalgia), `CCC_041` (chronic fatigue),
-  `CCC_061` (chemical sensitivities), `CCC_280` (mood disorder), `CCC_290` (anxiety disorder),
+- **CCC module (19 vars):** `CCC_031` (asthma), `CCC_041` (fibromyalgia), `CCC_051` (arthritis),
+  `CCC_061` (back problems), `CCC_071` (hypertension), `CCC_081` (migraine), `CCC_091` (COPD),
+  `CCC_101` (diabetes), `CCC_121` (heart disease), `CCC_131` (cancer), `CCC_141` (ulcer),
+  `CCC_151` (stroke), `CCC_171` (bowel disorder), `CCC_251` (chronic fatigue),
+  `CCC_261` (chemical sensitivities), `CCC_280` (mood disorder), `CCC_290` (anxiety disorder),
   `CCC_300` (other mental illness), `CCC_185` (digestive disease)
 - **Predisposing (11 vars):** `DHH_SEX`, `DHHGMS`, `DHHDGHSZ`, `EDUDH04`, `SDCFIMM`,
-  `SDCDGCB`, `DHHDGLVG`, `DHHDFC5`, `DHHDFC11`, `DHHDFC12P`, `SDCDGSTUD`
+  `SDCDGCB`, `DHHGLVG`, `DHHGLE5`, `DHHG611`, `DHHDFC12P`, `SDCDGSTUD`
 - **Facilitating (12 vars):** `INCDGHH`, `GEODGPRV`, `HCU_1AA`, `LBFDGHP`, `LBFDGFT`, `FVCDGTOT`,
-  `ALCDGTYP`, `SMKDSTY`, `HWTDGBMI`, `PACDPAI`, `GEN_07`, `NOC_31`
-- **Needs (5 vars):** `GEN_01`, `GEN_02A`, `GEN_09`, `RAC_1`, `INJ_01`
+  `ALCDTTM`, `SMKDSTY`, `HWTGISW`, `PACDPAI`, `GEN_07`, `LBSGSOC`
+- **Needs (5 vars):** `GEN_01`, `GEN_02A`, `GEN_02`, `RAC_1`, `INJ_01`
 - **ID (1 var):** `ADM_RNO`
 - **Bootstrap weights (500 vars):** `BSW001`–`BSW500` (pattern `^BSW`)
 

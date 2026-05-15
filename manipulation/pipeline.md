@@ -197,9 +197,9 @@ Bootstrap weights (`bsw001`–`bsw500`) are pattern-matched separately.
 | Category | Example variables | Count |
 |----------|-------------------|-------|
 | CCC module (chronic conditions) | `ccc_031`, `ccc_041`, `ccc_051`, … `ccc_290` (+ `ccc_300`, `ccc_185` absent from PUMF) | 19 (17 found) |
-| Predisposing | `dhh_sex`, `dhhgms`, `edudh04`, `dhhdglvg`, `dhhdfc5`, `dhhdfc11`, `dhhdfc12p`, `sdcdgstud`, … | 11 (7 found) |
-| Facilitating | `incdghh`, `geodgprv`, `hcu_1aa`, `lbfdghp`, `gen_07`, `alcdgtyp`, `hwtdgbmi`, `noc_31`, … | 12 (9 found) |
-| Needs | `gen_01`, `gen_02a`, `gen_09`, `rac_1`, `inj_01` | 5 |
+| Predisposing | `dhh_sex`, `dhhgms`, `edudh04`, `dhhglvg`, `dhhgle5`, `dhhg611`, `dhhdfc12p`, `sdcdgstud`, … | 11 (9 found) |
+| Facilitating | `incdghh`, `geodgprv`, `hcu_1aa`, `lbfdghp`, `gen_07`, `alcdttm`, `hwtgisw`, `lbsgsoc`, … | 12 (12 found) |
+| Needs | `gen_01`, `gen_02a`, `gen_02`, `rac_1`, `inj_01` | 5 |
 | Identifiers | `adm_rno` | 1 |
 | Bootstrap weights | `bsw001`–`bsw500` (pattern `^bsw`) | 500 |
 
@@ -254,7 +254,7 @@ After running `2-ellis.R`, verify these values match expectations:
 | Weighted mean `days_absent_total` | ≈ 1.25 |
 | % zeros in `days_absent_total` | ≈ 70.5% |
 | Variance of `days_absent_total` | ≈ 15.4 |
-| White-list misses (INFERRED tier) | 10 in current PUMF files (see Known Limitations in CACHE-manifest) |
+| White-list misses (INFERRED tier) | 4 in current PUMF files (`ccc_300`, `ccc_185`, `dhhdfc12p`, `sdcdgstud`) |
 
 ---
 

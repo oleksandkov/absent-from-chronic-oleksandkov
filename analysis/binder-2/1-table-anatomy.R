@@ -55,12 +55,12 @@ domain_map <- tribble(
   "days_absent_chronic",  "Outcome",
   "outcome_all_na",       "Outcome",
   "lopg040",              "Outcome",
-  "lopg045",              "Outcome",
-  "lopg050",              "Outcome",
-  "lopg055",              "Outcome",
-  "lopg060",              "Outcome",
-  "lopg065",              "Outcome",
   "lopg070",              "Outcome",
+  "lopg082",              "Outcome",
+  "lopg083",              "Outcome",
+  "lopg084",              "Outcome",
+  "lopg085",              "Outcome",
+  "lopg086",              "Outcome",
   "lopg100",              "Outcome",
   # Chronic conditions
   "cc_asthma",            "Chronic Condition",
@@ -87,9 +87,11 @@ domain_map <- tribble(
   "education",            "Predisposing",
   "immigration_status",   "Predisposing",
   "visible_minority",     "Predisposing",
-  "homeownership",        "Predisposing",
+  "living_arrangements",  "Predisposing",
   "student_status",       "Predisposing",
   "dhhdghsz",             "Predisposing",
+  "dhhgle5",              "Predisposing",
+  "dhhg611",              "Predisposing",
   # Facilitating predictors
   "income_5cat",          "Facilitating",
   "has_family_doctor",    "Facilitating",
@@ -114,7 +116,11 @@ domain_map <- tribble(
   "wts_m_original",       "Survey Design",
   "geodpmf",              "Survey Design",
   "cycle",                "Survey Design",
-  "cycle_f",              "Survey Design"
+  "cycle_f",              "Survey Design",
+  # Raw audit variables
+  "dhhgage",              "Survey Design",
+  "lop_015",              "Survey Design",
+  "adm_prx",             "Survey Design"
 )
 
 # ---- declare-functions -------------------------------------------------------
@@ -184,12 +190,12 @@ g1_data <- ds0 %>%
   )
 
 domain_palette <- c(
-  "Outcome"          = clr["orange"],
-  "Chronic Condition"= clr["green"],
-  "Predisposing"     = clr["sky_blue"],
-  "Facilitating"     = clr["blue"],
-  "Needs"            = clr["pink"],
-  "Survey Design"    = clr["vermillon"],
+  "Outcome"          = unname(clr["orange"]),
+  "Chronic Condition"= unname(clr["green"]),
+  "Predisposing"     = unname(clr["sky_blue"]),
+  "Facilitating"     = unname(clr["blue"]),
+  "Needs"            = unname(clr["pink"]),
+  "Survey Design"    = unname(clr["vermillon"]),
   "Other"            = "grey70"
 )
 
@@ -271,7 +277,7 @@ g2_sample_by_cycle <- g2_data %>%
     labels = scales::comma,
     expand = expansion(mult = c(0, 0.14))
   ) +
-  scale_fill_manual(values = c(clr["sky_blue"], clr["orange"])) +
+  scale_fill_manual(values = unname(c(clr["sky_blue"], clr["orange"]))) +
   labs(
     title   = "Unweighted sample size by survey cycle",
     subtitle = "Pooled dataset: CCHS 2010/2011 + 2013/2014",
@@ -302,7 +308,7 @@ g21_pooling_check <- g2_data %>%
     limits = c(0, 0.62),
     expand = expansion(mult = c(0, 0))
   ) +
-  scale_fill_manual(values = c(clr["sky_blue"], clr["orange"])) +
+  scale_fill_manual(values = unname(c(clr["sky_blue"], clr["orange"]))) +
   labs(
     title   = "Pooling check: weighted vs unweighted cycle shares",
     subtitle = "Both shares should be ~50%, confirming the wts_m / 2 halving rule",
@@ -344,11 +350,11 @@ g3_type_inventory <- g3_data %>%
             position = position_stack(vjust = 0.5),
             colour = "white", size = 3.5, fontface = "bold") +
   scale_fill_manual(values = c(
-    "Ordered factor" = clr["blue"],
-    "Nominal factor" = clr["sky_blue"],
-    "Logical"        = clr["green"],
-    "Integer"        = clr["orange"],
-    "Numeric"        = clr["vermillon"],
+    "Ordered factor" = unname(clr["blue"]),
+    "Nominal factor" = unname(clr["sky_blue"]),
+    "Logical"        = unname(clr["green"]),
+    "Integer"        = unname(clr["orange"]),
+    "Numeric"        = unname(clr["vermillon"]),
     "Other"          = "grey70"
   )) +
   labs(

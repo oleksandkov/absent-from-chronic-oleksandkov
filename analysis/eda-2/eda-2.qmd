@@ -258,7 +258,7 @@ This report documents the **Default Scenario** with real output and describes th
 |------------------------------------|------------------------------------|
 | Outcome | Days absent (LOP module sum); sensitivity outcome (chronic condition days only) |
 | Primary exposure | 19 binary chronic conditions (CCC module) |
-| Predisposing | Age, sex, marital status, household size, children counts, education, immigration, ethnicity, homeownership, student status |
+| Predisposing | Age, sex, marital status, household size, children counts, education, immigration, ethnicity, living arrangements, student status |
 | Facilitating | Income, province, family doctor, employment type, work schedule, occupation, job stress, diet, alcohol, smoking, BMI, physical activity |
 | Needs | Functional limitations, injury, self-perceived health (general + mental + change) |
 | Survey design | Master weight, 500 bootstrap replicates, strata/cluster IDs |
@@ -271,8 +271,8 @@ The white-list approach selects 55 named variables (plus any bootstrap weight co
 -   **Inferred — other** (29): predisposing (11) + facilitating (12) + needs (5) + id (1); absent inferred variables trigger a WARNING and are silently dropped
 
 ::: {.callout-warning icon="false"}
-**10 inferred variables absent from both CCHS PUMF cycles**: `ccc_300`, `ccc_185`, `dhhdglvg`, `dhhdfc5`, `dhhdfc11`, `dhhdfc12p`, `sdcdgstud`, `alcdgtyp`, `hwtdgbmi`, `noc_31`.
-Five of these — `alcdgtyp`, `hwtdgbmi`, `dhhdglvg`, `sdcdgstud`, `noc_31` — are added back as all-NA columns by `ensure_columns()` to prevent downstream factor recode failures.
+**4 inferred variables absent from both CCHS PUMF cycles**: `ccc_300`, `ccc_185`, `dhhdfc12p`, `sdcdgstud`.
+Only `sdcdgstud` (and CCC variables `ccc_300`, `ccc_185`) remain all-NA. The remaining formerly-missing variables have been corrected to verified PUMF names and are now populated: `alcdgtyp`→`alcdttm`, `hwtdgbmi`→`hwtgisw`, `dhhdglvg`→`dhhglvg`, `noc_31`→`lbsgsoc`, `dhhdfc5`→`dhhgle5`, `dhhdfc11`→`dhhg611`.
 :::
 
 ```{r}
@@ -348,12 +348,12 @@ Steps 1–3 plus outcome completeness are applied. Step 4b (CCC + predictor comp
 
 All §3.1 exclusion steps are applied sequentially with `n` recorded at each step. Starting pool matches §3.1 (62,909 + 63,522 = **126,431**). The **default run** (`apply_completeness_exclusion = FALSE`) applies steps 1–5 (age, employment, proxy, outcome completeness) and reaches **n = 63,843** — close to the §3.1 thesis target of 64,141. Step 4 (proxy) removed 0 rows: `adm_prx` IS a confirmed column; no respondents in the analytical pool carried the proxy flag (adm_prx = 1).
 
-**All-TRUE run** (`apply_completeness_exclusion = TRUE`): adds full predictor-completeness exclusion at step 6 — approximate result **n ≈ 41,372** (from an earlier run with the pre-correction white-list). The gap reflects NA values in predictor columns present in the pre-recode dataset. Note: `incdghh`, `lbfdghp`, `lbfdgft`, `fvcdgtot`, `dhhdghsz` are now populated via the alias map; confirmed absent variables are `alcdgtyp`, `hwtdgbmi`, `dhhdglvg`, `sdcdgstud`, `noc_31`, `ccc_300`, `ccc_185`. Re-run with `apply_completeness_exclusion = TRUE` to obtain the current actual n.
+**All-TRUE run** (`apply_completeness_exclusion = TRUE`): adds full predictor-completeness exclusion at step 6 — approximate result **n ≈ 41,372** (from an earlier run with the pre-correction white-list). The gap reflects NA values in predictor columns present in the pre-recode dataset. Confirmed absent variables (4 remaining): `ccc_300`, `ccc_185`, `dhhdfc12p`, `sdcdgstud`. Previously-missing variables `alcdgtyp`, `hwtdgbmi`, `dhhdglvg`, `noc_31`, `dhhdfc5`, `dhhdfc11` are now verified and populated under corrected names. Re-run with `apply_completeness_exclusion = TRUE` to obtain the current actual n.
 :::
 
 ### All-TRUE Scenario (`apply_completeness_exclusion = TRUE`)
 
-When `apply_completeness_exclusion = TRUE`, an additional step removes respondents with any `NA` on the 17 available CCC conditions or any predictor variable present in the pre-recode dataset (full §3.1 criterion 4b). The approximate result **n ≈ 41,372** is from an earlier run with the pre-correction white-list. The gap from the default run (63,843) reflects NA values in predictor columns that contain structural NAs (e.g., variables present in one cycle but not the other). Note: `adm_prx` IS a confirmed column — 0 proxy respondents were found. Variables confirmed absent from both CCHS PUMF cycles: `alcdgtyp`, `hwtdgbmi`, `dhhdglvg`, `sdcdgstud`, `noc_31`, `ccc_300`, `ccc_185`. Re-run with `apply_completeness_exclusion = TRUE` after the whitelist corrections to obtain the current actual n.
+When `apply_completeness_exclusion = TRUE`, an additional step removes respondents with any `NA` on the 17 available CCC conditions or any predictor variable present in the pre-recode dataset (full §3.1 criterion 4b). The approximate result **n ≈ 41,372** is from an earlier run with the pre-correction white-list. The gap from the default run (63,843) reflects NA values in predictor columns that contain structural NAs (e.g., variables present in one cycle but not the other). Note: `adm_prx` IS a confirmed column — 0 proxy respondents were found. Variables confirmed absent from both CCHS PUMF cycles (4 remaining): `ccc_300`, `ccc_185`, `dhhdfc12p`, `sdcdgstud`. Previously-missing variables `alcdgtyp`, `hwtdgbmi`, `dhhdglvg`, `noc_31`, `dhhdfc5`, `dhhdfc11` are now verified in both PUMF cycles under corrected names. Re-run with `apply_completeness_exclusion = TRUE` to obtain the current actual n.
 
 | Scenario | Actual final n | n vs. §3.1 target (64,141) | Completeness criterion |
 |------------------|------------------|------------------|------------------|
@@ -410,8 +410,8 @@ Key recoded variables:
 | `edudh04` | `education` | 4 ordered levels (\< secondary → post-secondary graduate) |
 | `incdghh` (alias: `incghh`) | `income_5cat` | 5 ordered income bands (\< \$20k → \$80k+) |
 | `smkdsty` | `smoking_status` | Never / Former / Occasional / Daily (ordered; 6 raw codes collapsed to 4) |
-| `hwtdgbmi` | `bmi_category` | **ALL-NA** — absent from both PUMF cycles; added by `ensure_columns()` |
-| `alcdgtyp` | `alcohol_type` | **ALL-NA** — absent from both PUMF cycles; added by `ensure_columns()` |
+| `hwtgisw` | `bmi_category` | 4 levels: Underweight / Normal weight / Overweight / Obese — verified in both PUMF cycles |
+| `alcdttm` | `alcohol_type` | 3 levels: Former or never drinker / Occasional drinker / Regular drinker — verified in both PUMF cycles |
 | `ccc_031`–`ccc_290` | `cc_asthma`, `cc_fibromyalgia`, … `cc_anxiety_disorder` | `Yes` / `No` (17 verified CCC conditions; output named `cc_<condition>`) |
 | `ccc_300`, `ccc_185` | `cc_other_mental_ill`, `cc_digestive_disease` | **ALL-NA** — not found in either PUMF cycle |
 

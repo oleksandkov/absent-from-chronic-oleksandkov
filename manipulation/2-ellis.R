@@ -217,16 +217,15 @@ vars_inferred_predisposing <- c(
                 #   NOTE: SAV has only 2 codes; no code 3 in data (code 3 recode is dead)
   "sdcdgcb",    # VERIFIED: visible minority — alias resolves to sdcgcgt (SDCGCGT in SAV)
                 #   codes: 1=WHITE, 2=VISIBLE MINORITY
-  "dhhdglvg",   # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
-                #   Intended: homeownership / living arrangements
-                #   Verify against CCHS_2010_DataDictionary_Freqs-ver2.pdf
+  "dhhglvg",    # VERIFIED: living arrangements — DHHGLVG in SAV (both cycles)
+                #   codes: 1=Unattached alone, 2=Unattached w/others, 3=Spouse/partner only,
+                #          4=Parent+spouse+child, 5=Single parent w/child, 6=Child in parent/sib hhld,
+                #          7=Child in two-parent hhld, 8=Other; special NAs: 96=N/A, 99=NOT STATED
   # --- Children in household by age group (§2.2 predisposing) ---
-  # VERIFY exact variable names against CCHS data dictionaries;
-  # standard CCHS PUMF may use a single derived variable or separate counts
-  "dhhdfc5",    # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
-                #   Intended: number of children < 5 yrs in household
-  "dhhdfc11",   # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
-                #   Intended: number of children 6–11 yrs in household
+  "dhhgle5",    # VERIFIED: persons ≤5 yrs in hhld — DHHGLE5 in SAV (both cycles)
+                #   codes: 0=None, 1=1 or more; special NAs: 6/7/8/9
+  "dhhg611",    # VERIFIED: persons 6–11 yrs in hhld — DHHG611 in SAV (both cycles)
+                #   codes: 0=None, 1=1 or more; special NAs: 6/7/8/9
   "dhhdfc12p",  # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
                 #   Intended: number of children ≥ 12 yrs in household
   # --- Student status (§2.2 predisposing) ---
@@ -248,17 +247,15 @@ vars_inferred_facilitating <- c(
   "fvcdgtot",  # VERIFIED: fruit & veg intake — alias resolves to fvcgtot (FVCGTOT in SAV)
                #   NOTE: FVCGTOT is a 3-category derived variable (1=<5/day, 2=5-10/day, 3=>10/day)
                #   NOT a continuous count; treat as ordinal/categorical in analysis
-  "alcdgtyp",  # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
-               #   Intended: type of drinker (regular/occasional/former/never)
-               #   Verify against CCHS_2010_DataDictionary_Freqs-ver2.pdf
+  "alcdttm",   # VERIFIED: type of drinker (12 months) — ALCDTTM in SAV (both cycles)
+               #   codes: 1=Regular drinker, 2=Occasional drinker, 3=No drink last 12m
+               #   NOTE: code 3 collapses former + never drinkers; only 3 substantive levels
   "smkdsty",   # VERIFIED: smoking status derived — SMKDSTY in SAV
                #   codes: 1=DAILY, 2=OCCASIONAL (current), 3=ALWAYS OCCASIONAL (former),
                #          4=FORMER DAILY, 5=FORMER OCCASIONAL, 6=NEVER SMOKED
                #   special NAs: 96=NOT APPLICABLE, 97=DK, 98=REFUSAL, 99=NOT STATED
-  "hwtdgbmi",  # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
-               #   Intended: 4-category derived BMI (underweight/normal/overweight/obese)
-               #   SAV contains HWTGBMI (continuous BMI); derived categories not found
-               #   Verify HWTDGBMI against CCHS_2014_DataDictionary_Freqs.pdf
+  "hwtgisw",   # VERIFIED: BMI classification (18+) self-report — HWTGISW in SAV (both cycles)
+               #   codes: 1=Underweight, 2=Normal weight, 3=Overweight, 4=Obese; special NAs: 6/7/8/9
   "pacdpai",   # VERIFIED: physical activity index — PACDPAI in SAV
                #   codes: 1=ACTIVE, 2=MODERATE ACTIVE, 3=INACTIVE
   "gen_07",    # VERIFIED: perceived life stress — GEN_07 in SAV
@@ -266,11 +263,10 @@ vars_inferred_facilitating <- c(
                #   NOTE: GEN_07 = perceived LIFE stress; GEN_09 = perceived WORK stress
                #   Confirm which is intended as 'job_stress' against stats_instructions
   # --- Occupation category (§2.2 facilitating) ---
-  "noc_31"     # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
-               #   LBSGSOC (in SAV) is a 5-cat occupation group (1=Mgmt/Art/Education,
-               #   2=Business/Finance, 3=Sales/Service, 4=Trades/Transport, 5=Prim.Ind./Processing)
-               #   This does NOT match the 10-category NOC structure coded in Ellis.
-               #   Verify whether noc_31 exists or lbsgsoc should be used with revised categories.
+  "lbsgsoc"    # VERIFIED: occupation group (5-category) — LBSGSOC in SAV (both cycles)
+               #   codes: 1=Group 1 (Mgmt/Art/Educ), 2=Group 2 (Business/Finance),
+               #          3=Group 3 (Sales/Service), 4=Group 4 (Trades/Transport),
+               #          5=Group 5 (Prim.Ind./Processing); special NAs: 6/7/8/9
 )
 
 vars_inferred_needs <- c(
@@ -850,13 +846,13 @@ special_na_codes <- c(6, 7, 8, 9, 96, 97, 98, 99)
 # Ensure they exist as NA columns so mutate()/case_when() never fails.
 recode_source_vars <- c(
   "dhhgage", "dhh_sex", "dhhgms", "edudh04", "sdcfimm", "sdcdgcb",
-  "incdghh", "hcu_1aa", "lbfdghp", "lbfdgft", "alcdgtyp", "smkdsty",
-  "hwtdgbmi", "pacdpai", "gen_01", "gen_02a", "gen_02", "rac_1", "inj_01",
+  "incdghh", "hcu_1aa", "lbfdghp", "lbfdgft", "alcdttm", "smkdsty",
+  "hwtgisw", "pacdpai", "gen_01", "gen_02a", "gen_02", "rac_1", "inj_01",
   # Added: previously missing from recode pipeline
-  "dhhdglvg",   # homeownership
+  "dhhglvg",    # living arrangements
   "gen_07",     # job stress level
   "sdcdgstud",  # student status
-  "noc_31"      # occupation category
+  "lbsgsoc"     # occupation category
 )
 
 ds2 <- ensure_columns(ds2, recode_source_vars, context_label = "factor recoding inputs")
@@ -1018,19 +1014,17 @@ ds3 <- ds2 %>%
     ),
 
     # --- Alcohol use (derived type of drinker) ---
-    # ALCDGTYP: 1=Regular drinker, 2=Occasional drinker, 3=Former drinker,
-    #           4=Never drinker (lifetime abstainer)
+    # ALCDTTM: 1=Regular drinker, 2=Occasional drinker, 3=No drink last 12m
+    #   NOTE: code 3 collapses former + never drinkers; 3-level factor only
     alcohol_type = factor(
       case_when(
-        alcdgtyp == 1 ~ "Regular drinker",
-        alcdgtyp == 2 ~ "Occasional drinker",
-        alcdgtyp == 3 ~ "Former drinker",
-        alcdgtyp == 4 ~ "Never drinker",
-        alcdgtyp %in% special_na_codes ~ NA_character_,
+        alcdttm == 1 ~ "Regular drinker",
+        alcdttm == 2 ~ "Occasional drinker",
+        alcdttm == 3 ~ "Former or never drinker",
+        alcdttm %in% special_na_codes ~ NA_character_,
         TRUE ~ NA_character_
       ),
-      levels = c("Never drinker", "Former drinker",
-                 "Occasional drinker", "Regular drinker")
+      levels = c("Former or never drinker", "Occasional drinker", "Regular drinker")
     ),
 
     # --- Smoking status (derived) ---
@@ -1053,15 +1047,15 @@ ds3 <- ds2 %>%
     ),
 
     # --- BMI category (derived) ---
-    # HWTDGBMI: 1=Underweight (<18.5), 2=Normal (18.5-24.9),
-    #           3=Overweight (25-29.9), 4=Obese (30+)
+    # HWTGISW: 1=Underweight (<18.5), 2=Normal weight (18.5-24.9),
+    #          3=Overweight (25-29.9), 4=Obese (30+)
     bmi_category = factor(
       case_when(
-        hwtdgbmi == 1 ~ "Underweight",
-        hwtdgbmi == 2 ~ "Normal weight",
-        hwtdgbmi == 3 ~ "Overweight",
-        hwtdgbmi == 4 ~ "Obese",
-        hwtdgbmi %in% special_na_codes ~ NA_character_,
+        hwtgisw == 1 ~ "Underweight",
+        hwtgisw == 2 ~ "Normal weight",
+        hwtgisw == 3 ~ "Overweight",
+        hwtgisw == 4 ~ "Obese",
+        hwtgisw %in% special_na_codes ~ NA_character_,
         TRUE ~ NA_character_
       ),
       levels = c("Underweight", "Normal weight", "Overweight", "Obese"),
@@ -1165,17 +1159,28 @@ ds3 <- ds2 %>%
       levels = c("Yes", "No")
     ),
 
-    # --- Homeownership / living arrangements (§2.2 predisposing) ---
-    # DHHDGLVG: typical CCHS codes — VERIFY against data dictionary
-    # Common coding: 1=Owner, 2=Renter/other
-    homeownership = factor(
+    # --- Living arrangements (§2.2 predisposing) ---
+    # DHHGLVG: 1=Unattached alone, 2=Unattached w/others, 3=Spouse/partner only,
+    #          4=Parent+spouse+child, 5=Single parent w/child,
+    #          6=Child in parent/sibling hhld, 7=Child in two-parent hhld, 8=Other
+    #   Special NAs: 96=NOT APPLICABLE, 99=NOT STATED (already in special_na_codes)
+    living_arrangements = factor(
       case_when(
-        dhhdglvg == 1 ~ "Owner",
-        dhhdglvg == 2 ~ "Renter/other",
-        dhhdglvg %in% special_na_codes ~ NA_character_,
+        dhhglvg == 1 ~ "Unattached, alone",
+        dhhglvg == 2 ~ "Unattached, with others",
+        dhhglvg == 3 ~ "Spouse/partner only",
+        dhhglvg == 4 ~ "Parent, spouse, and child",
+        dhhglvg == 5 ~ "Single parent with child",
+        dhhglvg == 6 ~ "Child in parent/sibling household",
+        dhhglvg == 7 ~ "Child in two-parent household",
+        dhhglvg == 8 ~ "Other",
+        dhhglvg %in% special_na_codes ~ NA_character_,
         TRUE ~ NA_character_
       ),
-      levels = c("Owner", "Renter/other")
+      levels = c("Unattached, alone", "Unattached, with others",
+                 "Spouse/partner only", "Parent, spouse, and child",
+                 "Single parent with child", "Child in parent/sibling household",
+                 "Child in two-parent household", "Other")
     ),
 
     # --- Job stress level (§2.2 facilitating) ---
@@ -1210,29 +1215,21 @@ ds3 <- ds2 %>%
     ),
 
     # --- Occupation category (§2.2 facilitating) ---
-    # NOC_31: National Occupation Classification major group — VERIFY codes
-    # Typical NOC major groups: 0=Management, 1=Business/finance, 2=Natural sciences,
-    #   3=Health, 4=Education, 5=Art/culture, 6=Sales/service, 7=Trades,
-    #   8=Primary industries, 9=Manufacturing/utilities
+    # LBSGSOC: 5-category occupation group (PUMF-consistent across both cycles)
+    #   1=Group 1 (Mgmt/Art/Educ), 2=Group 2 (Business/Finance),
+    #   3=Group 3 (Sales/Service), 4=Group 4 (Trades/Transport),
+    #   5=Group 5 (Prim.Ind./Processing)
     occupation_category = factor(
       case_when(
-        noc_31 == 0  ~ "Management",
-        noc_31 == 1  ~ "Business/finance/admin",
-        noc_31 == 2  ~ "Natural/applied sciences",
-        noc_31 == 3  ~ "Health",
-        noc_31 == 4  ~ "Education/law/social",
-        noc_31 == 5  ~ "Art/culture/sport",
-        noc_31 == 6  ~ "Sales/service",
-        noc_31 == 7  ~ "Trades/transport",
-        noc_31 == 8  ~ "Primary industries",
-        noc_31 == 9  ~ "Manufacturing/utilities",
-        noc_31 %in% special_na_codes ~ NA_character_,
+        lbsgsoc == 1 ~ "Group 1",
+        lbsgsoc == 2 ~ "Group 2",
+        lbsgsoc == 3 ~ "Group 3",
+        lbsgsoc == 4 ~ "Group 4",
+        lbsgsoc == 5 ~ "Group 5",
+        lbsgsoc %in% special_na_codes ~ NA_character_,
         TRUE ~ NA_character_
       ),
-      levels = c("Management", "Business/finance/admin", "Natural/applied sciences",
-                 "Health", "Education/law/social", "Art/culture/sport",
-                 "Sales/service", "Trades/transport", "Primary industries",
-                 "Manufacturing/utilities")
+      levels = c("Group 1", "Group 2", "Group 3", "Group 4", "Group 5")
     ),
 
     # --- Cycle as factor for models ---
@@ -1356,7 +1353,7 @@ factor_cols     <- c(
   "physical_activity", "self_health_general", "self_health_mental",
   "health_vs_lastyear", "activity_limitation", "injury_past_year",
   # Added: previously dropped from output (Fix #2)
-  "homeownership", "job_stress", "student_status", "occupation_category",
+  "living_arrangements", "job_stress", "student_status", "occupation_category",
   "cycle_f",
   cc_factor_cols
 )
@@ -1379,8 +1376,8 @@ keep_numeric <- c(
   "dhhdghsz",                                    # household size
   if ("fvcdgtot" %in% names(ds4)) "fvcdgtot",   # fruit/veg servings
   # Children by age group (§2.2 predisposing) — added: previously absent (Fix #1)
-  if ("dhhdfc5"   %in% names(ds4)) "dhhdfc5",   # children < 5 yrs
-  if ("dhhdfc11"  %in% names(ds4)) "dhhdfc11",  # children 6-11 yrs
+  if ("dhhgle5"   %in% names(ds4)) "dhhgle5",   # children <= 5 yrs
+  if ("dhhg611"   %in% names(ds4)) "dhhg611",   # children 6-11 yrs
   if ("dhhdfc12p" %in% names(ds4)) "dhhdfc12p", # children >= 12 yrs
   if ("adm_rno"  %in% names(ds4)) "adm_rno",    # respondent ID
   boot_cols

@@ -235,8 +235,8 @@ print(g31_province_cycle)
 
 # Feedback Questions
 
-1.  **Missing predictors in the portrait**: `homeownership`, `student_status`, `alcohol_type`, `bmi_category`, and `occupation_category` are all ALL-NA in this PUMF version. Of these, which would you expect to have the strongest theoretical link to work absenteeism, and would you pursue supplemental data sources to recover them?
+1.  **Sole PUMF gap**: `student_status` is the only ALL-NA column in this dataset. Given that student status may interact with employment type and work schedule (part-time students vs. full-time workers), would you pursue an alternative operationalization from existing variables (e.g., age + education combination) or flag this as an unavoidable PUMF limitation?
 
 2.  **Cycle consistency**: Looking at `g11`, is any demographic shift between 2010/11 and 2013/14 large enough to warrant a cycle-by-covariate interaction term in the regression model, or are the differences analytically negligible?
 
-3.  **Employment type as predictor vs. sample filter**: The current sample includes employees, self-employed, *and* unpaid workers. Should the primary analysis restrict to employees only (as LOP is most meaningful for wage-earners), or is it analytically important to retain all three groups?
+3.  **Employment type composition**: The sample contains only Employees (78%) and Self-employed (16%), with zero observations for "Unpaid family worker" (phantom PUMF level). Given this de facto binary split, should `employment_type` be simplified to a 2-level factor, or would you retain the original 3-level coding to accommodate potential future data linkage?
