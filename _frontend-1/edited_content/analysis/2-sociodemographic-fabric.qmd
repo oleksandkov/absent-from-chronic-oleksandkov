@@ -1,0 +1,9 @@
+---
+title: "Binder-2: Sociodemographic Fabric"
+format:
+  html:
+    page-layout: full
+    toc: false
+---
+
+<meta http-equiv="refresh" content="0; url=../../analysis/2-sociodemographic-fabric.html">
