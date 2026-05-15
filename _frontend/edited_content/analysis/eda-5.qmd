@@ -6,4 +6,4 @@ format:
     toc: false
 ---
 
-<meta http-equiv="refresh" content="0; url=../../analysis/eda-5/eda-5.html">
+<meta http-equiv="refresh" content="0; url=../../analysis/eda-5.html">

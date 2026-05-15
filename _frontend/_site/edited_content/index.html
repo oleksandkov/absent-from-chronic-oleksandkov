@@ -91,14 +91,17 @@ ul.task-list li input[type="checkbox"] {
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
-  <li class="nav-item">
-    <a class="nav-link active" href="../edited_content/index.html" aria-current="page"> 
-<span class="menu-text">Home</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-project" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Project</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-project">    
+        <li>
+    <a class="dropdown-item" href="../edited_content/project/statistical-instructions.html">
+ <span class="dropdown-text">Statistical Instructions</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../edited_content/project/statistical-instructions.html"> 
-<span class="menu-text">Project</span></a>
-  </li>  
+    </ul>
+  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-pipeline" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">Pipeline</span>
@@ -147,19 +150,19 @@ ul.task-list li input[type="checkbox"] {
  <span class="dropdown-text">EDA-5</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../edited_content/analysis/binder-2-table-anatomy.html">
+    <a class="dropdown-item" href="../edited_content/analysis/1-table-anatomy.html">
  <span class="dropdown-text">Binder-2: Table Anatomy</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../edited_content/analysis/binder-2-sociodemographic-fabric.html">
+    <a class="dropdown-item" href="../edited_content/analysis/2-sociodemographic-fabric.html">
  <span class="dropdown-text">Binder-2: Sociodemographic Fabric</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../edited_content/analysis/binder-2-outcome-anatomy.html">
+    <a class="dropdown-item" href="../edited_content/analysis/3-outcome-anatomy.html">
  <span class="dropdown-text">Binder-2: Outcome Anatomy</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../edited_content/analysis/binder-2-raw-to-analytical.html">
+    <a class="dropdown-item" href="../edited_content/analysis/4-raw-to-analytical.html">
  <span class="dropdown-text">Binder-2: Raw to Analytical</span></a>
   </li>  
     </ul>
@@ -196,6 +199,7 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#how-to-use-this-site" id="toc-how-to-use-this-site" class="nav-link active" data-scroll-target="#how-to-use-this-site">How to use this site</a></li>
+  <li><a href="#quick-navigation" id="toc-quick-navigation" class="nav-link" data-scroll-target="#quick-navigation">Quick navigation</a></li>
   </ul>
 </nav>
     </div>
@@ -221,19 +225,33 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>This site documents the statistical analysis workflow for <em>Predictors of Work Absenteeism Associated with Chronic Conditions Among Canadian Workers</em>.</p>
-<p><strong>Hero figure unavailable:</strong> <code>analysis/eda-5/prints/g01_lop_days_histogram.png</code> was not found at build time.</p>
-<p>The documentation is organized as a verification path from statistical instructions to implemented analysis artifacts. It is intended for direct review by the principal investigator.</p>
-<p>The analytical dataset currently documented in the CACHE Manifest contains <strong>63,843 rows</strong> and <strong>62 columns</strong>, pooling two CCHS cycles (2010–2011 and 2013–2014).</p>
-<p>Source grounding: <code>README.md</code>; <code>data-public/metadata/CACHE-manifest.md</code>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/g01_lop_days_histogram.png" class="img-fluid figure-img" style="width:90.0%" alt="Histogram of days absent from work"></p>
+<figcaption>LOP days absent distribution across the analytical sample. Source: <code>analysis/eda-5/prints/g01_lop_days_histogram.png</code>.</figcaption>
+</figure>
+</div>
+<p>This site documents the statistical analysis workflow for the study on predictors of work absenteeism among Canadian workers with chronic conditions. The intent and framing come from <code>README.md</code>, while dataset scope and structure are grounded in <code>data-public/metadata/CACHE-manifest.md</code>.</p>
+<p>The analytical core reported here is based on a pooled CCHS dataset with 63,843 rows and 62 columns (as documented in <code>data-public/metadata/CACHE-manifest.md</code>). The site is organized to let the principal investigator verify requirement coverage from protocol to output.</p>
 <section id="how-to-use-this-site" class="level2">
 <h2 class="anchored" data-anchor-id="how-to-use-this-site">How to use this site</h2>
 <ul>
-<li><strong>Project</strong>: the original statistical instructions that define required outputs.</li>
-<li><strong>Pipeline</strong>: the transport-and-transformation documentation, plus manifest references.</li>
-<li><strong>Data Primer</strong>: variable inclusion traceability and univariate profile access.</li>
-<li><strong>Analysis</strong>: EDA and binder report outputs used to inspect outcome structure and sample composition.</li>
-<li><strong>Docs</strong>: project synopsis and site map for navigation and requirement coverage.</li>
+<li><strong>Project</strong>: Open the full statistical instruction set used to scope the analysis.</li>
+<li><strong>Pipeline</strong>: Review the Ferry/Ellis workflow and both metadata manifests.</li>
+<li><strong>Data Primer</strong>: Check variable inclusion traceability and univariate reference outputs.</li>
+<li><strong>Analysis</strong>: Open published exploratory and binder outputs.</li>
+<li><strong>Docs</strong>: Read the sanitized project README and full navigation map.</li>
+</ul>
+</section>
+<section id="quick-navigation" class="level2">
+<h2 class="anchored" data-anchor-id="quick-navigation">Quick navigation</h2>
+<ul>
+<li><a href="../edited_content/project/statistical-instructions.html">Project → Statistical Instructions</a></li>
+<li><a href="../edited_content/pipeline/pipeline-guide.html">Pipeline → Pipeline Guide</a></li>
+<li><a href="../edited_content/pipeline/cache-manifest.html">Pipeline → CACHE Manifest</a></li>
+<li><a href="../edited_content/pipeline/input-manifest.html">Pipeline → INPUT Manifest</a></li>
+<li><a href="../edited_content/data-primer/variable-inclusion.html">Data Primer → Variable Inclusion</a></li>
+<li><a href="../edited_content/analysis/eda-5.html">Analysis → EDA-5</a></li>
 </ul>
 
 
@@ -647,7 +665,7 @@ ul.task-list li input[type="checkbox"] {
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>Absent from Chronic — Statistical Analysis Replication | Marc-Andre Blanchette, Research Scientist</p>
+<p><em>Absent from Chronic</em> — Statistical Analysis Replication | Marc-Andre Blanchette, Research Scientist</p>
 </div>
     <div class="nav-footer-right">
       &nbsp;

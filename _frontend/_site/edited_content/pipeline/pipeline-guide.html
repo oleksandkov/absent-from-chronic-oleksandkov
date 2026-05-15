@@ -91,14 +91,17 @@ ul.task-list li input[type="checkbox"] {
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
-  <li class="nav-item">
-    <a class="nav-link" href="../../edited_content/index.html"> 
-<span class="menu-text">Home</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-project" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Project</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-project">    
+        <li>
+    <a class="dropdown-item" href="../../edited_content/project/statistical-instructions.html">
+ <span class="dropdown-text">Statistical Instructions</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../edited_content/project/statistical-instructions.html"> 
-<span class="menu-text">Project</span></a>
-  </li>  
+    </ul>
+  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-pipeline" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">Pipeline</span>
@@ -147,19 +150,19 @@ ul.task-list li input[type="checkbox"] {
  <span class="dropdown-text">EDA-5</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-table-anatomy.html">
+    <a class="dropdown-item" href="../../edited_content/analysis/1-table-anatomy.html">
  <span class="dropdown-text">Binder-2: Table Anatomy</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-sociodemographic-fabric.html">
+    <a class="dropdown-item" href="../../edited_content/analysis/2-sociodemographic-fabric.html">
  <span class="dropdown-text">Binder-2: Sociodemographic Fabric</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-outcome-anatomy.html">
+    <a class="dropdown-item" href="../../edited_content/analysis/3-outcome-anatomy.html">
  <span class="dropdown-text">Binder-2: Outcome Anatomy</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-raw-to-analytical.html">
+    <a class="dropdown-item" href="../../edited_content/analysis/4-raw-to-analytical.html">
  <span class="dropdown-text">Binder-2: Raw to Analytical</span></a>
   </li>  
     </ul>
@@ -199,35 +202,8 @@ ul.task-list li input[type="checkbox"] {
   <ul class="collapse">
   <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a></li>
   <li><a href="#scripts" id="toc-scripts" class="nav-link" data-scroll-target="#scripts">Scripts</a></li>
-  <li><a href="#ferry" id="toc-ferry" class="nav-link" data-scroll-target="#ferry">1-ferry</a>
-  <ul class="collapse">
-  <li><a href="#high-level-summary" id="toc-high-level-summary" class="nav-link" data-scroll-target="#high-level-summary">High-Level Summary</a></li>
-  </ul></li>
-  <li><a href="#running-the-pipeline" id="toc-running-the-pipeline" class="nav-link" data-scroll-target="#running-the-pipeline">Running the Pipeline</a>
-  <ul class="collapse">
-  <li><a href="#option-a-full-pipeline-via-flow.r" id="toc-option-a-full-pipeline-via-flow.r" class="nav-link" data-scroll-target="#option-a-full-pipeline-via-flow.r">Option A: Full pipeline via flow.R</a></li>
-  <li><a href="#option-b-individual-scripts" id="toc-option-b-individual-scripts" class="nav-link" data-scroll-target="#option-b-individual-scripts">Option B: Individual scripts</a></li>
-  <li><a href="#option-c-vs-code-tasks" id="toc-option-c-vs-code-tasks" class="nav-link" data-scroll-target="#option-c-vs-code-tasks">Option C: VS Code Tasks</a></li>
-  <li><a href="#option-d-interactive-pipeline-run-interactive-flow.ps1" id="toc-option-d-interactive-pipeline-run-interactive-flow.ps1" class="nav-link" data-scroll-target="#option-d-interactive-pipeline-run-interactive-flow.ps1">Option D: Interactive Pipeline (run-interactive-flow.ps1)</a></li>
-  </ul></li>
-  <li><a href="#inputs" id="toc-inputs" class="nav-link" data-scroll-target="#inputs">Inputs</a></li>
-  <li><a href="#outputs" id="toc-outputs" class="nav-link" data-scroll-target="#outputs">Outputs</a>
-  <ul class="collapse">
-  <li><a href="#ferry-outputs-staging-not-for-analysis" id="toc-ferry-outputs-staging-not-for-analysis" class="nav-link" data-scroll-target="#ferry-outputs-staging-not-for-analysis">Ferry outputs (staging — not for analysis)</a></li>
-  <li><a href="#ellis-outputs-analysis-ready" id="toc-ellis-outputs-analysis-ready" class="nav-link" data-scroll-target="#ellis-outputs-analysis-ready">Ellis outputs (analysis-ready)</a></li>
-  <li><a href="#ellis-lane-3-outputs-clarity-layer-from-prior-run" id="toc-ellis-lane-3-outputs-clarity-layer-from-prior-run" class="nav-link" data-scroll-target="#ellis-lane-3-outputs-clarity-layer-from-prior-run">Ellis Lane 3 outputs (clarity layer — from prior run)</a></li>
-  </ul></li>
-  <li><a href="#pipeline-flags" id="toc-pipeline-flags" class="nav-link" data-scroll-target="#pipeline-flags">Pipeline Flags</a></li>
-  <li><a href="#white-list-design" id="toc-white-list-design" class="nav-link" data-scroll-target="#white-list-design">White-List Design</a>
-  <ul class="collapse">
-  <li><a href="#tier-1-confirmed-hard-error-if-missing" id="toc-tier-1-confirmed-hard-error-if-missing" class="nav-link" data-scroll-target="#tier-1-confirmed-hard-error-if-missing">Tier 1: CONFIRMED (hard error if missing)</a></li>
-  <li><a href="#tier-2-inferred-graceful-warning-if-missing" id="toc-tier-2-inferred-graceful-warning-if-missing" class="nav-link" data-scroll-target="#tier-2-inferred-graceful-warning-if-missing">Tier 2: INFERRED (graceful warning if missing)</a></li>
-  </ul></li>
-  <li><a href="#exclusion-criteria-sample_flow" id="toc-exclusion-criteria-sample_flow" class="nav-link" data-scroll-target="#exclusion-criteria-sample_flow">Exclusion Criteria (sample_flow)</a></li>
-  <li><a href="#survey-weight-pooling" id="toc-survey-weight-pooling" class="nav-link" data-scroll-target="#survey-weight-pooling">Survey Weight Pooling</a></li>
-  <li><a href="#diagnostic-checkpoints" id="toc-diagnostic-checkpoints" class="nav-link" data-scroll-target="#diagnostic-checkpoints">Diagnostic Checkpoints</a></li>
-  <li><a href="#troubleshooting" id="toc-troubleshooting" class="nav-link" data-scroll-target="#troubleshooting">Troubleshooting</a></li>
-  <li><a href="#data-documentation" id="toc-data-documentation" class="nav-link" data-scroll-target="#data-documentation">Data Documentation</a></li>
+  <li><a href="#ferry-lane-summary" id="toc-ferry-lane-summary" class="nav-link" data-scroll-target="#ferry-lane-summary">Ferry lane summary</a></li>
+  <li><a href="#ellis-lane-summary" id="toc-ellis-lane-summary" class="nav-link" data-scroll-target="#ellis-lane-summary">Ellis lane summary</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -257,29 +233,27 @@ ul.task-list li input[type="checkbox"] {
 <section id="data-pipeline-absent-from-chronic" class="level1">
 <h1>Data Pipeline: absent-from-chronic</h1>
 <p>Execution guide for the CCHS work-absenteeism data pipeline.</p>
-<hr>
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<pre><code>CCHS .sav files (private data storage)
+<pre><code>CCHS .sav files (private raw storage)
          │
          ▼  1-ferry.R   ← zero semantic transformation
-  cchs-1.sqlite + cchs-1-raw/*.parquet   (staging)
+  cchs-1.sqlite + raw parquet backup   (staging)
          │
          ▼  2-ellis.R   ← white-list + harmonize + recode
-  cchs-2.sqlite + cchs-2-tables/*.parquet   (analysis-ready)
+  cchs-2.sqlite + analysis-ready parquet tables
          │
          ▼  2-test-ellis-cache.R   ← alignment verification
   console report (pass/fail)</code></pre>
-<hr>
 </section>
 <section id="scripts" class="level2">
 <h2 class="anchored" data-anchor-id="scripts">Scripts</h2>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 11%">
-<col style="width: 23%">
-<col style="width: 34%">
-<col style="width: 30%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -294,13 +268,13 @@ ul.task-list li input[type="checkbox"] {
 <td>1</td>
 <td><code>manipulation/1-ferry.R</code></td>
 <td>Ferry</td>
-<td>private data storage + <code>cchs-1-raw/</code> Parquet backup</td>
+<td>Staging SQLite + raw Parquet backup</td>
 </tr>
 <tr class="even">
 <td>2</td>
 <td><code>manipulation/2-ellis.R</code></td>
 <td>Ellis</td>
-<td>private data storage + <code>cchs-2-tables/</code> Parquet</td>
+<td>Analysis-ready SQLite + Parquet tables</td>
 </tr>
 <tr class="odd">
 <td>3</td>
@@ -312,512 +286,39 @@ ul.task-list li input[type="checkbox"] {
 <td>—</td>
 <td><code>manipulation/example/ferry-lane-example.R</code></td>
 <td>Example</td>
-<td><code>cchs-1.sqlite</code> (demo only; does not affect main pipeline)</td>
+<td>Demo staging output</td>
 </tr>
 <tr class="odd">
 <td>—</td>
 <td><code>manipulation/example/ellis-lane-example.R</code></td>
 <td>Example</td>
-<td><code>cchs-2.sqlite</code> (demo only; does not affect main pipeline)</td>
+<td>Demo analysis-ready output</td>
 </tr>
 </tbody>
 </table>
+<blockquote class="blockquote">
 <p>A third Ellis lane produced additional derived outputs; documentation is in the CACHE Manifest.</p>
+</blockquote>
 </section>
-<section id="ferry" class="level2">
-<h2 class="anchored" data-anchor-id="ferry">1-ferry</h2>
-<section id="high-level-summary" class="level3">
-<h3 class="anchored" data-anchor-id="high-level-summary">High-Level Summary</h3>
-<p><code>1-ferry.R</code> is a <strong>pure transport</strong> script. Its sole job is to move raw CCHS PUMF microdata from SPSS (<code>.sav</code>) format into a local SQLite staging database, with a Parquet backup alongside. It does <strong>nothing analytical</strong>: no variable selection, no recoding, no filtering, no renaming beyond mechanical snake_case sanitization. The guiding discipline is that every decision about <em>what the data means</em> is deferred to the Ellis lane; Ferry only answers the question <em>“how do we get the data off disk into a queryable form?”</em>.</p>
-<p>Two CCHS cycles are handled in one script:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Cycle</th>
-<th>Source file</th>
-<th>SQLite table</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>2010–2011</td>
-<td><code>CCHS2010_LOP.sav</code></td>
-<td><code>cchs_2010_raw</code></td>
-</tr>
-<tr class="even">
-<td>2013–2014</td>
-<td><code>CCHS_2014_EN_PUMF.sav</code></td>
-<td><code>cchs_2014_raw</code></td>
-</tr>
-</tbody>
-</table>
-<p>If the 2014 file is absent, the script continues with a zero-row placeholder (same schema as 2010) so that downstream scripts can still be developed and tested against a structurally complete database.</p>
-<p><strong>Permitted operations</strong></p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 32%">
-<col style="width: 17%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Operation</th>
-<th>Tool</th>
-<th>Reason permitted</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Read SPSS</td>
-<td><code>haven::read_sav()</code></td>
-<td>Ingestion only</td>
-</tr>
-<tr class="even">
-<td>Strip value/variable labels</td>
-<td><code>haven::zap_labels()</code> / <code>haven::zap_label()</code></td>
-<td>SQLite cannot store SPSS label attributes</td>
-</tr>
-<tr class="odd">
-<td>Sanitize column names</td>
-<td><code>janitor::clean_names()</code></td>
-<td>Mechanical normalization, no meaning change</td>
-</tr>
-<tr class="even">
-<td>Write SQLite</td>
-<td><code>DBI::dbWriteTable()</code></td>
-<td>Primary staging output</td>
-</tr>
-<tr class="odd">
-<td>Write Parquet</td>
-<td><code>arrow::write_parquet()</code></td>
-<td>Backup / fast-read fallback</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Forbidden operations</strong> (all deferred to Ellis)</p>
+<section id="ferry-lane-summary" class="level2">
+<h2 class="anchored" data-anchor-id="ferry-lane-summary">Ferry lane summary</h2>
+<p><code>1-ferry.R</code> is a transport script. It ingests source SPSS files and writes staging artifacts with no analytical recoding.</p>
+<p>Permitted operations include:</p>
 <ul>
-<li>Variable selection / white-listing</li>
-<li>Renaming beyond <code>clean_names</code> normalization</li>
-<li>Factor or value recoding</li>
-<li>Sample exclusions or filtering</li>
-<li>Derived variable construction</li>
+<li>SPSS ingestion</li>
+<li>Label stripping for storage compatibility</li>
+<li>Mechanical column name normalization</li>
+<li>SQLite/Parquet writing</li>
 </ul>
-<hr>
-<hr>
 </section>
-</section>
-<section id="running-the-pipeline" class="level2">
-<h2 class="anchored" data-anchor-id="running-the-pipeline">Running the Pipeline</h2>
-<section id="option-a-full-pipeline-via-flow.r" class="level3">
-<h3 class="anchored" data-anchor-id="option-a-full-pipeline-via-flow.r">Option A: Full pipeline via flow.R</h3>
-<p>Runs ferry → ellis → all downstream analyses in sequence.</p>
-</section>
-<section id="option-b-individual-scripts" class="level3">
-<h3 class="anchored" data-anchor-id="option-b-individual-scripts">Option B: Individual scripts</h3>
-</section>
-<section id="option-c-vs-code-tasks" class="level3">
-<h3 class="anchored" data-anchor-id="option-c-vs-code-tasks">Option C: VS Code Tasks</h3>
-<p>Use the tasks defined in <code>.vscode/tasks.json</code>: - <strong>Run Ferry Lane 1</strong> — <code>Rscript manipulation/1-ferry.R</code> - <strong>Run Ellis Lane 2</strong> — <code>Rscript manipulation/2-ellis.R</code> - <strong>Test Ellis ↔︎ CACHE-Manifest Alignment</strong> — <code>Rscript manipulation/2-test-ellis-cache.R</code></p>
-</section>
-<section id="option-d-interactive-pipeline-run-interactive-flow.ps1" class="level3">
-<h3 class="anchored" data-anchor-id="option-d-interactive-pipeline-run-interactive-flow.ps1">Option D: Interactive Pipeline (run-interactive-flow.ps1)</h3>
-<p>The interactive runner asks three questions before launching <code>flow.R</code>:</p>
-<p><strong>Q1 — Ellis mode</strong> (<code>run-as-is</code> / <code>default</code> / <code>strict</code>): controls three pipeline flags in <code>2-ellis.R</code> (<code>strict_cycle_integrity</code>, <code>apply_sample_exclusions</code>, <code>apply_completeness_exclusion</code>).</p>
-<p><strong>Q2 — EDA selection</strong>: dynamically scans <code>analysis/</code> for folders that contain both an <code>.R</code> file and a <code>.qmd</code> file, and lets you choose which EDAs to activate (uncomment) in <code>flow.R</code>. Selecting <strong>None (0)</strong> comments out <strong>all</strong> active EDA lines in <code>flow.R</code> so they will be skipped.</p>
-<p><strong>Q3 — Run mode</strong>: apply all changes and launch, or run <code>flow.R</code> as-is.</p>
-<hr>
-</section>
-</section>
-<section id="inputs" class="level2">
-<h2 class="anchored" data-anchor-id="inputs">Inputs</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>File</th>
-<th>Location</th>
-<th>Cycle</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>CCHS2010_LOP.sav</code></td>
-<td>private data storage</td>
-<td>2010–2011</td>
-</tr>
-<tr class="even">
-<td><code>CCHS_2014_EN_PUMF.sav</code></td>
-<td>private data storage</td>
-<td>2013–2014</td>
-</tr>
-</tbody>
-</table>
-<p>Paths are configured in <code>config.yml</code> under <code>raw_data</code>.</p>
-<hr>
-</section>
-<section id="outputs" class="level2">
-<h2 class="anchored" data-anchor-id="outputs">Outputs</h2>
-<section id="ferry-outputs-staging-not-for-analysis" class="level3">
-<h3 class="anchored" data-anchor-id="ferry-outputs-staging-not-for-analysis">Ferry outputs (staging — not for analysis)</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 30%">
-<col style="width: 30%">
-<col style="width: 39%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Artifact</th>
-<th>Location</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>cchs-1.sqlite</code></td>
-<td>private data storage</td>
-<td>Raw tables: <code>cchs_2010_raw</code>, <code>cchs_2014_raw</code></td>
-</tr>
-<tr class="even">
-<td><code>cchs-1-raw/*.parquet</code></td>
-<td>private data storage</td>
-<td>Parquet backups of raw tables</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="ellis-outputs-analysis-ready" class="level3">
-<h3 class="anchored" data-anchor-id="ellis-outputs-analysis-ready">Ellis outputs (analysis-ready)</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 24%">
-<col style="width: 24%">
-<col style="width: 19%">
-<col style="width: 31%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Artifact</th>
-<th>Location</th>
-<th>Format</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>cchs_analytical.parquet</code></td>
-<td>private data storage</td>
-<td>Parquet</td>
-<td>Main analysis dataset (<code>apply_sample_exclusions = TRUE</code> by default; 63,843 rows, 62 cols)</td>
-</tr>
-<tr class="even">
-<td><code>sample_flow.parquet</code></td>
-<td>private data storage</td>
-<td>Parquet</td>
-<td>Exclusion audit trail (5 rows)</td>
-</tr>
-<tr class="odd">
-<td><code>cchs-2.sqlite</code></td>
-<td>private data storage</td>
-<td>SQLite</td>
-<td>Same tables as Parquet (factors as character)</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="ellis-lane-3-outputs-clarity-layer-from-prior-run" class="level3">
-<h3 class="anchored" data-anchor-id="ellis-lane-3-outputs-clarity-layer-from-prior-run">Ellis Lane 3 outputs (clarity layer — from prior run)</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 24%">
-<col style="width: 24%">
-<col style="width: 19%">
-<col style="width: 31%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Artifact</th>
-<th>Location</th>
-<th>Format</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>cchs_analytical.parquet</code></td>
-<td>private data storage</td>
-<td>Parquet</td>
-<td>Full pooled sample (mirrors Lane 2)</td>
-</tr>
-<tr class="even">
-<td><code>cchs_employed.parquet</code></td>
-<td>private data storage</td>
-<td>Parquet</td>
-<td>Employed-respondent split</td>
-</tr>
-<tr class="odd">
-<td><code>cchs_unemployed.parquet</code></td>
-<td>private data storage</td>
-<td>Parquet</td>
-<td>Non-employed-respondent split</td>
-</tr>
-<tr class="even">
-<td><code>data_dictionary.parquet</code></td>
-<td>private data storage</td>
-<td>Parquet</td>
-<td>Variable-level metadata / data dictionary</td>
-</tr>
-<tr class="odd">
-<td><code>sample_flow.parquet</code></td>
-<td>private data storage</td>
-<td>Parquet</td>
-<td>Exclusion audit trail</td>
-</tr>
-<tr class="even">
-<td><code>cchs-3.sqlite</code></td>
-<td>private data storage</td>
-<td>SQLite</td>
-<td>Same tables as above (factors as character)</td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-</section>
-<section id="pipeline-flags" class="level2">
-<h2 class="anchored" data-anchor-id="pipeline-flags">Pipeline Flags</h2>
-<p>Three boolean flags in <code>2-ellis.R</code> → <code># ---- declare-globals</code> control key pipeline behaviours. They can also be managed via the interactive runner (<code>scripts/ps1/run-interactive-flow.ps1</code>).</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 26%">
-<col style="width: 39%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Flag</th>
-<th>Default</th>
-<th>Effect</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>strict_cycle_integrity</code></td>
-<td><code>FALSE</code></td>
-<td>If <code>TRUE</code>, stop with an error when either CCHS cycle loads as empty; otherwise emit a warning and continue with available cycles.</td>
-</tr>
-<tr class="even">
-<td><code>apply_sample_exclusions</code></td>
-<td><code>TRUE</code></td>
-<td>If <code>TRUE</code>, apply §3.1 inclusion criteria (age 15–75, employed in past 3 months, non-proxy, non-missing outcome). If <code>FALSE</code>, retain full pooled sample (~126,431).</td>
-</tr>
-<tr class="odd">
-<td><code>apply_completeness_exclusion</code></td>
-<td><code>FALSE</code></td>
-<td>If <code>TRUE</code>, additionally drop any respondent with <code>NA</code> on any CCC indicator or key predictor. If <code>FALSE</code>, handle missing data downstream (e.g., multiple imputation).</td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="white-list-design" class="level2">
-<h2 class="anchored" data-anchor-id="white-list-design">White-List Design</h2>
-<p>Ellis uses a <strong>two-tier white-list</strong> to select only variables needed for the analysis. This keeps the analysis-ready dataset focused and avoids processing ~1,400 irrelevant columns.</p>
-<section id="tier-1-confirmed-hard-error-if-missing" class="level3">
-<h3 class="anchored" data-anchor-id="tier-1-confirmed-hard-error-if-missing">Tier 1: CONFIRMED (hard error if missing)</h3>
-<p>13 variables verified against PDF data dictionaries. If any are absent, Ellis fails loudly. See <code>vars_confirmed</code> in <code>2-ellis.R</code> → <code>declare-globals</code> section.</p>
-</section>
-<section id="tier-2-inferred-graceful-warning-if-missing" class="level3">
-<h3 class="anchored" data-anchor-id="tier-2-inferred-graceful-warning-if-missing">Tier 2: INFERRED (graceful warning if missing)</h3>
-<p>~48 variables inferred from standard CCHS PUMF naming conventions. If any are absent, Ellis logs a warning with a list of missing names and drops them. Analysis continues. Bootstrap weights (<code>bsw001</code>–<code>bsw500</code>) are pattern-matched separately.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 27%">
-<col style="width: 52%">
-<col style="width: 19%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Category</th>
-<th>Example variables</th>
-<th>Count</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>CCC module (chronic conditions)</td>
-<td><code>ccc_031</code>, <code>ccc_041</code>, <code>ccc_051</code>, … <code>ccc_290</code> (+ <code>ccc_300</code>, <code>ccc_185</code> absent from PUMF)</td>
-<td>19 (17 found)</td>
-</tr>
-<tr class="even">
-<td>Predisposing</td>
-<td><code>dhh_sex</code>, <code>dhhgms</code>, <code>edudh04</code>, <code>dhhdglvg</code>, <code>dhhdfc5</code>, <code>dhhdfc11</code>, <code>dhhdfc12p</code>, <code>sdcdgstud</code>, …</td>
-<td>11 (7 found)</td>
-</tr>
-<tr class="odd">
-<td>Facilitating</td>
-<td><code>incdghh</code>, <code>geodgprv</code>, <code>hcu_1aa</code>, <code>lbfdghp</code>, <code>gen_07</code>, <code>alcdgtyp</code>, <code>hwtdgbmi</code>, <code>noc_31</code>, …</td>
-<td>12 (9 found)</td>
-</tr>
-<tr class="even">
-<td>Needs</td>
-<td><code>gen_01</code>, <code>gen_02a</code>, <code>gen_09</code>, <code>rac_1</code>, <code>inj_01</code></td>
-<td>5</td>
-</tr>
-<tr class="odd">
-<td>Identifiers</td>
-<td><code>adm_rno</code></td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td>Bootstrap weights</td>
-<td><code>bsw001</code>–<code>bsw500</code> (pattern <code>^bsw</code>)</td>
-<td>500</td>
-</tr>
-</tbody>
-</table>
-<p><strong>To update the white-list:</strong> 1. Open <code>manipulation/2-ellis.R</code> 2. Navigate to <code># ---- declare-globals</code> 3. Modify <code>vars_confirmed</code> or the relevant <code>vars_inferred_*</code> vector 4. Re-run Ellis and the test script</p>
-<hr>
-</section>
-</section>
-<section id="exclusion-criteria-sample_flow" class="level2">
-<h2 class="anchored" data-anchor-id="exclusion-criteria-sample_flow">Exclusion Criteria (sample_flow)</h2>
-<p><code>2-ellis.R</code> applies <strong>§3.1 exclusion criteria by default</strong> (<code>apply_sample_exclusions = TRUE</code>). Full pooled sample mode (no exclusions) is available by setting <code>apply_sample_exclusions = FALSE</code>.</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Step</th>
-<th>Criterion</th>
-<th>Expected % retained</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Raw CCHS stacked sample</td>
-<td>100%</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Age 15–75 (<code>dhhgage %in% 2:15</code>)</td>
-<td>~89%</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>Currently employed (<code>lop_015 == 1</code>)</td>
-<td>~51%</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>Non-proxy respondent (<code>adm_prx != 1</code>)</td>
-<td>~51%</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>Complete outcome (any LOP var non-missing)</td>
-<td>~50.5%</td>
-</tr>
-</tbody>
-</table>
-<p>Reference final sample: - <strong>Default mode (<code>apply_sample_exclusions = TRUE</code>)</strong>: <code>63,843</code> - <strong>Full pooled mode (<code>apply_sample_exclusions = FALSE</code>)</strong>: <code>126,431</code></p>
-<hr>
-</section>
-<section id="survey-weight-pooling" class="level2">
-<h2 class="anchored" data-anchor-id="survey-weight-pooling">Survey Weight Pooling</h2>
-<p>Two CCHS cycles are pooled into a single dataset. Per Statistics Canada guidelines:</p>
-<pre><code>wts_m_pooled = wts_m / 2     # for each respondent
-bsw001_pooled = bsw001 / 2   # same for all 500 bootstrap weights</code></pre>
-<p><code>wts_m_original</code> is kept alongside <code>wts_m_pooled</code> for verification.</p>
-<hr>
-</section>
-<section id="diagnostic-checkpoints" class="level2">
-<h2 class="anchored" data-anchor-id="diagnostic-checkpoints">Diagnostic Checkpoints</h2>
-<p>After running <code>2-ellis.R</code>, verify these values match expectations:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 52%">
-<col style="width: 47%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Diagnostic</th>
-<th>Reference</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Final sample size (default — exclusions applied)</td>
-<td>63,843</td>
-</tr>
-<tr class="even">
-<td>Final sample size (full pooled — no exclusions)</td>
-<td>126,431</td>
-</tr>
-<tr class="odd">
-<td>Weighted mean <code>days_absent_total</code></td>
-<td>≈ 1.25</td>
-</tr>
-<tr class="even">
-<td>% zeros in <code>days_absent_total</code></td>
-<td>≈ 70.5%</td>
-</tr>
-<tr class="odd">
-<td>Variance of <code>days_absent_total</code></td>
-<td>≈ 15.4</td>
-</tr>
-<tr class="even">
-<td>White-list misses (INFERRED tier)</td>
-<td>10 in current PUMF files (see Known Limitations in CACHE-manifest)</td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="troubleshooting" class="level2">
-<h2 class="anchored" data-anchor-id="troubleshooting">Troubleshooting</h2>
-<p><strong>“Variable X not found” (confirmed tier)</strong><br>
-→ The variable was renamed in this cycle’s PUMF. Check the PDF data dictionary and add a harmonization step in <code>2-ellis.R</code> under <code># ---- SECTION 1 / harmonize</code>.</p>
-<p><strong>White-list inferred warnings</strong><br>
-→ Some CCHS predictor variables may have slightly different names (e.g., <code>GEN_02</code> vs <code>GEN_02A</code>). Open the data dictionary for that module and update <code>vars_inferred_*</code> in <code>2-ellis.R</code> → <code>declare-globals</code>.</p>
-<p><strong>DHHGAGE codes outside 2–15 seen in data</strong><br>
-→ Verify age category coding against the PDF data dictionary for each cycle. Adjust <code>dhhgage %in% 2:15</code> in <code>tweak-data-2-exclusions</code> accordingly.</p>
-<p><strong>SQLite and Parquet row counts don’t match</strong><br>
-→ Run <code>manipulation/2-test-ellis-cache.R</code> — it will identify the parity failure specifically. Re-run <code>2-ellis.R</code> to regenerate both outputs atomically.</p>
-<hr>
-</section>
-<section id="data-documentation" class="level2">
-<h2 class="anchored" data-anchor-id="data-documentation">Data Documentation</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 37%">
-<col style="width: 62%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>File</th>
-<th>Contents</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>data-public/metadata/INPUT-manifest.md</code></td>
-<td>Raw source file descriptions</td>
-</tr>
-<tr class="even">
-<td><code>data-public/metadata/CACHE-manifest.md</code></td>
-<td>Analysis-ready dataset descriptions (manually maintained)</td>
-</tr>
-<tr class="odd">
-<td><code>data-public/metadata/cchs-3-column-dictionary-uk.md</code></td>
-<td>Lane 3 column dictionary (Ukrainian)</td>
-</tr>
-<tr class="even">
-<td><code>manipulation/pipeline.md</code></td>
-<td>This file</td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><em>Last updated: 2026-03-20 (post Ellis revision — 62-column, 63,843-row output)</em></p>
+<section id="ellis-lane-summary" class="level2">
+<h2 class="anchored" data-anchor-id="ellis-lane-summary">Ellis lane summary</h2>
+<p><code>2-ellis.R</code> applies white-listing, harmonization, recoding, and sample-construction logic to produce analysis-ready tables.</p>
+<p>Key diagnostics and interpretation guidance are documented in:</p>
+<ul>
+<li><a href="../../edited_content/pipeline/cache-manifest.html">CACHE Manifest</a></li>
+<li><a href="../../edited_content/pipeline/input-manifest.html">INPUT Manifest</a></li>
+</ul>
 
 
 </section>
@@ -1231,7 +732,7 @@ bsw001_pooled = bsw001 / 2   # same for all 500 bootstrap weights</code></pre>
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>Absent from Chronic — Statistical Analysis Replication | Marc-Andre Blanchette, Research Scientist</p>
+<p><em>Absent from Chronic</em> — Statistical Analysis Replication | Marc-Andre Blanchette, Research Scientist</p>
 </div>
     <div class="nav-footer-right">
       &nbsp;

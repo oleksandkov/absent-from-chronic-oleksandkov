@@ -110,7 +110,7 @@ read_chunk("analysis/eda-5/eda-5.R")
 #| label: declare-globals
 #| code-summary: Paths, LOP component map, constants
 #| echo: true
-#| results: show
+#| results: markup
 #| code-fold: true
 ```
 
@@ -119,7 +119,7 @@ read_chunk("analysis/eda-5/eda-5.R")
 #| code-summary: Load cchs_analytical.parquet
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 # Data Context
@@ -131,7 +131,7 @@ For complete data documentation, see the [Data Primer](../data-primer-1/data-pri
 #| code-summary: Tables used in this EDA
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -139,14 +139,14 @@ For complete data documentation, see the [Data Primer](../data-primer-1/data-pri
 #| code-summary: Representative individual — all LOP components visible
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
 #| label: data-context-distributions
 #| code-summary: Non-missing counts and raw prevalence per component
 #| echo: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -168,7 +168,7 @@ For complete data documentation, see the [Data Primer](../data-primer-1/data-pri
 #| code-summary: Compute zero / non-zero group counts and weighted shares
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -186,7 +186,7 @@ For complete data documentation, see the [Data Primer](../data-primer-1/data-pri
 #| code-summary: Restrict to ≥1-day group and assign shared day-range colour palette
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -204,7 +204,7 @@ For complete data documentation, see the [Data Primer](../data-primer-1/data-pri
 #| code-summary: Summarise ≥1-day group by day-range category
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -226,7 +226,7 @@ For complete data documentation, see the [Data Primer](../data-primer-1/data-pri
 #| code-summary: Compute weighted prevalence per reason
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -258,7 +258,7 @@ For complete data documentation, see the [Data Primer](../data-primer-1/data-pri
 #| code-summary: Weighted mean days per reason category
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -290,7 +290,7 @@ For complete data documentation, see the [Data Primer](../data-primer-1/data-pri
 #| code-summary: Compute per-respondent reason counts and pairwise co-occurrence matrix
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -326,7 +326,7 @@ This section characterises the outcome variable (`days_absent_total`) and its pr
 #| code-summary: Weighted prevalence per reason (full sample)
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -348,7 +348,7 @@ This section characterises the outcome variable (`days_absent_total`) and its pr
 #| code-summary: Filter non-zero total days; count by integer value
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -370,7 +370,7 @@ This section characterises the outcome variable (`days_absent_total`) and its pr
 #| code-summary: Faceted long-form data for total vs chronic comparison
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -392,7 +392,7 @@ This section characterises the outcome variable (`days_absent_total`) and its pr
 #| code-summary: Mean and median days per reason, restricted to reporters
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -414,7 +414,7 @@ This section characterises the outcome variable (`days_absent_total`) and its pr
 #| code-summary: Classify absent respondents into three chronic-role groups
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -436,7 +436,7 @@ This section characterises the outcome variable (`days_absent_total`) and its pr
 #| code-summary: Count each (total, chronic) day combination (both > 0)
 #| echo: true
 #| cache: true
-#| results: show
+#| results: markup
 ```
 
 ```{r}
@@ -455,7 +455,7 @@ This section characterises the outcome variable (`days_absent_total`) and its pr
 #| label: session-info
 #| code-summary: Reproducibility record
 #| echo: true
-#| results: show
+#| results: markup
 #| code-fold: true
 cat("Rendered:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
 sessionInfo()

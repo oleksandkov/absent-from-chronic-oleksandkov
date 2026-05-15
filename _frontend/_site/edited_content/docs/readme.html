@@ -91,14 +91,17 @@ ul.task-list li input[type="checkbox"] {
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
-  <li class="nav-item">
-    <a class="nav-link" href="../../edited_content/index.html"> 
-<span class="menu-text">Home</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-project" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Project</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-project">    
+        <li>
+    <a class="dropdown-item" href="../../edited_content/project/statistical-instructions.html">
+ <span class="dropdown-text">Statistical Instructions</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../edited_content/project/statistical-instructions.html"> 
-<span class="menu-text">Project</span></a>
-  </li>  
+    </ul>
+  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-pipeline" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">Pipeline</span>
@@ -147,19 +150,19 @@ ul.task-list li input[type="checkbox"] {
  <span class="dropdown-text">EDA-5</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-table-anatomy.html">
+    <a class="dropdown-item" href="../../edited_content/analysis/1-table-anatomy.html">
  <span class="dropdown-text">Binder-2: Table Anatomy</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-sociodemographic-fabric.html">
+    <a class="dropdown-item" href="../../edited_content/analysis/2-sociodemographic-fabric.html">
  <span class="dropdown-text">Binder-2: Sociodemographic Fabric</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-outcome-anatomy.html">
+    <a class="dropdown-item" href="../../edited_content/analysis/3-outcome-anatomy.html">
  <span class="dropdown-text">Binder-2: Outcome Anatomy</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-raw-to-analytical.html">
+    <a class="dropdown-item" href="../../edited_content/analysis/4-raw-to-analytical.html">
  <span class="dropdown-text">Binder-2: Raw to Analytical</span></a>
   </li>  
     </ul>
@@ -195,9 +198,12 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#about-this-project" id="toc-about-this-project" class="nav-link active" data-scroll-target="#about-this-project">About This Project</a>
+  <li><a href="#absent-from-chronic" id="toc-absent-from-chronic" class="nav-link active" data-scroll-target="#absent-from-chronic">Absent from Chronic</a>
   <ul class="collapse">
-  <li><a href="#where-to-find-the-data" id="toc-where-to-find-the-data" class="nav-link" data-scroll-target="#where-to-find-the-data">Where to find the data</a></li>
+  <li><a href="#about-this-project" id="toc-about-this-project" class="nav-link" data-scroll-target="#about-this-project">About This Project</a></li>
+  <li><a href="#data-locations-sanitized" id="toc-data-locations-sanitized" class="nav-link" data-scroll-target="#data-locations-sanitized">Data locations (sanitized)</a></li>
+  <li><a href="#authoring-systems-in-this-repository" id="toc-authoring-systems-in-this-repository" class="nav-link" data-scroll-target="#authoring-systems-in-this-repository">Authoring systems in this repository</a></li>
+  <li><a href="#website-navigation-context" id="toc-website-navigation-context" class="nav-link" data-scroll-target="#website-navigation-context">Website navigation context</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -224,56 +230,68 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="absent-from-chronic" class="level1">
+<h1>Absent from Chronic</h1>
+<p>Replication-focused statistical analysis project for work absenteeism using pooled CCHS cycles.</p>
 <section id="about-this-project" class="level2">
 <h2 class="anchored" data-anchor-id="about-this-project">About This Project</h2>
-<p><strong>Project</strong>: <code>absent-from-chronic</code> — Analysis of work absenteeism using the Canadian Community Health Survey (CCHS) PUMF microdata.</p>
-<p><strong>Goal</strong>: Understand how chronic health conditions relate to workplace absenteeism, using two pooled CCHS survey cycles (2010-2011 and 2013-2014).</p>
-<p><strong>Data source</strong>: CCHS PUMF (<code>.sav</code>) files stored in private data storage. These files are not committed to the repository. Contact the project lead to obtain them.</p>
-<section id="where-to-find-the-data" class="level3">
-<h3 class="anchored" data-anchor-id="where-to-find-the-data">Where to find the data</h3>
+<ul>
+<li><strong>Project</strong>: <code>absent-from-chronic</code></li>
+<li><strong>Goal</strong>: Analyze relationships between chronic conditions and work absenteeism using pooled CCHS 2010–2011 and 2013–2014 cycles.</li>
+<li><strong>Data source</strong>: CCHS PUMF SPSS files stored in private raw storage.</li>
+</ul>
+</section>
+<section id="data-locations-sanitized" class="level2">
+<h2 class="anchored" data-anchor-id="data-locations-sanitized">Data locations (sanitized)</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
 <thead>
 <tr class="header">
-<th>Location</th>
+<th>Layer</th>
 <th>Contents</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>private data storage</td>
-<td>Raw CCHS <code>.sav</code> files (CCHS2010_LOP.sav, CCHS_2014_EN_PUMF.sav)</td>
+<td>Raw</td>
+<td>Source CCHS <code>.sav</code> files for two pooled cycles</td>
 </tr>
 <tr class="even">
-<td>private data storage</td>
-<td>Ferry staging database (all raw columns)</td>
+<td>Ferry output</td>
+<td>Staging SQLite + raw Parquet backup</td>
 </tr>
 <tr class="odd">
-<td>private data storage</td>
-<td>Parquet backup of raw tables</td>
+<td>Ellis output</td>
+<td>Analysis-ready Parquet tables + SQLite</td>
 </tr>
 <tr class="even">
-<td>private data storage</td>
-<td>Ellis analysis-ready Parquet files (<code>cchs_analytical.parquet</code>, <code>sample_flow.parquet</code>)</td>
-</tr>
-<tr class="odd">
-<td>private data storage</td>
-<td>Ellis SQLite output (same data, factors as character)</td>
-</tr>
-<tr class="even">
-<td>private data storage</td>
-<td>Clarity-layer splits: <code>cchs_employed.parquet</code>, <code>cchs_unemployed.parquet</code>, <code>data_dictionary.parquet</code></td>
-</tr>
-<tr class="odd">
-<td>private data storage</td>
-<td>SQLite version of Lane 3 outputs</td>
+<td>Clarity layer</td>
+<td>Optional split tables and data dictionary artifacts</td>
 </tr>
 </tbody>
 </table>
-<p>See the CACHE Manifest page in the Pipeline section for detailed descriptions.</p>
+<p>Detailed dataset definitions and diagnostics are documented in the pipeline manifests:</p>
+<ul>
+<li><a href="../../edited_content/pipeline/cache-manifest.html">CACHE Manifest</a></li>
+<li><a href="../../edited_content/pipeline/input-manifest.html">INPUT Manifest</a></li>
+</ul>
+</section>
+<section id="authoring-systems-in-this-repository" class="level2">
+<h2 class="anchored" data-anchor-id="authoring-systems-in-this-repository">Authoring systems in this repository</h2>
+<ul>
+<li><strong>Publishing Orchestra</strong>: interviewer + writer workflow for frontend website assembly.</li>
+<li><strong>Composing Orchestra</strong>: report-composition system for analysis deliverables in <code>analysis/</code>.</li>
+</ul>
+</section>
+<section id="website-navigation-context" class="level2">
+<h2 class="anchored" data-anchor-id="website-navigation-context">Website navigation context</h2>
+<p>This frontend is structured for PI verification:</p>
+<ul>
+<li>Project instructions</li>
+<li>Pipeline documentation and manifests</li>
+<li>Data-primer references</li>
+<li>Analysis outputs</li>
+<li>Site meta documentation</li>
+</ul>
 
 
 </section>
@@ -687,7 +705,7 @@ ul.task-list li input[type="checkbox"] {
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>Absent from Chronic — Statistical Analysis Replication | Marc-Andre Blanchette, Research Scientist</p>
+<p><em>Absent from Chronic</em> — Statistical Analysis Replication | Marc-Andre Blanchette, Research Scientist</p>
 </div>
     <div class="nav-footer-right">
       &nbsp;

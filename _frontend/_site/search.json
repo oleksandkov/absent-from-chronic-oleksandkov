@@ -4,28 +4,28 @@
     "href": "edited_content/docs/site-map.html",
     "title": "Site Map",
     "section": "",
-    "text": "Type\nMeaning\n\n\n\n\nVERBATIM\nSource content copied with minimal formatting changes (frontmatter only)\n\n\nREDIRECTED\nTransit page that forwards to a standalone HTML report\n\n\nTECHNICAL BRIDGE\nSource document adapted for web readability and PI-focused context\n\n\nNARRATIVE BRIDGE\nAuthored synthesis page grounded in repository sources"
+    "text": "This site map is generated from _frontend-1/publishing-contract.prompt.md and maps each page to its publishing protocol and source."
   },
   {
     "objectID": "edited_content/docs/site-map.html#content-types",
     "href": "edited_content/docs/site-map.html#content-types",
     "title": "Site Map",
-    "section": "",
-    "text": "Type\nMeaning\n\n\n\n\nVERBATIM\nSource content copied with minimal formatting changes (frontmatter only)\n\n\nREDIRECTED\nTransit page that forwards to a standalone HTML report\n\n\nTECHNICAL BRIDGE\nSource document adapted for web readability and PI-focused context\n\n\nNARRATIVE BRIDGE\nAuthored synthesis page grounded in repository sources"
+    "section": "Content Types",
+    "text": "Content Types\n\n\n\n\n\n\n\nType\nMeaning\n\n\n\n\nVERBATIM\nDirect transfer of source content into .qmd with minimal wrapper/frontmatter work\n\n\nREDIRECTED\nTransit .qmd page that forwards to a copied standalone HTML report\n\n\nTECHNICAL BRIDGE\nSource-derived page with structural adaptation for web audience/context\n\n\nNARRATIVE BRIDGE\nNewly authored page synthesized from contract brief + raw sources"
   },
   {
     "objectID": "edited_content/docs/site-map.html#navigation-structure",
     "href": "edited_content/docs/site-map.html#navigation-structure",
     "title": "Site Map",
     "section": "Navigation Structure",
-    "text": "Navigation Structure\n\nHome\n\nindex — NARRATIVE BRIDGE ← README.md, data-public/metadata/CACHE-manifest.md\n\nProject\n\nStatistical Instructions — TECHNICAL BRIDGE ← data-private/raw/2026-02-19/stats_instructions_v3.md\n\nPipeline\n\nPipeline Guide — TECHNICAL BRIDGE ← manipulation/pipeline.md\nCACHE Manifest — VERBATIM ← data-public/metadata/CACHE-manifest.md\nINPUT Manifest — VERBATIM ← data-public/metadata/INPUT-manifest.md\n\nData Primer\n\nVariable Inclusion — VERBATIM ← analysis/data-primer-1/variable-inclusion.qmd\nUnivariate Distributions — REDIRECTED → analysis/data-primer-1/univariate-distributions.html\n\nAnalysis\n\nEDA-2 — REDIRECTED → analysis/eda-2/eda-2.html\nEDA-5 — REDIRECTED → analysis/eda-5/eda-5.html\nBinder-2: Table Anatomy — REDIRECTED → analysis/binder-2/1-table-anatomy.html\nBinder-2: Sociodemographic Fabric — REDIRECTED → analysis/binder-2/2-sociodemographic-fabric.html\nBinder-2: Outcome Anatomy — REDIRECTED → analysis/binder-2/3-outcome-anatomy.html\nBinder-2: Raw to Analytical — REDIRECTED → analysis/binder-2/4-raw-to-analytical.html\n\nDocs\n\nREADME — TECHNICAL BRIDGE ← README.md\nSite Map — NARRATIVE BRIDGE ← contract navigation structure"
+    "text": "Navigation Structure\nAbsent from Chronic — Research Documentation\n│\n├── 🏠 Index                                NARRATIVE BRIDGE  ← README.md + CACHE-manifest.md + eda-5 print\n│\n├── Project\n│   └── Statistical Instructions            TECHNICAL BRIDGE  ← data-private/raw/2026-02-19/stats_instructions_v3.md\n│\n├── Pipeline\n│   ├── Pipeline Guide                      TECHNICAL BRIDGE  ← manipulation/pipeline.md\n│   ├── CACHE Manifest                      VERBATIM          ← data-public/metadata/CACHE-manifest.md\n│   └── INPUT Manifest                      VERBATIM          ← data-public/metadata/INPUT-manifest.md\n│\n├── Data Primer\n│   ├── Variable Inclusion                  VERBATIM          ← analysis/data-primer-1/variable-inclusion.qmd\n│   └── Univariate Distributions            REDIRECTED        → analysis/data-primer-1/univariate-distributions.html\n│\n├── Analysis\n│   ├── EDA-2                               REDIRECTED        → analysis/eda-2/eda-2.html\n│   ├── EDA-5                               REDIRECTED        → analysis/eda-5/eda-5.html (fallback used)\n│   ├── Binder-2: Table Anatomy             REDIRECTED        → analysis/binder-2/1-table-anatomy.html\n│   ├── Binder-2: Sociodemographic Fabric   REDIRECTED        → analysis/binder-2/2-sociodemographic-fabric.html\n│   ├── Binder-2: Outcome Anatomy           REDIRECTED        → analysis/binder-2/3-outcome-anatomy.html\n│   └── Binder-2: Raw to Analytical         REDIRECTED        → analysis/binder-2/4-raw-to-analytical.html\n│\n└── Docs\n    ├── README                              TECHNICAL BRIDGE  ← README.md\n    └── Site Map                            NARRATIVE BRIDGE  ← publishing contract"
   },
   {
-    "objectID": "edited_content/docs/site-map.html#stats-instructions-coverage",
-    "href": "edited_content/docs/site-map.html#stats-instructions-coverage",
+    "objectID": "edited_content/docs/site-map.html#stats-instructions-coverage-notes",
+    "href": "edited_content/docs/site-map.html#stats-instructions-coverage-notes",
     "title": "Site Map",
-    "section": "Stats Instructions Coverage",
-    "text": "Stats Instructions Coverage\n\n§2.2 variable requirements map to Data Primer → Variable Inclusion.\n§3 sample construction and pooling map to Pipeline Guide and binder/EDA pages.\n§4 descriptive outcome diagnostics map to Analysis (EDA-2, EDA-5)."
+    "section": "Stats instructions coverage notes",
+    "text": "Stats instructions coverage notes\n\n§2.2 variable selection traceability: Data Primer → Variable Inclusion.\n§3 sample and data-structure context: Pipeline + CACHE Manifest.\n§4–§5 distribution and exploratory diagnostics: Analysis pages (EDA/Binder outputs)."
   },
   {
     "objectID": "edited_content/pipeline/input-manifest.html",
@@ -74,112 +74,56 @@
     "href": "edited_content/pipeline/pipeline-guide.html",
     "title": "Pipeline Guide",
     "section": "",
-    "text": "Execution guide for the CCHS work-absenteeism data pipeline.\n\n\n\nCCHS .sav files (private data storage)\n         │\n         ▼  1-ferry.R   ← zero semantic transformation\n  cchs-1.sqlite + cchs-1-raw/*.parquet   (staging)\n         │\n         ▼  2-ellis.R   ← white-list + harmonize + recode\n  cchs-2.sqlite + cchs-2-tables/*.parquet   (analysis-ready)\n         │\n         ▼  2-test-ellis-cache.R   ← alignment verification\n  console report (pass/fail)\n\n\n\n\n\n\n\n\n\n\n\n\n\n#\nFile\nPattern\nOutput\n\n\n\n\n1\nmanipulation/1-ferry.R\nFerry\nprivate data storage + cchs-1-raw/ Parquet backup\n\n\n2\nmanipulation/2-ellis.R\nEllis\nprivate data storage + cchs-2-tables/ Parquet\n\n\n3\nmanipulation/2-test-ellis-cache.R\nTest\nConsole test report (three-way alignment check)\n\n\n—\nmanipulation/example/ferry-lane-example.R\nExample\ncchs-1.sqlite (demo only; does not affect main pipeline)\n\n\n—\nmanipulation/example/ellis-lane-example.R\nExample\ncchs-2.sqlite (demo only; does not affect main pipeline)\n\n\n\nA third Ellis lane produced additional derived outputs; documentation is in the CACHE Manifest.\n\n\n\n\n\n1-ferry.R is a pure transport script. Its sole job is to move raw CCHS PUMF microdata from SPSS (.sav) format into a local SQLite staging database, with a Parquet backup alongside. It does nothing analytical: no variable selection, no recoding, no filtering, no renaming beyond mechanical snake_case sanitization. The guiding discipline is that every decision about what the data means is deferred to the Ellis lane; Ferry only answers the question “how do we get the data off disk into a queryable form?”.\nTwo CCHS cycles are handled in one script:\n\n\n\nCycle\nSource file\nSQLite table\n\n\n\n\n2010–2011\nCCHS2010_LOP.sav\ncchs_2010_raw\n\n\n2013–2014\nCCHS_2014_EN_PUMF.sav\ncchs_2014_raw\n\n\n\nIf the 2014 file is absent, the script continues with a zero-row placeholder (same schema as 2010) so that downstream scripts can still be developed and tested against a structurally complete database.\nPermitted operations\n\n\n\n\n\n\n\n\nOperation\nTool\nReason permitted\n\n\n\n\nRead SPSS\nhaven::read_sav()\nIngestion only\n\n\nStrip value/variable labels\nhaven::zap_labels() / haven::zap_label()\nSQLite cannot store SPSS label attributes\n\n\nSanitize column names\njanitor::clean_names()\nMechanical normalization, no meaning change\n\n\nWrite SQLite\nDBI::dbWriteTable()\nPrimary staging output\n\n\nWrite Parquet\narrow::write_parquet()\nBackup / fast-read fallback\n\n\n\nForbidden operations (all deferred to Ellis)\n\nVariable selection / white-listing\nRenaming beyond clean_names normalization\nFactor or value recoding\nSample exclusions or filtering\nDerived variable construction\n\n\n\n\n\n\n\n\n\nRuns ferry → ellis → all downstream analyses in sequence.\n\n\n\n\n\n\nUse the tasks defined in .vscode/tasks.json: - Run Ferry Lane 1 — Rscript manipulation/1-ferry.R - Run Ellis Lane 2 — Rscript manipulation/2-ellis.R - Test Ellis ↔︎ CACHE-Manifest Alignment — Rscript manipulation/2-test-ellis-cache.R\n\n\n\nThe interactive runner asks three questions before launching flow.R:\nQ1 — Ellis mode (run-as-is / default / strict): controls three pipeline flags in 2-ellis.R (strict_cycle_integrity, apply_sample_exclusions, apply_completeness_exclusion).\nQ2 — EDA selection: dynamically scans analysis/ for folders that contain both an .R file and a .qmd file, and lets you choose which EDAs to activate (uncomment) in flow.R. Selecting None (0) comments out all active EDA lines in flow.R so they will be skipped.\nQ3 — Run mode: apply all changes and launch, or run flow.R as-is.\n\n\n\n\n\n\n\n\nFile\nLocation\nCycle\n\n\n\n\nCCHS2010_LOP.sav\nprivate data storage\n2010–2011\n\n\nCCHS_2014_EN_PUMF.sav\nprivate data storage\n2013–2014\n\n\n\nPaths are configured in config.yml under raw_data.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nArtifact\nLocation\nDescription\n\n\n\n\ncchs-1.sqlite\nprivate data storage\nRaw tables: cchs_2010_raw, cchs_2014_raw\n\n\ncchs-1-raw/*.parquet\nprivate data storage\nParquet backups of raw tables\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nArtifact\nLocation\nFormat\nDescription\n\n\n\n\ncchs_analytical.parquet\nprivate data storage\nParquet\nMain analysis dataset (apply_sample_exclusions = TRUE by default; 63,843 rows, 62 cols)\n\n\nsample_flow.parquet\nprivate data storage\nParquet\nExclusion audit trail (5 rows)\n\n\ncchs-2.sqlite\nprivate data storage\nSQLite\nSame tables as Parquet (factors as character)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nArtifact\nLocation\nFormat\nDescription\n\n\n\n\ncchs_analytical.parquet\nprivate data storage\nParquet\nFull pooled sample (mirrors Lane 2)\n\n\ncchs_employed.parquet\nprivate data storage\nParquet\nEmployed-respondent split\n\n\ncchs_unemployed.parquet\nprivate data storage\nParquet\nNon-employed-respondent split\n\n\ndata_dictionary.parquet\nprivate data storage\nParquet\nVariable-level metadata / data dictionary\n\n\nsample_flow.parquet\nprivate data storage\nParquet\nExclusion audit trail\n\n\ncchs-3.sqlite\nprivate data storage\nSQLite\nSame tables as above (factors as character)\n\n\n\n\n\n\n\n\nThree boolean flags in 2-ellis.R → # ---- declare-globals control key pipeline behaviours. They can also be managed via the interactive runner (scripts/ps1/run-interactive-flow.ps1).\n\n\n\n\n\n\n\n\nFlag\nDefault\nEffect\n\n\n\n\nstrict_cycle_integrity\nFALSE\nIf TRUE, stop with an error when either CCHS cycle loads as empty; otherwise emit a warning and continue with available cycles.\n\n\napply_sample_exclusions\nTRUE\nIf TRUE, apply §3.1 inclusion criteria (age 15–75, employed in past 3 months, non-proxy, non-missing outcome). If FALSE, retain full pooled sample (~126,431).\n\n\napply_completeness_exclusion\nFALSE\nIf TRUE, additionally drop any respondent with NA on any CCC indicator or key predictor. If FALSE, handle missing data downstream (e.g., multiple imputation).\n\n\n\n\n\n\n\nEllis uses a two-tier white-list to select only variables needed for the analysis. This keeps the analysis-ready dataset focused and avoids processing ~1,400 irrelevant columns.\n\n\n13 variables verified against PDF data dictionaries. If any are absent, Ellis fails loudly. See vars_confirmed in 2-ellis.R → declare-globals section.\n\n\n\n~48 variables inferred from standard CCHS PUMF naming conventions. If any are absent, Ellis logs a warning with a list of missing names and drops them. Analysis continues. Bootstrap weights (bsw001–bsw500) are pattern-matched separately.\n\n\n\n\n\n\n\n\nCategory\nExample variables\nCount\n\n\n\n\nCCC module (chronic conditions)\nccc_031, ccc_041, ccc_051, … ccc_290 (+ ccc_300, ccc_185 absent from PUMF)\n19 (17 found)\n\n\nPredisposing\ndhh_sex, dhhgms, edudh04, dhhdglvg, dhhdfc5, dhhdfc11, dhhdfc12p, sdcdgstud, …\n11 (7 found)\n\n\nFacilitating\nincdghh, geodgprv, hcu_1aa, lbfdghp, gen_07, alcdgtyp, hwtdgbmi, noc_31, …\n12 (9 found)\n\n\nNeeds\ngen_01, gen_02a, gen_09, rac_1, inj_01\n5\n\n\nIdentifiers\nadm_rno\n1\n\n\nBootstrap weights\nbsw001–bsw500 (pattern ^bsw)\n500\n\n\n\nTo update the white-list: 1. Open manipulation/2-ellis.R 2. Navigate to # ---- declare-globals 3. Modify vars_confirmed or the relevant vars_inferred_* vector 4. Re-run Ellis and the test script\n\n\n\n\n\n2-ellis.R applies §3.1 exclusion criteria by default (apply_sample_exclusions = TRUE). Full pooled sample mode (no exclusions) is available by setting apply_sample_exclusions = FALSE.\n\n\n\nStep\nCriterion\nExpected % retained\n\n\n\n\n1\nRaw CCHS stacked sample\n100%\n\n\n2\nAge 15–75 (dhhgage %in% 2:15)\n~89%\n\n\n3\nCurrently employed (lop_015 == 1)\n~51%\n\n\n4\nNon-proxy respondent (adm_prx != 1)\n~51%\n\n\n5\nComplete outcome (any LOP var non-missing)\n~50.5%\n\n\n\nReference final sample: - Default mode (apply_sample_exclusions = TRUE): 63,843 - Full pooled mode (apply_sample_exclusions = FALSE): 126,431\n\n\n\n\nTwo CCHS cycles are pooled into a single dataset. Per Statistics Canada guidelines:\nwts_m_pooled = wts_m / 2     # for each respondent\nbsw001_pooled = bsw001 / 2   # same for all 500 bootstrap weights\nwts_m_original is kept alongside wts_m_pooled for verification.\n\n\n\n\nAfter running 2-ellis.R, verify these values match expectations:\n\n\n\n\n\n\n\nDiagnostic\nReference\n\n\n\n\nFinal sample size (default — exclusions applied)\n63,843\n\n\nFinal sample size (full pooled — no exclusions)\n126,431\n\n\nWeighted mean days_absent_total\n≈ 1.25\n\n\n% zeros in days_absent_total\n≈ 70.5%\n\n\nVariance of days_absent_total\n≈ 15.4\n\n\nWhite-list misses (INFERRED tier)\n10 in current PUMF files (see Known Limitations in CACHE-manifest)\n\n\n\n\n\n\n\n“Variable X not found” (confirmed tier)\n→ The variable was renamed in this cycle’s PUMF. Check the PDF data dictionary and add a harmonization step in 2-ellis.R under # ---- SECTION 1 / harmonize.\nWhite-list inferred warnings\n→ Some CCHS predictor variables may have slightly different names (e.g., GEN_02 vs GEN_02A). Open the data dictionary for that module and update vars_inferred_* in 2-ellis.R → declare-globals.\nDHHGAGE codes outside 2–15 seen in data\n→ Verify age category coding against the PDF data dictionary for each cycle. Adjust dhhgage %in% 2:15 in tweak-data-2-exclusions accordingly.\nSQLite and Parquet row counts don’t match\n→ Run manipulation/2-test-ellis-cache.R — it will identify the parity failure specifically. Re-run 2-ellis.R to regenerate both outputs atomically.\n\n\n\n\n\n\n\n\n\n\n\nFile\nContents\n\n\n\n\ndata-public/metadata/INPUT-manifest.md\nRaw source file descriptions\n\n\ndata-public/metadata/CACHE-manifest.md\nAnalysis-ready dataset descriptions (manually maintained)\n\n\ndata-public/metadata/cchs-3-column-dictionary-uk.md\nLane 3 column dictionary (Ukrainian)\n\n\nmanipulation/pipeline.md\nThis file\n\n\n\n\nLast updated: 2026-03-20 (post Ellis revision — 62-column, 63,843-row output)"
+    "text": "Execution guide for the CCHS work-absenteeism data pipeline.\n\n\nCCHS .sav files (private raw storage)\n         │\n         ▼  1-ferry.R   ← zero semantic transformation\n  cchs-1.sqlite + raw parquet backup   (staging)\n         │\n         ▼  2-ellis.R   ← white-list + harmonize + recode\n  cchs-2.sqlite + analysis-ready parquet tables\n         │\n         ▼  2-test-ellis-cache.R   ← alignment verification\n  console report (pass/fail)\n\n\n\n\n\n\n\n\n\n\n\n\n#\nFile\nPattern\nOutput\n\n\n\n\n1\nmanipulation/1-ferry.R\nFerry\nStaging SQLite + raw Parquet backup\n\n\n2\nmanipulation/2-ellis.R\nEllis\nAnalysis-ready SQLite + Parquet tables\n\n\n3\nmanipulation/2-test-ellis-cache.R\nTest\nConsole test report (three-way alignment check)\n\n\n—\nmanipulation/example/ferry-lane-example.R\nExample\nDemo staging output\n\n\n—\nmanipulation/example/ellis-lane-example.R\nExample\nDemo analysis-ready output\n\n\n\n\nA third Ellis lane produced additional derived outputs; documentation is in the CACHE Manifest.\n\n\n\n\n1-ferry.R is a transport script. It ingests source SPSS files and writes staging artifacts with no analytical recoding.\nPermitted operations include:\n\nSPSS ingestion\nLabel stripping for storage compatibility\nMechanical column name normalization\nSQLite/Parquet writing\n\n\n\n\n2-ellis.R applies white-listing, harmonization, recoding, and sample-construction logic to produce analysis-ready tables.\nKey diagnostics and interpretation guidance are documented in:\n\nCACHE Manifest\nINPUT Manifest"
   },
   {
     "objectID": "edited_content/pipeline/pipeline-guide.html#overview",
     "href": "edited_content/pipeline/pipeline-guide.html#overview",
     "title": "Pipeline Guide",
     "section": "",
-    "text": "CCHS .sav files (private data storage)\n         │\n         ▼  1-ferry.R   ← zero semantic transformation\n  cchs-1.sqlite + cchs-1-raw/*.parquet   (staging)\n         │\n         ▼  2-ellis.R   ← white-list + harmonize + recode\n  cchs-2.sqlite + cchs-2-tables/*.parquet   (analysis-ready)\n         │\n         ▼  2-test-ellis-cache.R   ← alignment verification\n  console report (pass/fail)"
+    "text": "CCHS .sav files (private raw storage)\n         │\n         ▼  1-ferry.R   ← zero semantic transformation\n  cchs-1.sqlite + raw parquet backup   (staging)\n         │\n         ▼  2-ellis.R   ← white-list + harmonize + recode\n  cchs-2.sqlite + analysis-ready parquet tables\n         │\n         ▼  2-test-ellis-cache.R   ← alignment verification\n  console report (pass/fail)"
   },
   {
     "objectID": "edited_content/pipeline/pipeline-guide.html#scripts",
     "href": "edited_content/pipeline/pipeline-guide.html#scripts",
     "title": "Pipeline Guide",
     "section": "",
-    "text": "#\nFile\nPattern\nOutput\n\n\n\n\n1\nmanipulation/1-ferry.R\nFerry\nprivate data storage + cchs-1-raw/ Parquet backup\n\n\n2\nmanipulation/2-ellis.R\nEllis\nprivate data storage + cchs-2-tables/ Parquet\n\n\n3\nmanipulation/2-test-ellis-cache.R\nTest\nConsole test report (three-way alignment check)\n\n\n—\nmanipulation/example/ferry-lane-example.R\nExample\ncchs-1.sqlite (demo only; does not affect main pipeline)\n\n\n—\nmanipulation/example/ellis-lane-example.R\nExample\ncchs-2.sqlite (demo only; does not affect main pipeline)\n\n\n\nA third Ellis lane produced additional derived outputs; documentation is in the CACHE Manifest."
+    "text": "#\nFile\nPattern\nOutput\n\n\n\n\n1\nmanipulation/1-ferry.R\nFerry\nStaging SQLite + raw Parquet backup\n\n\n2\nmanipulation/2-ellis.R\nEllis\nAnalysis-ready SQLite + Parquet tables\n\n\n3\nmanipulation/2-test-ellis-cache.R\nTest\nConsole test report (three-way alignment check)\n\n\n—\nmanipulation/example/ferry-lane-example.R\nExample\nDemo staging output\n\n\n—\nmanipulation/example/ellis-lane-example.R\nExample\nDemo analysis-ready output\n\n\n\n\nA third Ellis lane produced additional derived outputs; documentation is in the CACHE Manifest."
   },
   {
-    "objectID": "edited_content/pipeline/pipeline-guide.html#ferry",
-    "href": "edited_content/pipeline/pipeline-guide.html#ferry",
+    "objectID": "edited_content/pipeline/pipeline-guide.html#ferry-lane-summary",
+    "href": "edited_content/pipeline/pipeline-guide.html#ferry-lane-summary",
     "title": "Pipeline Guide",
     "section": "",
-    "text": "1-ferry.R is a pure transport script. Its sole job is to move raw CCHS PUMF microdata from SPSS (.sav) format into a local SQLite staging database, with a Parquet backup alongside. It does nothing analytical: no variable selection, no recoding, no filtering, no renaming beyond mechanical snake_case sanitization. The guiding discipline is that every decision about what the data means is deferred to the Ellis lane; Ferry only answers the question “how do we get the data off disk into a queryable form?”.\nTwo CCHS cycles are handled in one script:\n\n\n\nCycle\nSource file\nSQLite table\n\n\n\n\n2010–2011\nCCHS2010_LOP.sav\ncchs_2010_raw\n\n\n2013–2014\nCCHS_2014_EN_PUMF.sav\ncchs_2014_raw\n\n\n\nIf the 2014 file is absent, the script continues with a zero-row placeholder (same schema as 2010) so that downstream scripts can still be developed and tested against a structurally complete database.\nPermitted operations\n\n\n\n\n\n\n\n\nOperation\nTool\nReason permitted\n\n\n\n\nRead SPSS\nhaven::read_sav()\nIngestion only\n\n\nStrip value/variable labels\nhaven::zap_labels() / haven::zap_label()\nSQLite cannot store SPSS label attributes\n\n\nSanitize column names\njanitor::clean_names()\nMechanical normalization, no meaning change\n\n\nWrite SQLite\nDBI::dbWriteTable()\nPrimary staging output\n\n\nWrite Parquet\narrow::write_parquet()\nBackup / fast-read fallback\n\n\n\nForbidden operations (all deferred to Ellis)\n\nVariable selection / white-listing\nRenaming beyond clean_names normalization\nFactor or value recoding\nSample exclusions or filtering\nDerived variable construction"
+    "text": "1-ferry.R is a transport script. It ingests source SPSS files and writes staging artifacts with no analytical recoding.\nPermitted operations include:\n\nSPSS ingestion\nLabel stripping for storage compatibility\nMechanical column name normalization\nSQLite/Parquet writing"
   },
   {
-    "objectID": "edited_content/pipeline/pipeline-guide.html#running-the-pipeline",
-    "href": "edited_content/pipeline/pipeline-guide.html#running-the-pipeline",
+    "objectID": "edited_content/pipeline/pipeline-guide.html#ellis-lane-summary",
+    "href": "edited_content/pipeline/pipeline-guide.html#ellis-lane-summary",
     "title": "Pipeline Guide",
     "section": "",
-    "text": "Runs ferry → ellis → all downstream analyses in sequence.\n\n\n\n\n\n\nUse the tasks defined in .vscode/tasks.json: - Run Ferry Lane 1 — Rscript manipulation/1-ferry.R - Run Ellis Lane 2 — Rscript manipulation/2-ellis.R - Test Ellis ↔︎ CACHE-Manifest Alignment — Rscript manipulation/2-test-ellis-cache.R\n\n\n\nThe interactive runner asks three questions before launching flow.R:\nQ1 — Ellis mode (run-as-is / default / strict): controls three pipeline flags in 2-ellis.R (strict_cycle_integrity, apply_sample_exclusions, apply_completeness_exclusion).\nQ2 — EDA selection: dynamically scans analysis/ for folders that contain both an .R file and a .qmd file, and lets you choose which EDAs to activate (uncomment) in flow.R. Selecting None (0) comments out all active EDA lines in flow.R so they will be skipped.\nQ3 — Run mode: apply all changes and launch, or run flow.R as-is."
-  },
-  {
-    "objectID": "edited_content/pipeline/pipeline-guide.html#inputs",
-    "href": "edited_content/pipeline/pipeline-guide.html#inputs",
-    "title": "Pipeline Guide",
-    "section": "",
-    "text": "File\nLocation\nCycle\n\n\n\n\nCCHS2010_LOP.sav\nprivate data storage\n2010–2011\n\n\nCCHS_2014_EN_PUMF.sav\nprivate data storage\n2013–2014\n\n\n\nPaths are configured in config.yml under raw_data."
-  },
-  {
-    "objectID": "edited_content/pipeline/pipeline-guide.html#outputs",
-    "href": "edited_content/pipeline/pipeline-guide.html#outputs",
-    "title": "Pipeline Guide",
-    "section": "",
-    "text": "Artifact\nLocation\nDescription\n\n\n\n\ncchs-1.sqlite\nprivate data storage\nRaw tables: cchs_2010_raw, cchs_2014_raw\n\n\ncchs-1-raw/*.parquet\nprivate data storage\nParquet backups of raw tables\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nArtifact\nLocation\nFormat\nDescription\n\n\n\n\ncchs_analytical.parquet\nprivate data storage\nParquet\nMain analysis dataset (apply_sample_exclusions = TRUE by default; 63,843 rows, 62 cols)\n\n\nsample_flow.parquet\nprivate data storage\nParquet\nExclusion audit trail (5 rows)\n\n\ncchs-2.sqlite\nprivate data storage\nSQLite\nSame tables as Parquet (factors as character)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nArtifact\nLocation\nFormat\nDescription\n\n\n\n\ncchs_analytical.parquet\nprivate data storage\nParquet\nFull pooled sample (mirrors Lane 2)\n\n\ncchs_employed.parquet\nprivate data storage\nParquet\nEmployed-respondent split\n\n\ncchs_unemployed.parquet\nprivate data storage\nParquet\nNon-employed-respondent split\n\n\ndata_dictionary.parquet\nprivate data storage\nParquet\nVariable-level metadata / data dictionary\n\n\nsample_flow.parquet\nprivate data storage\nParquet\nExclusion audit trail\n\n\ncchs-3.sqlite\nprivate data storage\nSQLite\nSame tables as above (factors as character)"
-  },
-  {
-    "objectID": "edited_content/pipeline/pipeline-guide.html#pipeline-flags",
-    "href": "edited_content/pipeline/pipeline-guide.html#pipeline-flags",
-    "title": "Pipeline Guide",
-    "section": "",
-    "text": "Three boolean flags in 2-ellis.R → # ---- declare-globals control key pipeline behaviours. They can also be managed via the interactive runner (scripts/ps1/run-interactive-flow.ps1).\n\n\n\n\n\n\n\n\nFlag\nDefault\nEffect\n\n\n\n\nstrict_cycle_integrity\nFALSE\nIf TRUE, stop with an error when either CCHS cycle loads as empty; otherwise emit a warning and continue with available cycles.\n\n\napply_sample_exclusions\nTRUE\nIf TRUE, apply §3.1 inclusion criteria (age 15–75, employed in past 3 months, non-proxy, non-missing outcome). If FALSE, retain full pooled sample (~126,431).\n\n\napply_completeness_exclusion\nFALSE\nIf TRUE, additionally drop any respondent with NA on any CCC indicator or key predictor. If FALSE, handle missing data downstream (e.g., multiple imputation)."
-  },
-  {
-    "objectID": "edited_content/pipeline/pipeline-guide.html#white-list-design",
-    "href": "edited_content/pipeline/pipeline-guide.html#white-list-design",
-    "title": "Pipeline Guide",
-    "section": "",
-    "text": "Ellis uses a two-tier white-list to select only variables needed for the analysis. This keeps the analysis-ready dataset focused and avoids processing ~1,400 irrelevant columns.\n\n\n13 variables verified against PDF data dictionaries. If any are absent, Ellis fails loudly. See vars_confirmed in 2-ellis.R → declare-globals section.\n\n\n\n~48 variables inferred from standard CCHS PUMF naming conventions. If any are absent, Ellis logs a warning with a list of missing names and drops them. Analysis continues. Bootstrap weights (bsw001–bsw500) are pattern-matched separately.\n\n\n\n\n\n\n\n\nCategory\nExample variables\nCount\n\n\n\n\nCCC module (chronic conditions)\nccc_031, ccc_041, ccc_051, … ccc_290 (+ ccc_300, ccc_185 absent from PUMF)\n19 (17 found)\n\n\nPredisposing\ndhh_sex, dhhgms, edudh04, dhhdglvg, dhhdfc5, dhhdfc11, dhhdfc12p, sdcdgstud, …\n11 (7 found)\n\n\nFacilitating\nincdghh, geodgprv, hcu_1aa, lbfdghp, gen_07, alcdgtyp, hwtdgbmi, noc_31, …\n12 (9 found)\n\n\nNeeds\ngen_01, gen_02a, gen_09, rac_1, inj_01\n5\n\n\nIdentifiers\nadm_rno\n1\n\n\nBootstrap weights\nbsw001–bsw500 (pattern ^bsw)\n500\n\n\n\nTo update the white-list: 1. Open manipulation/2-ellis.R 2. Navigate to # ---- declare-globals 3. Modify vars_confirmed or the relevant vars_inferred_* vector 4. Re-run Ellis and the test script"
-  },
-  {
-    "objectID": "edited_content/pipeline/pipeline-guide.html#exclusion-criteria-sample_flow",
-    "href": "edited_content/pipeline/pipeline-guide.html#exclusion-criteria-sample_flow",
-    "title": "Pipeline Guide",
-    "section": "",
-    "text": "2-ellis.R applies §3.1 exclusion criteria by default (apply_sample_exclusions = TRUE). Full pooled sample mode (no exclusions) is available by setting apply_sample_exclusions = FALSE.\n\n\n\nStep\nCriterion\nExpected % retained\n\n\n\n\n1\nRaw CCHS stacked sample\n100%\n\n\n2\nAge 15–75 (dhhgage %in% 2:15)\n~89%\n\n\n3\nCurrently employed (lop_015 == 1)\n~51%\n\n\n4\nNon-proxy respondent (adm_prx != 1)\n~51%\n\n\n5\nComplete outcome (any LOP var non-missing)\n~50.5%\n\n\n\nReference final sample: - Default mode (apply_sample_exclusions = TRUE): 63,843 - Full pooled mode (apply_sample_exclusions = FALSE): 126,431"
-  },
-  {
-    "objectID": "edited_content/pipeline/pipeline-guide.html#survey-weight-pooling",
-    "href": "edited_content/pipeline/pipeline-guide.html#survey-weight-pooling",
-    "title": "Pipeline Guide",
-    "section": "",
-    "text": "Two CCHS cycles are pooled into a single dataset. Per Statistics Canada guidelines:\nwts_m_pooled = wts_m / 2     # for each respondent\nbsw001_pooled = bsw001 / 2   # same for all 500 bootstrap weights\nwts_m_original is kept alongside wts_m_pooled for verification."
-  },
-  {
-    "objectID": "edited_content/pipeline/pipeline-guide.html#diagnostic-checkpoints",
-    "href": "edited_content/pipeline/pipeline-guide.html#diagnostic-checkpoints",
-    "title": "Pipeline Guide",
-    "section": "",
-    "text": "After running 2-ellis.R, verify these values match expectations:\n\n\n\n\n\n\n\nDiagnostic\nReference\n\n\n\n\nFinal sample size (default — exclusions applied)\n63,843\n\n\nFinal sample size (full pooled — no exclusions)\n126,431\n\n\nWeighted mean days_absent_total\n≈ 1.25\n\n\n% zeros in days_absent_total\n≈ 70.5%\n\n\nVariance of days_absent_total\n≈ 15.4\n\n\nWhite-list misses (INFERRED tier)\n10 in current PUMF files (see Known Limitations in CACHE-manifest)"
-  },
-  {
-    "objectID": "edited_content/pipeline/pipeline-guide.html#troubleshooting",
-    "href": "edited_content/pipeline/pipeline-guide.html#troubleshooting",
-    "title": "Pipeline Guide",
-    "section": "",
-    "text": "“Variable X not found” (confirmed tier)\n→ The variable was renamed in this cycle’s PUMF. Check the PDF data dictionary and add a harmonization step in 2-ellis.R under # ---- SECTION 1 / harmonize.\nWhite-list inferred warnings\n→ Some CCHS predictor variables may have slightly different names (e.g., GEN_02 vs GEN_02A). Open the data dictionary for that module and update vars_inferred_* in 2-ellis.R → declare-globals.\nDHHGAGE codes outside 2–15 seen in data\n→ Verify age category coding against the PDF data dictionary for each cycle. Adjust dhhgage %in% 2:15 in tweak-data-2-exclusions accordingly.\nSQLite and Parquet row counts don’t match\n→ Run manipulation/2-test-ellis-cache.R — it will identify the parity failure specifically. Re-run 2-ellis.R to regenerate both outputs atomically."
-  },
-  {
-    "objectID": "edited_content/pipeline/pipeline-guide.html#data-documentation",
-    "href": "edited_content/pipeline/pipeline-guide.html#data-documentation",
-    "title": "Pipeline Guide",
-    "section": "",
-    "text": "File\nContents\n\n\n\n\ndata-public/metadata/INPUT-manifest.md\nRaw source file descriptions\n\n\ndata-public/metadata/CACHE-manifest.md\nAnalysis-ready dataset descriptions (manually maintained)\n\n\ndata-public/metadata/cchs-3-column-dictionary-uk.md\nLane 3 column dictionary (Ukrainian)\n\n\nmanipulation/pipeline.md\nThis file\n\n\n\n\nLast updated: 2026-03-20 (post Ellis revision — 62-column, 63,843-row output)"
+    "text": "2-ellis.R applies white-listing, harmonization, recoding, and sample-construction logic to produce analysis-ready tables.\nKey diagnostics and interpretation guidance are documented in:\n\nCACHE Manifest\nINPUT Manifest"
   },
   {
     "objectID": "edited_content/index.html",
     "href": "edited_content/index.html",
     "title": "Absent from Chronic — Research Documentation",
     "section": "",
-    "text": "This site documents the statistical analysis workflow for Predictors of Work Absenteeism Associated with Chronic Conditions Among Canadian Workers.\nHero figure unavailable: analysis/eda-5/prints/g01_lop_days_histogram.png was not found at build time.\nThe documentation is organized as a verification path from statistical instructions to implemented analysis artifacts. It is intended for direct review by the principal investigator.\nThe analytical dataset currently documented in the CACHE Manifest contains 63,843 rows and 62 columns, pooling two CCHS cycles (2010–2011 and 2013–2014).\nSource grounding: README.md; data-public/metadata/CACHE-manifest.md."
+    "text": "LOP days absent distribution across the analytical sample. Source: analysis/eda-5/prints/g01_lop_days_histogram.png.\nThis site documents the statistical analysis workflow for the study on predictors of work absenteeism among Canadian workers with chronic conditions. The intent and framing come from README.md, while dataset scope and structure are grounded in data-public/metadata/CACHE-manifest.md.\nThe analytical core reported here is based on a pooled CCHS dataset with 63,843 rows and 62 columns (as documented in data-public/metadata/CACHE-manifest.md). The site is organized to let the principal investigator verify requirement coverage from protocol to output."
   },
   {
     "objectID": "edited_content/index.html#how-to-use-this-site",
     "href": "edited_content/index.html#how-to-use-this-site",
     "title": "Absent from Chronic — Research Documentation",
     "section": "How to use this site",
-    "text": "How to use this site\n\nProject: the original statistical instructions that define required outputs.\nPipeline: the transport-and-transformation documentation, plus manifest references.\nData Primer: variable inclusion traceability and univariate profile access.\nAnalysis: EDA and binder report outputs used to inspect outcome structure and sample composition.\nDocs: project synopsis and site map for navigation and requirement coverage."
+    "text": "How to use this site\n\nProject: Open the full statistical instruction set used to scope the analysis.\nPipeline: Review the Ferry/Ellis workflow and both metadata manifests.\nData Primer: Check variable inclusion traceability and univariate reference outputs.\nAnalysis: Open published exploratory and binder outputs.\nDocs: Read the sanitized project README and full navigation map."
+  },
+  {
+    "objectID": "edited_content/index.html#quick-navigation",
+    "href": "edited_content/index.html#quick-navigation",
+    "title": "Absent from Chronic — Research Documentation",
+    "section": "Quick navigation",
+    "text": "Quick navigation\n\nProject → Statistical Instructions\nPipeline → Pipeline Guide\nPipeline → CACHE Manifest\nPipeline → INPUT Manifest\nData Primer → Variable Inclusion\nAnalysis → EDA-5"
   },
   {
     "objectID": "edited_content/project/statistical-instructions.html",
@@ -354,13 +298,34 @@
     "href": "edited_content/docs/readme.html",
     "title": "README",
     "section": "",
-    "text": "Project: absent-from-chronic — Analysis of work absenteeism using the Canadian Community Health Survey (CCHS) PUMF microdata.\nGoal: Understand how chronic health conditions relate to workplace absenteeism, using two pooled CCHS survey cycles (2010-2011 and 2013-2014).\nData source: CCHS PUMF (.sav) files stored in private data storage. These files are not committed to the repository. Contact the project lead to obtain them.\n\n\n\n\n\n\n\n\n\nLocation\nContents\n\n\n\n\nprivate data storage\nRaw CCHS .sav files (CCHS2010_LOP.sav, CCHS_2014_EN_PUMF.sav)\n\n\nprivate data storage\nFerry staging database (all raw columns)\n\n\nprivate data storage\nParquet backup of raw tables\n\n\nprivate data storage\nEllis analysis-ready Parquet files (cchs_analytical.parquet, sample_flow.parquet)\n\n\nprivate data storage\nEllis SQLite output (same data, factors as character)\n\n\nprivate data storage\nClarity-layer splits: cchs_employed.parquet, cchs_unemployed.parquet, data_dictionary.parquet\n\n\nprivate data storage\nSQLite version of Lane 3 outputs\n\n\n\nSee the CACHE Manifest page in the Pipeline section for detailed descriptions."
+    "text": "Replication-focused statistical analysis project for work absenteeism using pooled CCHS cycles.\n\n\n\nProject: absent-from-chronic\nGoal: Analyze relationships between chronic conditions and work absenteeism using pooled CCHS 2010–2011 and 2013–2014 cycles.\nData source: CCHS PUMF SPSS files stored in private raw storage.\n\n\n\n\n\n\n\nLayer\nContents\n\n\n\n\nRaw\nSource CCHS .sav files for two pooled cycles\n\n\nFerry output\nStaging SQLite + raw Parquet backup\n\n\nEllis output\nAnalysis-ready Parquet tables + SQLite\n\n\nClarity layer\nOptional split tables and data dictionary artifacts\n\n\n\nDetailed dataset definitions and diagnostics are documented in the pipeline manifests:\n\nCACHE Manifest\nINPUT Manifest\n\n\n\n\n\nPublishing Orchestra: interviewer + writer workflow for frontend website assembly.\nComposing Orchestra: report-composition system for analysis deliverables in analysis/.\n\n\n\n\nThis frontend is structured for PI verification:\n\nProject instructions\nPipeline documentation and manifests\nData-primer references\nAnalysis outputs\nSite meta documentation"
   },
   {
     "objectID": "edited_content/docs/readme.html#about-this-project",
     "href": "edited_content/docs/readme.html#about-this-project",
     "title": "README",
     "section": "",
-    "text": "Project: absent-from-chronic — Analysis of work absenteeism using the Canadian Community Health Survey (CCHS) PUMF microdata.\nGoal: Understand how chronic health conditions relate to workplace absenteeism, using two pooled CCHS survey cycles (2010-2011 and 2013-2014).\nData source: CCHS PUMF (.sav) files stored in private data storage. These files are not committed to the repository. Contact the project lead to obtain them.\n\n\n\n\n\n\n\n\n\nLocation\nContents\n\n\n\n\nprivate data storage\nRaw CCHS .sav files (CCHS2010_LOP.sav, CCHS_2014_EN_PUMF.sav)\n\n\nprivate data storage\nFerry staging database (all raw columns)\n\n\nprivate data storage\nParquet backup of raw tables\n\n\nprivate data storage\nEllis analysis-ready Parquet files (cchs_analytical.parquet, sample_flow.parquet)\n\n\nprivate data storage\nEllis SQLite output (same data, factors as character)\n\n\nprivate data storage\nClarity-layer splits: cchs_employed.parquet, cchs_unemployed.parquet, data_dictionary.parquet\n\n\nprivate data storage\nSQLite version of Lane 3 outputs\n\n\n\nSee the CACHE Manifest page in the Pipeline section for detailed descriptions."
+    "text": "Project: absent-from-chronic\nGoal: Analyze relationships between chronic conditions and work absenteeism using pooled CCHS 2010–2011 and 2013–2014 cycles.\nData source: CCHS PUMF SPSS files stored in private raw storage."
+  },
+  {
+    "objectID": "edited_content/docs/readme.html#data-locations-sanitized",
+    "href": "edited_content/docs/readme.html#data-locations-sanitized",
+    "title": "README",
+    "section": "",
+    "text": "Layer\nContents\n\n\n\n\nRaw\nSource CCHS .sav files for two pooled cycles\n\n\nFerry output\nStaging SQLite + raw Parquet backup\n\n\nEllis output\nAnalysis-ready Parquet tables + SQLite\n\n\nClarity layer\nOptional split tables and data dictionary artifacts\n\n\n\nDetailed dataset definitions and diagnostics are documented in the pipeline manifests:\n\nCACHE Manifest\nINPUT Manifest"
+  },
+  {
+    "objectID": "edited_content/docs/readme.html#authoring-systems-in-this-repository",
+    "href": "edited_content/docs/readme.html#authoring-systems-in-this-repository",
+    "title": "README",
+    "section": "",
+    "text": "Publishing Orchestra: interviewer + writer workflow for frontend website assembly.\nComposing Orchestra: report-composition system for analysis deliverables in analysis/."
+  },
+  {
+    "objectID": "edited_content/docs/readme.html#website-navigation-context",
+    "href": "edited_content/docs/readme.html#website-navigation-context",
+    "title": "README",
+    "section": "",
+    "text": "This frontend is structured for PI verification:\n\nProject instructions\nPipeline documentation and manifests\nData-primer references\nAnalysis outputs\nSite meta documentation"
   }
 ]

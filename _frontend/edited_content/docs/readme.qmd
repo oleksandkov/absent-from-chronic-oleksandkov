@@ -2,25 +2,41 @@
 title: "README"
 ---
 
+# Absent from Chronic
+
+Replication-focused statistical analysis project for work absenteeism using pooled CCHS cycles.
+
 ## About This Project
 
-**Project**: `absent-from-chronic` — Analysis of work absenteeism using the Canadian Community Health Survey (CCHS) PUMF microdata.
+- **Project**: `absent-from-chronic`
+- **Goal**: Analyze relationships between chronic conditions and work absenteeism using pooled CCHS 2010–2011 and 2013–2014 cycles.
+- **Data source**: CCHS PUMF SPSS files stored in private raw storage.
 
-**Goal**: Understand how chronic health conditions relate to workplace absenteeism, using two pooled CCHS survey cycles (2010-2011 and 2013-2014).
+## Data locations (sanitized)
 
-**Data source**: CCHS PUMF (`.sav`) files stored in private data storage. These files are not committed to the repository. Contact the project lead to obtain them.
+| Layer | Contents |
+|---|---|
+| Raw | Source CCHS `.sav` files for two pooled cycles |
+| Ferry output | Staging SQLite + raw Parquet backup |
+| Ellis output | Analysis-ready Parquet tables + SQLite |
+| Clarity layer | Optional split tables and data dictionary artifacts |
 
-### Where to find the data
+Detailed dataset definitions and diagnostics are documented in the pipeline manifests:
 
-| Location | Contents |
-|----------|----------|
-| private data storage | Raw CCHS `.sav` files (CCHS2010_LOP.sav, CCHS_2014_EN_PUMF.sav) |
-| private data storage | Ferry staging database (all raw columns) |
-| private data storage | Parquet backup of raw tables |
-| private data storage | Ellis analysis-ready Parquet files (`cchs_analytical.parquet`, `sample_flow.parquet`) |
-| private data storage | Ellis SQLite output (same data, factors as character) |
-| private data storage | Clarity-layer splits: `cchs_employed.parquet`, `cchs_unemployed.parquet`, `data_dictionary.parquet` |
-| private data storage | SQLite version of Lane 3 outputs |
+- [CACHE Manifest](../pipeline/cache-manifest.qmd)
+- [INPUT Manifest](../pipeline/input-manifest.qmd)
 
-See the CACHE Manifest page in the Pipeline section for detailed descriptions.
+## Authoring systems in this repository
 
+- **Publishing Orchestra**: interviewer + writer workflow for frontend website assembly.
+- **Composing Orchestra**: report-composition system for analysis deliverables in `analysis/`.
+
+## Website navigation context
+
+This frontend is structured for PI verification:
+
+- Project instructions
+- Pipeline documentation and manifests
+- Data-primer references
+- Analysis outputs
+- Site meta documentation

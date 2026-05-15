@@ -211,6 +211,15 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
       "problemMatcher": []
     },
+    {
+      "label": "Run EDA-5 Pipeline",
+      "detail": "Run eda-5.R then render eda-5.qmd",
+      "type": "shell",
+      "command": "Rscript analysis/eda-5/eda-5.R ; quarto render analysis/eda-5/eda-5.qmd",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
 
     // ── Log maintenance ───────────────────────────────────────────────────────
     {

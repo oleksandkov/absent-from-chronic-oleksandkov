@@ -91,14 +91,17 @@ ul.task-list li input[type="checkbox"] {
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
-  <li class="nav-item">
-    <a class="nav-link" href="../../edited_content/index.html"> 
-<span class="menu-text">Home</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-project" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Project</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-project">    
+        <li>
+    <a class="dropdown-item" href="../../edited_content/project/statistical-instructions.html">
+ <span class="dropdown-text">Statistical Instructions</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../../edited_content/project/statistical-instructions.html"> 
-<span class="menu-text">Project</span></a>
-  </li>  
+    </ul>
+  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-pipeline" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">Pipeline</span>
@@ -147,19 +150,19 @@ ul.task-list li input[type="checkbox"] {
  <span class="dropdown-text">EDA-5</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-table-anatomy.html">
+    <a class="dropdown-item" href="../../edited_content/analysis/1-table-anatomy.html">
  <span class="dropdown-text">Binder-2: Table Anatomy</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-sociodemographic-fabric.html">
+    <a class="dropdown-item" href="../../edited_content/analysis/2-sociodemographic-fabric.html">
  <span class="dropdown-text">Binder-2: Sociodemographic Fabric</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-outcome-anatomy.html">
+    <a class="dropdown-item" href="../../edited_content/analysis/3-outcome-anatomy.html">
  <span class="dropdown-text">Binder-2: Outcome Anatomy</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../edited_content/analysis/binder-2-raw-to-analytical.html">
+    <a class="dropdown-item" href="../../edited_content/analysis/4-raw-to-analytical.html">
  <span class="dropdown-text">Binder-2: Raw to Analytical</span></a>
   </li>  
     </ul>
@@ -197,7 +200,7 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#content-types" id="toc-content-types" class="nav-link active" data-scroll-target="#content-types">Content Types</a></li>
   <li><a href="#navigation-structure" id="toc-navigation-structure" class="nav-link" data-scroll-target="#navigation-structure">Navigation Structure</a></li>
-  <li><a href="#stats-instructions-coverage" id="toc-stats-instructions-coverage" class="nav-link" data-scroll-target="#stats-instructions-coverage">Stats Instructions Coverage</a></li>
+  <li><a href="#stats-instructions-coverage-notes" id="toc-stats-instructions-coverage-notes" class="nav-link" data-scroll-target="#stats-instructions-coverage-notes">Stats instructions coverage notes</a></li>
   </ul>
 </nav>
     </div>
@@ -223,12 +226,13 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<p>This site map is generated from <code>_frontend-1/publishing-contract.prompt.md</code> and maps each page to its publishing protocol and source.</p>
 <section id="content-types" class="level2">
 <h2 class="anchored" data-anchor-id="content-types">Content Types</h2>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 37%">
-<col style="width: 62%">
+<col style="width: 50%">
+<col style="width: 50%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -239,67 +243,59 @@ ul.task-list li input[type="checkbox"] {
 <tbody>
 <tr class="odd">
 <td><strong>VERBATIM</strong></td>
-<td>Source content copied with minimal formatting changes (frontmatter only)</td>
+<td>Direct transfer of source content into <code>.qmd</code> with minimal wrapper/frontmatter work</td>
 </tr>
 <tr class="even">
 <td><strong>REDIRECTED</strong></td>
-<td>Transit page that forwards to a standalone HTML report</td>
+<td>Transit <code>.qmd</code> page that forwards to a copied standalone HTML report</td>
 </tr>
 <tr class="odd">
 <td><strong>TECHNICAL BRIDGE</strong></td>
-<td>Source document adapted for web readability and PI-focused context</td>
+<td>Source-derived page with structural adaptation for web audience/context</td>
 </tr>
 <tr class="even">
 <td><strong>NARRATIVE BRIDGE</strong></td>
-<td>Authored synthesis page grounded in repository sources</td>
+<td>Newly authored page synthesized from contract brief + raw sources</td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="navigation-structure" class="level2">
 <h2 class="anchored" data-anchor-id="navigation-structure">Navigation Structure</h2>
-<ul>
-<li><strong>Home</strong>
-<ul>
-<li><code>index</code> — NARRATIVE BRIDGE ← <code>README.md</code>, <code>data-public/metadata/CACHE-manifest.md</code></li>
-</ul></li>
-<li><strong>Project</strong>
-<ul>
-<li><code>Statistical Instructions</code> — TECHNICAL BRIDGE ← <code>data-private/raw/2026-02-19/stats_instructions_v3.md</code></li>
-</ul></li>
-<li><strong>Pipeline</strong>
-<ul>
-<li><code>Pipeline Guide</code> — TECHNICAL BRIDGE ← <code>manipulation/pipeline.md</code></li>
-<li><code>CACHE Manifest</code> — VERBATIM ← <code>data-public/metadata/CACHE-manifest.md</code></li>
-<li><code>INPUT Manifest</code> — VERBATIM ← <code>data-public/metadata/INPUT-manifest.md</code></li>
-</ul></li>
-<li><strong>Data Primer</strong>
-<ul>
-<li><code>Variable Inclusion</code> — VERBATIM ← <code>analysis/data-primer-1/variable-inclusion.qmd</code></li>
-<li><code>Univariate Distributions</code> — REDIRECTED → <code>analysis/data-primer-1/univariate-distributions.html</code></li>
-</ul></li>
-<li><strong>Analysis</strong>
-<ul>
-<li><code>EDA-2</code> — REDIRECTED → <code>analysis/eda-2/eda-2.html</code></li>
-<li><code>EDA-5</code> — REDIRECTED → <code>analysis/eda-5/eda-5.html</code></li>
-<li><code>Binder-2: Table Anatomy</code> — REDIRECTED → <code>analysis/binder-2/1-table-anatomy.html</code></li>
-<li><code>Binder-2: Sociodemographic Fabric</code> — REDIRECTED → <code>analysis/binder-2/2-sociodemographic-fabric.html</code></li>
-<li><code>Binder-2: Outcome Anatomy</code> — REDIRECTED → <code>analysis/binder-2/3-outcome-anatomy.html</code></li>
-<li><code>Binder-2: Raw to Analytical</code> — REDIRECTED → <code>analysis/binder-2/4-raw-to-analytical.html</code></li>
-</ul></li>
-<li><strong>Docs</strong>
-<ul>
-<li><code>README</code> — TECHNICAL BRIDGE ← <code>README.md</code></li>
-<li><code>Site Map</code> — NARRATIVE BRIDGE ← contract navigation structure</li>
-</ul></li>
-</ul>
+<pre class="text"><code>Absent from Chronic — Research Documentation
+│
+├── 🏠 Index                                NARRATIVE BRIDGE  ← README.md + CACHE-manifest.md + eda-5 print
+│
+├── Project
+│   └── Statistical Instructions            TECHNICAL BRIDGE  ← data-private/raw/2026-02-19/stats_instructions_v3.md
+│
+├── Pipeline
+│   ├── Pipeline Guide                      TECHNICAL BRIDGE  ← manipulation/pipeline.md
+│   ├── CACHE Manifest                      VERBATIM          ← data-public/metadata/CACHE-manifest.md
+│   └── INPUT Manifest                      VERBATIM          ← data-public/metadata/INPUT-manifest.md
+│
+├── Data Primer
+│   ├── Variable Inclusion                  VERBATIM          ← analysis/data-primer-1/variable-inclusion.qmd
+│   └── Univariate Distributions            REDIRECTED        → analysis/data-primer-1/univariate-distributions.html
+│
+├── Analysis
+│   ├── EDA-2                               REDIRECTED        → analysis/eda-2/eda-2.html
+│   ├── EDA-5                               REDIRECTED        → analysis/eda-5/eda-5.html (fallback used)
+│   ├── Binder-2: Table Anatomy             REDIRECTED        → analysis/binder-2/1-table-anatomy.html
+│   ├── Binder-2: Sociodemographic Fabric   REDIRECTED        → analysis/binder-2/2-sociodemographic-fabric.html
+│   ├── Binder-2: Outcome Anatomy           REDIRECTED        → analysis/binder-2/3-outcome-anatomy.html
+│   └── Binder-2: Raw to Analytical         REDIRECTED        → analysis/binder-2/4-raw-to-analytical.html
+│
+└── Docs
+    ├── README                              TECHNICAL BRIDGE  ← README.md
+    └── Site Map                            NARRATIVE BRIDGE  ← publishing contract</code></pre>
 </section>
-<section id="stats-instructions-coverage" class="level2">
-<h2 class="anchored" data-anchor-id="stats-instructions-coverage">Stats Instructions Coverage</h2>
+<section id="stats-instructions-coverage-notes" class="level2">
+<h2 class="anchored" data-anchor-id="stats-instructions-coverage-notes">Stats instructions coverage notes</h2>
 <ul>
-<li><strong>§2.2 variable requirements</strong> map to <strong>Data Primer → Variable Inclusion</strong>.</li>
-<li><strong>§3 sample construction and pooling</strong> map to <strong>Pipeline Guide</strong> and binder/EDA pages.</li>
-<li><strong>§4 descriptive outcome diagnostics</strong> map to <strong>Analysis (EDA-2, EDA-5)</strong>.</li>
+<li>§2.2 variable selection traceability: <strong>Data Primer → Variable Inclusion</strong>.</li>
+<li>§3 sample and data-structure context: <strong>Pipeline + CACHE Manifest</strong>.</li>
+<li>§4–§5 distribution and exploratory diagnostics: <strong>Analysis pages (EDA/Binder outputs)</strong>.</li>
 </ul>
 
 
@@ -713,7 +709,7 @@ ul.task-list li input[type="checkbox"] {
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>Absent from Chronic — Statistical Analysis Replication | Marc-Andre Blanchette, Research Scientist</p>
+<p><em>Absent from Chronic</em> — Statistical Analysis Replication | Marc-Andre Blanchette, Research Scientist</p>
 </div>
     <div class="nav-footer-right">
       &nbsp;

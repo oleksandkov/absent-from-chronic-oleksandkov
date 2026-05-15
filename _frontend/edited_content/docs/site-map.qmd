@@ -2,41 +2,51 @@
 title: "Site Map"
 ---
 
+This site map is generated from `_frontend-1/publishing-contract.prompt.md` and maps each page to its publishing protocol and source.
+
 ## Content Types
 
 | Type | Meaning |
-|------|----------|
-| **VERBATIM** | Source content copied with minimal formatting changes (frontmatter only) |
-| **REDIRECTED** | Transit page that forwards to a standalone HTML report |
-| **TECHNICAL BRIDGE** | Source document adapted for web readability and PI-focused context |
-| **NARRATIVE BRIDGE** | Authored synthesis page grounded in repository sources |
+|---|---|
+| **VERBATIM** | Direct transfer of source content into `.qmd` with minimal wrapper/frontmatter work |
+| **REDIRECTED** | Transit `.qmd` page that forwards to a copied standalone HTML report |
+| **TECHNICAL BRIDGE** | Source-derived page with structural adaptation for web audience/context |
+| **NARRATIVE BRIDGE** | Newly authored page synthesized from contract brief + raw sources |
 
 ## Navigation Structure
 
-- **Home**
-  - `index` — NARRATIVE BRIDGE ← `README.md`, `data-public/metadata/CACHE-manifest.md`
-- **Project**
-  - `Statistical Instructions` — TECHNICAL BRIDGE ← `data-private/raw/2026-02-19/stats_instructions_v3.md`
-- **Pipeline**
-  - `Pipeline Guide` — TECHNICAL BRIDGE ← `manipulation/pipeline.md`
-  - `CACHE Manifest` — VERBATIM ← `data-public/metadata/CACHE-manifest.md`
-  - `INPUT Manifest` — VERBATIM ← `data-public/metadata/INPUT-manifest.md`
-- **Data Primer**
-  - `Variable Inclusion` — VERBATIM ← `analysis/data-primer-1/variable-inclusion.qmd`
-  - `Univariate Distributions` — REDIRECTED → `analysis/data-primer-1/univariate-distributions.html`
-- **Analysis**
-  - `EDA-2` — REDIRECTED → `analysis/eda-2/eda-2.html`
-  - `EDA-5` — REDIRECTED → `analysis/eda-5/eda-5.html`
-  - `Binder-2: Table Anatomy` — REDIRECTED → `analysis/binder-2/1-table-anatomy.html`
-  - `Binder-2: Sociodemographic Fabric` — REDIRECTED → `analysis/binder-2/2-sociodemographic-fabric.html`
-  - `Binder-2: Outcome Anatomy` — REDIRECTED → `analysis/binder-2/3-outcome-anatomy.html`
-  - `Binder-2: Raw to Analytical` — REDIRECTED → `analysis/binder-2/4-raw-to-analytical.html`
-- **Docs**
-  - `README` — TECHNICAL BRIDGE ← `README.md`
-  - `Site Map` — NARRATIVE BRIDGE ← contract navigation structure
+```text
+Absent from Chronic — Research Documentation
+│
+├── 🏠 Index                                NARRATIVE BRIDGE  ← README.md + CACHE-manifest.md + eda-5 print
+│
+├── Project
+│   └── Statistical Instructions            TECHNICAL BRIDGE  ← data-private/raw/2026-02-19/stats_instructions_v3.md
+│
+├── Pipeline
+│   ├── Pipeline Guide                      TECHNICAL BRIDGE  ← manipulation/pipeline.md
+│   ├── CACHE Manifest                      VERBATIM          ← data-public/metadata/CACHE-manifest.md
+│   └── INPUT Manifest                      VERBATIM          ← data-public/metadata/INPUT-manifest.md
+│
+├── Data Primer
+│   ├── Variable Inclusion                  VERBATIM          ← analysis/data-primer-1/variable-inclusion.qmd
+│   └── Univariate Distributions            REDIRECTED        → analysis/data-primer-1/univariate-distributions.html
+│
+├── Analysis
+│   ├── EDA-2                               REDIRECTED        → analysis/eda-2/eda-2.html
+│   ├── EDA-5                               REDIRECTED        → analysis/eda-5/eda-5.html (fallback used)
+│   ├── Binder-2: Table Anatomy             REDIRECTED        → analysis/binder-2/1-table-anatomy.html
+│   ├── Binder-2: Sociodemographic Fabric   REDIRECTED        → analysis/binder-2/2-sociodemographic-fabric.html
+│   ├── Binder-2: Outcome Anatomy           REDIRECTED        → analysis/binder-2/3-outcome-anatomy.html
+│   └── Binder-2: Raw to Analytical         REDIRECTED        → analysis/binder-2/4-raw-to-analytical.html
+│
+└── Docs
+    ├── README                              TECHNICAL BRIDGE  ← README.md
+    └── Site Map                            NARRATIVE BRIDGE  ← publishing contract
+```
 
-## Stats Instructions Coverage
+## Stats instructions coverage notes
 
-- **§2.2 variable requirements** map to **Data Primer → Variable Inclusion**.
-- **§3 sample construction and pooling** map to **Pipeline Guide** and binder/EDA pages.
-- **§4 descriptive outcome diagnostics** map to **Analysis (EDA-2, EDA-5)**.
+- §2.2 variable selection traceability: **Data Primer → Variable Inclusion**.
+- §3 sample and data-structure context: **Pipeline + CACHE Manifest**.
+- §4–§5 distribution and exploratory diagnostics: **Analysis pages (EDA/Binder outputs)**.

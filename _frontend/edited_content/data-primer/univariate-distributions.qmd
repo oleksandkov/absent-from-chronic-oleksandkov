@@ -6,4 +6,4 @@ format:
     toc: false
 ---
 
-<meta http-equiv="refresh" content="0; url=../../analysis/data-primer-1/univariate-distributions.html">
+<meta http-equiv="refresh" content="0; url=../../data-primer/univariate-distributions.html">

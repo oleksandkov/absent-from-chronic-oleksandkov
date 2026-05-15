@@ -1,9 +1,0 @@
----
-title: "Binder-2: Raw to Analytical"
-format:
-  html:
-    page-layout: full
-    toc: false
----
-
-<meta http-equiv="refresh" content="0; url=../../analysis/binder-2/4-raw-to-analytical.html">
