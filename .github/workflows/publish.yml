@@ -1,7 +1,12 @@
 name: Publish to GitHub Pages
 
 on:
-  workflow_dispatch:      # manual trigger only — run from the Actions tab when ready to publish
+  push:
+    branches: [main]
+    paths:
+      - "_frontend-1/**"
+      - ".github/workflows/publish.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,19 +25,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Quarto
-        uses: quarto-dev/quarto-actions/setup@v2
+      - name: Locate committed site directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Workspace: $PWD"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Checking for committed _site directory..."
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          if [ -d "_frontend-1/_site" ]; then
+            echo "✓ FOUND: _frontend-1/_site"
+            echo "SITE_DIR=_frontend-1/_site" >> "$GITHUB_ENV"
+            echo "Site contents:"
+            ls -lh _frontend-1/_site | head -20
+            exit 0
+          fi
 
-      - name: Render site (frozen outputs only — no R runtime needed)
-        run: quarto render
-        # freeze: auto (set in _quarto.yml) uses cached _freeze/ outputs when hash matches.
-        # No R needed on CI as long as _freeze/ is up-to-date and committed.
-        # To rebuild outputs: render locally with R + private data, commit _freeze/, then push.
+          echo "✗ ERROR: Could not find committed _frontend-1/_site directory"
+          echo "If you want CI to build the site, switch the workflow back to rendering with Quarto."
+          exit 1
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: ${{ env.SITE_DIR }}
 
   deploy:
     needs: build
