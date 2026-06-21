@@ -1,9 +1,0 @@
----
-title: "EDA-5"
-format:
-  html:
-    page-layout: full
-    toc: false
----
-
-<meta http-equiv="refresh" content="0; url=../../analysis/eda-5.html">

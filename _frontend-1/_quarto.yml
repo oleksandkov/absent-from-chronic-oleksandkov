@@ -1,10 +1,6 @@
 project:
   type: website
   output-dir: _site
-  pre-render:
-    - scripts/pre-render-assemble.R
-  post-render:
-    - scripts/post-render-copy-redirects.R
   render:
     - edited_content/index.qmd
     - edited_content/project/statistical-instructions.qmd
@@ -12,18 +8,20 @@ project:
     - edited_content/pipeline/cache-manifest.qmd
     - edited_content/pipeline/input-manifest.qmd
     - edited_content/data-primer/variable-inclusion.qmd
-    - edited_content/data-primer/univariate-distributions.qmd
-    - edited_content/analysis/eda-2.qmd
-    - edited_content/analysis/eda-5.qmd
-    - edited_content/analysis/1-table-anatomy.qmd
-    - edited_content/analysis/2-sociodemographic-fabric.qmd
-    - edited_content/analysis/3-outcome-anatomy.qmd
-    - edited_content/analysis/4-raw-to-analytical.qmd
-    - edited_content/docs/readme.qmd
-    - edited_content/docs/site-map.qmd
+    - edited_content/data-primer/univariate-distributions-redirect.qmd
+    - edited_content/analysis/outcome-redirect.qmd
+    - edited_content/analysis/outcome-distribution-shapes-redirect.qmd
+    - edited_content/analysis/exposure-redirect.qmd
+    - edited_content/analysis/predisposing-redirect.qmd
+    - edited_content/analysis/facilitating-redirect.qmd
+    - edited_content/analysis/needs-redirect.qmd
+    - edited_content/analysis/missingness-redirect.qmd
+    - edited_content/site-map.qmd
+  post-render:
+    - Rscript scripts/copy-analysis-html.R
 
 website:
-  title: "Absent from Chronic — Research Documentation"
+  title: "Absent from Chronic"
   navbar:
     left:
       - text: "Project"
@@ -43,34 +41,35 @@ website:
           - text: "Variable Inclusion"
             href: edited_content/data-primer/variable-inclusion.qmd
           - text: "Univariate Distributions"
-            href: edited_content/data-primer/univariate-distributions.qmd
+            href: edited_content/data-primer/univariate-distributions-redirect.qmd
       - text: "Analysis"
         menu:
-          - text: "EDA-2"
-            href: edited_content/analysis/eda-2.qmd
-          - text: "EDA-5"
-            href: edited_content/analysis/eda-5.qmd
-          - text: "Binder-2: Table Anatomy"
-            href: edited_content/analysis/1-table-anatomy.qmd
-          - text: "Binder-2: Sociodemographic Fabric"
-            href: edited_content/analysis/2-sociodemographic-fabric.qmd
-          - text: "Binder-2: Outcome Anatomy"
-            href: edited_content/analysis/3-outcome-anatomy.qmd
-          - text: "Binder-2: Raw to Analytical"
-            href: edited_content/analysis/4-raw-to-analytical.qmd
-      - text: "Docs"
-        menu:
-          - text: "README"
-            href: edited_content/docs/readme.qmd
-          - text: "Site Map"
-            href: edited_content/docs/site-map.qmd
+          - text: "Outcome (LOP Day Decomposition)"
+            href: edited_content/analysis/outcome-redirect.qmd
+          - text: "Outcome (Distribution Shapes)"
+            href: edited_content/analysis/outcome-distribution-shapes-redirect.qmd
+          - text: "Exposure (Chronic Conditions)"
+            href: edited_content/analysis/exposure-redirect.qmd
+          - text: "Predisposing (Socio-demographic)"
+            href: edited_content/analysis/predisposing-redirect.qmd
+          - text: "Facilitating (Health System & Behaviours)"
+            href: edited_content/analysis/facilitating-redirect.qmd
+          - text: "Needs (Perceived Health & Limitations)"
+            href: edited_content/analysis/needs-redirect.qmd
+          - text: "Missingness"
+            href: edited_content/analysis/missingness-redirect.qmd
+      - text: "Site Map"
+        href: edited_content/site-map.qmd
+
   page-footer:
     center: "*Absent from Chronic* — Statistical Analysis Replication | Marc-Andre Blanchette, Research Scientist"
-  repo-url: "https://github.com/RG-FIDES/absent-from-chronic"
+
+  repo-url: https://github.com/RG-FIDES/absent-from-chronic
 
 format:
   html:
     theme: flatly
     toc: true
+    embed-resources: true
     mermaid:
       theme: neutral

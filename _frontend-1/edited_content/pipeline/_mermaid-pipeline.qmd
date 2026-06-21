@@ -1,0 +1,37 @@
+```{mermaid}
+flowchart LR
+    RAW_2010["CCHS2010_LOP.sav\n(~62,909 rows)"]
+    RAW_2014["CCHS_2014_EN_PUMF.sav\n(~63,522 rows)"]
+
+    subgraph Lane0["Lane 0 – Metadata"]
+        META["0-extract-metadata.R\nExtract variable/value labels\nWrite codebook CSVs"]
+    end
+
+    subgraph Lane1["Lane 1 – Ferry"]
+        FERRY["1-ferry.R\nFull transport (zap labels)\nWrite to cchs-1.sqlite"]
+    end
+
+    subgraph Lane2["Lane 2 – Ellis"]
+        ELLIS["2-ellis.R\nAlias resolution\nWhite-list (Tier 1+2)\nSample exclusion\nFactor recoding\nOutcome construction\nWeight pooling"]
+    end
+
+    subgraph Lane3["Lane 3 – Test"]
+        TEST["3-test-ellis-cache.R\nArtifact existence\nSQLite ↔ Parquet parity\nData quality checks\nSample flow validation"]
+    end
+
+    CODEBOOK["codebook-*.csv"]
+    FERRY_DB["cchs-1.sqlite\n(tables: cchs_2010, cchs_2014)"]
+    FERRY_PQ["cchs-1-ferry/\n*.parquet"]
+    ELLIS_DB["cchs-2.sqlite\n(tables: cchs_analytic, sample_flow)"]
+    ELLIS_PQ["cchs-2-tables/\ncchs_analytic.parquet\nsample_flow.parquet"]
+
+    RAW_2010 --> Lane0 --> CODEBOOK
+    RAW_2014 --> Lane0
+    RAW_2010 --> Lane1 --> FERRY_DB
+    RAW_2014 --> Lane1
+    FERRY_DB --> Lane2 --> ELLIS_DB
+    Lane1 --> FERRY_PQ
+    Lane2 --> ELLIS_PQ
+    ELLIS_DB --> Lane3
+    ELLIS_PQ --> Lane3
+```

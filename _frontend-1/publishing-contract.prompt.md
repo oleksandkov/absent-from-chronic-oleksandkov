@@ -6,11 +6,10 @@ A research documentation site for the study *"Predictors of Work Absenteeism Ass
 Chronic Conditions Among Canadian Workers"*, built for Marc-Andre Blanchette — the study's lead
 research scientist and principal investigator.
 
-The site provides a structured, navigable record of analytical decisions, data pipeline
-documentation, variable selection rationale, and preliminary descriptive findings. Its organizing
-principle is evidence: every section corresponds to a layer of work that responds to requirements
-in `stats_instructions_v3.md`. A visitor should be able to navigate from "what was asked" to "what
-was done" without needing access to the repository.
+The site provides a structured, navigable record of statistical analysis requirements, data
+pipeline documentation, variable selection rationale, and exploratory descriptive findings
+organized by the Andersen Behavioral Model domains. Its organizing principle is evidence: every
+section corresponds to a layer of work that responds to requirements in `stats_instructions_v3.md`.
 
 The audience is a single expert reader (the PI) who wants to verify coverage — not a general
 public site. Tone is professional and direct. Content is shown essentially as the analyst produced
@@ -25,16 +24,19 @@ it.
 - **Protocol**: Narrative Bridge
 - **Intent**: Orient Marc-Andre with a clear statement of what this site contains and where to
   find evidence of each addressed requirement. Establish that the pipeline is built, the data is
-  clean, and the study variables are documented and profiled.
+  clean, and the five Andersen Model domains are profiled.
 - **Goal**: Home page — the first thing a visitor sees.
 - **Spirit**: Professional and direct. Lead with the study title and purpose, anchored by the LOP
-  days distribution chart (`g01` from EDA-5). Three-sentence summary of the analytical layers
-  (pipeline → data primer → EDA). No marketing language. End with a brief "How to use this site"
-  paragraph pointing to the main sections.
-- **Image**: `images/g01_lop_days_histogram.png` — copied from
+  days distribution chart (`g01_lop_days_histogram.png`). Show the pipeline architecture image
+  (`pipeline-architecture.jpg`) to convey infrastructure maturity. Include a brief navigation
+  guide pointing visitors to each section. No marketing language.
+- **Image 1**: `images/g01_lop_days_histogram.png` — copied from
   `analysis/eda-5/prints/g01_lop_days_histogram.png` by the pre-render hook.
-- **Inputs**: `README.md`, `data-public/metadata/CACHE-manifest.md`
-  (use the dataset summary: 63,843 rows, 62 columns, two CCHS cycles pooled).
+- **Image 2**: `images/pipeline-architecture.jpg` — copied from
+  `libs/images/pipeline-architecture.jpg` by the pre-render hook.
+- **Inputs**: `README.md` (project overview), `data-public/metadata/CACHE-manifest.md`
+  (dataset summary: 63,843 rows, 69 columns, two CCHS cycles pooled),
+  `ai/project/mission.md` (study purpose).
 
 ---
 
@@ -49,7 +51,8 @@ it.
     repository workflow notes that are not part of the scientific content.
   - Retain all numbered sections (§1–§6), all tables, all R code blocks (these are methodology
     context relevant to the PI).
-  - Do not reference `data-private/` paths in the rendered page.
+  - Do not reference `data-private/` paths in the rendered page — present as if the document is
+    standalone.
 
 ---
 
@@ -60,12 +63,10 @@ it.
 - **Protocol**: Technical Bridge
 - **Source**: `./manipulation/pipeline.md`
 - **Transforms**:
-  - Retain the ASCII flow diagram and scripts table as-is.
+  - Retain the pipeline flow diagram and scripts table as-is.
+  - Inject mermaid shortcode where fenced mermaid blocks exist.
   - Strip R console code blocks and PowerShell commands (not relevant to PI audience).
   - Remove references to `data-private/` paths.
-  - Remove the developer note about the missing `manipulation/3-ellis.R` — replace with a neutral
-    statement: *"A third Ellis lane produced additional derived outputs; documentation is in the
-    CACHE Manifest."*
   - Rewrite any local file links to plain text (no paths point outside the site).
 
 #### CACHE Manifest
@@ -87,9 +88,8 @@ it.
 - **Protocol**: Direct Line (VERBATIM)
 - **Source**: `./analysis/data-primer-1/variable-inclusion.qmd`
 - **Note**: QMD is transferred to `edited_content/data-primer/variable-inclusion.qmd` and
-  rendered as part of the Quarto site build. The standalone HTML (`variable-inclusion.html`)
-  is for local development preview only. Strip `embed-resources: true` and `theme: flatly`
-  from YAML (inherited from site `_quarto.yml`).
+  rendered as part of the Quarto site build. Strip `embed-resources: true` and `theme:` from
+  YAML (inherited from site `_quarto.yml`).
 
 #### Univariate Distributions
 
@@ -100,65 +100,52 @@ it.
 
 ### Analysis
 
-#### EDA-2
-
-- **Protocol**: Direct Line (REDIRECTED)
-- **Source**: `./analysis/eda-2/eda-2.html`
-
-#### EDA-5
+#### Outcome
 
 - **Protocol**: Direct Line (REDIRECTED)
 - **Source**: `./analysis/eda-5/eda-5.html`
+- **Label**: Outcome (LOP Day Decomposition)
 
-#### Binder-2: Table Anatomy
-
-- **Protocol**: Direct Line (REDIRECTED)
-- **Source**: `./analysis/binder-2/1-table-anatomy.html`
-
-#### Binder-2: Sociodemographic Fabric
+#### Exposure
 
 - **Protocol**: Direct Line (REDIRECTED)
-- **Source**: `./analysis/binder-2/2-sociodemographic-fabric.html`
+- **Source**: `./analysis/eda-61/eda-61.html`
+- **Label**: Exposure (Chronic Conditions)
 
-#### Binder-2: Outcome Anatomy
-
-- **Protocol**: Direct Line (REDIRECTED)
-- **Source**: `./analysis/binder-2/3-outcome-anatomy.html`
-
-#### Binder-2: Raw to Analytical
+#### Predisposing
 
 - **Protocol**: Direct Line (REDIRECTED)
-- **Source**: `./analysis/binder-2/4-raw-to-analytical.html`
+- **Source**: `./analysis/eda-62/eda-62.html`
+- **Label**: Predisposing (Socio-demographic)
+
+#### Facilitating
+
+- **Protocol**: Direct Line (REDIRECTED)
+- **Source**: `./analysis/eda-63/eda-63.html`
+- **Label**: Facilitating (Health System & Behaviours)
+
+#### Needs
+
+- **Protocol**: Direct Line (REDIRECTED)
+- **Source**: `./analysis/eda-64/eda-64.html`
+- **Label**: Needs (Perceived Health & Limitations)
 
 ---
 
-### Docs
-
-#### README
-
-- **Protocol**: Technical Bridge
-- **Source**: `./README.md`
-- **Transforms**:
-  - Strip all R console code blocks and PowerShell instructions.
-  - Remove `data-private/` path references.
-  - Remove the "Running the data pipeline" and "Running the analysis scripts" sections — these are
-    developer-facing; the PI audience does not need them.
-  - Retain the "About This Project" section and the data location table (sanitized).
-  - Rewrite internal markdown links to match site navigation where applicable; remove any links
-    that point to files not included in the site.
-
-#### Site Map
+### Site Map
 
 - **Protocol**: Narrative Bridge
 - **Intent**: Help Marc-Andre navigate the site and understand what each section contains and how
-  it maps to the statistical analysis requirements. Provide a complete inventory of all pages.
-- **Goal**: Site map — an oriented index of all pages.
-- **Spirit**: Concise and functional. Include a **Content Types** legend table (defining VERBATIM,
-  REDIRECTED, TECHNICAL BRIDGE, NARRATIVE BRIDGE) and a **Navigation Structure** list annotating
-  every page with its content type and source file. Add a brief "Stats Instructions Coverage" note
-  where the mapping from page to requirement is clear (e.g., Data Primer → §2.2 variable
-  selection; Univariate Distributions → §3 descriptive statistics).
-- **Inputs**: Contract navigation structure (this file).
+  it maps to the statistical analysis requirements.
+- **Goal**: Site map — an oriented index of all pages with stats instructions coverage.
+- **Spirit**: Concise and functional. Open with the **Navigation Structure** — an ASCII tree
+  annotating every page with its content type (VERBATIM, REDIRECTED, TECHNICAL BRIDGE,
+  NARRATIVE BRIDGE) and source provenance. Follow with a **Stats Instructions Coverage** section
+  mapping each page to the requirement it addresses (e.g., Data Primer → §2.2 variable
+  selection; Outcome → §4.1–§4.2 outcome construction; Exposure/Predisposing/Facilitating/Needs
+  → §2.2 predictor domains and §4.3 bivariate associations).
+- **Inputs**: Contract navigation structure (this file),
+  `data-private/raw/2026-02-19/stats_instructions_v3.md` (section headings for mapping).
 
 ---
 
@@ -166,9 +153,9 @@ it.
 
 - `*.R` — source scripts, not publishable
 - `*_cache/` — Quarto render cache
-- `data-private/` — private data, never publish
+- `data-private/` — private data, never publish (except `stats_instructions_v3.md` via Technical Bridge)
 - `analysis/eda-1/` — mtcars scaffold, always excluded
-- `README.md` inside subfolders (only root README is included)
+- `README.md` inside subfolders (only root README used as input to landing page)
 - `.github/` — internal workflow files
 - `ai/memory/`, `ai/scripts/`, `ai/templates/` — internal AI support files
 - `renv/`, `scripts/`, `utility/` — developer infrastructure
@@ -190,4 +177,4 @@ flatly
 
 ## Repo URL
 
-https://github.com/[owner]/absent-from-chronic
+https://github.com/RG-FIDES/absent-from-chronic

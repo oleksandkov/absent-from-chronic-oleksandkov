@@ -1,0 +1,63 @@
+---
+title: "Site Map"
+---
+
+## Navigation Structure
+
+```
+Absent from Chronic — Research Documentation
+│
+├── 🏠  Home                                    COMPOSED  ← README.md, CACHE-manifest, mission.md
+│
+├── Project
+│   └── Statistical Instructions                GENERATED ← stats_instructions_v3.md (Technical Bridge)
+│
+├── Pipeline
+│   ├── Pipeline Guide                          GENERATED ← manipulation/pipeline.md (Technical Bridge)
+│   ├── CACHE Manifest                          VERBATIM  ← data-public/metadata/CACHE-manifest.md
+│   └── INPUT Manifest                          VERBATIM  ← data-public/metadata/INPUT-manifest.md
+│
+├── Data Primer
+│   ├── Variable Inclusion                      VERBATIM  ← analysis/data-primer-1/variable-inclusion.qmd
+│   └── Univariate Distributions                REDIRECT  → univariate-distributions.html
+│
+├── Analysis
+│   ├── Outcome (LOP Day Decomposition)         REDIRECT  → eda-5.html
+│   ├── Outcome (Distribution Shapes)           REDIRECT  → eda-71.html
+│   ├── Exposure (Chronic Conditions)           REDIRECT  → eda-61.html
+│   ├── Predisposing (Socio-demographic)        REDIRECT  → eda-62.html
+│   ├── Facilitating (Health System & Behav.)   REDIRECT  → eda-63.html
+│   ├── Needs (Perceived Health & Limitations)  REDIRECT  → eda-64.html
+│   └── Missingness                             REDIRECT  → eda-65.html
+│
+└── Site Map                                    COMPOSED  ← publishing-contract.prompt.md
+```
+
+## Content Types
+
+| Type | Meaning |
+|------|----------|
+| **VERBATIM** | Source `.md` morphed to `.qmd` with YAML frontmatter added; content preserved exactly |
+| **COMPOSED** | Authored by the Publishing Writer; synthesized from one or more raw sources per the contract brief |
+| **GENERATED** | Produced from a verbatim source with transforms applied (link rewriting, mermaid injection, developer content stripping) |
+| **REDIRECT** | Transit `.qmd` stub that forwards the browser to a standalone rendered HTML report |
+
+## Stats Instructions Coverage
+
+The following mapping shows how each page in this site addresses requirements from the statistical analysis instructions (`stats_instructions_v3.md`):
+
+| Site Page | Stats Instructions Section | Coverage |
+|-----------|---------------------------|----------|
+| Statistical Instructions | §1–§6 (complete) | The full requirements document as received by the independent biostatistician |
+| Pipeline Guide | §2.1 (database), §3.2 (pooling) | Documents how raw CCHS files are transported, harmonized, and transformed |
+| CACHE Manifest | §2.2 (variables), §3.1 (sample), §4.1 (outcome) | Authoritative reference for the 69-column analytic dataset |
+| INPUT Manifest | §2.1 (database) | Raw input file documentation and module inventory |
+| Variable Inclusion | §2.2 (required variables) | Traceability record: every §2.2 variable mapped to its Ellis implementation |
+| Univariate Distributions | §4.2 (distribution checks), §5.2 (descriptive stats) | Full univariate profiles for all variables — weighted frequencies, means, missingness |
+| Outcome | §4.1 (construction), §4.2 (distribution) | LOP day decomposition into 8 reason categories; prevalence, contribution, co-occurrence |
+| Outcome (Distribution Shapes) | §4.2 (distribution checks), §5.2 (descriptive stats) | Outcome-distribution diagnostics for LOP day counts; zero-inflation, tail shape, and modeling-oriented distribution structure |
+| Exposure | §2.2 (primary exposure) | Weighted prevalence of 17 chronic conditions; relationship to primary outcome |
+| Predisposing | §2.2 (predisposing factors), §5.3 (bivariate) | Distribution and outcome relationship for 11 socio-demographic variables |
+| Facilitating | §2.2 (facilitating factors), §5.3 (bivariate) | Distribution and outcome relationship for 12 health-system and behaviour variables |
+| Needs | §2.2 (needs factors), §5.3 (bivariate) | Distribution and outcome relationship for 10 perceived health and ADL variables |
+| Missingness | §5.1 (missing data), §4.2 (distribution checks) | Little's MCAR test and missingness visualization across Andersen Model domains |
