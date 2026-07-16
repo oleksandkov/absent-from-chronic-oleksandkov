@@ -9,23 +9,28 @@
 ## Orchestra Sitemap
 
 ```text
-.github/
 ├── publishing-orchestra.md
 ├── agents/
 │   ├── publishing-interviewer.agent.md
 │   └── publishing-writer.agent.md
-├── prompts/
-│   ├── publishing-new.prompt.md
-│   └── publishing-validate.prompt.md
+├── copilot/
+│   └── publishing-orchestra-SKILL.md
+├── hooks/
+│   ├── publishing-validation-reminder.json
+│   └── scripts/
+│       └── check-publishing-validation.ps1
 ├── instructions/
 │   └── publishing-rules.instructions.md
-├── templates/
-│   └── publishing-contract-template.md
+├── prompts/
+│   ├── publishing-new.prompt.md
+│   ├── publishing-validate.prompt.md
+│   └── publishing-write.prompt.md
 ├── skills/
 │   └── publishing-fidelity-audit/
 │       └── SKILL.md
-└── copilot/
-    └── publishing-orchestra-SKILL.md
+└── templates/
+    ├── audit-fidelity-template.R
+    └── publishing-contract-template.md
 ```
 
 ---
