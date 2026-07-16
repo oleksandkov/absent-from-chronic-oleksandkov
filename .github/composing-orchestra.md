@@ -10,14 +10,19 @@
 ├── composing-orchestra.md
 ├── agents/
 │   └── report-composer.agent.md
-├── prompts/
-│   ├── composing-new.prompt.md
-│   └── talk-new.prompt.md
+├── copilot/
+│   └── composing-orchestra-SKILL.md
 ├── instructions/
-│   ├── report-composition.instructions.md
-│   └── artifact-naming.instructions.md
-└── copilot/
-  └── composing-orchestra-SKILL.md
+│   ├── artifact-naming.instructions.md
+│   └── report-composition.instructions.md
+├── prompts/
+│   └── composing-new.prompt.md
+└── templates/
+    ├── composing-contract-template.md
+    ├── composing-template.R
+    ├── composing-template.qmd
+    ├── data-primer-template.qmd
+    └── report-audit-checklist.md
 ```
 
 ---

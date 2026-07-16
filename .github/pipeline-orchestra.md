@@ -10,17 +10,30 @@
 ├── pipeline-orchestra.md
 ├── agents/
 │   └── pipeline-engineer.agent.md
+├── copilot/
+│   └── pipeline-orchestra-SKILL.md
+├── hooks/
+│   ├── ellis-validation-reminder.json
+│   └── scripts/
+│       └── check-ellis-validation.ps1
 ├── prompts/
-│   ├── pipeline-bootstrap.prompt.md
-│   ├── pipeline-ellis.prompt.md
-│   ├── pipeline-validate.prompt.md
 │   ├── pipeline-audit.prompt.md
-│   └── pipeline-diagram.prompt.md
+│   ├── pipeline-bootstrap.prompt.md
+│   ├── pipeline-diagram.prompt.md
+│   ├── pipeline-ellis.prompt.md
+│   └── pipeline-validate.prompt.md
 ├── instructions/
 │   └── pipeline-scripts.instructions.md
-└── skills/
+├── skills/
     └── validate-cache-manifest/
-        └── SKILL.md
+        ├── SKILL.md
+        ├── references/
+        │   ├── extract-table-metadata.sql
+        │   └── report-template.md
+        └── scripts/
+            └── validate-cache-manifest.R
+└── templates/
+    └── pipeline-diagram-template.mmd
 ```
 
 ---
