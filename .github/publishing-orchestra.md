@@ -8,6 +8,8 @@
 
 ## Orchestra Sitemap
 
+> **Note:** This sitemap is a convenience copy. The authoritative source is the whitelist map in `.github/migration.md`.
+
 ```text
 ├── publishing-orchestra.md
 ├── agents/

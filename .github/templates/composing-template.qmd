@@ -21,6 +21,7 @@ editor_options:
 ---
 
 <!-- Composing Orchestra template — customize all {PLACEHOLDERS} before use. -->
+
 <!-- Mode: {TYPE} (EDA = explore with open mind | Report = synthesize prior findings) -->
 
 # Mission
@@ -29,9 +30,9 @@ editor_options:
 
 **Research Questions:**
 
-1. {RQ1}
-2. {RQ2}
-3. {RQ3}
+1.  {RQ1}
+2.  {RQ2}
+3.  {RQ3}
 
 Following the dual-file development pattern, analytical code lives in the companion `.R` script. This document sources those chunks for presentation.
 
@@ -172,6 +173,7 @@ For complete data documentation, see the [Data Primer](../data-primer-1/data-pri
 ## Graph Family g1: {g1 description from contract}
 
 <!-- Artifact ID: g1 | Type: Graph | Research question: {RQ1 from contract} -->
+
 <!-- Numbering is nominal (creation order) unless the project documents a convention -->
 
 ```{r}
@@ -194,6 +196,7 @@ For complete data documentation, see the [Data Primer](../data-primer-1/data-pri
 ## Graph Family g2: {g2 description from contract}
 
 <!-- Artifact ID: g2 | Type: Graph | Research question: {RQ2 from contract} -->
+
 <!-- Hierarchy: g2 (level 1) -> g21 (level 2) -> g211 (level 3 micro-variant) -->
 
 ```{r}
@@ -272,6 +275,7 @@ For complete data documentation, see the [Data Primer](../data-primer-1/data-pri
 ## Outputs
 
 <!-- Artifact ID: out1 | Type: Output | Raw text-based console blocks -->
+
 <!-- Outputs ground understanding relative to the CACHE-manifest, data primer, or method.md -->
 
 ```{r}
