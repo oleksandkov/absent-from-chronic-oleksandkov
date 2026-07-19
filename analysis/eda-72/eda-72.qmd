@@ -1,0 +1,335 @@
+---
+title: "EDA 72: Predisposition Profiles Across Chronic-Absence Groups"
+subtitle: "Extending the EDA-71 G2 Outcome Family"
+author: "Analysis Team"
+date: last-modified
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    code-fold: show
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission
+
+This EDA extends the EDA-71 G2 family by relating its outcome groups and exact
+chronic-day distribution to the non-student predisposing variables documented in
+Section 3 of the Data Primer. It first profiles respondents with No Days, then makes
+the proposed day-scale coarsening explicit, and finally compares No Days with Chronic
+Days while retaining the positive chronic-day values.
+
+**Research Questions:**
+
+1.  How are predisposing variables distributed among respondents with No Days?
+2.  How do exact chronic days map to weekly and hybrid coarsened scales?
+3.  How does predisposing composition differ between No Days and Chronic Days?
+4.  How does chronic-day intensity vary across predisposing-variable levels?
+5.  Which predictor levels have visibly different exact chronic-day distributions?
+
+# Definition of Terms
+
+**No Days**: `days_absent_total == 0` (n = 45,006).
+
+**Chronic Days**: `days_absent_chronic > 0` (n = 3,626). This group may also report
+non-chronic absence days.
+
+**Non-Chronic Days**: `days_absent_chronic == 0 & days_absent_total > 0`
+(n = 15,211).
+
+**Work-week coarsening**: Five reported workdays are grouped into one display week.
+This is a scale-design choice, not a claim about elapsed time or work schedule.
+
+```{r}
+#| code-summary: Reconciles working directory between execution modes
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir='../../') # keep this chunk isolated
+```
+
+```{r}
+#| label: set_options
+#| code-summary: Report-wide formatting options
+#| echo: false
+#| results: hide
+#| message: false
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results = 'show',
+  message = FALSE,
+  warning = FALSE,
+  comment = NA,
+  tidy = FALSE,
+  fig.path = 'figure-png-iso/'
+)
+echo_chunks <- FALSE
+message_chunks <- FALSE
+options(width = 100)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/eda-72/eda-72.R")
+```
+
+# Environment
+
+```{r}
+#| label: load-packages
+#| code-summary: Packages used in the current report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: Project functions and Alberta visual identity colours
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: Paths, dimensions, predictor definitions, and group labels
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| code-summary: Helpers for predictor reshaping, facet labels, and weighted means
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+# Data
+
+```{r}
+#| label: load-data
+#| code-summary: Load the Ellis respondent-level analytical parquet
+#| echo: true
+#| warning: false
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: tweak-data-0
+#| code-summary: Verify the three outcome-group counts and chronic-day support
+#| echo: true
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: inspect-data-0
+#| code-summary: Outcome-group counts
+#| echo: false
+```
+
+```{r}
+#| label: inspect-data-1
+#| code-summary: Predisposition variables retained after dropping student status
+#| echo: false
+```
+
+## Data Context
+
+For complete data documentation, see the
+[Univariate Distributions Data Primer](../data-primer-1/univariate-distributions.html),
+especially Section 3, Predisposing Variables.
+
+```{r}
+#| label: data-context-tables
+#| code-summary: Which table and variables this analysis uses
+#| echo: true
+```
+
+```{r}
+#| label: data-context-person
+#| code-summary: One illustrative record from No Days and Chronic Days
+#| echo: true
+```
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: Group counts and predictor completeness
+#| echo: true
+```
+
+```{r}
+#| label: out1
+#| code-summary: Respondent grain proof
+#| echo: true
+```
+
+# Analysis
+
+## Graph Family g0: No Days Predisposition Overview
+
+The No Days group is the largest outcome group. These panels show each predictor's
+weighted composition without implying that the categories across different predictors
+share a common denominator beyond membership in the same No Days cohort.
+
+```{r}
+#| label: g0-data-prep
+#| code-summary: Prepare weighted predisposing-variable distributions for No Days
+#| echo: true
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g0
+#| code-summary: Compact No Days predisposition overview
+#| echo: false
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Graph g0: Weighted composition of the non-student predisposing variables among 45,006 respondents who reported No Days. Percentages sum to 100% within each variable."
+```
+
+### g01 - A4 Landscape Design
+
+Graph g01 tests the same content at A4 landscape dimensions. Three facet columns,
+larger labels, and direct percentages trade browser compactness for print legibility.
+
+```{r}
+#| label: g01
+#| code-summary: A4-landscape No Days predisposition overview
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g01: A4-landscape version of the No Days predisposition profile. Direct labels and a three-column facet layout are designed to remain legible in the browser and on an A4 landscape page."
+```
+
+## Graph Family g1: Chronic-Day Scale Design
+
+The exact support contains integer values from 1 through 31. Graph g1 exposes rather
+than hides the consequence of each coarsening rule: exact values, five-day work-week
+bins, and a hybrid that retains one-day granularity through day 5 before coarsening.
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: Map every exact chronic-day value to each proposed scale
+#| echo: true
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g1
+#| code-summary: Exact-to-coarsened chronic-day scale map
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 4.2
+#| fig-cap: "Graph g1: Every exact chronic-day value from 1 to 31 mapped to the raw, five-day work-week, and first-week-exact scales. Alternating bands reveal bin boundaries; labels state the category readers would see."
+```
+
+### g11 - Chronic-Day Distribution at Three Scales
+
+Graph g11 adopts the left-hand three-way cohort partition from EDA-71 graph g22.
+The three stacked panels at right hold the same 3,626 Chronic Days respondents at
+the exact, five-day work-week, and first-week-exact scales. The top panel uses an
+exact-day colour category; the lower panels use the seven five-day work-week colour
+bands. Therefore, in the bottom panel days 1 through 5 remain separate bars while
+sharing the first work-week colour.
+
+```{r}
+#| label: g11-data-prep
+#| code-summary: Prepare the three-way cohort partition and chronic-day frequencies at three scales
+#| echo: true
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g11
+#| code-summary: Three-scale chronic-day distribution with the EDA-71 cohort partition
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g11: The EDA-71 G22 three-way respondent partition at left, with Chronic Days respondent counts at three scales at right. Top: one bar per exact chronic day from 1 through 31, coloured by exact day. Middle: five-day work-week bins. Bottom: days 1 through 5 remain separate while 6-10 through 26-30 are coarsened, with every bar coloured by its five-day work-week band."
+```
+
+## Graph Family g2: No Days Versus Chronic Days
+
+This family compares group composition before moving to the numeric chronic-day
+values. Percentages in g2 and g21 use the pooled survey weight. Graphs g22 and g23
+condition on the 3,626 Chronic Days respondents.
+
+```{r}
+#| label: g2-data-prep
+#| code-summary: Prepare weighted composition contrasts and chronic-day intensity
+#| echo: true
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g2
+#| code-summary: Compare predictor composition for No Days and Chronic Days
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g2: Pooled survey-weighted composition of No Days and Chronic Days respondents within each predisposing variable. The connecting line isolates the within-level contrast; it does not imply an ordered transition between groups."
+```
+
+### g21 - Composition Difference
+
+```{r}
+#| label: g21
+#| code-summary: Show Chronic Days minus No Days percentage-point differences
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g21: Weighted percentage-point difference calculated as Chronic Days minus No Days for every predictor level. Positive values indicate that the level occupies a larger share of the Chronic Days group."
+```
+
+### g22 - Chronic-Day Intensity
+
+```{r}
+#| label: g22
+#| code-summary: Weighted mean chronic days by predisposing-variable level
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g22: Pooled survey-weighted mean chronic-absence days within each predictor level among Chronic Days respondents only. Point area encodes the raw subgroup count to flag sparse levels."
+```
+
+### g23 - Exact Positive-Day Distribution
+
+Graph g23 continues the thought of EDA-71's
+`g23_chronic_vs_other_only_split_distribution`: it preserves every exact positive
+chronic-day value, but replaces the other-only comparison with predisposing-variable
+levels. Each row has its own 100% conditional denominator.
+
+```{r}
+#| label: g23
+#| code-summary: Exact weighted chronic-day distributions by predictor level
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g23: Exact chronic-day values among Chronic Days respondents, stratified by predisposing-variable level. Each row sums to 100%, so colour compares distribution shape rather than subgroup prevalence."
+```
+
+# Appendix
+
+Student status is excluded because the source field is suppressed and all-missing in
+the PUMF. Non-Chronic Days remains part of the group definition and count validation,
+but the primary predictor contrast in this EDA is No Days versus Chronic Days.
