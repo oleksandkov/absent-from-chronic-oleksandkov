@@ -66,6 +66,7 @@ exactly when copying into the target repo.
 │   ├── pipeline-ellis.prompt.md
 │   ├── pipeline-validate.prompt.md
 │   ├── publishing-new.prompt.md
+│   ├── publishing-export-site-pdf.prompt.md
 │   ├── publishing-validate.prompt.md
 │   ├── publishing-write.prompt.md
 │   └── talk-new.prompt.md
@@ -74,7 +75,13 @@ exactly when copying into the target repo.
 │   │   ├── SKILL.md
 │   │   └── scripts/
 │   │       └── evaluate-harness-equivalence.ps1
+│   ├── export-frontend-site-pdfs/
+│   │   ├── SKILL.md
+│   │   └── scripts/
+│   │       └── export-frontend-site-pdfs.R
 │   ├── publishing-fidelity-audit/
+│   │   └── SKILL.md
+│   ├── update-frontend/
 │   │   └── SKILL.md
 │   └── validate-cache-manifest/
 │       ├── SKILL.md
@@ -199,10 +206,17 @@ static Quarto website from analytical content in `_frontend-*`.
 │   └── publishing-rules.instructions.md
 ├── prompts/
 │   ├── publishing-new.prompt.md
+│   ├── publishing-export-site-pdf.prompt.md
 │   ├── publishing-validate.prompt.md
 │   └── publishing-write.prompt.md
 ├── skills/
-│   └── publishing-fidelity-audit/
+│   ├── export-frontend-site-pdfs/
+│   │   ├── SKILL.md
+│   │   └── scripts/
+│   │       └── export-frontend-site-pdfs.R
+│   ├── publishing-fidelity-audit/
+│   │   └── SKILL.md
+│   └── update-frontend/
 │       └── SKILL.md
 └── templates/
     ├── audit-fidelity-template.R
