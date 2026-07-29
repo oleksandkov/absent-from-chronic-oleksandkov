@@ -181,6 +181,7 @@ ds_rail  <- tibble::tribble(
 
   # ---- Series 7: Outcome Profile ---------------------------------------------
   # "run_qmd"   , "analysis/eda-71/eda-71.qmd",     # EDA-71: LOP outcome profile — distribution structure for modeling context (composed, not yet active)
+  # "run_qmd"   , "analysis/eda-72/eda-72.qmd",     # EDA-72: Predisposition profiles across chronic-absence groups (composed, not yet active)
 
 
 )
