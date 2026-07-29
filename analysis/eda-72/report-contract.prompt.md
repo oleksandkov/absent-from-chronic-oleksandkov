@@ -6,7 +6,7 @@ EDA
 
 ## Date
 
-2026-07-18 | Last updated: 2026-07-18
+2026-07-18 | Last updated: 2026-07-19
 
 ## Status
 
@@ -15,9 +15,10 @@ active
 ## Mission
 
 Extend the EDA-71 chronic-absence outcome profile by examining how the non-student
-predisposing variables from Section 3 of the Data Primer differ between respondents
-with No Days and Chronic Days. Preserve the exact chronic-day support while testing
-coarser work-week scales that may make the 1-to-31-day distribution easier to read.
+predisposing variables from Section 3 of the Data Primer differ across the exhaustive,
+mutually exclusive No Days, Chronic Days, and Non-Chronic Days groups. Preserve exact
+positive-day support while testing a hybrid work-week scale and paired raw/weighted
+composition displays.
 
 ## Data Sources
 
@@ -48,14 +49,18 @@ coarser work-week scales that may make the 1-to-31-day distribution easier to re
 4. Within the Chronic Days group, how does chronic-day intensity vary across
    predisposing-variable levels?
 5. Which predisposing levels have visibly different exact chronic-day distributions?
+6. How do the other two pairwise composition contrasts complete the three-group
+  comparison matrix?
+7. How do Chronic Days and Non-Chronic Days frequency distributions compare when
+  days 1-5 remain exact and the tail is coarsened into work-week bins?
 
 ## Target Graph Families
 
 - g0: No Days predisposition overview, including an A4-landscape browser/print design
 - g1: Mapping of exact chronic days to weekly and first-week-exact coarsened scales,
-  including a three-panel distributional comparison
-- g2: No Days versus Chronic Days composition and chronic-day intensity by
-  predisposing-variable level
+  including Chronic and Non-Chronic positive-day frequency comparisons
+- g2: Three-group composition, exhaustive pairwise contrasts, chronic-day intensity,
+  and exact-day distributions with raw and weighted composition context
 
 ## Artifact Inventory
 
@@ -65,10 +70,15 @@ coarser work-week scales that may make the 1-to-31-day distribution easier to re
 | g01 | Graph | A4 Predisposition Profile Among Respondents With No Days | A4-landscape design for browser and print review |
 | g1 | Graph | Mapping Exact Chronic Days to Coarser Work-Week Scales | Make all proposed coarsening rules explicit on the raw 1-31 support |
 | g11 | Graph | Chronic-Day Distribution at Three Scales | Retain EDA-71 G22's left cohort partition while comparing exact, weekly, and hybrid chronic-day bars |
+| g12 | Graph | Missed-Day Distributions on the Hybrid Work-Week Scale | Compare Chronic and Non-Chronic frequency bars with days 1-5 exact and the tail coarsened |
 | g2 | Graph | Predisposition Composition: No Days and Chronic Days | Compare weighted within-group percentages |
+| g20 | Graph | Predisposition Composition Across All Outcome Groups | Add Non-Chronic Days using the EDA-71 outcome palette |
 | g21 | Graph | Chronic Minus No Days Composition Difference | Rank percentage-point contrasts by predictor level |
+| g211 | Graph | Non-Chronic Minus No Days Composition Difference | Add the second pairwise contrast in the three-group matrix |
+| g212 | Graph | Chronic Minus Non-Chronic Composition Difference | Complete the three pairwise contrasts among mutually exclusive groups |
 | g22 | Graph | Mean Chronic Days by Predisposition Level | Add numeric chronic-day intensity within chronic reporters |
 | g23 | Graph | Exact Chronic-Day Distribution by Predisposition Level | Continue EDA-71 g23 with predictor-stratified positive-day distributions |
+| g24 | Graph | Chronic-Day Distribution and Predisposition Composition | Add raw respondent-count and weighted-share tiles that each sum to 100% within predictor |
 | out1 | Output | Respondent Grain Proof | Verify one row per respondent identifier |
 
 Numbering follows the requested analytic sequence. The user-requested `g0` family is
@@ -77,15 +87,17 @@ No Days cohort itself has no positive day values to coarsen.
 
 ## Output Format
 
-HTML with code folding and a table of contents. Graph g01 and graph g23 use A4 landscape
-dimensions (11.69 x 8.27 inches) for browser and print review.
+HTML with code folding and a table of contents. Graphs g01, g2, g20, g21, g211, g212,
+g22, g23, and g24 use A4 landscape dimensions (11.69 x 8.27 inches) for browser and
+print review.
 
 ## Scope Boundaries
 
 ### Included
 
 - Three mutually exclusive outcome labels: No Days, Chronic Days, and Non-Chronic Days
-- Primary comparison: No Days (n = 45,006) versus Chronic Days (n = 3,626)
+- All three pairwise comparisons among No Days (n = 45,006), Chronic Days
+  (n = 3,626), and Non-Chronic Days (n = 15,211)
 - All Section 3 predisposing variables available in the Ellis output except student status
 - Raw and pooled-weight descriptive summaries
 - Exact chronic days and two explicit coarsening schemes
@@ -94,8 +106,6 @@ dimensions (11.69 x 8.27 inches) for browser and print review.
 
 - Student status, because it is suppressed and all-missing in the PUMF
 - Inferential tests, regression models, causal claims, and confidence intervals
-- Non-Chronic Days as a primary predictor comparison group; it remains documented in
-  the three-way cohort definition for continuity with EDA-71
 - Treating the coarsened work-week categories as literal elapsed calendar weeks
 
 ## Notes

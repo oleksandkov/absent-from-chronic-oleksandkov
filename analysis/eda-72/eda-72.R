@@ -59,6 +59,14 @@ comparison_group_colours <- c(
   "Non-Chronic Days" = abcol[["blue"]]
 )
 
+dhhgage_labels <- c(
+  "2" = "15-17 yrs", "3" = "18-19 yrs", "4" = "20-24 yrs",
+  "5" = "25-29 yrs", "6" = "30-34 yrs", "7" = "35-39 yrs",
+  "8" = "40-44 yrs", "9" = "45-49 yrs", "10" = "50-54 yrs",
+  "11" = "55-59 yrs", "12" = "60-64 yrs", "13" = "65-69 yrs",
+  "14" = "70-74 yrs", "15" = "75-79 yrs"
+)
+
 # ---- declare-functions -------------------------------------------------------
 make_predictor_long <- function(data, specifications) {
   purrr::map2_dfr(
@@ -66,10 +74,19 @@ make_predictor_long <- function(data, specifications) {
     specifications$variable_label,
     function(variable_name, display_name) {
       source_value <- data[[variable_name]]
-      value_levels <- if (is.factor(source_value)) {
-        levels(source_value)
+      if (identical(variable_name, "dhhgage")) {
+        value_levels <- names(dhhgage_labels)
+        level_value <- factor(
+          dhhgage_labels[as.character(source_value)],
+          levels = unname(dhhgage_labels[value_levels])
+        )
       } else {
-        sort(unique(stats::na.omit(source_value))) |> as.character()
+        value_levels <- if (is.factor(source_value)) {
+          levels(source_value)
+        } else {
+          sort(unique(stats::na.omit(source_value))) |> as.character()
+        }
+        level_value <- factor(as.character(source_value), levels = value_levels)
       }
 
       tibble::tibble(
@@ -79,7 +96,7 @@ make_predictor_long <- function(data, specifications) {
         days_absent_chronic = data$days_absent_chronic,
         variable = variable_name,
         variable_label = display_name,
-        level = factor(as.character(source_value), levels = value_levels)
+        level = level_value
       )
     }
   )
@@ -104,6 +121,30 @@ strip_facet_level <- function(value) sub("^.*___", "", value)
 
 weighted_mean <- function(value, weight) {
   stats::weighted.mean(value, weight, na.rm = TRUE)
+}
+
+compose_two_panel_grob <- function(left_plot, right_plot, left_width = 0.22, right_width = 0.78) {
+  left_grob <- ggplot2::ggplotGrob(left_plot)
+  right_grob <- ggplot2::ggplotGrob(right_plot)
+
+  grid::grid.grabExpr({
+    grid::grid.newpage()
+    grid::pushViewport(
+      grid::viewport(
+        layout = grid::grid.layout(
+          nrow = 1,
+          ncol = 2,
+          widths = grid::unit(c(left_width, right_width), "npc")
+        )
+      )
+    )
+    grid::pushViewport(grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
+    grid::grid.draw(left_grob)
+    grid::upViewport()
+    grid::pushViewport(grid::viewport(layout.pos.row = 1, layout.pos.col = 2))
+    grid::grid.draw(right_grob)
+    grid::upViewport(2)
+  }, wrap.grobs = TRUE)
 }
 
 # ---- load-data ---------------------------------------------------------------
@@ -136,6 +177,16 @@ outcome_group_summary <- ds0 %>%
 
 stopifnot(all(outcome_group_summary$n_raw == outcome_group_summary$expected_n))
 stopifnot(max(ds0$days_absent_chronic, na.rm = TRUE) == 31L)
+
+n_no_days <- outcome_group_summary %>% filter(outcome_group == "No Days") %>% pull(n_raw)
+n_chronic_days <- outcome_group_summary %>% filter(outcome_group == "Chronic Days") %>% pull(n_raw)
+n_non_chronic_days <- outcome_group_summary %>% filter(outcome_group == "Non-Chronic Days") %>% pull(n_raw)
+
+group_definition_short <- paste0(
+  "No Days: n = ", scales::comma(n_no_days),
+  "; Chronic: >=1 chronic day (n = ", scales::comma(n_chronic_days),
+  "); Non-Chronic: >0 missed days and 0 chronic days (n = ", scales::comma(n_non_chronic_days), ")."
+)
 
 # ---- inspect-data-0 ----------------------------------------------------------
 cat("Analytical rows:", scales::comma(nrow(ds0)), "\n")
@@ -407,9 +458,16 @@ g11_left_partition <- g11_partition_summary %>%
     labels = scales::label_percent(scale = 1), limits = c(0, 100),
     expand = expansion(mult = c(0, 0))
   ) +
-  labs(x = NULL, y = "Share of sample") +
+  labs(
+    title = "Graph g11: Groups",
+    subtitle = "No Days / Chronic / Non-Chronic",
+    x = NULL,
+    y = "Share of sample"
+  ) +
   theme_minimal(base_size = 11) +
   theme(
+    plot.title = element_text(size = 10),
+    plot.subtitle = element_text(size = 9),
     axis.text.x = element_blank(), panel.grid.major.x = element_blank(),
     panel.grid.minor = element_blank(), plot.margin = margin(5.5, 0, 5.5, 5.5)
   )
@@ -421,7 +479,11 @@ g11_top_exact <- g11_chronic_exact %>%
   scale_x_continuous(breaks = c(1:5, seq(10, 30, 5), 31), limits = c(0.5, 31.5)) +
   scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.08))) +
   labs(
-    title = "Exact reported days", subtitle = "One-day bars, 1 through 31; colour identifies the exact-day category",
+    title = "Graph g11: Exact reported days",
+    subtitle = paste0(
+      "Chronic group only (>=1 chronic day), n = ", scales::comma(n_chronic_days),
+      "; one-day bars from 1 to 31"
+    ),
     x = "Chronic-absence days", y = "Respondent count"
   ) +
   theme_minimal(base_size = 8) +
@@ -434,7 +496,11 @@ g11_middle_weekly <- g11_weekly %>%
   scale_fill_manual(values = g11_week_colours, guide = "none") +
   scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.14))) +
   labs(
-    title = "Five-day work-week bins", subtitle = "1-5, 6-10, ..., 26-30, and 31 days",
+    title = "Graph g11: Five-day work-week bins",
+    subtitle = paste0(
+      "Chronic group only (>=1 chronic day), n = ", scales::comma(n_chronic_days),
+      "; bins: 1-5, 6-10, ..., 31 days"
+    ),
     x = NULL, y = "Respondent count"
   ) +
   theme_minimal(base_size = 8) +
@@ -446,7 +512,11 @@ g11_bottom_hybrid <- g11_hybrid %>%
   scale_fill_manual(values = g11_week_colours, name = "Five-day colour band") +
   scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.08))) +
   labs(
-    title = "First week exact; tail coarsened", subtitle = "Days 1-5 remain separate; tail bins retain their five-day colour band",
+    title = "Graph g11: First week exact; tail coarsened",
+    subtitle = paste0(
+      "Chronic group only (>=1 chronic day), n = ", scales::comma(n_chronic_days),
+      "; days 1-5 exact, tail binned"
+    ),
     x = NULL, y = "Respondent count"
   ) +
   theme_minimal(base_size = 8) +
@@ -492,6 +562,8 @@ ggsave(
 
 # ---- g12-data-prep -----------------------------------------------------------
 # Compare the hybrid missed-day distribution for the two positive-day groups.
+g12_partition_summary <- g11_partition_summary
+
 g12_hybrid_distribution <- ds0 %>%
   filter(outcome_group %in% c("Chronic Days", "Non-Chronic Days")) %>%
   transmute(
@@ -546,7 +618,35 @@ g12_hybrid_distribution <- ds0 %>%
   )
 
 # ---- g12 ---------------------------------------------------------------------
-g12_group_hybrid_distribution <- g12_hybrid_distribution %>%
+g12_left_partition <- g12_partition_summary %>%
+  ggplot(aes(x = "Analytic sample", y = pct_raw, fill = outcome_group)) +
+  geom_col(width = 0.48, colour = "white", linewidth = 0.3) +
+  geom_text(
+    aes(label = paste0(scales::comma(n_raw), "\n", sprintf("%.1f%%", pct_raw))),
+    position = position_stack(vjust = 0.5), size = 2.8, lineheight = 0.95
+  ) +
+  scale_fill_manual(values = g11_partition_colours, guide = "none") +
+  scale_y_continuous(
+    labels = scales::label_percent(scale = 1), limits = c(0, 100),
+    expand = expansion(mult = c(0, 0))
+  ) +
+  labs(
+    title = "Graph g12: Groups",
+    subtitle = "All respondents",
+    x = NULL,
+    y = "Share of sample"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(size = 10),
+    plot.subtitle = element_text(size = 9),
+    axis.text.x = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.margin = margin(5.5, 0, 5.5, 5.5)
+  )
+
+g12_right_hybrid_distribution <- g12_hybrid_distribution %>%
   ggplot(aes(x = bin_label, y = n_raw, fill = work_week)) +
   geom_col(width = 0.82) +
   facet_grid(
@@ -560,8 +660,12 @@ g12_group_hybrid_distribution <- g12_hybrid_distribution %>%
   ) +
   scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.08))) +
   labs(
-    title = "Graph g12: Missed-Day Distributions on the Hybrid Work-Week Scale",
-    subtitle = "Days 1-5 remain exact; values above day 5 are grouped into work-week bins",
+    title = "Graph g12: Hybrid Missed-Day Distributions",
+    subtitle = paste0(
+      "Chronic = >=1 chronic day (n = ", scales::comma(n_chronic_days),
+      "); Non-Chronic = >0 missed days and 0 chronic days (n = ", scales::comma(n_non_chronic_days),
+      "); days 1-5 exact, tail binned"
+    ),
     x = "Exact day within week 1 or work-week bin",
     y = "Respondent count"
   ) +
@@ -573,7 +677,14 @@ g12_group_hybrid_distribution <- g12_hybrid_distribution %>%
     plot.title.position = "plot"
   )
 
-print(g12_group_hybrid_distribution)
+g12_group_hybrid_distribution <- compose_two_panel_grob(
+  g12_left_partition,
+  g12_right_hybrid_distribution,
+  left_width = 0.22,
+  right_width = 0.78
+)
+
+grid::grid.draw(g12_group_hybrid_distribution)
 ggsave(
   paste0(prints_folder, "g12_group_hybrid_distribution.png"),
   g12_group_hybrid_distribution,
@@ -651,7 +762,10 @@ g2_group_composition <- g2_composition %>%
   scale_y_discrete(labels = strip_facet_level) +
   labs(
     title = "Graph g2: Predisposition Composition in No Days and Chronic Days",
-    subtitle = "Pooled survey-weighted percentages within each outcome group and variable",
+    subtitle = paste0(
+      "No Days (n = ", scales::comma(n_no_days), ") vs Chronic (>=1 chronic day; n = ",
+      scales::comma(n_chronic_days), "); pooled survey-weighted shares"
+    ),
     x = "Weighted share within group",
     y = NULL,
     colour = NULL
@@ -685,7 +799,11 @@ g20_three_group_composition <- g2_composition_all %>%
   scale_y_discrete(labels = strip_facet_level) +
   labs(
     title = "Graph g20: Predisposition Composition Across All Outcome Groups",
-    subtitle = "Pooled survey-weighted percentages; colours match EDA-71 graph g2",
+    subtitle = paste0(
+      "No Days (n = ", scales::comma(n_no_days), "), Chronic (>=1 chronic day; n = ",
+      scales::comma(n_chronic_days), "), Non-Chronic (>0 missed days & 0 chronic days; n = ",
+      scales::comma(n_non_chronic_days), ")"
+    ),
     x = "Weighted share within group",
     y = NULL,
     colour = NULL
@@ -720,7 +838,10 @@ g21_composition_difference <- g2_difference %>%
   scale_y_discrete(labels = strip_facet_level) +
   labs(
     title = "Graph g21: Chronic Minus No Days Composition Difference",
-    subtitle = "Positive values indicate a larger weighted share among Chronic Days respondents",
+    subtitle = paste0(
+      "Chronic (>=1 chronic day; n = ", scales::comma(n_chronic_days), ") minus No Days (n = ",
+      scales::comma(n_no_days), "); positive values indicate larger Chronic share"
+    ),
     x = "Percentage-point difference",
     y = NULL
   ) +
@@ -753,7 +874,10 @@ g211_non_chronic_minus_no_days <- g2_pairwise_differences %>%
   scale_y_discrete(labels = strip_facet_level) +
   labs(
     title = "Graph g211: Non-Chronic Minus No Days Composition Difference",
-    subtitle = "Positive values indicate a larger weighted share among Non-Chronic Days respondents",
+    subtitle = paste0(
+      "Non-Chronic (>0 missed days & 0 chronic days; n = ", scales::comma(n_non_chronic_days),
+      ") minus No Days (n = ", scales::comma(n_no_days), ")"
+    ),
     x = "Percentage-point difference",
     y = NULL
   ) +
@@ -786,7 +910,10 @@ g212_chronic_minus_non_chronic <- g2_pairwise_differences %>%
   scale_y_discrete(labels = strip_facet_level) +
   labs(
     title = "Graph g212: Chronic Minus Non-Chronic Composition Difference",
-    subtitle = "Positive values indicate a larger weighted share among Chronic Days respondents",
+    subtitle = paste0(
+      "Chronic (>=1 chronic day; n = ", scales::comma(n_chronic_days), ") minus Non-Chronic (n = ",
+      scales::comma(n_non_chronic_days), ")"
+    ),
     x = "Percentage-point difference",
     y = NULL
   ) +
@@ -813,7 +940,10 @@ g22_chronic_day_intensity <- g2_intensity %>%
   scale_size_area(max_size = 5, labels = scales::label_comma()) +
   labs(
     title = "Graph g22: Mean Chronic Days by Predisposition Level",
-    subtitle = "Chronic Days respondents only (n = 3,626); means use pooled survey weights",
+    subtitle = paste0(
+      "Chronic group only (>=1 chronic day), n = ", scales::comma(n_chronic_days),
+      "; means use pooled survey weights"
+    ),
     x = "Weighted mean chronic-absence days",
     y = NULL,
     size = "Raw n"
@@ -841,7 +971,10 @@ g23_exact_chronic_distribution <- g2_exact_distribution %>%
   scale_y_discrete(labels = strip_facet_level) +
   labs(
     title = "Graph g23: Exact Chronic-Day Distribution by Predisposition Level",
-    subtitle = "Each row sums to 100%; darker cells mark more common exact values within that level",
+    subtitle = paste0(
+      "Chronic group only (>=1 chronic day), n = ", scales::comma(n_chronic_days),
+      "; each row sums to 100%"
+    ),
     x = "Exact chronic-absence days among Chronic Days respondents",
     y = NULL,
     fill = "Weighted share"
@@ -875,7 +1008,7 @@ g24_composition_tiles <- g2_composition_all %>%
     measure = factor(
       measure,
       levels = c("pct_raw", "pct_weighted"),
-      labels = c("Respondent count", "Weighted share")
+      labels = c("Respondent\nshare", "Weighted\nshare")
     )
   )
 
@@ -900,7 +1033,7 @@ g24_left_exact_distribution <- g2_exact_distribution %>%
   scale_y_discrete(labels = strip_facet_level) +
   labs(
     title = "Graph g24: Chronic-Day Distribution and Predisposition Composition",
-    subtitle = "Distribution rows sum to 100%; each composition column also sums to 100% within predictor",
+    subtitle = "Distribution rows and right-side composition columns each sum to 100%",
     x = "Exact chronic-absence days among Chronic Days respondents",
     y = NULL,
     fill = "Within-row share"
@@ -910,7 +1043,7 @@ g24_left_exact_distribution <- g2_exact_distribution %>%
     panel.grid = element_blank(),
     strip.text.y = element_text(face = "bold", angle = 0),
     axis.text.y = element_text(size = 6),
-    legend.position = "top",
+    legend.position = "left",
     plot.title.position = "plot"
   )
 
@@ -919,15 +1052,27 @@ g24_right_composition <- g24_composition_tiles %>%
   geom_tile(height = 0.82, width = 0.9) +
   geom_text(aes(label = sprintf("%.1f%%", share)), size = 1.8) +
   facet_grid(variable_label ~ ., scales = "free_y", space = "free_y") +
-  scale_fill_gradient(low = "#F2F2F2", high = abcol[["blue"]], guide = "none") +
-  scale_y_discrete(labels = NULL) +
-  labs(x = NULL, y = NULL) +
+  scale_fill_gradient(
+    low = "#F2F2F2",
+    high = abcol[["blue"]],
+    labels = scales::label_percent(scale = 1),
+    name = "Column share"
+  ) +
+  scale_y_discrete(labels = strip_facet_level) +
+  labs(
+    x = NULL,
+    y = NULL,
+    title = NULL,
+    subtitle = NULL
+  ) +
   theme_minimal(base_size = 8) +
   theme(
     panel.grid = element_blank(),
     strip.text.y = element_blank(),
-    axis.text.x = element_text(size = 7, angle = 25, hjust = 1),
+    axis.text.y = element_text(size = 6),
+    axis.text.x = element_text(size = 6, angle = 0, hjust = 0.5, vjust = 0.5, lineheight = 0.9),
     axis.ticks.y = element_blank(),
+    legend.position = "right",
     plot.margin = margin(5.5, 5.5, 5.5, 0)
   )
 
@@ -937,7 +1082,7 @@ g24_distribution_with_composition <- grid::grid.grabExpr({
     grid::viewport(
       layout = grid::grid.layout(
         nrow = 1, ncol = 2,
-        widths = grid::unit(c(0.78, 0.22), "npc")
+        widths = grid::unit(c(0.70, 0.30), "npc")
       )
     )
   )

@@ -244,7 +244,8 @@ bins, and a hybrid that retains one-day granularity through day 5 before coarsen
 ### g11 - Chronic-Day Distribution at Three Scales
 
 Graph g11 adopts the left-hand three-way cohort partition from EDA-71 graph g22.
-The three stacked panels at right hold the same 3,626 Chronic Days respondents at
+The three stacked panels at right hold the same 3,626 Chronic respondents (defined
+as respondents with at least one chronic day) at
 the exact, five-day work-week, and first-week-exact scales. The top panel uses an
 exact-day colour category; the lower panels use the seven five-day work-week colour
 bands. Therefore, in the bottom panel days 1 through 5 remain separate bars while
@@ -264,14 +265,41 @@ sharing the first work-week colour.
 #| echo: false
 #| fig-width: 11.69
 #| fig-height: 8.27
-#| fig-cap: "Graph g11: The EDA-71 G22 three-way respondent partition at left, with Chronic Days respondent counts at three scales at right. Top: one bar per exact chronic day from 1 through 31, coloured by exact day. Middle: five-day work-week bins. Bottom: days 1 through 5 remain separate while 6-10 through 26-30 are coarsened, with every bar coloured by its five-day work-week band."
+#| fig-cap: "Graph g11: Left panel shows all three outcome groups (No Days n=45,006; Chronic n=3,626; Non-Chronic n=15,211). Right panels use the Chronic group only (>=1 chronic day; n=3,626): exact-day bars, five-day bins, and first-week-exact tail coarsening."
 ```
 
-## Graph Family g2: No Days Versus Chronic Days
+### g12 - Hybrid Missed-Day Distributions by Positive-Day Group
+
+Graph g12 now keeps the left-hand three-way stacked partition and adds a right-hand
+comparison for the two positive-day groups only: Chronic (>=1 chronic day; n=3,626)
+and Non-Chronic (>0 missed days and 0 chronic days; n=15,211). Within each group,
+the first panel preserves days 1 through 5 while the second panel groups the
+remaining tail into work-week bins 2 through 7+. Panel widths are proportional to
+their five and six bars, so an individual bar occupies approximately the same width
+on both sides.
+
+```{r}
+#| label: g12-data-prep
+#| code-summary: Prepare hybrid missed-day frequencies for Chronic and Non-Chronic Days groups
+#| echo: true
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g12
+#| code-summary: Compare hybrid missed-day distributions across both positive-day groups
+#| echo: false
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Graph g12: Left panel shows the full three-group partition (No Days, Chronic, Non-Chronic). Right panels use only Chronic (>=1 chronic day; n=3,626) and Non-Chronic (>0 missed days and 0 chronic days; n=15,211). Days 1-5 remain exact; values above day 5 are grouped into work-week bins 2 through 7+."
+```
+
+## Graph Family g2: Outcome-Group Predisposition Comparisons
 
 This family compares group composition before moving to the numeric chronic-day
-values. Percentages in g2 and g21 use the pooled survey weight. Graphs g22 and g23
-condition on the 3,626 Chronic Days respondents.
+values. Percentages in g2, g20, g21, g211, and g212 use the pooled survey weight.
+Graphs g22 through g24 condition on the 3,626 Chronic Days respondents.
 
 ```{r}
 #| label: g2-data-prep
@@ -287,7 +315,22 @@ condition on the 3,626 Chronic Days respondents.
 #| echo: false
 #| fig-width: 11.69
 #| fig-height: 8.27
-#| fig-cap: "Graph g2: Pooled survey-weighted composition of No Days and Chronic Days respondents within each predisposing variable. The connecting line isolates the within-level contrast; it does not imply an ordered transition between groups."
+#| fig-cap: "Graph g2: Pooled survey-weighted composition of No Days (n=45,006) and Chronic respondents (>=1 chronic day; n=3,626) within each predisposing variable."
+```
+
+### g20 - Composition Across All Three Groups
+
+Graph g20 adds the Non-Chronic Days group to the same canvas. Its grey, brown, and
+blue group colours match EDA-71 graph g2 so the outcome partition remains visually
+consistent across reports.
+
+```{r}
+#| label: g20
+#| code-summary: Compare predictor composition across all three outcome groups
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g20: Pooled survey-weighted composition across No Days (n=45,006), Chronic (>=1 chronic day; n=3,626), and Non-Chronic (>0 missed days and 0 chronic days; n=15,211). Colours reproduce the EDA-71 graph g2 outcome palette."
 ```
 
 ### g21 - Composition Difference
@@ -298,7 +341,29 @@ condition on the 3,626 Chronic Days respondents.
 #| echo: false
 #| fig-width: 11.69
 #| fig-height: 8.27
-#| fig-cap: "Graph g21: Weighted percentage-point difference calculated as Chronic Days minus No Days for every predictor level. Positive values indicate that the level occupies a larger share of the Chronic Days group."
+#| fig-cap: "Graph g21: Weighted percentage-point difference calculated as Chronic (>=1 chronic day; n=3,626) minus No Days (n=45,006) for each predictor level."
+```
+
+#### g211 - Non-Chronic Minus No Days
+
+```{r}
+#| label: g211
+#| code-summary: Show Non-Chronic Days minus No Days percentage-point differences
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g211: Weighted percentage-point difference calculated as Non-Chronic (>0 missed days and 0 chronic days; n=15,211) minus No Days (n=45,006) for each predictor level."
+```
+
+#### g212 - Chronic Minus Non-Chronic Days
+
+```{r}
+#| label: g212
+#| code-summary: Show Chronic Days minus Non-Chronic Days percentage-point differences
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g212: Weighted percentage-point difference calculated as Chronic (>=1 chronic day; n=3,626) minus Non-Chronic (>0 missed days and 0 chronic days; n=15,211) for each predictor level."
 ```
 
 ### g22 - Chronic-Day Intensity
@@ -309,7 +374,7 @@ condition on the 3,626 Chronic Days respondents.
 #| echo: false
 #| fig-width: 11.69
 #| fig-height: 8.27
-#| fig-cap: "Graph g22: Pooled survey-weighted mean chronic-absence days within each predictor level among Chronic Days respondents only. Point area encodes the raw subgroup count to flag sparse levels."
+#| fig-cap: "Graph g22: Pooled survey-weighted mean chronic-absence days within each predictor level among Chronic respondents only (>=1 chronic day; n=3,626)."
 ```
 
 ### g23 - Exact Positive-Day Distribution
@@ -325,11 +390,35 @@ levels. Each row has its own 100% conditional denominator.
 #| echo: false
 #| fig-width: 11.69
 #| fig-height: 8.27
-#| fig-cap: "Graph g23: Exact chronic-day values among Chronic Days respondents, stratified by predisposing-variable level. Each row sums to 100%, so colour compares distribution shape rather than subgroup prevalence."
+#| fig-cap: "Graph g23: Exact chronic-day values among Chronic respondents only (>=1 chronic day; n=3,626), stratified by predisposing-variable level. Each row sums to 100%."
+```
+
+### g24 - Exact Distribution With Composition Tiles
+
+Graph g24 retains g23's exact-day matrix and adds two composition columns. The
+respondent-count column uses raw subgroup counts converted to shares, while the
+weighted-share column uses the pooled survey weight. Each column sums to 100%
+within a predictor, allowing levels such as age 15-24 to be read in context.
+
+```{r}
+#| label: g24-data-prep
+#| code-summary: Prepare raw respondent-count shares and weighted shares by predictor level
+#| echo: true
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g24
+#| code-summary: Add respondent-count and weighted-share tiles to the exact-day matrix
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g24: Left matrix shows exact chronic-day distributions; right columns show respondent-count share and weighted share. Rows are aligned so each category appears on the same row on both sides."
 ```
 
 # Appendix
 
 Student status is excluded because the source field is suppressed and all-missing in
-the PUMF. Non-Chronic Days remains part of the group definition and count validation,
-but the primary predictor contrast in this EDA is No Days versus Chronic Days.
+the PUMF. The three outcome groups are exhaustive and mutually exclusive; the added
+graphs now show their complete composition comparison matrix.
