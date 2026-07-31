@@ -1,0 +1,372 @@
+---
+title: "Model 0: A LASSO Rehearsal on Predisposing Variables"
+subtitle: "Testing our reading of Section 5.4 before committing to it"
+author: "Analysis Team"
+date: last-modified
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    code-fold: show
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission
+
+Section 5.4 of the project proposal specifies variable selection by LASSO. Before applying that procedure to the full predictor set across four model specifications, nineteen condition-specific subgroups, and two sex strata, this report rehearses the machinery once, on a single Andersen domain, against a single outcome.
+
+Model 0 is deliberately **not** a findings report. It is a feasibility check whose deliverable is a list of decisions that Section 5.4 leaves open, together with evidence about how each decision would bite. Nothing here should be cited as a substantive result.
+
+**Research questions:**
+
+1.  What does the L1 penalty actually do to coefficients as it tightens?
+2.  How do `lambda.min` and `lambda.1se` differ in what they retain?
+3.  When Section 5.4 counts "16 variables", is it counting variables or columns?
+4.  Does the Poisson-to-negative-binomial handoff work mechanically?
+5.  Do the survey weights disturb cross-validation, and if so, how much?
+6.  What does a retained set mean when the predictor universe is deliberately narrow?
+
+# Definition of Terms
+
+**LASSO.** A penalized regression that maximizes the log-likelihood minus $\lambda \sum_j |\beta_j|$. Because the absolute-value penalty has a corner at zero, it drives some coefficients *exactly* to zero rather than merely shrinking them. It therefore performs shrinkage and subset selection in one convex optimization, replacing the unstable, path-dependent search of stepwise methods with a continuous one governed by a single tuning parameter.
+
+**`lambda.min`.** The penalty that minimizes cross-validated deviance. Permissive: retains more predictors.
+
+**`lambda.1se`.** The largest penalty whose cross-validated deviance still sits within one standard error of the minimum. The "one-standard-error rule" buys parsimony at a cost in fit that cross-validation cannot distinguish from noise.
+
+**Design column.** After dummy coding, a factor with $k$ levels becomes $k-1$ columns. LASSO operates on columns, not on variables. A four-level factor can have two columns retained and two eliminated.
+
+**Perceived health variables.** Following the decision recorded for this project, these are exactly three: `health_perceived`, `mental_health_perceived`, and `health_vs_prior_year`. The functional-limitation items (`adl_*`) and `injured_past_12m` remain in every specification. None of the five appear in Model 0, which is restricted to the predisposing domain.
+
+**Outcome.** `days_absent_chronic`, the sensitivity outcome of Section 4.1: workdays lost to chronic conditions in the three months before the survey.
+
+```{r}
+#| code-summary: Reconciles working directory between execution modes
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir='../../') # keep this chunk isolated
+```
+
+```{r}
+#| label: set_options
+#| code-summary: Report-wide formatting options
+#| echo: false
+#| results: hide
+#| message: false
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results = 'show',
+  message = FALSE,
+  warning = FALSE,
+  comment = NA,
+  tidy = FALSE,
+  fig.path = 'figure-png-iso/'
+)
+echo_chunks <- FALSE
+message_chunks <- FALSE
+options(width = 100)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/model-0/model-0.R")
+```
+
+# Environment
+
+```{r}
+#| label: load-packages
+#| code-summary: Packages used in the current report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: Project functions and Alberta visual identity colours
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: Paths, seed, outcome, and the predisposing variable set
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| code-summary: Helpers for table rendering, design-matrix mapping, and coefficient extraction
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+# Data
+
+```{r}
+#| label: load-data
+#| code-summary: Load the Ellis respondent-level analytical parquet
+#| echo: true
+#| warning: false
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: tweak-data-0
+#| code-summary: Build the model frame and design matrix
+#| echo: true
+#| code-fold: true
+#| cache: true
+```
+
+Two preparation choices deserve to be visible rather than buried.
+
+First, `dhhgage` is dropped. It measures the same construct as `age_group_3` at five-year resolution, and Section 2.2 specifies the three-category recode. Carrying both would hand LASSO two near-collinear encodings of age and let the penalty choose between them arbitrarily.
+
+Second, the analysis is complete-case. `glmnet` cannot accept a design matrix with missing cells, so the 1,742 respondents missing at least one predisposing value are excluded. At 2.73% this falls under the 5% threshold that Section 5.1 sets for treating missingness simply, but the same restriction applied to the full predictor set will drop considerably more.
+
+```{r}
+#| label: inspect-data-0
+#| code-summary: Complete-case attrition and design-matrix dimensions
+#| echo: false
+```
+
+## Data Context
+
+For complete data documentation, see the [Univariate Distributions Data Primer](../data-primer-1/univariate-distributions.html), especially Section 3, Predisposing Variables. The outcome is profiled in [EDA-71](../eda-71/eda-71.html), and its relationship to these predictors in [EDA-72](../eda-72/eda-72.html).
+
+```{r}
+#| label: data-context-tables
+#| code-summary: Which table and columns this analysis uses
+#| echo: true
+#| results: asis
+```
+
+```{r}
+#| label: data-context-person
+#| code-summary: One illustrative respondent reporting chronic absence days
+#| echo: true
+#| results: asis
+```
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: Levels, dummy columns, and reference level for each predictor
+#| echo: true
+#| results: asis
+```
+
+```{r}
+#| label: out1
+#| code-summary: Respondent grain proof
+#| echo: true
+```
+
+# Analysis
+
+## The Problem Being Solved
+
+Two facts frame the exercise. Output out2 shows the first: the outcome is severely zero-inflated and its variance exceeds its mean by more than an order of magnitude. A Poisson model, which assumes those two quantities are equal, is therefore misspecified from the start. This is precisely why Section 5.4 uses Poisson only as a *selection* device and re-estimates with negative binomial.
+
+```{r}
+#| label: out2
+#| code-summary: Weighted outcome moments and the dispersion ratio
+#| echo: true
+```
+
+Table t1 shows the second fact, and it answers Research Question 3 directly. Eleven predisposing variables plus the cycle indicator do not produce twelve columns. They produce twenty-seven.
+
+```{r}
+#| label: t1
+#| code-summary: Variable-to-column expansion in the design matrix
+#| echo: true
+#| results: asis
+```
+
+This has a consequence that the proposal's phrasing does not settle. Section 5.4 sets targets of 16, 9, 32, and 33 "variables" for the four models. Because LASSO selects columns, a result can be reported two ways, and the two counts will not agree. Model 0 reports both throughout so the discrepancy stays visible.
+
+## Graph Family g1: Fitting the Penalized Path
+
+Graph g1 is the picture worth carrying away. Each line is one design column. Read right to left: at the far right the penalty is so heavy that every penalized coefficient is pinned at zero. As $\lambda$ relaxes, coefficients peel away from the axis one at a time. Selection is not a separate step applied after fitting; it *is* the fitting, viewed at a particular penalty.
+
+The cycle indicator is the one line that never touches zero. It carries `penalty.factor = 0`, which exempts it from the penalty entirely, because the pooled design requires a cycle term whether or not it earns its place.
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: Fit the full LASSO path and the cross-validated fit
+#| echo: true
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g1
+#| code-summary: Coefficient path across the penalty grid
+#| echo: false
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Graph g1: Each line traces one design-matrix column across the penalty grid. Coefficients leave zero one at a time as the penalty relaxes. The unpenalized cycle indicator is the only line that never touches zero."
+```
+
+Graph g2 shows how a single point on that path gets chosen. Five-fold cross-validation estimates out-of-sample Poisson deviance at each $\lambda$, with an uncertainty band. `lambda.min` sits at the bottom of the curve. `lambda.1se` sits to its right, at the heaviest penalty whose deviance is still statistically indistinguishable from the minimum.
+
+```{r}
+#| label: g2
+#| code-summary: Cross-validated deviance with both candidate penalties marked
+#| echo: false
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Graph g2: Five-fold cross-validated Poisson deviance across the penalty grid, with the one-standard-error band. lambda.min minimizes deviance; lambda.1se is the largest penalty within one standard error of that minimum."
+```
+
+## What Each Penalty Retains
+
+Table t2 is the headline, and it is not the result anticipated when this rehearsal was scoped.
+
+```{r}
+#| label: t2
+#| code-summary: Retention by variable under both penalties
+#| echo: true
+#| results: asis
+```
+
+**At `lambda.1se`, not one predisposing variable survives.** The single retained column is the cycle indicator, which was exempted from the penalty and therefore could not have been dropped. The one-standard-error rule concludes that, for predicting workdays lost to chronic conditions, the entire predisposing domain adds nothing that cross-validation can distinguish from noise.
+
+At `lambda.min` the picture changes substantially: eighteen columns drawn from nine predisposing variables. The gap between the two penalties is not a technicality here. It is the difference between an empty model and a moderately rich one.
+
+Graph g3 shows what that gap looks like coefficient by coefficient. Every column retained at `lambda.min` appears twice, once under each penalty. The `lambda.1se` points have all collapsed onto a rate ratio of exactly 1.0 — the visual signature of a coefficient set to zero.
+
+```{r}
+#| label: g3
+#| code-summary: Retained coefficients as rate ratios under both penalties
+#| echo: false
+#| fig-width: 8.5
+#| fig-height: 7.5
+#| fig-cap: "Graph g3: Every design column retained at lambda.min, expressed as a rate ratio under both penalties. Points resting exactly on 1.0 were eliminated by the heavier penalty."
+```
+
+## Stage Two: Handing Selection to Negative Binomial
+
+Section 5.4 selects with a penalized Poisson model and re-estimates with an unpenalized negative binomial one. Table t3 demonstrates that handoff.
+
+Because `lambda.1se` retained nothing, the demonstration necessarily uses the `lambda.min` set — the Model 3 analogue rather than the Model 1 analogue. The carry-forward rule applied here is that a variable enters stage two if *any* of its dummy columns survived. That rule is a choice, not a given, and it is one of the decisions listed at the end of this report.
+
+::: callout-important
+## These estimates hold only inside this predictor universe
+
+Everything in this section is conditional on **what the penalty was shown**.
+
+LASSO does not measure whether a variable is associated with the outcome. It measures whether a variable earns its place *against its competitors*. Every competitor offered here comes from the predisposing domain alone. Chronic conditions, perceived health, activity limitations, income, occupation and work schedule were all withheld — and on substantive grounds those withheld variables are nearer causes of work absence than marital status or household composition.
+
+The consequence is that part of what the surviving terms measure is **borrowed**. Age, household size and living arrangement are correlated with the chronic conditions that were not offered, so they absorb signal that properly belongs to those conditions. This is not a defect in the estimation; it is what a regression does when a cause is omitted and a correlate of it is present.
+
+Offer the omitted causes — as Model 1 does, with the full 47-variable candidate set — and these terms can be expected to weaken or disappear from the retained set entirely. Model 1 bears this out: of the eleven predisposing variables examined here, only one survives at `lambda.1se` once the chronic conditions and activity limitations compete for the same penalty budget.
+
+Read this section as a statement about what predisposing characteristics do **in the absence of anything better**, not as an estimate of their effect.
+:::
+
+```{r}
+#| label: t3
+#| code-summary: The two stages side by side on the lambda.min variable set
+#| echo: true
+#| results: asis
+```
+
+Table t3 places the penalized and unpenalized estimates in adjacent columns, which makes the division of labour between the stages legible. The penalized column answers "does this term belong?"; the refit column answers "how much does it matter?" They are different quantities, and the gap between them is the shrinkage the penalty imposed. Terms marked with a dagger are levels the penalty had driven to zero that re-enter anyway, because a sibling level of the same factor survived — the carry-forward rule made visible.
+
+```{r}
+#| label: g4
+#| code-summary: Rate ratios with 95% Wald intervals for every term carried into stage two
+#| echo: false
+#| fig-width: 8.5
+#| fig-height: 8
+#| fig-cap: "Graph g4: Unpenalized negative binomial rate ratios with 95% Wald intervals, for every term carried into stage two. Valid only within this predictor universe. Terms coloured grey have intervals overlapping 1.0."
+```
+
+Graph g4 is the interpretable face of the solution, and it repays a moment's scepticism. The largest rate ratios attach to age and to living arrangements involving a single parent or an unattached adult — exactly the characteristics one would expect to correlate with the chronic conditions that were withheld. The colouring separates terms whose interval clears 1.0 from those whose does not, but that separation is not a significance test: the intervals ignore both the survey design and the selection step that produced the term list, and each of those omissions makes them narrower than they should be.
+
+The intervals in Table t3 and Graph g4 are Wald intervals from a single model fit. They are **not** the bootstrap intervals that Sections 5.5 through 5.9 require, and they should not be read as inferential. Two separate reasons: the Statistics Canada replicate weights have not been applied — indeed they do not exist for these cycles — and the variables were selected using the same data used to estimate them, which invalidates naive standard errors regardless of how the variance is computed.
+
+Output out3 shows why stage two is not optional. The Poisson fit is overdispersed by a factor of roughly two and a half on the deviance scale, and the negative binomial dispersion parameter is small enough to imply enormous excess variance. The improvement in AIC is not marginal.
+
+```{r}
+#| label: out3
+#| code-summary: Overdispersion diagnostics and Poisson vs negative binomial fit
+#| echo: true
+```
+
+## Do the Survey Weights Disturb Cross-Validation?
+
+A result as stark as "nothing survives `lambda.1se`" deserves interrogation before it is believed. One candidate explanation is mechanical rather than substantive.
+
+The pooled master weights span three orders of magnitude. Highly variable weights inflate the variance of any weighted estimate, including the fold-to-fold variance of cross-validated deviance. A wider standard-error band pushes `lambda.1se` further from `lambda.min`, and therefore prunes harder. Output out4 isolates this by re-running the identical cross-validation without weights.
+
+```{r}
+#| label: out4
+#| code-summary: Weight variability and its effect on penalty selection
+#| echo: true
+```
+
+The weights matter, but they do not manufacture the finding. Unweighted, `lambda.1se` retains five columns instead of one — still a drastic reduction from twenty-seven, and still consistent with the reading that predisposing variables carry little signal for this outcome. The Kish effective sample size tells the wider story: the weighting scheme spends roughly seventy percent of the nominal sample, which will matter far more in the condition-specific models of Section 5.7, where subgroups are small before weighting is applied at all.
+
+# What Model 0 Settles, and What It Does Not
+
+## Confirmed
+
+The Section 5.4 machinery works as written. `glmnet` fits a weighted penalized Poisson model on CCHS data at this scale without difficulty; both penalties are recoverable from a single cross-validated fit; and the selected set transfers to `MASS::glm.nb` cleanly. Nothing in the proposal's Stage 1 to Stage 2 design is obstructed by our data.
+
+## Open decisions for Section 5.4
+
+Five questions the proposal leaves unresolved, each of which changes the results.
+
+**1. Variables or columns?** The targets of 16, 9, 32, and 33 must be one or the other. Model 0 produced 18 columns from 9 variables at `lambda.min` on a single domain — the two counts differ by a factor of two. Reproducing the prior analysis requires knowing which it counted.
+
+**2. Reference coding or one-hot?** Model 0 uses treatment contrasts, so each factor contributes $k-1$ columns and the reference level is unpenalized by construction. The proposal's snippet (`model.matrix(~ . - 1, ...)`) yields full one-hot coding for the first factor and reference coding for the rest, which is internally inconsistent. Under one-hot coding the reference level competes for retention like any other, and selection results change.
+
+**3. What is the carry-forward rule?** When two of a factor's four columns survive, does the whole factor enter stage two, or only the retained levels? Model 0 assumed the whole factor. The alternative produces non-standard contrasts whose interpretation is awkward but whose parsimony is greater.
+
+**4. Should selection be design-aware?** `cv.glmnet` accepts observation weights but draws cross-validation folds as though observations were independent, and it cannot accept replicate weights at all. The penalty is therefore chosen under a design-naive criterion even when the likelihood is weighted. Output out4 shows this is not a negligible detail.
+
+**5. Is `lambda.1se` viable as the primary specification?** Section 5.5 designates the `lambda.1se` model as primary. On the predisposing domain against `days_absent_chronic`, that specification is empty. Whether it remains empty once the chronic-condition exposures, facilitating variables, and needs variables are added is the single most important thing to test next.
+
+## A note on scope
+
+Model 0 used one domain and one outcome by design. Three restrictions bound how far its results generalize.
+
+The outcome is the *sensitivity* outcome, not the primary one. At 94.31% zeros, `days_absent_chronic` is far harsher than `days_absent_total` at roughly 70%. Weak selection here does not imply weak selection there.
+
+The predisposing domain is, on theoretical grounds, the domain expected to carry the least direct signal. Andersen's framework positions predisposing characteristics as distal, acting largely through the enabling and need factors that Model 0 excludes. A domain that selects poorly in isolation may still contribute once the mediating variables are present.
+
+Most importantly, **selection is a relative verdict, and the comparison set here is narrow by construction.** A variable is retained because it beat the alternatives it was shown, not because it is important in any absolute sense. Restricting the universe to the predisposing domain does two things at once: it removes the variables most likely to win, and it leaves the survivors carrying signal that belongs to those absent variables. Both effects inflate what the retained terms appear to say. Model 1, which offers all forty-seven candidates simultaneously, retains exactly one predisposing variable at `lambda.1se` — a direct measurement of how much of Model 0's apparent structure was borrowed rather than earned.
+
+And no attempt was made at group LASSO, at bootstrap variance estimation, or at the performance metrics of Section 5.6. Those belong to the real implementation.
+
+# Session Information
+
+```{r}
+#| label: session-info
+#| code-summary: Report render duration and R session details
+#| echo: false
+cat("Report rendered in ",
+    round(as.numeric(difftime(Sys.time(), report_render_start_time, units = "secs"))),
+    " seconds.\n\n")
+sessionInfo()
+```
