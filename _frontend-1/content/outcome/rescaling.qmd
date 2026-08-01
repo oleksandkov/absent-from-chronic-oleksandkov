@@ -1,0 +1,9 @@
+---
+title: "Outcome: Rescaling (eda-72)"
+format:
+  html:
+    page-layout: full
+    toc: false
+---
+
+<meta http-equiv="refresh" content="0; url=eda-72.html">

@@ -1,0 +1,9 @@
+---
+title: "Lasso Rehearsal with Predisposing (model-0)"
+format:
+  html:
+    page-layout: full
+    toc: false
+---
+
+<meta http-equiv="refresh" content="0; url=model-0.html">
