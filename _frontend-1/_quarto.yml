@@ -1,0 +1,92 @@
+project:
+  type: website
+  output-dir: _site
+  pre-render:
+    - scripts/copy-contract-assets.R
+  post-render:
+    - scripts/copy-analysis-html.R
+  render:
+    - content/index.qmd
+    - content/project/project-proposal.qmd
+    - content/pipeline/pipeline-guide.qmd
+    - content/pipeline/cache-manifest.qmd
+    - content/pipeline/input-manifest.qmd
+    - content/data-primer/variable-inclusion.qmd
+    - content/data-primer/univariate-distributions.qmd
+    - content/outcome/day-decomposition.qmd
+    - content/outcome/distribution-shapes.qmd
+    - content/outcome/rescaling.qmd
+    - content/predictors/exposure.qmd
+    - content/predictors/predisposing.qmd
+    - content/predictors/facilitating.qmd
+    - content/predictors/needs.qmd
+    - content/predictors/missingness.qmd
+    - content/model/bivariate-models.qmd
+    - content/model/lasso-rehearsal.qmd
+    - content/model/variable-selection.qmd
+    - content/site-map.qmd
+
+website:
+  title: "Absent from Chronic"
+  repo-url: https://github.com/RG-FIDES/absent-from-chronic
+  navbar:
+    left:
+      - text: "Home"
+        href: content/index.qmd
+      - text: "Project"
+        menu:
+          - text: "Project Proposal"
+            href: content/project/project-proposal.qmd
+      - text: "Pipeline"
+        menu:
+          - text: "Pipeline Guide"
+            href: content/pipeline/pipeline-guide.qmd
+          - text: "CACHE Manifest"
+            href: content/pipeline/cache-manifest.qmd
+          - text: "INPUT Manifest"
+            href: content/pipeline/input-manifest.qmd
+      - text: "Data Primer"
+        menu:
+          - text: "Variable Inclusion"
+            href: content/data-primer/variable-inclusion.qmd
+          - text: "Univariate Distributions (data-primer-1)"
+            href: content/data-primer/univariate-distributions.qmd
+      - text: "Outcome"
+        menu:
+          - text: "Outcome: LOP Day Decomposition (eda-5)"
+            href: content/outcome/day-decomposition.qmd
+          - text: "Outcome: Distribution Shapes (eda-71)"
+            href: content/outcome/distribution-shapes.qmd
+          - text: "Outcome: Rescaling (eda-72)"
+            href: content/outcome/rescaling.qmd
+      - text: "Predictors"
+        menu:
+          - text: "Exposure: Chronic Conditions (eda-61)"
+            href: content/predictors/exposure.qmd
+          - text: "Predisposing: Socio-demographic (eda-62)"
+            href: content/predictors/predisposing.qmd
+          - text: "Facilitating: Health System & Behaviours (eda-63)"
+            href: content/predictors/facilitating.qmd
+          - text: "Needs: Perceived Health & Limitations (eda-64)"
+            href: content/predictors/needs.qmd
+          - text: "Missingness (eda-65)"
+            href: content/predictors/missingness.qmd
+      - text: "Model"
+        menu:
+          - text: "Bivariate Models (model-00)"
+            href: content/model/bivariate-models.qmd
+          - text: "Lasso Rehearsal with Predisposing (model-0)"
+            href: content/model/lasso-rehearsal.qmd
+          - text: "Variable Selection with Lasso (model-1)"
+            href: content/model/variable-selection.qmd
+      - text: "Site Map"
+        href: content/site-map.qmd
+  page-footer:
+    center: "*Absent from Chronic* | Marc-Andre Blanchette, Oleksandr Koval, Andriy Koval | 2026"
+
+format:
+  html:
+    theme: flatly
+    toc: true
+    mermaid:
+      theme: neutral
