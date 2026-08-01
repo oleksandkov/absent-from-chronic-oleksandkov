@@ -1,0 +1,495 @@
+---
+title: "Model 00: The Bivariate Series"
+subtitle: "Section 5.3 implemented as one model per predictor, and the one requirement it cannot meet"
+author: "Analysis Team"
+date: last-modified
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    toc-depth: 3
+    code-fold: show
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission
+
+Section 5.3 asks for Table 2: for each candidate predictor on its own, a weighted negative binomial regression of absence days on that predictor and the pooled-cycle indicator, reporting unadjusted prevalence rate ratios with 95% confidence intervals.
+
+The request is arithmetically simple and methodologically loaded. It is simple because each model has two terms. It is loaded because Section 5.3 attaches a warning to it — that the intervals **must** come from Statistics Canada's 500 bootstrap replicate weights, and that model-based standard errors will be "artificially narrow." Those replicate weights do not exist for the 2010–2011 and 2013–2014 Public Use Microdata Files. This report therefore delivers the estimates the section asks for, and, in place of the intervals it asks for, measures how far short the available intervals fall.
+
+Model 00 precedes Model 1 in the analytic order even though it was built after it. Section 5.3 screens; Section 5.4 selects. Reading them in that order is the point of the numbering.
+
+**This report is built to be vetted, not merely read.** Each step closes with a *review point* naming exactly what a reader should agree or disagree with before the next step is allowed to stand.
+
+::: callout-important
+## What this report is not
+
+Model 00 is a **screening** report. Every estimate is unadjusted for everything except survey cycle. A rate ratio here answers "do people with this characteristic report more absence days?" — not "does this characteristic cause absence days," and not "does it still matter once the others are accounted for." The second question belongs to [Model 1](../model-1/model-1.html); the first belongs to a study design these data do not have.
+:::
+
+**Research questions:**
+
+1.  What is the unadjusted association between each candidate predictor and absence days, once survey cycle is accounted for?
+2.  Which predictors carry signal strong enough to be worth offering to the Section 5.4 selection procedure?
+3.  How much narrower are these intervals than the bootstrap intervals Section 5.3 requires, and what part of that gap is unmeasurable?
+4.  Do the estimates depend on which rows are used, or on which of the two outcomes is modelled?
+
+# Definition of Terms
+
+**Bivariate model.** Here, a model with *two* predictors: the candidate variable and the cycle indicator. The cycle term is not an adjustment in the usual sense — it is the price of pooling two survey years into one file, and Section 5.3 specifies it.
+
+**Prevalence rate ratio (PR).** $\exp(\beta)$ from the negative binomial fit: the multiplicative change in expected absence days associated with a one-level move away from the reference category. A PR of $1.30$ means 30% more expected days.
+
+**Analytic basis.** The rule fixing which rows a model may use. *Per-predictor complete case* gives each model every row where its own predictor is observed; *shared* holds all models to the rows Model 1 uses. Section 5.3 does not say which; this report reports both.
+
+**Design effect.** The ratio of the true sampling variance to the variance a simple random sample of the same size would produce. It has two components here: unequal weighting, which is computable from the PUMF, and stratification and clustering, which are not, because the identifiers are suppressed.
+
+**Wald interval.** $\exp(\hat\beta \pm 1.96\,\mathrm{SE})$ using the model-based standard error. This treats the weighted sample as though it were a simple random sample of its nominal size — precisely the assumption Section 5.3 forbids, and the only one these data support.
+
+**Robust (sandwich) interval.** The same interval computed from a Huber–White covariance estimate. It recovers the *weighting* component of the design effect and nothing else. It is not a design-based interval and is not a substitute for the bootstrap.
+
+# Environment
+
+```{r}
+#| code-summary: Reconciles working directory between execution modes
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir='../../') # keep this chunk isolated
+```
+
+```{r}
+#| label: set_options
+#| code-summary: Report-wide formatting options
+#| echo: false
+#| results: hide
+#| message: false
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results = 'show',
+  message = FALSE,
+  warning = FALSE,
+  comment = NA,
+  tidy = FALSE,
+  fig.path = 'figure-png-iso/'
+)
+echo_chunks <- FALSE
+message_chunks <- FALSE
+options(width = 100)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/model-00/model-00.R")
+```
+
+```{r}
+#| label: load-packages
+#| code-summary: Packages used in the current report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: Project functions, Alberta visual identity colours, and the shared candidate registry
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: Paths, the four estimation series, and the decision registry
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| code-summary: Helpers for column mapping, robust variance, and one bivariate fit
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+# Data
+
+```{r}
+#| label: load-data
+#| code-summary: Load the Ellis respondent-level analytical parquet
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: tweak-data-0
+#| code-summary: Build the model frame and the shared-basis row filter
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: inspect-data-0
+#| code-summary: Structure of the source table
+#| echo: false
+#| code-fold: true
+```
+
+# Data Context
+
+For complete data documentation, see the [Data Primer](../data-primer-1/data-primer-1.html). This section covers only what Model 00 touches.
+
+## Tables and columns
+
+```{r}
+#| label: data-context-tables
+#| code-summary: Which table this analysis reads, and which of its columns matter
+#| echo: false
+```
+
+## A single respondent
+
+Every count in this report is a count of respondents, and that claim holds only if one row means one person. The representative row below shows exactly what a single model sees when it selects its two columns.
+
+```{r}
+#| label: data-context-person
+#| code-summary: Grain proof and one respondent shown in full
+#| echo: false
+```
+
+## Distributions
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: Both outcomes, the dispersion statistics, and the weighting profile
+#| echo: false
+```
+
+::: callout-note
+## Reading the outcome and weight summaries
+
+Two numbers here govern the rest of the report.
+
+The **variance-to-mean ratio** is what makes the negative binomial the right likelihood: a Poisson model assumes this ratio equals 1, and neither outcome is anywhere near that.
+
+The **Kish design effect** is what makes the intervals wrong. It measures how much the unequal survey weights alone inflate sampling variance relative to a simple random sample. Its square root is a multiplier on every standard error in this report — a multiplier that has *not* been applied, because Section 5.3 asks for a bootstrap correction that subsumes it and these data cannot supply one. Step 2 works through the consequence.
+:::
+
+# Analysis
+
+## Step 1 — The Bivariate Protocol
+
+Section 5.3 says "each potential predictor variable individually." Two questions have to be answered before a single model can be fitted: which variables count as potential predictors, and — since the answer is a list, not a formula — what happens to the ones that Model 1 found unusable.
+
+```{r}
+#| label: t1
+#| code-summary: The candidate registry, sourced rather than re-typed
+#| echo: false
+#| results: asis
+```
+
+The registry is not declared in this report. It is sourced from `scripts/modeling/candidate-registry.R`, the same object Model 1 uses, so that the two reports cannot drift apart. Earlier exploratory work kept these lists in several places and they did drift; that is the mistake the registry exists to prevent.
+
+```{r}
+#| label: t11
+#| code-summary: Model inventory by Andersen domain
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: out1
+#| code-summary: Section 5.3 as written, against what is delivered
+#| echo: false
+```
+
+::: callout-tip
+## Review point 1
+
+Three things to agree or disagree with.
+
+1.  **The exclusions carry over.** `cc_copd` and `has_family_doctor` are excluded here for the same reasons Model 1 excludes them, even though a bivariate model *could* estimate both. Doing so would define each on a different population from the other 46 (decision 2).
+2.  **`dhhgage` stays out.** Collinearity with `age_group_3` is a multivariable problem that does not arise in a one-predictor model, so the usual reason does not apply. It is still withheld — to preserve row-for-row correspondence with Model 1 and to avoid reporting the same signal twice (decision 3). This is the most arguable exclusion in the report.
+3.  **Nothing else enters the models.** No age or sex adjustment, because "unadjusted" is what Section 5.3 asks for (decision 4).
+:::
+
+## Step 2 — The Interval Problem
+
+This step exists because Section 5.3 raises the issue itself, in bold, with a warning symbol. It is the only requirement in the section that these data cannot satisfy, and the honest response is to measure the gap rather than to note it and move on.
+
+```{r}
+#| label: t2
+#| code-summary: The eleven decisions standing between the Ellis table and Table 2
+#| echo: false
+#| results: asis
+```
+
+::: callout-warning
+## The requirement that cannot be met
+
+Section 5.3 states: *"Confidence intervals must be computed using bootstrap variance estimation (500 bootstrap weights provided by Statistics Canada), NOT using standard model-based SEs with simple random sampling assumptions. Failure to use bootstrap weights will yield artificially narrow CIs."*
+
+The 500 replicate weights were not provided, because they do not exist for these cycles. Statistics Canada began distributing bootstrap weights with the CCHS 2015 file. The 2010–2011 and 2013–2014 Public Use Microdata Files carry the master weight only, and the stratum and cluster identifiers that would permit a Taylor-series alternative are suppressed as a confidentiality measure.
+
+Section 5.3's prediction is therefore correct: **every interval in this report is artificially narrow.** What follows is an attempt to say by how much.
+:::
+
+```{r}
+#| label: fit-models
+#| code-summary: Fit every model in all four series, or reload the cached fits
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: t21
+#| code-summary: Table t21 — how much narrower the intervals are likely to be
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: out2
+#| code-summary: Working through the width arithmetic on a worked example
+#| echo: false
+```
+
+Two instruments are used, and both measure the same thing from different directions. **Kish's design effect** derives an inflation factor from the spread of the weights alone. The **Huber–White sandwich** derives one empirically from each fitted model, and additionally absorbs some mean-variance misspecification.
+
+The sandwich ratios are not uniformly above 1. A handful of low-prevalence binary conditions produce robust standard errors *smaller* than their model-based counterparts, which is what a sandwich does when the few respondents carrying the exposure happen to be lightly weighted. Those cases are not evidence that the intervals are wide enough; they are evidence that a per-model empirical estimator is unstable when a cell is thin. The median is the number to read.
+
+Neither sees clustering. CCHS draws respondents through a multistage stratified cluster design, and in health surveys the clustering component of the design effect is routinely larger than the weighting component. The two numbers in Table t21 are therefore not estimates of the shortfall — they are **lower bounds** on it.
+
+```{r}
+#| label: out3
+#| code-summary: Fitting log — convergence, sample sizes, and dispersion by series
+#| echo: false
+```
+
+::: callout-tip
+## Review point 2
+
+Agree or disagree that reporting Wald intervals, clearly labelled and flanked by a robust alternative and a measured lower bound on their understatement, is preferable to the two alternatives: reporting no intervals at all, or silently reporting the Wald intervals as though they answered Section 5.3.
+
+If you disagree, decision 8 is not reversible without Research Data Centre access to the master files. That is a procurement decision, not an analytic one.
+:::
+
+## Step 3 — Two Analytic Bases
+
+Section 5.3 does not say which rows each model may use, and the two defensible answers give different samples. Rather than pick one silently, both are estimated and the difference is shown.
+
+```{r}
+#| label: t3
+#| code-summary: Table t3 — what the per-predictor basis buys, variable by variable
+#| echo: false
+#| results: asis
+```
+
+Variables with no missingness of their own gain the most from the per-predictor basis: under the shared rule they would be penalised for the missingness of variables they have nothing to do with. That is the argument for making per-predictor primary. The argument against it is directly visible in the table: n is not constant down the column, so two rate ratios in Table t4 are not strictly estimates on the same population.
+
+::: callout-tip
+## Review point 3
+
+Agree or disagree with decision 5 — that the per-predictor basis is primary and the shared basis is reported as a sensitivity. Graph g3 and Table t42 show what the choice is worth before you decide.
+:::
+
+## Step 4 — Table 2
+
+The deliverable.
+
+```{r}
+#| label: t4
+#| code-summary: Table t4 — Section 5.3 Table 2, level-wise rate ratios
+#| echo: false
+#| results: asis
+```
+
+Each row is one non-reference level of one predictor, from a model containing only that predictor and the cycle indicator. The Wald column is the reported quantity; the robust column sits beside it so that the width difference is visible in every row rather than only in the summary of Step 2.
+
+```{r}
+#| label: t41
+#| code-summary: Table t41 — variable-level omnibus tests, ranked
+#| echo: false
+#| results: asis
+```
+
+A multi-level factor has no single rate ratio, so a table of level-wise PRs cannot be ranked. The likelihood-ratio test against the cycle-only model on identical rows gives each variable one number and makes the screening ordering explicit. Two cautions: the likelihood is weighted, so these are pseudo-likelihood statistics whose reference distribution is approximate; and the same understated variance that narrows the intervals also inflates these statistics. Read the ranking, not the p-value.
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: Order the terms to match the domain bands of model-1 Graph g4
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: g1
+#| code-summary: Graph g1 — unadjusted rate ratios, one model per predictor
+#| echo: false
+#| fig-width: 12
+#| fig-height: 17
+```
+
+Graph g1 is the report's central artifact, and it is drawn to be read next to [Graph g4 of Model 1](../model-1/model-1.html). The domain bands are the same, in the same order, and within each band the variables appear in the same sequence. Model 1's g4 answers *did the penalty keep this variable?*; Model 00's g1 answers *what did this variable look like on its own?* Laying them side by side shows which variables were dropped despite a visible unadjusted signal — the ones whose signal belonged to something else.
+
+Three features of the graph are deliberate. Estimates whose $p \ge 0.05$ are drawn faded, so the eye is not drawn to noise. The pale grey bar behind each interval is the robust interval, so that the width penalty of Step 2 is visible at every row rather than stated once. And the x-axis is clipped: a few low-prevalence conditions produce intervals far wider than the panel, and letting them set the scale would flatten everything else into a line.
+
+```{r}
+#| label: g11
+#| code-summary: Graph g11 — the same rate ratios, ranked within each domain
+#| echo: false
+#| fig-width: 12
+#| fig-height: 17
+```
+
+Graph g11 is g1 with the correspondence to Model 1 traded away for legibility. It is the graph to use when the question is "what is strongest," and g1 is the graph to use when the question is "how does this compare with what the penalty kept."
+
+::: callout-tip
+## Review point 4
+
+This is the report's substantive output. Two questions to settle.
+
+1.  Is the level-wise presentation the right one, or should the report lead with the omnibus ranking in Table t41 and relegate levels to an appendix (decision 7)?
+2.  Should the ranking in Table t41 use unadjusted p-values, as it does, or the Benjamini–Hochberg column beside them (decision 10)? The unadjusted column is the screening quantity; the adjusted one guards against reading a table of 48 simultaneous tests as 48 independent findings.
+:::
+
+## Step 5 — The Cycle Term
+
+The cycle indicator appears in every model, so it is estimated once per predictor. That redundancy is free diagnostic information: if the two cycles were balanced on a predictor, adding that predictor could not move the cycle coefficient much.
+
+```{r}
+#| label: g2
+#| code-summary: Graph g2 — the cycle rate ratio across every bivariate model
+#| echo: false
+#| fig-width: 9
+#| fig-height: 13
+```
+
+The dashed line is the cycle-only model — the cycle effect with nothing else in the equation. A model whose point sits away from that line contains a predictor that is distributed unevenly across 2010–2011 and 2013–2014, and whose association with absence therefore partly overlaps with the cycle's. Points sitting on the line indicate predictors that carry no cycle confounding at all.
+
+::: callout-tip
+## Review point 5
+
+Agree or disagree that the cycle term is stable enough for the pooled design to stand. Large movement in this graph would not invalidate Table 2, but it would mean that "unadjusted, given cycle" is doing more work than the phrase suggests.
+:::
+
+## Step 6 — Sensitivity
+
+Series S1 rests on two choices Section 5.3 leaves open: which rows, and which outcome. Each is varied in turn.
+
+```{r}
+#| label: g3
+#| code-summary: Graph g3 — per-predictor basis against shared model-1 sample
+#| echo: false
+#| fig-width: 9
+#| fig-height: 9
+```
+
+Points on the diagonal are indifferent to the choice of basis. Points off it identify estimates that depend on which rows were available, and those are precisely the estimates that should not be quoted from Table t4 without the qualification.
+
+```{r}
+#| label: t42
+#| code-summary: Table t42 — the twenty estimates most sensitive to the analytic basis
+#| echo: false
+#| results: asis
+```
+
+Anything marked **CROSSES 1** changes direction depending on the basis. Those rows are not findings; they are artefacts of who happened to answer which questions.
+
+```{r}
+#| label: g4
+#| code-summary: Graph g4 — all-cause absence against chronic-condition absence
+#| echo: false
+#| fig-width: 9
+#| fig-height: 8
+```
+
+The chronic-condition outcome is a subset of the all-cause one and is overwhelmingly zero. Predictors above the diagonal associate more strongly with absence attributed to chronic conditions than with absence in general, which is the substantively interesting direction for this project — but the outcome's sparsity means the vertical position of any single point is far less certain than its horizontal position.
+
+```{r}
+#| label: t43
+#| code-summary: Table t43 — all four series side by side
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: t5
+#| code-summary: Table t5 — per-model diagnostics for the primary series
+#| echo: false
+#| results: asis
+```
+
+Theta far below 1 in every model confirms that the overdispersion seen in the Data Context section is not an artifact of the marginal distribution: it survives conditioning on each predictor in turn. That is the empirical justification for Section 5.3's choice of a negative binomial rather than a Poisson, and for Section 5.4's two-stage design.
+
+::: callout-tip
+## Review point 6
+
+Agree or disagree that the estimates in Table t4 are robust to the two choices varied here. If a predictor you care about appears in Table t42, or sits far off the diagonal in Graph g3 or g4, that predictor's screening result should be treated as provisional.
+:::
+
+## Step 7 — Reproducibility Ledger
+
+```{r}
+#| label: t6
+#| code-summary: Table t6 — persisted artifacts
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: out4
+#| code-summary: Parameters, and the scope Model 00 does not cover
+#| echo: false
+```
+
+# What Model 00 Settles, and What It Does Not
+
+**Settled.**
+
+-   Every eligible candidate has an unadjusted rate ratio, estimated exactly as Section 5.3 specifies: its own model, its own predictor, the cycle indicator, survey weights, negative binomial likelihood.
+-   The candidate list is sourced, not re-typed, so Model 00 and Model 1 cannot disagree about what a candidate is.
+-   The two choices Section 5.3 leaves open — analytic basis and outcome — are both varied, and the estimates that depend on them are named.
+-   The interval shortfall is measured rather than asserted, with the measurable and unmeasurable components separated.
+
+**Not settled.**
+
+-   *Variance estimation.* Decision 8 is data-blocked. Every interval is a Wald interval, understated by at least the factor in Table t21 and probably by more. Delivering Section 5.3 as written requires the CCHS master files.
+-   *Design-based inference generally.* The omnibus tests in Table t41 use nominal degrees of freedom. A design-based analysis would use degrees of freedom derived from the number of primary sampling units, which the PUMF suppresses.
+-   *`cc_copd` and `has_family_doctor`.* Both remain estimable on restricted populations and both remain unestimated. If either is wanted, it needs its own short report with its own sample definition, not a row in Table t4.
+-   *Section 5.1.* Missingness is handled by complete-case deletion within each model. Little's MCAR test and multiple imputation are out of scope here.
+
+**Recommended next step.** Read Graph g1 against Model 1's Graph g4. The interesting cases are the disagreements: variables with a clear unadjusted signal that the penalty discarded, and variables the penalty kept that show little on their own. Both patterns are informative, and neither is visible from either report alone.
+
+# Session Information
+
+```{r}
+#| label: session-info
+#| code-summary: Reproducibility environment
+#| echo: false
+report_render_duration <- round(
+  as.numeric(difftime(Sys.time(), report_render_start_time, units = "secs")), 1
+)
+cat("Rendered at:      ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n", sep = "")
+cat("Render duration:  ", report_render_duration, " seconds\n\n", sep = "")
+sessionInfo()
+```
