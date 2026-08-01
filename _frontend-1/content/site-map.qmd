@@ -30,14 +30,6 @@ Absent from Chronic
 │   └── Univariate Distributions             REDIRECT  → analysis/data-primer-1/univariate-distributions.html
 │       (data-primer-1)
 │
-├── Outcome
-│   ├── Outcome: LOP Day Decomposition       REDIRECT  → analysis/eda-5/eda-5.html
-│   │   (eda-5)
-│   ├── Outcome: Distribution Shapes         REDIRECT  → analysis/eda-71/eda-71.html
-│   │   (eda-71)
-│   └── Outcome: Rescaling                   REDIRECT  → analysis/eda-72/eda-72.html
-│       (eda-72)
-│
 ├── Predictors
 │   ├── Exposure: Chronic Conditions         REDIRECT  → analysis/eda-61/eda-61.html
 │   │   (eda-61)
@@ -49,6 +41,14 @@ Absent from Chronic
 │   │   (eda-64)
 │   └── Missingness                          REDIRECT  → analysis/eda-65/eda-65.html
 │       (eda-65)
+│
+├── Outcome
+│   ├── Outcome: LOP Day Decomposition       REDIRECT  → analysis/eda-5/eda-5.html
+│   │   (eda-5)
+│   ├── Outcome: Distribution Shapes         REDIRECT  → analysis/eda-71/eda-71.html
+│   │   (eda-71)
+│   └── Outcome: Rescaling                   REDIRECT  → analysis/eda-72/eda-72.html
+│       (eda-72)
 │
 ├── Model
 │   ├── Bivariate Models                     REDIRECT  → analysis/model-00/model-00.html
@@ -85,14 +85,14 @@ Absent from Chronic
 | [INPUT Manifest](pipeline/input-manifest.html) | §2.1 (database), §2.2 (survey modules) | Describes both raw CCHS SPSS files (2010-2011 and 2013-2014 cycles), confirms all required survey modules are present (LOP, CCC, GEN, DHH, SDC, INC, EDU, health behaviours, ADL, HCU, LBS), and documents known cross-cycle variable name differences. |
 | [Variable Inclusion](data-primer/variable-inclusion.html) | §2.2 (required variables), §3.1 (sample construction) | Maps every variable in §2.2 to its PUMF column name and Ellis implementation. Documents 17/19 chronic conditions available in PUMF (2 require RDC access), confirms all facilitating and needs variables present, and records the CONSORT-style sample exclusion flowchart (§3.1). |
 | [Univariate Distributions (data-primer-1)](data-primer/univariate-distributions.html) | §4.2 (distribution checks), §5.1 (missingness), §5.2 (descriptive statistics) | Shows empirical distributions for all 69 variables in the analytic dataset. Supports §4.2 outcome distribution checks, §5.1 missingness assessment, and §5.2 Table 1 preparation. |
-| [Outcome: LOP Day Decomposition (eda-5)](outcome/day-decomposition.html) | §4.1–4.2 (outcome construction and checks), §5.2 (Table 1), §5.3 (Table 2 baseline) | EDA-5: Decomposes the LOP outcome by cause of absence, profiles zero inflation, and examines the chronic condition component separately. Addresses §4.2 distribution diagnostic requirements and establishes the outcome profile needed for Table 1 and Table 2. |
-| [Outcome: Distribution Shapes (eda-71)](outcome/distribution-shapes.html) | §4.2 (distribution checks), §5.4–5.5 (model selection) | EDA-71: Profiles the shape of the days-absent distribution across chronic vs. non-chronic subgroups using ECDF, density, and benchmark comparisons. Informs the choice of negative binomial vs. Poisson for §5.5 multivariable models. |
-| [Outcome: Rescaling (eda-72)](outcome/rescaling.html) | §4.2 (outcome checks), §5.3 (bivariate analysis), §5.4–5.5 (model preparation) | EDA-72: Compares predisposing-variable composition between respondents with No Days and Chronic Days, then profiles chronic-day intensity and exact distributions across predictor levels. Extends the EDA-71 outcome family and supports rescaling decisions for count-model specification. |
 | [Exposure: Chronic Conditions (eda-61)](predictors/exposure.html) | §2.2 (primary exposure), §5.3 (Table 2), §5.7 (Table 4) | EDA-61: Profiles prevalence and co-occurrence of the 17 PUMF-available chronic conditions. Supports §5.3 bivariate analysis and §5.7 condition-specific model sample size assessment. |
 | [Predisposing: Socio-demographic (eda-62)](predictors/predisposing.html) | §2.2 (predisposing variables), §5.2 (Table 1), §5.3 (Table 2) | EDA-62: Profiles age, sex, marital status, education, immigration status, visible minority, household size, and related predisposing variables. Directly supports §5.2 Table 1 and §5.3 Table 2 for the predisposing domain. |
 | [Facilitating: Health System & Behaviours (eda-63)](predictors/facilitating.html) | §2.2 (facilitating variables), §5.2 (Table 1), §5.3 (Table 2) | EDA-63: Profiles income, province, family doctor access, employment type, work schedule, occupation, and health behaviour variables. Directly supports §5.2 Table 1 and §5.3 Table 2 for the facilitating domain. |
 | [Needs: Perceived Health & Limitations (eda-64)](predictors/needs.html) | §2.2 (needs variables), §5.2 (Table 1), §5.3 (Table 2) | EDA-64: Profiles self-perceived general and mental health, health vs. prior year, functional limitations (ADL items), injury status, and work stress. Directly supports §5.2 Table 1 and §5.3 Table 2 for the needs domain. |
 | [Missingness (eda-65)](predictors/missingness.html) | §5.1 (missingness handling) | EDA-65: Documents the pattern and extent of missing data across all predictor variables. Supports §5.1 decisions on multiple imputation vs. missing-as-category treatment and informs the `flag_complete_predictors` coverage (59,309/63,843 rows fully complete). |
+| [Outcome: LOP Day Decomposition (eda-5)](outcome/day-decomposition.html) | §4.1–4.2 (outcome construction and checks), §5.2 (Table 1), §5.3 (Table 2 baseline) | EDA-5: Decomposes the LOP outcome by cause of absence, profiles zero inflation, and examines the chronic condition component separately. Addresses §4.2 distribution diagnostic requirements and establishes the outcome profile needed for Table 1 and Table 2. |
+| [Outcome: Distribution Shapes (eda-71)](outcome/distribution-shapes.html) | §4.2 (distribution checks), §5.4–5.5 (model selection) | EDA-71: Profiles the shape of the days-absent distribution across chronic vs. non-chronic subgroups using ECDF, density, and benchmark comparisons. Informs the choice of negative binomial vs. Poisson for §5.5 multivariable models. |
+| [Outcome: Rescaling (eda-72)](outcome/rescaling.html) | §4.2 (outcome checks), §5.3 (bivariate analysis), §5.4–5.5 (model preparation) | EDA-72: Compares predisposing-variable composition between respondents with No Days and Chronic Days, then profiles chronic-day intensity and exact distributions across predictor levels. Extends the EDA-71 outcome family and supports rescaling decisions for count-model specification. |
 | [Bivariate Models (model-00)](model/bivariate-models.html) | §5.3 (Table 2), §4.2 (outcome checks) | Model-00: Implements §5.3 as one model per predictor across seven reviewable steps — the bivariate protocol, the interval problem, two analytic bases, the Table 2 build, the cycle term, and a sensitivity pass. Explicitly names the one §5.3 requirement that cannot be met with PUMF data, and closes with a reproducibility ledger. |
 | [Lasso Rehearsal with Predisposing (model-0)](model/lasso-rehearsal.html) | §5.4 (variable selection via LASSO) | Model-0: A scoped rehearsal that tests the project's reading of §5.4 on the predisposing block alone before committing to the full candidate set. Fits the penalized path, examines what each penalty retains, hands selection to a negative binomial second stage, and asks whether survey weights disturb cross-validation. Records what is confirmed and which §5.4 decisions remain open. |
 | [Variable Selection with Lasso (model-1)](model/variable-selection.html) | §5.4 (variable selection via LASSO), §5.5 (primary multivariable models) | Model-1: Implements §5.4 across the full candidate set in nine reviewable steps — candidate registry, missing data, analytic sample, decision registry, four specifications, penalised Poisson fitting, selection results, negative binomial refitting, and a reproducibility ledger. Flags the one decision that cannot be reversed and produces the predictor set carried into the §5.5 primary models. |

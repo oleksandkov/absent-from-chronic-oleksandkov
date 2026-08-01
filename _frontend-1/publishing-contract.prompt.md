@@ -104,28 +104,6 @@ it.
 
 ---
 
-### Outcome
-
-#### LOP Day Decomposition
-
-- **Protocol**: Direct Line (REDIRECTED)
-- **Source**: `./analysis/eda-5/eda-5.html`
-- **Label**: Outcome: LOP Day Decomposition (eda-5)
-
-#### Distribution Shapes
-
-- **Protocol**: Direct Line (REDIRECTED)
-- **Source**: `./analysis/eda-71/eda-71.html`
-- **Label**: Outcome: Distribution Shapes (eda-71)
-
-#### Rescaling
-
-- **Protocol**: Direct Line (REDIRECTED)
-- **Source**: `./analysis/eda-72/eda-72.html`
-- **Label**: Outcome: Rescaling (eda-72)
-
----
-
 ### Predictors
 
 #### Exposure
@@ -157,6 +135,28 @@ it.
 - **Protocol**: Direct Line (REDIRECTED)
 - **Source**: `./analysis/eda-65/eda-65.html`
 - **Label**: Missingness (eda-65)
+
+---
+
+### Outcome
+
+#### LOP Day Decomposition
+
+- **Protocol**: Direct Line (REDIRECTED)
+- **Source**: `./analysis/eda-5/eda-5.html`
+- **Label**: Outcome: LOP Day Decomposition (eda-5)
+
+#### Distribution Shapes
+
+- **Protocol**: Direct Line (REDIRECTED)
+- **Source**: `./analysis/eda-71/eda-71.html`
+- **Label**: Outcome: Distribution Shapes (eda-71)
+
+#### Rescaling
+
+- **Protocol**: Direct Line (REDIRECTED)
+- **Source**: `./analysis/eda-72/eda-72.html`
+- **Label**: Outcome: Rescaling (eda-72)
 
 ---
 

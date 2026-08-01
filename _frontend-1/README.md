@@ -43,3 +43,6 @@
 - **Site map decision**: Continue from the existing `content/site-map.qmd` draft. Additive edits
   only — add the `Model` branch to the navigation tree and three rows to the proposal coverage
   table; leave all existing content unchanged.
+- **Navbar reordering**: Analytical sections now run `Predictors` → `Outcome` → `Model`,
+  reflecting the analytical reading order (what predicts, what is predicted, how it is modelled).
+  The site map navigation tree and proposal coverage table follow the same order.

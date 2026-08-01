@@ -13,14 +13,14 @@ project:
     - content/pipeline/input-manifest.qmd
     - content/data-primer/variable-inclusion.qmd
     - content/data-primer/univariate-distributions.qmd
-    - content/outcome/day-decomposition.qmd
-    - content/outcome/distribution-shapes.qmd
-    - content/outcome/rescaling.qmd
     - content/predictors/exposure.qmd
     - content/predictors/predisposing.qmd
     - content/predictors/facilitating.qmd
     - content/predictors/needs.qmd
     - content/predictors/missingness.qmd
+    - content/outcome/day-decomposition.qmd
+    - content/outcome/distribution-shapes.qmd
+    - content/outcome/rescaling.qmd
     - content/model/bivariate-models.qmd
     - content/model/lasso-rehearsal.qmd
     - content/model/variable-selection.qmd
@@ -51,14 +51,6 @@ website:
             href: content/data-primer/variable-inclusion.qmd
           - text: "Univariate Distributions (data-primer-1)"
             href: content/data-primer/univariate-distributions.qmd
-      - text: "Outcome"
-        menu:
-          - text: "Outcome: LOP Day Decomposition (eda-5)"
-            href: content/outcome/day-decomposition.qmd
-          - text: "Outcome: Distribution Shapes (eda-71)"
-            href: content/outcome/distribution-shapes.qmd
-          - text: "Outcome: Rescaling (eda-72)"
-            href: content/outcome/rescaling.qmd
       - text: "Predictors"
         menu:
           - text: "Exposure: Chronic Conditions (eda-61)"
@@ -71,6 +63,14 @@ website:
             href: content/predictors/needs.qmd
           - text: "Missingness (eda-65)"
             href: content/predictors/missingness.qmd
+      - text: "Outcome"
+        menu:
+          - text: "Outcome: LOP Day Decomposition (eda-5)"
+            href: content/outcome/day-decomposition.qmd
+          - text: "Outcome: Distribution Shapes (eda-71)"
+            href: content/outcome/distribution-shapes.qmd
+          - text: "Outcome: Rescaling (eda-72)"
+            href: content/outcome/rescaling.qmd
       - text: "Model"
         menu:
           - text: "Bivariate Models (model-00)"

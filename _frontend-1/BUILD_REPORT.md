@@ -27,6 +27,13 @@ branch was inserted into the ASCII navigation tree and three rows were appended 
 **Proposal Coverage** table (mapped to §5.3 and §5.4). The **Content Type** table and all prior
 tree branches and coverage rows are unchanged.
 
+### Navbar Reordering
+
+Analytical sections were reordered to `Predictors` → `Outcome` → `Model`. The change was applied
+to `_quarto.yml` (both the `render:` list and the navbar), the contract section order, and the
+site map (tree branches and coverage rows). The rendered navbar order was verified in
+`_site/content/index.html` as: Project, Pipeline, Data Primer, Predictors, Outcome, Model.
+
 ### Fidelity Warnings (Non-Blocking)
 
 - No `source_sha256` fields in the contract — deterministic drift checks are unavailable.
