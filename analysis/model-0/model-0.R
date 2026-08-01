@@ -368,7 +368,7 @@ g1_coefficient_path <- path_long %>%
       "Dashed lines mark lambda.1se (magenta) and lambda.min (blue)."
     ),
     x = "Lambda (log scale, larger = heavier penalty)",
-    y = "Penalized Poisson coefficient (log scale)",
+    y = "Penalized Poisson coefficient (log rate ratio)",
     colour = "Source variable",
     caption = "Cycle indicator is unpenalized and never shrinks to zero."
   ) +

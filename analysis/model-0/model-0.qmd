@@ -226,6 +226,38 @@ The cycle indicator is the one line that never touches zero. It carries `penalty
 #| fig-cap: "Graph g1: Each line traces one design-matrix column across the penalty grid. Coefficients leave zero one at a time as the penalty relaxes. The unpenalized cycle indicator is the only line that never touches zero."
 ```
 
+### Reading the Vertical Axis
+
+The quantity on the vertical axis is a coefficient from a Poisson GLM with a log link,
+
+$$\log \mathbb{E}[Y_i \mid X_i] = \beta_0 + \sum_j \beta_j x_{ij},$$
+
+so it lives on the log-count scale, not the day scale. The word *penalized* means $\hat\beta$ is not the maximum-likelihood estimate; it solves
+
+$$\hat\beta(\lambda) = \arg\max_\beta \; \ell_{\text{Poisson}}(\beta) - \lambda \sum_j c_j |\beta_j|,$$
+
+with $c_j = 1$ for the predisposing dummies and $c_j = 0$ for the cycle indicator. Two consequences follow. Every plotted value is deliberately biased toward zero, by an amount that grows with $\lambda$. And no standard error, confidence interval, or p-value attaches to it — LASSO coefficients admit no valid Wald inference. This is exactly why stage two re-estimates the selected set with negative binomial: LASSO answers *which columns*, not *how much*.
+
+Every column of the design matrix is a 0/1 dummy, so each $\beta_j$ contrasts one level against that variable's reference level, holding the other retained columns fixed. Exponentiating converts it to a rate ratio, $\text{RR}_j = e^{\beta_j}$:
+
+| $\beta_j$ | $e^{\beta_j}$ | Reading |
+|---:|---:|:---|
+| $0.05$ | $1.05$ | ~5% more absence days than reference |
+| $0.20$ | $1.22$ | ~22% more |
+| $0.69$ | $2.00$ | twice as many |
+| $-0.20$ | $0.82$ | ~18% fewer |
+| $-0.69$ | $0.50$ | half as many |
+
+For $|\beta| \lesssim 0.2$ the shortcut $100 \times \beta \approx$ percent change is close enough; beyond that the relationship is multiplicative and must be exponentiated.
+
+Three cautions attach to magnitude:
+
+1. **Shrunk, so not an effect size.** A $\beta$ of $0.15$ at `lambda.min` is a lower bound in absolute value on what an unpenalized fit of the same columns would return. It should not be quoted as "the effect."
+2. **The path is more informative than any single point.** Which lines leave the axis *first*, at the largest $\lambda$, is a far more stable ranking of predictive contribution than the height of any line at a chosen $\lambda$.
+3. **Rare levels receive an effective penalty discount.** `glmnet` standardizes columns internally, so the penalty acts on $\beta_j s_j$ where $s_j = \sqrt{p_j(1-p_j)}$ is the dummy's standard deviation. A sparse category has small $s_j$, pays less penalty per unit of $\beta$, and can therefore carry a tall coefficient that a common category of equal predictive value would not.
+
+A negative $\beta_j$ means respondents at that level are expected to lose *fewer* workdays to chronic conditions than respondents at the reference level of the same variable, conditional on the other columns non-zero at that $\lambda$. That is the whole of its content. Negative is not weak — sign is direction, magnitude is strength, and $\beta = -0.4$ is a stronger signal than $\beta = +0.1$. Negative is not a failing predictor either: a useless column sits at exactly zero, and being non-zero in either direction is the survival criterion. The comparison is against a reference level rather than the sample average, so flipping the reference flips the sign; the `reference_level` column in the data-context table above settles which is which. Finally, with correlated predictors — `household_size`, `living_arrangements`, and the three child-presence indicators are entangled by construction — LASSO tends to retain one member of a cluster and may hand it a sign opposite to its marginal association. A surprising negative is a collinearity question first and a substantive finding second.
+
 Graph g2 shows how a single point on that path gets chosen. Five-fold cross-validation estimates out-of-sample Poisson deviance at each $\lambda$, with an uncertainty band. `lambda.min` sits at the bottom of the curve. `lambda.1se` sits to its right, at the heaviest penalty whose deviance is still statistically indistinguishable from the minimum.
 
 ```{r}
