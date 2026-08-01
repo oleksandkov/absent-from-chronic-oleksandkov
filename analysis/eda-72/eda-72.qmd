@@ -1,6 +1,6 @@
 ---
-title: "EDA 72: Predisposition Profiles Across Chronic-Absence Groups"
-subtitle: "Extending the EDA-71 G2 Outcome Family"
+title: "EDA 72: Outcome Groups and the Days-Absent Scale"
+subtitle: "With a Worked Illustration on the Predisposing Domain"
 author: "Analysis Team"
 date: last-modified
 format:
@@ -22,21 +22,45 @@ editor_options:
 
 # Mission
 
-This EDA extends the EDA-71 G2 family by relating its outcome groups and exact
-chronic-day distribution to the non-student predisposing variables documented in
-Section 3 of the Data Primer. It first profiles respondents with No Days, then makes
-the proposed day-scale coarsening explicit, and finally compares No Days with Chronic
-Days while retaining the positive chronic-day values.
+This EDA has two subjects.
+
+The first is the **three mutually exclusive outcome groups** we constructed to think
+through the numerical nature of the outcome: No Days, Chronic Days, and Non-Chronic
+Days. They are exhaustive, they partition the analytic sample, and they will be the
+frame in which model results and group comparisons are read.
+
+The second is the **distribution of `days_absent`**, the numeric outcome, and what
+happens to it under coarsening. Chronic days are not a separate measure; they are the
+portion of `days_absent` attributed to a chronic condition. Graphs that show the
+whole measure and graphs that show the chronic component are labelled and coloured
+differently so the two are never conflated.
+
+Graph family g2 is then offered as an **illustration**: one way a set of variables --
+here the project's predisposing domain -- can be evaluated against those three groups.
+The substance is the method, not the predisposing findings. Family g3 is a reference
+profile of the No Days group, kept for lookup.
 
 **Research Questions:**
 
-1.  How are predisposing variables distributed among respondents with No Days?
-2.  How do exact chronic days map to weekly and hybrid coarsened scales?
-3.  How does predisposing composition differ between No Days and Chronic Days?
-4.  How does chronic-day intensity vary across predisposing-variable levels?
-5.  Which predictor levels have visibly different exact chronic-day distributions?
+1.  How do the three outcome groups partition the analytic sample, and how are they
+    defined from the two day counts?
+2.  How is `days_absent_total` distributed among respondents who missed any work, and
+    how do the exact, five-day, and hybrid scales change what a reader sees?
+3.  How does the chronic component sit inside that measure, in support and in shape?
+4.  How do the two positive-day groups compare when both are placed on the same
+    measure?
+5.  How can a set of candidate variables be evaluated against the three groups, using
+    the predisposing domain as the worked example?
 
 # Definition of Terms
+
+**`days_absent_total`** ("days absent"): workdays missed for any health reason in the
+past three months. Support 0-63. This is the numeric outcome.
+
+**`days_absent_chronic`** ("chronic days"): the portion of those same days attributed
+to a chronic condition. Support 0-31. It is a **component of** `days_absent_total`,
+not a parallel measure. Every respondent satisfies
+`days_absent_chronic <= days_absent_total`.
 
 **No Days**: `days_absent_total == 0` (n = 45,006).
 
@@ -48,6 +72,11 @@ non-chronic absence days.
 
 **Work-week coarsening**: Five reported workdays are grouped into one display week.
 This is a scale-design choice, not a claim about elapsed time or work schedule.
+
+**Colour convention**: The outcome-group palette is grey (No Days), reddish brown
+(Chronic Days), and dark blue (Non-Chronic Days). Every sequential ramp in this report
+inherits from it. A **bluish** ramp means the display is of `days_absent_total`, the
+whole measure. A **reddish** ramp means the display is of the chronic component.
 
 ```{r}
 #| code-summary: Reconciles working directory between execution modes
@@ -131,7 +160,7 @@ read_chunk("analysis/eda-72/eda-72.R")
 
 ```{r}
 #| label: tweak-data-0
-#| code-summary: Verify the three outcome-group counts and chronic-day support
+#| code-summary: Verify the three outcome-group counts, both day supports, and the subset relation
 #| echo: true
 #| code-fold: true
 #| cache: true
@@ -145,7 +174,7 @@ read_chunk("analysis/eda-72/eda-72.R")
 
 ```{r}
 #| label: inspect-data-1
-#| code-summary: Predisposition variables retained after dropping student status
+#| code-summary: Variables used in the graph family g2 illustration
 #| echo: false
 ```
 
@@ -181,52 +210,22 @@ especially Section 3, Predisposing Variables.
 
 # Analysis
 
-## Graph Family g0: No Days Predisposition Overview
+## Graph Family g1: Outcome Groups and the Days-Absent Scale
 
-The No Days group is the largest outcome group. These panels show each predictor's
-weighted composition without implying that the categories across different predictors
-share a common denominator beyond membership in the same No Days cohort.
+This family carries both subjects of the report. The **outcome-group partition** --
+No Days, Chronic Days, Non-Chronic Days -- is reproduced unchanged at the left of
+every graph below, so that each view of the numeric outcome is read against the
+population it comes from. The panels at right show `days_absent_total` at the exact
+scale and at two coarsenings.
 
-```{r}
-#| label: g0-data-prep
-#| code-summary: Prepare weighted predisposing-variable distributions for No Days
-#| echo: true
-#| code-fold: true
-#| cache: true
-```
-
-```{r}
-#| label: g0
-#| code-summary: Compact No Days predisposition overview
-#| echo: false
-#| fig-width: 8.5
-#| fig-height: 5.5
-#| fig-cap: "Graph g0: Weighted composition of the non-student predisposing variables among 45,006 respondents who reported No Days. Percentages sum to 100% within each variable."
-```
-
-### g01 - A4 Landscape Design
-
-Graph g01 tests the same content at A4 landscape dimensions. Three facet columns,
-larger labels, and direct percentages trade browser compactness for print legibility.
-
-```{r}
-#| label: g01
-#| code-summary: A4-landscape No Days predisposition overview
-#| echo: false
-#| fig-width: 11.69
-#| fig-height: 8.27
-#| fig-cap: "Graph g01: A4-landscape version of the No Days predisposition profile. Direct labels and a three-column facet layout are designed to remain legible in the browser and on an A4 landscape page."
-```
-
-## Graph Family g1: Chronic-Day Scale Design
-
-The exact support contains integer values from 1 through 31. Graph g1 exposes rather
-than hides the consequence of each coarsening rule: exact values, five-day work-week
-bins, and a hybrid that retains one-day granularity through day 5 before coarsening.
+The exact support of `days_absent_total` runs from 1 to 63 among respondents who
+missed any work. The chronic component runs only from 1 to 31. That difference is not
+a rounding artifact; it follows from chronic days being one of eight reasons summed
+into the total.
 
 ```{r}
 #| label: g1-data-prep
-#| code-summary: Map every exact chronic-day value to each proposed scale
+#| code-summary: Map every exact days-absent value to each proposed scale
 #| echo: true
 #| code-fold: true
 #| cache: true
@@ -234,26 +233,29 @@ bins, and a hybrid that retains one-day granularity through day 5 before coarsen
 
 ```{r}
 #| label: g1
-#| code-summary: Exact-to-coarsened chronic-day scale map
+#| code-summary: Exact-to-coarsened days-absent scale map
 #| echo: false
 #| fig-width: 11.69
-#| fig-height: 4.2
-#| fig-cap: "Graph g1: Every exact chronic-day value from 1 to 31 mapped to the raw, five-day work-week, and first-week-exact scales. Alternating bands reveal bin boundaries; labels state the category readers would see."
+#| fig-height: 4.6
+#| fig-cap: "Graph g1: Every exact days-absent value from 1 to 63 mapped to the exact, five-day work-week, and first-week-exact scales. Alternating bands reveal bin boundaries; labels state the category readers would see. The dashed rule marks day 31, the ceiling of the chronic-day component."
 ```
 
-### g11 - Chronic-Day Distribution at Three Scales
+### g11 - Days Absent at Three Scales
 
-Graph g11 adopts the left-hand three-way cohort partition from EDA-71 graph g22.
-The three stacked panels at right hold the same 3,626 Chronic respondents (defined
-as respondents with at least one chronic day) at
-the exact, five-day work-week, and first-week-exact scales. The top panel uses an
-exact-day colour category; the lower panels use the seven five-day work-week colour
-bands. Therefore, in the bottom panel days 1 through 5 remain separate bars while
-sharing the first work-week colour.
+Graph g11 places the three-way cohort partition at left and, at right, the
+distribution of `days_absent_total` among all 18,837 respondents who missed at least
+one day -- the Chronic and Non-Chronic groups combined. The three right-hand panels
+hold the same people at the exact, five-day work-week, and first-week-exact scales.
+The bluish ramp signals the whole measure.
+
+Read the panels against each other: the five-day binning collapses the first five
+one-day bars, which is where most of the mass sits, into a single 15,176-respondent
+column. The hybrid scale is the compromise that keeps that structure visible while
+still taming the tail.
 
 ```{r}
 #| label: g11-data-prep
-#| code-summary: Prepare the three-way cohort partition and chronic-day frequencies at three scales
+#| code-summary: Prepare the three-way cohort partition and days-absent frequencies
 #| echo: true
 #| code-fold: true
 #| cache: true
@@ -261,26 +263,54 @@ sharing the first work-week colour.
 
 ```{r}
 #| label: g11
-#| code-summary: Three-scale chronic-day distribution with the EDA-71 cohort partition
+#| code-summary: Three-scale days-absent distribution with the outcome-group partition
 #| echo: false
 #| fig-width: 11.69
 #| fig-height: 8.27
-#| fig-cap: "Graph g11: Left panel shows all three outcome groups (No Days n=45,006; Chronic n=3,626; Non-Chronic n=15,211). Right panels use the Chronic group only (>=1 chronic day; n=3,626): exact-day bars, five-day bins, and first-week-exact tail coarsening."
+#| fig-cap: "Graph g11: Left panel shows all three outcome groups (No Days n=45,006; Chronic n=3,626; Non-Chronic n=15,211). Right panels use every respondent with >0 days absent (n=18,837) and show days_absent_total at the exact, five-day, and first-week-exact scales."
 ```
 
-### g12 - Hybrid Missed-Day Distributions by Positive-Day Group
+#### g111 - The Chronic Component at the Same Three Scales
 
-Graph g12 now keeps the left-hand three-way stacked partition and adds a right-hand
-comparison for the two positive-day groups only: Chronic (>=1 chronic day; n=3,626)
-and Non-Chronic (>0 missed days and 0 chronic days; n=15,211). Within each group,
-the first panel preserves days 1 through 5 while the second panel groups the
-remaining tail into work-week bins 2 through 7+. Panel widths are proportional to
-their five and six bars, so an individual bar occupies approximately the same width
-on both sides.
+Graph g111 repeats the g11 construction on the chronic component alone. It is the
+same design, the same three scales, and the same partition panel; only the measure and
+the basis change. The reddish ramp signals the subset.
+
+Two differences are worth naming. The support ends at day 31 rather than 63, and the
+terminal value carries visible mass -- 251 respondents report exactly 31 chronic days,
+which is consistent with a reporting ceiling rather than a smooth tail.
+
+```{r}
+#| label: g111-data-prep
+#| code-summary: Prepare chronic-day frequencies on the same scale construction
+#| echo: true
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g111
+#| code-summary: Three-scale chronic-day distribution, the subset variant of g11
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g111: The g11 construction restricted to the chronic component. Right panels use the Chronic Days group only (>=1 chronic day; n=3,626) and show days_absent_chronic, support 1 to 31."
+```
+
+### g12 - Both Positive-Day Groups on the Same Measure
+
+Graph g12 compares the two positive-day groups on one measure, `days_absent_total`.
+An earlier version of this graph used chronic days for one group and total days for
+the other while labelling both "missed days"; that comparison was not like-for-like
+and has been withdrawn. Bar colour is the group colour from the partition panel.
+
+Within each row, the first panel preserves days 1 through 5 and the second groups the
+remaining tail into work-week bins 2 through 13. Row scales are free, so the two rows
+show shape rather than magnitude; the left panel carries the magnitude.
 
 ```{r}
 #| label: g12-data-prep
-#| code-summary: Prepare hybrid missed-day frequencies for Chronic and Non-Chronic Days groups
+#| code-summary: Prepare hybrid days-absent frequencies for both positive-day groups
 #| echo: true
 #| code-fold: true
 #| cache: true
@@ -288,18 +318,51 @@ on both sides.
 
 ```{r}
 #| label: g12
-#| code-summary: Compare hybrid missed-day distributions across both positive-day groups
+#| code-summary: Compare days-absent distributions across both positive-day groups
 #| echo: false
-#| fig-width: 8.5
-#| fig-height: 5.5
-#| fig-cap: "Graph g12: Left panel shows the full three-group partition (No Days, Chronic, Non-Chronic). Right panels use only Chronic (>=1 chronic day; n=3,626) and Non-Chronic (>0 missed days and 0 chronic days; n=15,211). Days 1-5 remain exact; values above day 5 are grouped into work-week bins 2 through 7+."
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g12: Left panel shows the full three-group partition. Right panels show days_absent_total for Chronic (>=1 chronic day; n=3,626) and Non-Chronic (>0 days absent and 0 chronic days; n=15,211). Days 1-5 remain exact; values above day 5 are grouped into work-week bins 2 through 13. Row scales are free."
 ```
 
-## Graph Family g2: Outcome-Group Predisposition Comparisons
+#### g121 - Two Measures on the Same Respondents
 
-This family compares group composition before moving to the numeric chronic-day
-values. Percentages in g2, g20, g21, g211, and g212 use the pooled survey weight.
-Graphs g22 through g24 condition on the 3,626 Chronic Days respondents.
+Graph g121 makes the subset relation visible on a single set of people. The 3,626
+Chronic Days respondents are counted twice: once by all days absent, once by the
+chronic component of those same days. The chronic row cannot extend past work-week 7,
+because 31 is the component's ceiling, while the total row reaches work-week 13.
+
+This is the graph to consult whenever a reader is tempted to treat "chronic days" and
+"days absent" as interchangeable labels for the same quantity.
+
+```{r}
+#| label: g121-data-prep
+#| code-summary: Prepare both day measures for the Chronic Days group
+#| echo: true
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g121
+#| code-summary: Compare all days absent with the chronic component on the same respondents
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g121: Chronic Days group only (n=3,626), counted twice. Upper row is days_absent_total; lower row is days_absent_chronic. Days 1-5 remain exact; the tail is grouped into five-day work weeks."
+```
+
+## Graph Family g2: Evaluating a Variable Set Against the Outcome Groups
+
+This family is an **illustration of a method**, not a set of substantive findings.
+Family g1 established the groups and the scale; this family shows one way a set of
+candidate variables can be examined against those groups. The predisposing domain
+serves as the worked example because it is the first block of the project's candidate
+registry. The same displays would serve any other domain unchanged.
+
+Graphs g2, g20, g21, g211, and g212 are composition contrasts and use the pooled
+survey weight. Graphs g22 through g24 condition on the 3,626 Chronic Days respondents
+and report the chronic component, `days_absent_chronic`, which is labelled as such.
 
 ```{r}
 #| label: g2-data-prep
@@ -417,8 +480,52 @@ within a predictor, allowing levels such as age 15-24 to be read in context.
 #| fig-cap: "Graph g24: Left matrix shows exact chronic-day distributions; right columns show respondent-count share and weighted share. Rows are aligned so each category appears on the same row on both sides."
 ```
 
+## Graph Family g3: Reference Profile of the No Days Group
+
+This family is reference material, not argument. It answers "what does the largest
+outcome group look like" rather than "how do the groups differ", so it sits after the
+two substantive families rather than before them.
+
+It was previously numbered g0 and placed first, which gave a lookup profile the
+position of a lead finding. The IDs `g0` and `g01` are retired and are not reused.
+
+```{r}
+#| label: g3-data-prep
+#| code-summary: Prepare weighted predisposing-variable distributions for No Days
+#| echo: true
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g3
+#| code-summary: Compact No Days reference profile
+#| echo: false
+#| fig-width: 8.5
+#| fig-height: 5.5
+#| fig-cap: "Graph g3: Weighted composition of the non-student predisposing variables among 45,006 respondents who reported No Days. Percentages sum to 100% within each variable."
+```
+
+### g31 - A4 Landscape Design
+
+Graph g31 tests the same content at A4 landscape dimensions. Three facet columns,
+larger labels, and direct percentages trade browser compactness for print legibility.
+
+```{r}
+#| label: g31
+#| code-summary: A4-landscape No Days reference profile
+#| echo: false
+#| fig-width: 11.69
+#| fig-height: 8.27
+#| fig-cap: "Graph g31: A4-landscape version of the No Days reference profile. Direct labels and a three-column facet layout are designed to remain legible in the browser and on an A4 landscape page."
+```
+
 # Appendix
 
 Student status is excluded because the source field is suppressed and all-missing in
-the PUMF. The three outcome groups are exhaustive and mutually exclusive; the added
-graphs now show their complete composition comparison matrix.
+the PUMF. The three outcome groups are exhaustive and mutually exclusive; the g2
+family shows their complete composition comparison matrix.
+
+Retired artifact IDs: `g0` and `g01` became `g3` and `g31` when the reference profile
+moved from first position to last. Per the project's artifact rules the retired IDs are
+not reused.

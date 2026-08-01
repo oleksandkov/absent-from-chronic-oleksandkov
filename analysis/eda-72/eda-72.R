@@ -1,6 +1,12 @@
 # nolint start
 # AI agents must consult ./analysis/eda-1/eda-style-guide.md before making changes to this file.
-# EDA-72: Predisposition profiles for chronic-absence outcome groups.
+# EDA-72: Outcome groups and the days_absent scale.
+# Theme 1 (g1): the three mutually exclusive outcome groups and the rescaling of
+#   days_absent, the numeric outcome. Chronic days are a subset of days_absent,
+#   not a parallel measure.
+# Theme 2 (g2): an illustration of how a set of variables -- here the project's
+#   predisposing domain -- can be evaluated against those three groups.
+# g3 is a reference profile of the No Days group, kept for lookup, not argument.
 rm(list = ls(all.names = TRUE)) # Clear the memory of variables from previous run.
 cat("\014") # Clear the console
 cat("Working directory: ", getwd()) # Must be set to Project Directory
@@ -58,6 +64,22 @@ comparison_group_colours <- c(
   "Chronic Days" = abcol[["brown"]],
   "Non-Chronic Days" = abcol[["blue"]]
 )
+
+# Outcome-group palette carried over from EDA-71 graph g2. Every sequential ramp
+# in this report is anchored to it: displays of days_absent (the whole measure)
+# take the bluish Non-Chronic hue, displays of chronic days take the reddish
+# Chronic hue. Colour therefore signals which slice of the outcome is on screen.
+outcome_group_colours <- c(
+  "No Days" = "#D9D9D9",
+  "Chronic Days" = "#D08C60",
+  "Non-Chronic Days" = "#0B4F6C"
+)
+days_absent_ramp <- grDevices::colorRampPalette(c("#DCEAF1", "#3E7F9B", "#0B4F6C"))
+chronic_days_ramp <- grDevices::colorRampPalette(c("#FBE7D6", "#D08C60", "#8C4A1E"))
+
+# Observed support of the two day counts (CACHE-manifest: total 0-63, chronic 0-31).
+days_absent_max <- 63L
+chronic_days_max <- 31L
 
 dhhgage_labels <- c(
   "2" = "15-17 yrs", "3" = "18-19 yrs", "4" = "20-24 yrs",
@@ -123,6 +145,230 @@ weighted_mean <- function(value, weight) {
   stats::weighted.mean(value, weight, na.rm = TRUE)
 }
 
+# --- Day-scale coarsening rules -----------------------------------------------
+# These helpers are deliberately measure-agnostic. They take a count of days
+# absent and return the bin it falls into. The same rules apply to
+# days_absent_total and to days_absent_chronic; only the upper bound differs.
+work_week_index <- function(days) as.integer(ceiling(days / 5))
+
+hybrid_bin_index <- function(days) {
+  dplyr::if_else(
+    days <= 5,
+    as.integer(days),
+    5L + as.integer(ceiling((days - 5) / 5))
+  )
+}
+
+week_bin_label <- function(week_index, max_days) {
+  lower <- (week_index - 1L) * 5L + 1L
+  upper <- pmin(week_index * 5L, max_days)
+  dplyr::if_else(lower == upper, as.character(lower), paste0(lower, "-", upper))
+}
+
+hybrid_bin_label <- function(days, max_days) {
+  dplyr::if_else(
+    days <= 5,
+    as.character(days),
+    week_bin_label(hybrid_bin_index(days) - 4L, max_days)
+  )
+}
+
+make_scale_mapping <- function(max_days) {
+  tidyr::crossing(
+    days_absent = seq_len(max_days),
+    scale = factor(
+      c("Exact reported days", "Five-day work weeks", "First week exact; tail coarsened"),
+      levels = c("Exact reported days", "First week exact; tail coarsened", "Five-day work weeks")
+    )
+  ) %>%
+    mutate(
+      bin_index = case_when(
+        scale == "Exact reported days" ~ as.integer(days_absent),
+        scale == "Five-day work weeks" ~ work_week_index(days_absent),
+        TRUE ~ hybrid_bin_index(days_absent)
+      ),
+      bin_label = case_when(
+        scale == "Exact reported days" ~ as.character(days_absent),
+        scale == "Five-day work weeks" ~ paste0(
+          work_week_index(days_absent),
+          if_else(work_week_index(days_absent) == 1L, " week", " weeks")
+        ),
+        TRUE ~ hybrid_bin_label(days_absent, max_days)
+      ),
+      band = factor(bin_index %% 2)
+    )
+}
+
+# Attach both coarsened scales to a per-day frequency table.
+add_day_scales <- function(data, day_column, max_days) {
+  week_levels <- unique(week_bin_label(work_week_index(seq_len(max_days)), max_days))
+  hybrid_levels <- unique(hybrid_bin_label(seq_len(max_days), max_days))
+
+  data %>%
+    mutate(
+      day_value = as.integer(.data[[day_column]]),
+      exact_day = factor(day_value, levels = seq_len(max_days)),
+      work_week = work_week_index(day_value),
+      work_week_label = factor(week_bin_label(work_week, max_days), levels = week_levels),
+      hybrid_index = hybrid_bin_index(day_value),
+      hybrid_label = factor(hybrid_bin_label(day_value, max_days), levels = hybrid_levels)
+    )
+}
+
+# The outcome-group partition panel. It is the visual anchor of this report and
+# is reproduced unchanged at the left of every graph in family g1.
+build_partition_panel <- function(partition_data, artifact_id) {
+  partition_data %>%
+    ggplot(aes(x = "Analytic sample", y = pct_raw, fill = outcome_group)) +
+    geom_col(width = 0.48, colour = "white", linewidth = 0.3) +
+    geom_text(
+      aes(label = paste0(scales::comma(n_raw), "\n", sprintf("%.1f%%", pct_raw))),
+      position = position_stack(vjust = 0.5), size = 2.8, lineheight = 0.95
+    ) +
+    scale_fill_manual(values = outcome_group_colours, guide = "none") +
+    scale_y_continuous(
+      labels = scales::label_percent(scale = 1), limits = c(0, 100),
+      expand = expansion(mult = c(0, 0))
+    ) +
+    labs(
+      title = paste0("Graph ", artifact_id, ": Outcome groups"),
+      subtitle = "No Days / Chronic / Non-Chronic",
+      x = NULL,
+      y = "Share of sample"
+    ) +
+    theme_minimal(base_size = 11) +
+    theme(
+      plot.title = element_text(size = 10),
+      plot.subtitle = element_text(size = 9),
+      axis.text.x = element_blank(), panel.grid.major.x = element_blank(),
+      panel.grid.minor = element_blank(), plot.margin = margin(5.5, 0, 5.5, 5.5)
+    )
+}
+
+# Split a hybrid-binned frequency table into the two display panels used by g12
+# and g121: exact days 1-5 on the left, work-week numbers 2 and up on the right.
+hybrid_panel_frame <- function(data) {
+  data %>%
+    mutate(
+      scale_panel = factor(
+        if_else(hybrid_index <= 5L, "A Week or Less", "More than a Week"),
+        levels = c("A Week or Less", "More than a Week")
+      ),
+      bin_label = factor(
+        if_else(
+          hybrid_index <= 5L,
+          as.character(hybrid_index),
+          as.character(hybrid_index - 4L)
+        ),
+        levels = as.character(seq_len(work_week_index(days_absent_max)))
+      )
+    )
+}
+
+# Build the four-panel scale composite used by g11 and g111: the outcome-group
+# partition at left, and the same day count at the exact, five-day, and hybrid
+# scales stacked at right. Both artifacts share this construction so that the
+# whole measure and its chronic component can be read against each other.
+build_day_scale_composite <- function(exact_data, partition_data, artifact_id,
+                                      basis_label, day_axis_label, ramp, max_days) {
+  week_levels <- levels(exact_data$work_week_label)
+  exact_colours <- stats::setNames(ramp(max_days), as.character(seq_len(max_days)))
+  week_colours <- stats::setNames(ramp(length(week_levels)), week_levels)
+
+  weekly_data <- exact_data %>%
+    group_by(work_week, work_week_label) %>%
+    summarise(n_raw = sum(n_raw), .groups = "drop")
+
+  hybrid_data <- exact_data %>%
+    group_by(hybrid_index, hybrid_label, work_week_label) %>%
+    summarise(n_raw = sum(n_raw), .groups = "drop")
+
+  left_panel <- build_partition_panel(partition_data, artifact_id)
+
+  top_panel <- exact_data %>%
+    ggplot(aes(x = day_value, y = n_raw, fill = exact_day)) +
+    geom_col(width = 0.9) +
+    scale_fill_manual(values = exact_colours, guide = "none") +
+    scale_x_continuous(
+      breaks = unique(c(1, seq(5, max_days - 3, 5), max_days)),
+      limits = c(0.5, max_days + 0.5)
+    ) +
+    scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.08))) +
+    labs(
+      title = paste0("Graph ", artifact_id, ": Exact reported days"),
+      subtitle = paste0(basis_label, "; one-day bars from 1 to ", max_days),
+      x = day_axis_label, y = "Respondent count"
+    ) +
+    theme_minimal(base_size = 8) +
+    theme(
+      panel.grid.major.x = element_blank(), panel.grid.minor = element_blank(),
+      plot.margin = margin(5.5, 5.5, 1, 6)
+    )
+
+  middle_panel <- weekly_data %>%
+    ggplot(aes(x = work_week_label, y = n_raw, fill = work_week_label)) +
+    geom_col(width = 0.78) +
+    geom_text(aes(label = scales::comma(n_raw)), vjust = -0.3, size = 2.2) +
+    scale_fill_manual(values = week_colours, guide = "none") +
+    scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.14))) +
+    labs(
+      title = paste0("Graph ", artifact_id, ": Five-day work-week bins"),
+      subtitle = paste0(basis_label, "; bins: 1-5, 6-10, ..., ", dplyr::last(week_levels), " days"),
+      x = NULL, y = "Respondent count"
+    ) +
+    theme_minimal(base_size = 8) +
+    theme(
+      panel.grid.major.x = element_blank(), panel.grid.minor = element_blank(),
+      axis.text.x = element_text(size = 6.5, angle = 30, hjust = 1),
+      plot.margin = margin(1, 5.5, 1, 6)
+    )
+
+  bottom_panel <- hybrid_data %>%
+    ggplot(aes(x = hybrid_label, y = n_raw, fill = work_week_label)) +
+    geom_col(width = 0.78) +
+    scale_fill_manual(values = week_colours, guide = "none") +
+    scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.08))) +
+    labs(
+      title = paste0("Graph ", artifact_id, ": First week exact; tail coarsened"),
+      subtitle = paste0(
+        basis_label,
+        "; days 1-5 exact, tail binned. Fill marks the five-day band each bar belongs to."
+      ),
+      x = NULL, y = "Respondent count"
+    ) +
+    theme_minimal(base_size = 8) +
+    theme(
+      panel.grid.major.x = element_blank(), panel.grid.minor = element_blank(),
+      axis.text.x = element_text(size = 6.5, angle = 30, hjust = 1),
+      plot.margin = margin(1, 5.5, 5.5, 6)
+    )
+
+  grid::grid.grabExpr({
+    grid::grid.newpage()
+    grid::pushViewport(
+      grid::viewport(
+        layout = grid::grid.layout(
+          nrow = 3, ncol = 2,
+          heights = grid::unit(c(1 / 3, 1 / 3, 1 / 3), "npc"),
+          widths = grid::unit(c(0.22, 0.78), "npc")
+        )
+      )
+    )
+    grid::pushViewport(grid::viewport(layout.pos.row = 1:3, layout.pos.col = 1))
+    grid::grid.draw(ggplot2::ggplotGrob(left_panel))
+    grid::upViewport()
+    grid::pushViewport(grid::viewport(layout.pos.row = 1, layout.pos.col = 2))
+    grid::grid.draw(ggplot2::ggplotGrob(top_panel))
+    grid::upViewport()
+    grid::pushViewport(grid::viewport(layout.pos.row = 2, layout.pos.col = 2))
+    grid::grid.draw(ggplot2::ggplotGrob(middle_panel))
+    grid::upViewport()
+    grid::pushViewport(grid::viewport(layout.pos.row = 3, layout.pos.col = 2))
+    grid::grid.draw(ggplot2::ggplotGrob(bottom_panel))
+    grid::upViewport(2)
+  }, wrap.grobs = TRUE)
+}
+
 compose_two_panel_grob <- function(left_plot, right_plot, left_width = 0.22, right_width = 0.78) {
   left_grob <- ggplot2::ggplotGrob(left_plot)
   right_grob <- ggplot2::ggplotGrob(right_plot)
@@ -159,6 +405,7 @@ ds0 <- arrow::read_parquet(path_parquet) %>%
     ),
     outcome_group = factor(outcome_group, levels = outcome_group_levels),
     weight_value = .data[[weight_col]],
+    days_absent_total = as.integer(days_absent_total),
     days_absent_chronic = as.integer(days_absent_chronic)
   )
 
@@ -176,11 +423,16 @@ outcome_group_summary <- ds0 %>%
   mutate(expected_n = c(45006L, 3626L, 15211L))
 
 stopifnot(all(outcome_group_summary$n_raw == outcome_group_summary$expected_n))
-stopifnot(max(ds0$days_absent_chronic, na.rm = TRUE) == 31L)
+stopifnot(max(ds0$days_absent_total, na.rm = TRUE) == days_absent_max)
+stopifnot(max(ds0$days_absent_chronic, na.rm = TRUE) == chronic_days_max)
+# Chronic days can never exceed total days absent: the subset relation must hold.
+stopifnot(all(ds0$days_absent_chronic <= ds0$days_absent_total, na.rm = TRUE))
 
 n_no_days <- outcome_group_summary %>% filter(outcome_group == "No Days") %>% pull(n_raw)
 n_chronic_days <- outcome_group_summary %>% filter(outcome_group == "Chronic Days") %>% pull(n_raw)
 n_non_chronic_days <- outcome_group_summary %>% filter(outcome_group == "Non-Chronic Days") %>% pull(n_raw)
+n_any_days <- n_chronic_days + n_non_chronic_days
+stopifnot(n_any_days == sum(ds0$days_absent_total > 0, na.rm = TRUE))
 
 group_definition_short <- paste0(
   "No Days: n = ", scales::comma(n_no_days),
@@ -193,13 +445,18 @@ cat("Analytical rows:", scales::comma(nrow(ds0)), "\n")
 print(outcome_group_summary %>% select(-expected_n))
 
 # ---- inspect-data-1 ----------------------------------------------------------
-cat("Predisposition variables retained after dropping student status:\n")
+cat("Predisposition variables used in the graph family g2 illustration:\n")
 print(predisposition_specs)
 
 # ---- data-context-tables -----------------------------------------------------
 cat("This analysis uses cchs_analytic.parquet at one row per CCHS respondent.\n")
-cat("Variables: 11 non-student predisposing fields, days_absent_total,\n")
-cat("days_absent_chronic, and wts_m_pooled.\n")
+cat("Outcome measure: days_absent_total, workdays missed for any health reason\n")
+cat("in the past three months, support 0-63.\n")
+cat("Subset measure: days_absent_chronic, the portion of those days attributed to\n")
+cat("a chronic condition, support 0-31. It is a component of days_absent_total.\n")
+cat("Grouping: outcome_group, derived from the two measures above.\n")
+cat("Illustration variables: 11 non-student predisposing fields.\n")
+cat("Weight: wts_m_pooled.\n")
 
 # ---- data-context-person -----------------------------------------------------
 example_rows <- bind_rows(
@@ -232,153 +489,82 @@ cat("Output out1: Respondent grain proof\n")
 cat("Rows:", nrow(ds0), " Unique generated row IDs:", n_distinct(ds0$.respondent_id), "\n")
 stopifnot(nrow(ds0) == n_distinct(ds0$.respondent_id))
 
-# ---- SECTION: Graph Family g0 ------------------------------------------------
-# Predisposition distributions among the 45,006 respondents with No Days.
-
-# ---- g0-data-prep ------------------------------------------------------------
-g0_data <- predictor_long %>%
-  filter(outcome_group == "No Days", !is.na(level)) %>%
-  group_by(variable, variable_label, level) %>%
-  summarise(
-    n_raw = n(),
-    weight_sum = sum(weight_value, na.rm = TRUE),
-    .groups = "drop_last"
-  ) %>%
-  mutate(
-    pct_weighted = weight_sum / sum(weight_sum) * 100,
-    label = sprintf("%.1f%%", pct_weighted)
-  ) %>%
-  ungroup() %>%
-  add_facet_level()
-
-# ---- g0 ----------------------------------------------------------------------
-g0_no_days_predisposition <- g0_data %>%
-  ggplot(aes(x = pct_weighted, y = facet_level)) +
-  geom_col(fill = abcol[["blue"]], width = 0.72) +
-  facet_wrap(~ variable_label, scales = "free_y", ncol = 4) +
-  scale_x_continuous(
-    labels = scales::label_percent(scale = 1),
-    expand = expansion(mult = c(0, 0.16))
-  ) +
-  scale_y_discrete(labels = strip_facet_level) +
-  labs(
-    title = "Graph g0: Predisposition Profile Among Respondents With No Days",
-    subtitle = "Weighted within each variable; unweighted n = 45,006",
-    x = "Weighted share within variable",
-    y = NULL
-  ) +
-  theme_minimal(base_size = 8) +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor = element_blank(),
-    strip.text = element_text(face = "bold", size = 7),
-    axis.text.y = element_text(size = 6),
-    plot.title.position = "plot"
-  )
-
-print(g0_no_days_predisposition)
-ggsave(
-  paste0(prints_folder, "g0_no_days_predisposition.png"),
-  g0_no_days_predisposition, width = 8.5, height = 5.5, dpi = 300
-)
-
-# ---- g01 ---------------------------------------------------------------------
-g01_no_days_predisposition_a4 <- g0_no_days_predisposition +
-  geom_text(
-    aes(label = label),
-    hjust = -0.08,
-    size = 2.6,
-    colour = abcol[["grey"]]
-  ) +
-  facet_wrap(~ variable_label, scales = "free_y", ncol = 3) +
-  labs(
-    title = "Graph g01: A4 Predisposition Profile Among Respondents With No Days",
-    subtitle = "A4 landscape layout; weighted percentages within each variable (n = 45,006)"
-  ) +
-  theme(
-    strip.text = element_text(face = "bold", size = 9),
-    axis.text.x = element_text(size = 8),
-    axis.text.y = element_text(size = 7),
-    axis.title.x = element_text(size = 9),
-    plot.title = element_text(size = 15),
-    plot.subtitle = element_text(size = 10),
-    plot.margin = margin(10, 18, 10, 10)
-  )
-
-print(g01_no_days_predisposition_a4)
-ggsave(
-  paste0(prints_folder, "g01_no_days_predisposition_a4.png"),
-  g01_no_days_predisposition_a4,
-  width = a4_landscape_width, height = a4_landscape_height, dpi = 300
-)
-
 # ---- SECTION: Graph Family g1 ------------------------------------------------
-# Map exact positive chronic days to both proposed coarsened display scales.
+# THEME 1 and THEME 2 of this report.
+#
+# The three outcome groups are exhaustive and mutually exclusive:
+#   No Days           days_absent_total == 0
+#   Chronic Days      days_absent_chronic > 0
+#   Non-Chronic Days  days_absent_chronic == 0 & days_absent_total > 0
+#
+# Every graph in this family carries that partition on the left. The panels at
+# right show the numeric outcome, days_absent_total, at the exact and coarsened
+# scales. Chronic days are a component of days_absent_total, not a parallel
+# measure, so chronic-day displays appear as explicitly labelled subsets and
+# carry the reddish Chronic hue; whole-measure displays carry the bluish hue.
 
 # ---- g1-data-prep ------------------------------------------------------------
-g1_scale_mapping <- tidyr::crossing(
-  days_absent_chronic = 1:31,
-  scale = factor(
-    c("Exact reported days", "Five-day work weeks", "First week exact; tail coarsened"),
-    levels = c("Exact reported days", "First week exact; tail coarsened", "Five-day work weeks")
-  )
-) %>%
-  mutate(
-    bin_index = case_when(
-      scale == "Exact reported days" ~ days_absent_chronic,
-      scale == "Five-day work weeks" ~ ceiling(days_absent_chronic / 5),
-      days_absent_chronic <= 5 ~ days_absent_chronic,
-      TRUE ~ 5 + ceiling((days_absent_chronic - 5) / 5)
-    ),
-    bin_label = case_when(
-      scale == "Exact reported days" ~ as.character(days_absent_chronic),
-      scale == "Five-day work weeks" & days_absent_chronic == 31 ~ "7+ weeks",
-      scale == "Five-day work weeks" ~ paste0(ceiling(days_absent_chronic / 5), " week", if_else(ceiling(days_absent_chronic / 5) == 1, "", "s")),
-      days_absent_chronic <= 5 ~ paste0(days_absent_chronic, " day", if_else(days_absent_chronic == 1, "", "s")),
-      days_absent_chronic == 31 ~ "31 days",
-      TRUE ~ paste0((ceiling((days_absent_chronic - 5) / 5) - 1) * 5 + 6, "-", ceiling((days_absent_chronic - 5) / 5) * 5 + 5, " days")
-    ),
-    band = factor(bin_index %% 2)
-  )
+# The coarsening rules are applied to the full days_absent support, 1 to 63.
+g1_scale_mapping <- make_scale_mapping(days_absent_max)
 
+# Labels are drawn only on the two coarsened rows; the exact row is read off the
+# x axis, which stays legible where 63 in-tile labels would not.
 g1_scale_labels <- g1_scale_mapping %>%
+  filter(scale != "Exact reported days") %>%
   group_by(scale, bin_index, bin_label) %>%
-  summarise(label_x = mean(days_absent_chronic), .groups = "drop")
+  summarise(label_x = mean(days_absent), .groups = "drop")
 
 # ---- g1 ----------------------------------------------------------------------
 g1_coarsening_map <- g1_scale_mapping %>%
-  ggplot(aes(x = days_absent_chronic, y = scale, fill = band)) +
-  geom_tile(colour = "white", linewidth = 0.25, height = 0.78) +
+  ggplot(aes(x = days_absent, y = scale, fill = band)) +
+  geom_tile(colour = "white", linewidth = 0.2, height = 0.78) +
   geom_text(
     data = g1_scale_labels,
     aes(x = label_x, y = scale, label = bin_label),
     inherit.aes = FALSE,
-    size = 2.5
+    size = 2.0
   ) +
-  scale_fill_manual(values = c("0" = "#D9EDF2", "1" = "#FCE2CF"), guide = "none") +
-  scale_x_continuous(breaks = c(1:5, seq(10, 30, 5), 31), expand = c(0, 0)) +
+  geom_vline(
+    xintercept = chronic_days_max + 0.5,
+    colour = outcome_group_colours[["Chronic Days"]],
+    linewidth = 0.7,
+    linetype = "dashed"
+  ) +
+  scale_fill_manual(values = c("0" = "#DCEAF1", "1" = "#FCE2CF"), guide = "none") +
+  scale_x_continuous(
+    breaks = c(1, seq(5, 60, 5), days_absent_max),
+    expand = expansion(add = 0.5)
+  ) +
   labs(
-    title = "Graph g1: Mapping Exact Chronic Days to Coarser Work-Week Scales",
-    subtitle = "Five reported workdays are treated as one display week; this is a coarsening rule, not elapsed time",
-    x = "Exact reported chronic-absence days",
+    title = "Graph g1: Mapping Exact Days Absent to Coarser Work-Week Scales",
+    subtitle = paste0(
+      "days_absent_total runs 1 to ", days_absent_max,
+      " among respondents who missed any work. Five reported workdays are treated as one display week;\n",
+      "this is a coarsening rule, not elapsed time. The dashed rule marks day ", chronic_days_max,
+      ", the ceiling of the chronic-day component."
+    ),
+    x = "Exact reported days absent",
     y = NULL
   ) +
   theme_minimal(base_size = 10) +
   theme(
     panel.grid = element_blank(),
     axis.text.y = element_text(face = "bold"),
+    axis.text.x = element_text(size = 7),
     plot.title.position = "plot"
   )
 
 print(g1_coarsening_map)
 ggsave(
-  paste0(prints_folder, "g1_chronic_day_coarsening_map.png"),
-  g1_coarsening_map, width = 11.69, height = 4.2, dpi = 300
+  paste0(prints_folder, "g1_days_absent_coarsening_map.png"),
+  g1_coarsening_map, width = 11.69, height = 4.6, dpi = 300
 )
 
 # ---- g11-data-prep -----------------------------------------------------------
 # Extend the EDA-71 G22 composition: the unchanged three-way respondent partition
-# sits at left, while the chronic-reporter distribution is shown at three scales.
+# sits at left, while the distribution of days_absent_total among every
+# respondent who missed at least one day is shown at three scales. The bluish
+# ramp signals that this is the whole outcome measure, not the chronic subset.
 g11_partition_summary <- ds0 %>%
   filter(!is.na(outcome_group)) %>%
   count(outcome_group, name = "n_raw") %>%
@@ -387,286 +573,120 @@ g11_partition_summary <- ds0 %>%
     outcome_group = factor(outcome_group, levels = outcome_group_levels)
   )
 
-g11_chronic_exact <- ds0 %>%
-  filter(outcome_group == "Chronic Days") %>%
-  count(days_absent_chronic, name = "n_raw") %>%
-  tidyr::complete(days_absent_chronic = 1:31, fill = list(n_raw = 0L)) %>%
-  mutate(
-    exact_day = factor(days_absent_chronic, levels = 1:31),
-    work_week = pmin(ceiling(days_absent_chronic / 5), 7L),
-    work_week_label = factor(
-      case_when(
-        work_week == 1 ~ "1-5 days (1 week)",
-        work_week == 2 ~ "6-10 days (2 weeks)",
-        work_week == 3 ~ "11-15 days (3 weeks)",
-        work_week == 4 ~ "16-20 days (4 weeks)",
-        work_week == 5 ~ "21-25 days (5 weeks)",
-        work_week == 6 ~ "26-30 days (6 weeks)",
-        TRUE ~ "31 days (7+ weeks)"
-      ),
-      levels = c(
-        "1-5 days (1 week)", "6-10 days (2 weeks)",
-        "11-15 days (3 weeks)", "16-20 days (4 weeks)",
-        "21-25 days (5 weeks)", "26-30 days (6 weeks)",
-        "31 days (7+ weeks)"
-      )
-    ),
-    hybrid_label = factor(
-      case_when(
-        days_absent_chronic <= 5 ~ paste0(days_absent_chronic, " day", if_else(days_absent_chronic == 1, "", "s")),
-        days_absent_chronic <= 10 ~ "6-10 days",
-        days_absent_chronic <= 15 ~ "11-15 days",
-        days_absent_chronic <= 20 ~ "16-20 days",
-        days_absent_chronic <= 25 ~ "21-25 days",
-        days_absent_chronic <= 30 ~ "26-30 days",
-        TRUE ~ "31 days"
-      ),
-      levels = c("1 day", "2 days", "3 days", "4 days", "5 days", "6-10 days",
-                 "11-15 days", "16-20 days", "21-25 days", "26-30 days", "31 days")
-    )
-  )
+g11_days_absent_exact <- ds0 %>%
+  filter(days_absent_total > 0) %>%
+  count(days_absent_total, name = "n_raw") %>%
+  tidyr::complete(days_absent_total = 1:days_absent_max, fill = list(n_raw = 0L)) %>%
+  add_day_scales("days_absent_total", days_absent_max)
 
-g11_weekly <- g11_chronic_exact %>%
-  group_by(work_week, work_week_label) %>%
-  summarise(n_raw = sum(n_raw), .groups = "drop")
+stopifnot(sum(g11_days_absent_exact$n_raw) == n_any_days)
 
-g11_hybrid <- g11_chronic_exact %>%
-  group_by(hybrid_label, work_week_label) %>%
-  summarise(n_raw = sum(n_raw), .groups = "drop")
-
-g11_partition_colours <- c(
-  "No Days" = "#D9D9D9",
-  "Chronic Days" = "#D08C60",
-  "Non-Chronic Days" = "#0B4F6C"
-)
-g11_exact_colours <- stats::setNames(grDevices::hcl.colors(31, "YlOrRd", rev = TRUE), as.character(1:31))
-g11_week_colours <- stats::setNames(
-  grDevices::hcl.colors(7, "YlOrRd", rev = TRUE),
-  levels(g11_chronic_exact$work_week_label)
+g11_basis_label <- paste0(
+  "All respondents with >0 days absent (Chronic + Non-Chronic), n = ",
+  scales::comma(n_any_days)
 )
 
 # ---- g11 ---------------------------------------------------------------------
-g11_left_partition <- g11_partition_summary %>%
-  ggplot(aes(x = "Analytic sample", y = pct_raw, fill = outcome_group)) +
-  geom_col(width = 0.48, colour = "white", linewidth = 0.3) +
-  geom_text(
-    aes(label = paste0(scales::comma(n_raw), "\n", sprintf("%.1f%%", pct_raw))),
-    position = position_stack(vjust = 0.5), size = 2.8, lineheight = 0.95
-  ) +
-  scale_fill_manual(values = g11_partition_colours, guide = "none") +
-  scale_y_continuous(
-    labels = scales::label_percent(scale = 1), limits = c(0, 100),
-    expand = expansion(mult = c(0, 0))
-  ) +
-  labs(
-    title = "Graph g11: Groups",
-    subtitle = "No Days / Chronic / Non-Chronic",
-    x = NULL,
-    y = "Share of sample"
-  ) +
-  theme_minimal(base_size = 11) +
-  theme(
-    plot.title = element_text(size = 10),
-    plot.subtitle = element_text(size = 9),
-    axis.text.x = element_blank(), panel.grid.major.x = element_blank(),
-    panel.grid.minor = element_blank(), plot.margin = margin(5.5, 0, 5.5, 5.5)
-  )
+g11_days_absent_scales <- build_day_scale_composite(
+  exact_data = g11_days_absent_exact,
+  partition_data = g11_partition_summary,
+  artifact_id = "g11",
+  basis_label = g11_basis_label,
+  day_axis_label = "Days absent (days_absent_total)",
+  ramp = days_absent_ramp,
+  max_days = days_absent_max
+)
 
-g11_top_exact <- g11_chronic_exact %>%
-  ggplot(aes(x = days_absent_chronic, y = n_raw, fill = exact_day)) +
-  geom_col(width = 0.9) +
-  scale_fill_manual(values = g11_exact_colours, guide = "none") +
-  scale_x_continuous(breaks = c(1:5, seq(10, 30, 5), 31), limits = c(0.5, 31.5)) +
-  scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.08))) +
-  labs(
-    title = "Graph g11: Exact reported days",
-    subtitle = paste0(
-      "Chronic group only (>=1 chronic day), n = ", scales::comma(n_chronic_days),
-      "; one-day bars from 1 to 31"
-    ),
-    x = "Chronic-absence days", y = "Respondent count"
-  ) +
-  theme_minimal(base_size = 8) +
-  theme(panel.grid.major.x = element_blank(), panel.grid.minor = element_blank(), plot.margin = margin(5.5, 5.5, 1, 6))
-
-g11_middle_weekly <- g11_weekly %>%
-  ggplot(aes(x = work_week_label, y = n_raw, fill = work_week_label)) +
-  geom_col(width = 0.78) +
-  geom_text(aes(label = scales::comma(n_raw)), vjust = -0.3, size = 2.5) +
-  scale_fill_manual(values = g11_week_colours, guide = "none") +
-  scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.14))) +
-  labs(
-    title = "Graph g11: Five-day work-week bins",
-    subtitle = paste0(
-      "Chronic group only (>=1 chronic day), n = ", scales::comma(n_chronic_days),
-      "; bins: 1-5, 6-10, ..., 31 days"
-    ),
-    x = NULL, y = "Respondent count"
-  ) +
-  theme_minimal(base_size = 8) +
-  theme(panel.grid.major.x = element_blank(), panel.grid.minor = element_blank(), axis.text.x = element_text(size = 7), plot.margin = margin(1, 5.5, 1, 6))
-
-g11_bottom_hybrid <- g11_hybrid %>%
-  ggplot(aes(x = hybrid_label, y = n_raw, fill = work_week_label)) +
-  geom_col(width = 0.78) +
-  scale_fill_manual(values = g11_week_colours, name = "Five-day colour band") +
-  scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.08))) +
-  labs(
-    title = "Graph g11: First week exact; tail coarsened",
-    subtitle = paste0(
-      "Chronic group only (>=1 chronic day), n = ", scales::comma(n_chronic_days),
-      "; days 1-5 exact, tail binned"
-    ),
-    x = NULL, y = "Respondent count"
-  ) +
-  theme_minimal(base_size = 8) +
-  theme(
-    panel.grid.major.x = element_blank(), panel.grid.minor = element_blank(),
-    axis.text.x = element_text(size = 6.5, angle = 25, hjust = 1),
-    legend.position = c(0.99, 0.99), legend.justification = c(1, 1),
-    legend.background = element_rect(fill = "#FFFFFFDD", colour = "#D0D0D0"),
-    legend.key.size = grid::unit(0.28, "cm"), legend.title = element_text(size = 6),
-    legend.text = element_text(size = 5.5), plot.margin = margin(1, 5.5, 5.5, 6)
-  )
-
-g11_chronic_day_scales <- grid::grid.grabExpr({
-  grid::grid.newpage()
-  grid::pushViewport(
-    grid::viewport(
-      layout = grid::grid.layout(
-        nrow = 3, ncol = 2,
-        heights = grid::unit(c(1 / 3, 1 / 3, 1 / 3), "npc"),
-        widths = grid::unit(c(0.22, 0.78), "npc")
-      )
-    )
-  )
-  grid::pushViewport(grid::viewport(layout.pos.row = 1:3, layout.pos.col = 1))
-  grid::grid.draw(ggplot2::ggplotGrob(g11_left_partition))
-  grid::upViewport()
-  grid::pushViewport(grid::viewport(layout.pos.row = 1, layout.pos.col = 2))
-  grid::grid.draw(ggplot2::ggplotGrob(g11_top_exact))
-  grid::upViewport()
-  grid::pushViewport(grid::viewport(layout.pos.row = 2, layout.pos.col = 2))
-  grid::grid.draw(ggplot2::ggplotGrob(g11_middle_weekly))
-  grid::upViewport()
-  grid::pushViewport(grid::viewport(layout.pos.row = 3, layout.pos.col = 2))
-  grid::grid.draw(ggplot2::ggplotGrob(g11_bottom_hybrid))
-  grid::upViewport(2)
-}, wrap.grobs = TRUE)
-
-grid::grid.draw(g11_chronic_day_scales)
+grid::grid.draw(g11_days_absent_scales)
 ggsave(
-  paste0(prints_folder, "g11_chronic_day_scales.png"),
-  g11_chronic_day_scales, width = a4_landscape_width, height = a4_landscape_height, dpi = 300
+  paste0(prints_folder, "g11_days_absent_scales.png"),
+  g11_days_absent_scales, width = a4_landscape_width, height = a4_landscape_height, dpi = 300
+)
+
+# ---- g111-data-prep ----------------------------------------------------------
+# The same construction restricted to the chronic component. Read against g11,
+# it shows that chronic days are one slice of days_absent: a shorter support
+# (1 to 31) held by a smaller group.
+g111_chronic_exact <- ds0 %>%
+  filter(outcome_group == "Chronic Days") %>%
+  count(days_absent_chronic, name = "n_raw") %>%
+  tidyr::complete(days_absent_chronic = 1:chronic_days_max, fill = list(n_raw = 0L)) %>%
+  add_day_scales("days_absent_chronic", chronic_days_max)
+
+stopifnot(sum(g111_chronic_exact$n_raw) == n_chronic_days)
+
+g111_basis_label <- paste0(
+  "Chronic Days group only (>=1 chronic day), n = ", scales::comma(n_chronic_days)
+)
+
+# ---- g111 --------------------------------------------------------------------
+g111_chronic_day_scales <- build_day_scale_composite(
+  exact_data = g111_chronic_exact,
+  partition_data = g11_partition_summary,
+  artifact_id = "g111",
+  basis_label = g111_basis_label,
+  day_axis_label = "Chronic days (days_absent_chronic)",
+  ramp = chronic_days_ramp,
+  max_days = chronic_days_max
+)
+
+grid::grid.draw(g111_chronic_day_scales)
+ggsave(
+  paste0(prints_folder, "g111_chronic_day_scales.png"),
+  g111_chronic_day_scales, width = a4_landscape_width, height = a4_landscape_height, dpi = 300
 )
 
 # ---- g12-data-prep -----------------------------------------------------------
-# Compare the hybrid missed-day distribution for the two positive-day groups.
+# Both positive-day groups placed on the SAME measure, days_absent_total. An
+# earlier version of this graph mixed measures -- chronic days for one group,
+# total days for the other -- and labelled both "missed days". Bar colour is the
+# group colour carried over from the partition panel at left.
 g12_partition_summary <- g11_partition_summary
 
+hybrid_index_max <- hybrid_bin_index(days_absent_max)
+
 g12_hybrid_distribution <- ds0 %>%
-  filter(outcome_group %in% c("Chronic Days", "Non-Chronic Days")) %>%
+  filter(days_absent_total > 0) %>%
   transmute(
-    outcome_group,
-    missed_days = if_else(
-      outcome_group == "Chronic Days",
-      days_absent_chronic,
-      as.integer(days_absent_total)
-    )
-  ) %>%
-  mutate(
-    bin_index = case_when(
-      missed_days <= 5 ~ missed_days,
-      missed_days <= 10 ~ 6L,
-      missed_days <= 15 ~ 7L,
-      missed_days <= 20 ~ 8L,
-      missed_days <= 25 ~ 9L,
-      missed_days <= 30 ~ 10L,
-      TRUE ~ 11L
-    )
-  ) %>%
-  count(outcome_group, bin_index, name = "n_raw") %>%
-  tidyr::complete(
     outcome_group = factor(
-      c("Chronic Days", "Non-Chronic Days"),
+      as.character(outcome_group),
       levels = c("Chronic Days", "Non-Chronic Days")
     ),
-    bin_index = 1:11,
+    hybrid_index = hybrid_bin_index(days_absent_total)
+  ) %>%
+  count(outcome_group, hybrid_index, name = "n_raw") %>%
+  tidyr::complete(
+    outcome_group,
+    hybrid_index = seq_len(hybrid_index_max),
     fill = list(n_raw = 0L)
   ) %>%
-  mutate(
-    scale_panel = factor(
-      if_else(bin_index <= 5, "A Week or Less", "More than a Week"),
-      levels = c("A Week or Less", "More than a Week")
-    ),
-    bin_label = factor(
-      case_when(
-        bin_index <= 5 ~ as.character(bin_index),
-        bin_index == 6 ~ "2",
-        bin_index == 7 ~ "3",
-        bin_index == 8 ~ "4",
-        bin_index == 9 ~ "5",
-        bin_index == 10 ~ "6",
-        TRUE ~ "7+"
-      ),
-      levels = c("1", "2", "3", "4", "5", "6", "7+")
-    ),
-    work_week = factor(
-      if_else(bin_index <= 5, 1L, bin_index - 4L),
-      levels = 1:7
-    )
-  )
+  hybrid_panel_frame()
+
+stopifnot(sum(g12_hybrid_distribution$n_raw) == n_any_days)
 
 # ---- g12 ---------------------------------------------------------------------
-g12_left_partition <- g12_partition_summary %>%
-  ggplot(aes(x = "Analytic sample", y = pct_raw, fill = outcome_group)) +
-  geom_col(width = 0.48, colour = "white", linewidth = 0.3) +
-  geom_text(
-    aes(label = paste0(scales::comma(n_raw), "\n", sprintf("%.1f%%", pct_raw))),
-    position = position_stack(vjust = 0.5), size = 2.8, lineheight = 0.95
-  ) +
-  scale_fill_manual(values = g11_partition_colours, guide = "none") +
-  scale_y_continuous(
-    labels = scales::label_percent(scale = 1), limits = c(0, 100),
-    expand = expansion(mult = c(0, 0))
-  ) +
-  labs(
-    title = "Graph g12: Groups",
-    subtitle = "All respondents",
-    x = NULL,
-    y = "Share of sample"
-  ) +
-  theme_minimal(base_size = 11) +
-  theme(
-    plot.title = element_text(size = 10),
-    plot.subtitle = element_text(size = 9),
-    axis.text.x = element_blank(),
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor = element_blank(),
-    plot.margin = margin(5.5, 0, 5.5, 5.5)
-  )
+g12_left_partition <- build_partition_panel(g12_partition_summary, "g12")
 
 g12_right_hybrid_distribution <- g12_hybrid_distribution %>%
-  ggplot(aes(x = bin_label, y = n_raw, fill = work_week)) +
+  ggplot(aes(x = bin_label, y = n_raw, fill = outcome_group)) +
   geom_col(width = 0.82) +
   facet_grid(
     outcome_group ~ scale_panel,
     scales = "free",
     space = "free_x"
   ) +
-  scale_fill_manual(
-    values = stats::setNames(unname(g11_week_colours), as.character(1:7)),
-    guide = "none"
-  ) +
+  scale_fill_manual(values = outcome_group_colours, guide = "none") +
   scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.08))) +
   labs(
-    title = "Graph g12: Hybrid Missed-Day Distributions",
+    title = "Graph g12: Days Absent by Outcome Group, Hybrid Scale",
     subtitle = paste0(
+      "Both rows show the same measure, days_absent_total.\n",
       "Chronic = >=1 chronic day (n = ", scales::comma(n_chronic_days),
-      "); Non-Chronic = >0 missed days and 0 chronic days (n = ", scales::comma(n_non_chronic_days),
-      "); days 1-5 exact, tail binned"
+      "); Non-Chronic = >0 days absent and 0 chronic days (n = ",
+      scales::comma(n_non_chronic_days), ").\n",
+      "Days 1-5 stay exact; the tail is grouped into five-day work weeks. Row scales are free."
     ),
-    x = "Exact day within week 1 or work-week bin",
+    x = "Exact day within week 1, or work-week number",
     y = "Respondent count"
   ) +
   theme_minimal(base_size = 10) +
@@ -674,6 +694,7 @@ g12_right_hybrid_distribution <- g12_hybrid_distribution %>%
     panel.grid.major.x = element_blank(),
     panel.grid.minor = element_blank(),
     strip.text = element_text(face = "bold"),
+    axis.text.x = element_text(size = 7),
     plot.title.position = "plot"
   )
 
@@ -688,11 +709,116 @@ grid::grid.draw(g12_group_hybrid_distribution)
 ggsave(
   paste0(prints_folder, "g12_group_hybrid_distribution.png"),
   g12_group_hybrid_distribution,
-  width = 8.5, height = 5.5, dpi = 300
+  width = a4_landscape_width, height = a4_landscape_height, dpi = 300
+)
+
+# ---- g121-data-prep ----------------------------------------------------------
+# The subset relation on one set of people. Within the Chronic Days group, the
+# same respondents are counted twice: once by all days absent, once by the
+# chronic component of those days. The chronic bars can never sit to the right
+# of the total bars, because chronic days are drawn from the same total.
+g121_measure_levels <- c("All days absent", "Chronic days only")
+g121_measure_colours <- c(
+  "All days absent" = unname(outcome_group_colours[["Non-Chronic Days"]]),
+  "Chronic days only" = unname(outcome_group_colours[["Chronic Days"]])
+)
+
+g121_measure_distribution <- ds0 %>%
+  filter(outcome_group == "Chronic Days") %>%
+  select(days_absent_total, days_absent_chronic) %>%
+  tidyr::pivot_longer(
+    cols = everything(),
+    names_to = "measure_column",
+    values_to = "day_value"
+  ) %>%
+  mutate(
+    measure = factor(
+      if_else(
+        measure_column == "days_absent_total",
+        g121_measure_levels[1],
+        g121_measure_levels[2]
+      ),
+      levels = g121_measure_levels
+    ),
+    hybrid_index = hybrid_bin_index(day_value)
+  ) %>%
+  count(measure, hybrid_index, name = "n_raw") %>%
+  tidyr::complete(
+    measure,
+    hybrid_index = seq_len(hybrid_index_max),
+    fill = list(n_raw = 0L)
+  ) %>%
+  hybrid_panel_frame()
+
+stopifnot(sum(g121_measure_distribution$n_raw) == 2L * n_chronic_days)
+
+g121_measure_means <- ds0 %>%
+  filter(outcome_group == "Chronic Days") %>%
+  summarise(
+    mean_total = weighted_mean(days_absent_total, weight_value),
+    mean_chronic = weighted_mean(days_absent_chronic, weight_value)
+  )
+
+# ---- g121 --------------------------------------------------------------------
+g121_left_partition <- build_partition_panel(g12_partition_summary, "g121")
+
+g121_right_measure_distribution <- g121_measure_distribution %>%
+  ggplot(aes(x = bin_label, y = n_raw, fill = measure)) +
+  geom_col(width = 0.82) +
+  facet_grid(
+    measure ~ scale_panel,
+    scales = "free",
+    space = "free_x"
+  ) +
+  scale_fill_manual(values = g121_measure_colours, guide = "none") +
+  scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.08))) +
+  labs(
+    title = "Graph g121: Two Measures on the Same Respondents",
+    subtitle = paste0(
+      "Chronic Days group only (n = ", scales::comma(n_chronic_days),
+      "), counted twice: by all days absent and by the chronic component of those days.\n",
+      "Weighted means: ", sprintf("%.1f", g121_measure_means$mean_total),
+      " days absent, of which ", sprintf("%.1f", g121_measure_means$mean_chronic),
+      " are chronic. Days 1-5 stay exact; the tail is grouped into five-day work weeks."
+    ),
+    x = "Exact day within week 1, or work-week number",
+    y = "Respondent count"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank(),
+    strip.text = element_text(face = "bold"),
+    axis.text.x = element_text(size = 7),
+    plot.title.position = "plot"
+  )
+
+g121_measure_hybrid_distribution <- compose_two_panel_grob(
+  g121_left_partition,
+  g121_right_measure_distribution,
+  left_width = 0.22,
+  right_width = 0.78
+)
+
+grid::grid.draw(g121_measure_hybrid_distribution)
+ggsave(
+  paste0(prints_folder, "g121_measure_hybrid_distribution.png"),
+  g121_measure_hybrid_distribution,
+  width = a4_landscape_width, height = a4_landscape_height, dpi = 300
 )
 
 # ---- SECTION: Graph Family g2 ------------------------------------------------
-# Compare No Days with Chronic Days, then add positive chronic-day intensity.
+# AN ILLUSTRATION, not a finding.
+#
+# Family g1 established the outcome groups and the day scale. This family shows
+# one way a set of variables can be evaluated against those three groups. The
+# predisposing domain is used as the worked example because it is the first
+# block of the project's candidate registry; the same displays would serve any
+# other domain unchanged.
+#
+# Read g2, g20, g21, g211, and g212 as composition contrasts across groups, and
+# g22 through g24 as the numeric outcome conditioned on predictor level. The
+# latter use days_absent_chronic and are labelled as the chronic component.
 
 # ---- g2-data-prep ------------------------------------------------------------
 g2_composition_all <- predictor_long %>%
@@ -1101,14 +1227,109 @@ ggsave(
   width = a4_landscape_width, height = a4_landscape_height, dpi = 300
 )
 
+# ---- SECTION: Graph Family g3 ------------------------------------------------
+# REFERENCE, not argument.
+#
+# Formerly numbered g0 and placed first. It is a lookup profile of the largest
+# outcome group, the 45,006 respondents with No Days, and it answers "what does
+# this group look like" rather than "how do the groups differ". It now sits
+# after the two substantive families. The retired IDs g0 and g01 are not reused.
+
+# ---- g3-data-prep ------------------------------------------------------------
+g3_data <- predictor_long %>%
+  filter(outcome_group == "No Days", !is.na(level)) %>%
+  group_by(variable, variable_label, level) %>%
+  summarise(
+    n_raw = n(),
+    weight_sum = sum(weight_value, na.rm = TRUE),
+    .groups = "drop_last"
+  ) %>%
+  mutate(
+    pct_weighted = weight_sum / sum(weight_sum) * 100,
+    label = sprintf("%.1f%%", pct_weighted)
+  ) %>%
+  ungroup() %>%
+  add_facet_level()
+
+# ---- g3 ----------------------------------------------------------------------
+g3_no_days_predisposition <- g3_data %>%
+  ggplot(aes(x = pct_weighted, y = facet_level)) +
+  geom_col(fill = outcome_group_colours[["Non-Chronic Days"]], width = 0.72) +
+  facet_wrap(~ variable_label, scales = "free_y", ncol = 4) +
+  scale_x_continuous(
+    labels = scales::label_percent(scale = 1),
+    expand = expansion(mult = c(0, 0.16))
+  ) +
+  scale_y_discrete(labels = strip_facet_level) +
+  labs(
+    title = "Graph g3: Predisposition Profile Among Respondents With No Days",
+    subtitle = paste0(
+      "Reference profile of the largest outcome group. Weighted within each variable; unweighted n = ",
+      scales::comma(n_no_days)
+    ),
+    x = "Weighted share within variable",
+    y = NULL
+  ) +
+  theme_minimal(base_size = 8) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    strip.text = element_text(face = "bold", size = 7),
+    axis.text.y = element_text(size = 6),
+    plot.title.position = "plot"
+  )
+
+print(g3_no_days_predisposition)
+ggsave(
+  paste0(prints_folder, "g3_no_days_predisposition.png"),
+  g3_no_days_predisposition, width = 8.5, height = 5.5, dpi = 300
+)
+
+# ---- g31 ---------------------------------------------------------------------
+g31_no_days_predisposition_a4 <- g3_no_days_predisposition +
+  geom_text(
+    aes(label = label),
+    hjust = -0.08,
+    size = 2.6,
+    colour = abcol[["grey"]]
+  ) +
+  facet_wrap(~ variable_label, scales = "free_y", ncol = 3) +
+  labs(
+    title = "Graph g31: A4 Predisposition Profile Among Respondents With No Days",
+    subtitle = paste0(
+      "A4 landscape layout; weighted percentages within each variable (n = ",
+      scales::comma(n_no_days), ")"
+    )
+  ) +
+  theme(
+    strip.text = element_text(face = "bold", size = 9),
+    axis.text.x = element_text(size = 8),
+    axis.text.y = element_text(size = 7),
+    axis.title.x = element_text(size = 9),
+    plot.title = element_text(size = 15),
+    plot.subtitle = element_text(size = 10),
+    plot.margin = margin(10, 18, 10, 10)
+  )
+
+print(g31_no_days_predisposition_a4)
+ggsave(
+  paste0(prints_folder, "g31_no_days_predisposition_a4.png"),
+  g31_no_days_predisposition_a4,
+  width = a4_landscape_width, height = a4_landscape_height, dpi = 300
+)
+
 # ---- save-to-disk ------------------------------------------------------------
 saveRDS(
   list(
     outcome_group_summary = outcome_group_summary,
-    g0_data = g0_data,
     g1_scale_mapping = g1_scale_mapping,
+    g11_days_absent_exact = g11_days_absent_exact,
+    g111_chronic_exact = g111_chronic_exact,
+    g12_hybrid_distribution = g12_hybrid_distribution,
+    g121_measure_distribution = g121_measure_distribution,
     g2_composition = g2_composition_all,
-    g2_intensity = g2_intensity
+    g2_intensity = g2_intensity,
+    g3_data = g3_data
   ),
   paste0(local_data, "eda-72-summaries.rds")
 )
