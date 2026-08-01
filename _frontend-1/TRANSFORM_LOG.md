@@ -55,3 +55,22 @@ Taxonomy source: `.github/instructions/publishing-rules.instructions.md`
 | Stripped `embed-resources: true` from YAML frontmatter | `frontmatter_add` | Field causes Quarto to embed all assets inline; incompatible with multi-page website build. Inherited from site `_quarto.yml`. |
 | Stripped `theme: flatly` from YAML frontmatter | `frontmatter_add` | Standalone theme declaration conflicts with site-level theme; inherited from `_quarto.yml`. |
 | Removed reference to `data-private/raw/2026-02-19/stats_instructions_v3.md` path in body | `sanitize` | Source file path replaced with generic reference ("the statistical analysis instructions") to avoid exposing internal `data-private/` path in rendered page. |
+| Replaced `data-public/metadata/CACHE-manifest.md` path with plain text "the CACHE manifest" in the `dhhgl12` row | `link_rewrite` | Cross-reference points at a repository file; the site publishes the same content as the CACHE Manifest page. Added 2026-08-01. |
+| Removed `data-public/metadata/cchs_value_label_diffs.csv` reference from the `education` row | `sanitize` | Metadata CSV is not published by this site; the discrepancy itself is retained verbatim. Added 2026-08-01. |
+
+---
+
+## Refresh 2026-08-01 — `home_ownership` admitted, `dhhgl12` disposition ratified
+
+Re-applied Technical Bridge transforms to `content/pipeline/pipeline-guide.qmd` after
+`manipulation/pipeline.md` gained the 70-column verification checklist and the `DHH_OWN`
+cross-cycle note.
+
+**Source:** `manipulation/pipeline.md`
+
+| Transform | Type | Rationale |
+|-----------|------|-----------|
+| Carried the two new "After Lane 2" bullets (63,843 × 70 table shape; `home_ownership` non-NA ≈ 63,677) into the guide unchanged | `content_sync` | Source-side verification checklist grew when `home_ownership` was admitted; no sanitization needed because the bullets reference no repository paths. |
+| Carried the new "After Lane 3" latest-run bullet (2026-08-01, 0 FAILED, 63,843 × 70) into the guide unchanged | `content_sync` | Keeps the published validation record aligned with the current pipeline run. |
+| Carried the `DHH_OWN` paragraph into "Cross-Cycle Harmonization Reference", rewriting the trailing `INPUT-manifest.md` § reference to plain text ("the INPUT Manifest, section Known Cross-Cycle Encoding Differences") | `link_rewrite` | Per contract, local file links are rendered as plain text; the referenced content is published as the INPUT Manifest page. |
+

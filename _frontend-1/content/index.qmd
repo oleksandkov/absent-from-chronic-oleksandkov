@@ -40,7 +40,7 @@ It is the authoritative statement of what the analysis must deliver.
 
 **Pipeline** documents the data infrastructure: how the two raw CCHS files were transported
 into a staging database (Ferry), transformed into the analytic dataset (Ellis), and validated
-(Test). The CACHE Manifest describes the 69-column, 63,843-row dataset produced by the
+(Test). The CACHE Manifest describes the 70-column, 63,843-row dataset produced by the
 pipeline. The INPUT Manifest describes the two raw SPSS files.
 
 **Data Primer** contains variable-level traceability. The Variable Inclusion page maps every

@@ -1,3 +1,11 @@
+_frontend-*/site_libs/
+_frontend-*/content/*.html
+_frontend-*/content/**/*.html
+_frontend-*/content/*.png
+_frontend-*/content/**/*.png
+_frontend-*/content/images/*
+_frontend-1/content/images/g23_chronic_vs_other_only_raw_split_distribution.png
+
 # ---- R and RStudio files -----------------------------------------------
 .Rproj.user/
 .Rhistory
@@ -157,7 +165,6 @@ analysis/eda-2/figure-png-iso/g-whitelist-ratio-1.png
 /analysis/binder-*/*
 /analysis/binder-*/*.*
 !analysis/binder-*/*.[R|qmd|ipynb]
-/_frontend-*/*
 analysis/eda-2/figure-png-iso/g-whitelist-ratio-1.png
 analysis/eda-5/figure-png-iso/g0-1.png
 analysis/eda-5/figure-png-iso/g01-1.png
@@ -183,3 +190,4 @@ analysis/talks/minding-the-agents-2/slides_files
 analysis/eda-72/prints/
 analysis/eda-72/eda-72.rmarkdown
 .github/copilot-instructions.md
+_frontend-1/content/images/g23_chronic_vs_other_only_raw_split_distribution.png
