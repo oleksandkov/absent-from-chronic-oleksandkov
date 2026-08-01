@@ -159,7 +159,18 @@ prefix and are stored as **R logical** (not factor); prevalence calculations mus
 
 Age is available in PUMF only as a grouped derived variable (`dhhgage`); single-year
 resolution requires restricted RDC access. `dhhdfc12p` (children ≥ 12 yrs) has no PUMF
-equivalent. Student status (`sdcdgstud`) is suppressed in the PUMF and renders all-NA.
+equivalent. Note that `dhhgl12` — which *is* present — denotes children **less than** 12
+and is a different construct; do not read it as the requested ≥ 12 measure. Student status
+(`sdcdgstud`) is suppressed in the PUMF and renders all-NA.
+
+> **Correction (2026-08-01) — homeownership is available after all.** Revisions of this
+> report dated before 2026-08-01 stated that no house-ownership construct existed in the
+> CCHS PUMF, and treated `living_arrangements` as a proxy for it. A targeted QC
+> (`scripts/qc-home-ownership.R`) established that `DHH_OWN` is present in **both**
+> cycles, uses identical integer coding in both, and covers 99.74% of the analytic
+> table. It is now carried as `home_ownership` and satisfies the §2.2 requirement
+> directly. `living_arrangements` is retained on its own merits as a
+> household-composition measure, not as a substitute.
 
 | Requested | 2011 | 2014 | In Study | Note |
 |-----------|------|------|----------|------|
@@ -169,11 +180,13 @@ equivalent. Student status (`sdcdgstud`) is suppressed in the PUMF and renders a
 | Household size (number of persons) | `dhhghsz` | `dhhghsz` | `household_size` | ✅ Ordered factor: 1 / 2 / 3 / 4 / 5+ (recoded from `dhhghsz`; groups 5–8 collapsed to "5+") |
 | Children ≤ 5 yrs in household | `dhhgle5` | `dhhgle5` | `dhhgle5` | ✅ Numeric (0 = none, 1 = one or more); present and populated in both cycles |
 | Children 6–11 yrs in household | `dhhg611` | `dhhg611` | `dhhg611` | ✅ Numeric (0 = none, 1 = one or more); present and populated in both cycles |
-| Children ≥ 12 yrs in household (count) | unknown | unknown | ❌ absent | ❌ White-list used `dhhdfc12p`; no PUMF equivalent found in either cycle |
+| — (not requested; present in PUMF) | `dhhgl12` | `dhhgl12` | `dhhgl12` | ⚠️ Children **< 12 yrs** — numeric (0 = none, 1 = one or more), fully populated (63,843). **Redundant**: `dhhgl12 == (dhhgle5 \| dhhg611)` in all 63,843 rows, zero discordant cases, so it adds no information beyond the two rows above. Not a substitute for the ≥ 12 yrs row below. See the QC note in the CACHE manifest (2026-08-01) |
+| Children ≥ 12 yrs in household (count) | unknown | unknown | ❌ absent | ❌ White-list used `dhhdfc12p`; no PUMF equivalent found in either cycle. **Not** satisfied by `dhhgl12`, which measures the opposite age band |
 | Education level (4 categories) | `edudh04` | `edudh04` | `education` | ✅ Ordered factor: Less than secondary → Post-secondary graduate. ⚠️ Cross-cycle label discrepancy for code 3 ("Other post-secondary" in 2010 vs "Some post-secondary" in 2014) |
 | Immigration status | `sdcfimm` | `sdcfimm` | `immigration_status` | ✅ Factor: Non-immigrant / Immigrant / Non-permanent resident |
 | Ethnic origin (White vs. visible minority) | `sdcgcgt` | `sdcgcgt` | `visible_minority` | ✅ Alias `sdcdgcb ← sdcgcgt` resolves; Factor: White / Visible minority |
-| Living arrangements | `dhhglvg` | `dhhglvg` | `living_arrangements` | ✅ Factor (8 levels): Unattached alone / Unattached with others / Couple no children / Couple with children / Single parent / Child in parent-sibling household / Child in two-parent household / Other. **Note**: The Project Proposal (§2.2) specifies "homeownership" as a predisposing variable; however, no house-ownership construct exists in the CCHS PUMF. `living_arrangements` (household composition) is included as the closest available proxy, per agreement with M.-A. Blanchette (2026-05-15 review). |
+| Homeownership | `dhh_own` | `dhh_own` | `home_ownership` | ✅ Factor: Owner (50,101) / Renter (13,576); 63,677 non-NA (99.74%). **Correction (2026-08-01)**: earlier revisions of this report stated that no house-ownership construct existed in the CCHS PUMF. That was wrong. `DHH_OWN` is present in **both** cycles with identical integer coding, and is now included directly. Label text differs across cycles ("Dwelling - owned by a member of hhld" vs "Owned, Rented") but no alias resolution is needed. Not-stated responses are SPSS system-missing in 2010-2011 and explicit codes 7/8/9 in 2013-2014; both map to `NA`. Verified by `scripts/qc-home-ownership.R` |
+| Living arrangements | `dhhglvg` | `dhhglvg` | `living_arrangements` | ✅ Factor (8 levels): Unattached alone / Unattached with others / Couple no children / Couple with children / Single parent / Child in parent-sibling household / Child in two-parent household / Other. Retained on its own merits as a household-composition measure; it is no longer serving as a homeownership proxy (see the row above) |
 | Student status | ❌ absent | ❌ absent | `student_status` (all NA) | ❌ `sdcdgstud` not present in PUMF; column all-NA in current dataset |
 
 ---
@@ -259,11 +272,24 @@ analysis and reproducibility checks.
 | Outcomes (primary + sensitivity) | 2 | 2 | 2 | 0 |
 | LOP components | 8 | 8 | 8 | 0 |
 | Chronic conditions | 19 | 17 | 17 | 2 (RDC-only) |
-| Predisposing | 12 | 11 | 11 | 1 (`dhhdfc12p`) + 1 all-NA (`student_status`) |
+| Predisposing | 12 | 10 | 10 | 1 (`dhhdfc12p`) + 1 all-NA (`student_status`) |
 | Facilitating | 12 | 12 | 12 | 0 |
 | Needs | 10 | 10 | 10 | 0 |
 | Survey design | 6 | 6 | 6 | 0 |
 
-**Total:** 69 columns in `cchs_analytic`. Two chronic condition variables (`ccc_300`,
+**Total:** 70 columns in `cchs_analytic`. Two chronic condition variables (`ccc_300`,
 `ccc_185`) and one predisposing variable (`dhhdfc12p`) require RDC access. Student status
 (`student_status`) is all-NA due to PUMF suppression of `sdcdgstud`.
+
+**Unrequested extras in the predisposing block.** Two columns are carried that §2.2 did
+not request, which is why the "In Study" count above (10) is lower than the number of
+predisposing columns actually present:
+
+- `dhhgl12` (any child < 12) — fully populated but redundant, identical to
+  `dhhgle5 | dhhg611` in all 63,843 rows, and *not* the missing ≥ 12 yrs construct. It is
+  kept for descriptive and bivariate reporting and withheld from the LASSO.
+- `living_arrangements` (8-level household composition) — previously justified as a
+  homeownership proxy, now retained on its own merits.
+
+The predisposing row of the table counts only the requested constructs, so that the
+§2.2 checklist can be read without adjustment.

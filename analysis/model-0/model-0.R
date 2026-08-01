@@ -45,18 +45,31 @@ if (!fs::dir_exists(prints_folder)) { fs::dir_create(prints_folder) }
 # Predisposing domain per stats_instructions_v3.md Section 2.2.
 # `dhhgage` is deliberately excluded: it is the same construct as `age_group_3`
 # at finer resolution, and the proposal specifies the 3-category recode.
+#
+# `dhhgl12` is also excluded, ratified 2026-08-01. It is the logical OR of
+# `dhhgle5` and `dhhg611` in all 63,843 rows, so all three together span the same
+# column space as `dhhgle5 * dhhg611`. This report exists to demonstrate how the
+# penalty behaves, and a deterministically redundant column would demonstrate the
+# wrong thing: the penalty would split one shared coefficient arbitrarily between
+# the three. It is retained for descriptive and bivariate reporting in model-00.
+# See `bivariate_only_vars` in scripts/modeling/candidate-registry.R.
+#
+# `home_ownership` was admitted 2026-08-01 after QC established that `DHH_OWN` is
+# present in both cycles with 99.74% coverage; it satisfies the Section 2.2
+# "homeownership" requirement that was previously believed to have no PUMF
+# equivalent.
 predisposing_specs <- tibble::tribble(
   ~variable, ~variable_label,
   "age_group_3", "Age group",
   "sex", "Sex",
   "marital_status", "Marital status",
   "household_size", "Household size",
-  "dhhgle5", "Children age 0-5",
-  "dhhg611", "Children age 6-11",
-  "dhhgl12", "Children age 12+",
+  "dhhgle5", "Child aged 0-5 in household",
+  "dhhg611", "Child aged 6-11 in household",
   "education", "Education",
   "immigration_status", "Immigration status",
   "visible_minority", "Visible minority",
+  "home_ownership", "Home ownership",
   "living_arrangements", "Living arrangements"
 )
 
@@ -155,7 +168,7 @@ ds1 <- ds0 %>%
     all_of(c(outcome_var, weight_col, cycle_var, predisposing_vars))
   ) %>%
   mutate(across(where(is.ordered), ~ factor(., ordered = FALSE))) %>%
-  mutate(across(all_of(c("dhhgle5", "dhhg611", "dhhgl12")), to_yes_no)) %>%
+  mutate(across(any_of(c("dhhgle5", "dhhg611", "dhhgl12")), to_yes_no)) %>%
   mutate(across(where(is.character), factor))
 
 n_before_complete_case <- nrow(ds1)

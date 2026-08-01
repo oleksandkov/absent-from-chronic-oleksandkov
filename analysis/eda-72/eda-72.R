@@ -49,11 +49,13 @@ predisposition_specs <- tibble::tribble(
   "sex", "Sex",
   "marital_status", "Marital status",
   "household_size", "Household size",
-  "dhhgle5", "Children age 0-5",
-  "dhhg611", "Children age 6-11",
+  "dhhgle5", "Child aged 0-5 in household",
+  "dhhg611", "Child aged 6-11 in household",
+  "dhhgl12", "Child under 12 in household",
   "education", "Education",
   "immigration_status", "Immigration status",
   "visible_minority", "Visible minority",
+  "home_ownership", "Home ownership",
   "living_arrangements", "Living arrangements"
 )
 

@@ -40,7 +40,7 @@ it.
 - **Image 2**: `images/pipeline-architecture.jpg` — copied from
   `libs/images/pipeline-architecture.jpg` by the pre-render hook.
 - **Inputs**: `README.md` (project overview), `data-public/metadata/CACHE-manifest.md`
-  (dataset summary: 63,843 rows, 69 columns, two CCHS cycles pooled),
+  (dataset summary: 63,843 rows, 70 columns, two CCHS cycles pooled),
   `ai/project/mission.md` (study purpose).
 
 ---

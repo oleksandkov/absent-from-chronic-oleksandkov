@@ -70,11 +70,15 @@ path_cchs2_parquet  <- "./data-private/derived/cchs-2-tables"
 path_analytical_pq  <- file.path(path_cchs2_parquet, "cchs_analytic.parquet")
 weight_col          <- "wts_m_pooled"
 
-# The 11 predisposing variables (socio-demographic factors)
+# The 13 predisposing variables (socio-demographic factors).
+# `dhhgl12` and `home_ownership` added 2026-08-01. `dhhgl12` is redundant for
+# modelling (it is the logical OR of the two flags above it) but is a legitimate
+# descriptive marginal; `home_ownership` satisfies the Section 2.2 homeownership
+# requirement previously believed to have no PUMF equivalent.
 predisposing_vars <- c(
   "age_group_3", "dhhgage", "sex", "marital_status", "household_size",
-  "dhhgle5", "dhhg611", "education", "immigration_status",
-  "visible_minority", "living_arrangements"
+  "dhhgle5", "dhhg611", "dhhgl12", "education", "immigration_status",
+  "visible_minority", "home_ownership", "living_arrangements"
 )
 
 # Human-readable labels for display
@@ -84,11 +88,13 @@ predisposing_labels <- c(
   "sex"                 = "Sex",
   "marital_status"      = "Marital status",
   "household_size"      = "Household size",
-  "dhhgle5"             = "Children < 5 in household",
-  "dhhg611"             = "Children 6-11 in household",
+  "dhhgle5"             = "Child aged 0-5 in household",
+  "dhhg611"             = "Child aged 6-11 in household",
+  "dhhgl12"             = "Child under 12 in household",
   "education"           = "Education level",
   "immigration_status"  = "Immigration status",
   "visible_minority"    = "Visible minority",
+  "home_ownership"      = "Home ownership",
   "living_arrangements" = "Living arrangements"
 )
 
@@ -124,7 +130,7 @@ data_context_tables <- tibble::tibble(
   rows         = nrow(ds0),
   columns      = ncol(ds0),
   usage        = paste(
-    "11 predisposing socio-demographic variables,",
+    length(predisposing_vars), "predisposing socio-demographic variables,",
     "primary outcome days_absent_total, survey weight wts_m_pooled"
   )
 )
@@ -156,7 +162,8 @@ ds1 <- ds0 %>%
     all_of(predisposing_vars)
   ) %>%
   mutate(across(
-    all_of(predisposing_vars[!predisposing_vars %in% c("household_size", "dhhgle5", "dhhg611")]),
+    all_of(predisposing_vars[!predisposing_vars %in%
+                              c("household_size", "dhhgle5", "dhhg611", "dhhgl12")]),
     ~ as.factor(.x)
   ))
 
@@ -181,7 +188,8 @@ purrr::walk(predisposing_vars, function(v) {
 # ---- g1-data-prep ------------------------------------------------------------
 # Focus on the key categorical variables for bar chart display
 g1_vars <- c("age_group_3", "sex", "marital_status", "education",
-             "immigration_status", "visible_minority", "living_arrangements")
+             "immigration_status", "visible_minority", "home_ownership",
+             "living_arrangements")
 
 g1_data <- purrr::map_dfr(g1_vars, function(v) {
   ds1 %>%

@@ -48,7 +48,7 @@ Both cycles include the following modules essential to this study:
 | Loss of Productivity (LOP) | `LOP_`, `LOPG` | Outcome: days absent from work |
 | Chronic Conditions (CCC) | `CCC_` | Primary exposure: 19 chronic conditions |
 | General Health (GEN) | `GEN_` | Self-perceived health (needs domain) |
-| Demographics (DHH) | `DHH`, `DHHG` | Age, sex, household (predisposing) |
+| Demographics (DHH) | `DHH`, `DHHG` | Age, sex, household, home ownership (predisposing) |
 | Sociodemographics (SDC) | `SDCG` | Immigration, ethnicity (predisposing) |
 | Income (INC) | `INCG` | Household income (facilitating) |
 | Education (EDU) | `EDUD` | Education level (predisposing) |
@@ -71,6 +71,22 @@ The following variables require alias resolution in `2-ellis.R`:
 
 All other white-listed research variables use identical names in both cycles
 (confirmed by `0-extract-metadata.R` spot-check).
+
+## Known Cross-Cycle Encoding Differences (Identical Names)
+
+Some variables share a name across cycles but differ in label text or in how
+not-stated responses are stored. These need no alias resolution, but they do
+constrain how `2-ellis.R` may recode them.
+
+| Variable | 2010-2011 | 2013-2014 | Consequence for Ellis |
+|----------|-----------|-----------|-----------------------|
+| `DHH_OWN` | Label "Dwelling - owned by a member of hhld"; `1 = YES`, `2 = NO`; not-stated is **SPSS system missing** (1,475 rows) | Label "Owned, Rented"; `1 = OWNER`, `2 = RENTED`; not-stated is **explicit codes 7 / 8 / 9** (1,809 rows) | Integer coding is identical, so no alias is needed. The recode must map only `1` and `2` and send everything else to `NA`, so that both missingness representations are caught. |
+
+> **Verified 2026-08-01** by `scripts/qc-home-ownership.R`. `DHH_OWN` is present
+> in both PUMF files, covers 99.74% of the final analytic table, and shows no
+> optional-content aliasing (every province × cycle cell exceeds 99.3%). It
+> satisfies the Project Proposal §2.2 "homeownership" requirement, which earlier
+> documentation incorrectly reported as unavailable in the PUMF.
 
 ## Cross-Variable Dependencies
 

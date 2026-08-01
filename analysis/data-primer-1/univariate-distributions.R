@@ -215,7 +215,8 @@ print(styled_kable(
 # ---- section-predisposing ----------------------------------------------------
 pred_discrete_vars <- intersect(
   c("age_group_3", "sex", "marital_status", "household_size",
-    "education", "immigration_status", "visible_minority", "living_arrangements"),
+    "education", "immigration_status", "visible_minority", "home_ownership",
+    "living_arrangements"),
   names(ds0)
 )
 t_pred_freq <- lapply(pred_discrete_vars, function(v) summarize_discrete(ds0, v))
@@ -246,7 +247,9 @@ if ("dhhgage" %in% names(ds0)) {
                                 stringsAsFactors = FALSE)
 }
 
-# Children in household by age band — treated as ordered factors for frequency tables
+# Children in household by age band. Despite the "count" naming inherited from
+# the PUMF documentation, DHHGLE5 / DHHG611 / DHHGL12 are BINARY 0/1 presence
+# flags (0 = none, 1 = one or more). Treated as ordered factors here.
 make_count_freq <- function(ds, var) {
   if (!var %in% names(ds)) return(NULL)
   vals   <- sort(unique(na.omit(ds[[var]])))
@@ -255,6 +258,7 @@ make_count_freq <- function(ds, var) {
 }
 t_children_le5  <- make_count_freq(ds0, "dhhgle5")
 t_children_6_11 <- make_count_freq(ds0, "dhhg611")
+t_children_l12  <- make_count_freq(ds0, "dhhgl12")
 
 # student_status: suppressed in PUMF; create all-NA stub for QMD guard
 if ("student_status" %in% names(ds0)) {
@@ -322,6 +326,14 @@ print(styled_kable(
   align     = c("l", "r", "r")
 ))
 
+# ---- display-home-ownership --------------------------------------------------
+print(styled_kable(
+  t_pred_freq[["home_ownership"]],
+  col.names = c("Home ownership", "N", "% (of valid)"),
+  caption   = "home_ownership \u2014 Dwelling owned by a member of the household",
+  align     = c("l", "r", "r")
+))
+
 # ---- display-living-arrangements ---------------------------------------------
 {
   n_miss_la  <- attr(t_pred_freq[["living_arrangements"]], "n_miss")
@@ -373,8 +385,8 @@ if (nrow(t_dhhgage_freq) > 0) {
 if (!is.null(t_children_le5) && nrow(t_children_le5) > 0) {
   print(styled_kable(
     t_children_le5,
-    col.names = c("Count", "N", "% (of valid)"),
-    caption   = "dhhgle5 \u2014 Number of children aged \u2264 5 in household",
+    col.names = c("Presence (0/1)", "N", "% (of valid)"),
+    caption   = "dhhgle5 \u2014 Any child aged \u2264 5 in household (0 = none, 1 = one or more)",
     align     = c("l", "r", "r"),
     row.names = FALSE
   ))
@@ -382,8 +394,17 @@ if (!is.null(t_children_le5) && nrow(t_children_le5) > 0) {
 if (!is.null(t_children_6_11) && nrow(t_children_6_11) > 0) {
   print(styled_kable(
     t_children_6_11,
-    col.names = c("Count", "N", "% (of valid)"),
-    caption   = "dhhg611 \u2014 Number of children aged 6\u201311 in household",
+    col.names = c("Presence (0/1)", "N", "% (of valid)"),
+    caption   = "dhhg611 \u2014 Any child aged 6\u201311 in household (0 = none, 1 = one or more)",
+    align     = c("l", "r", "r"),
+    row.names = FALSE
+  ))
+}
+if (!is.null(t_children_l12) && nrow(t_children_l12) > 0) {
+  print(styled_kable(
+    t_children_l12,
+    col.names = c("Presence (0/1)", "N", "% (of valid)"),
+    caption   = "dhhgl12 \u2014 Any child aged under 12 in household (0 = none, 1 = one or more)",
     align     = c("l", "r", "r"),
     row.names = FALSE
   ))
@@ -661,6 +682,7 @@ saveRDS(
     t_dhhgage_freq       = t_dhhgage_freq,
     t_children_le5       = t_children_le5,
     t_children_6_11      = t_children_6_11,
+    t_children_l12       = t_children_l12,
     t_student_status     = t_student_status,
     t_facil_freq         = t_facil_freq,
     t_bmi_continuous     = t_bmi_continuous,

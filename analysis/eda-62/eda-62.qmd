@@ -22,7 +22,7 @@ editor_options:
 
 # Mission
 
-This EDA profiles the 11 predisposing variables (socio-demographic background) from the
+This EDA profiles the 13 predisposing variables (socio-demographic background) from the
 Andersen Behavioral Model framework. These represent immutable or slowly-changing
 characteristics that predispose individuals toward or away from health service use and,
 by extension, work absence.
@@ -32,7 +32,7 @@ by extension, work absence.
 1. What is the weighted distribution of each predisposing variable in the employed population?
 2. How does each predisposing variable relate to the primary outcome (`days_absent_total`) —
    mean days, median days, and zero-proportion?
-3. What is the missing-data pattern across the 11 predisposing variables?
+3. What is the missing-data pattern across the 13 predisposing variables?
 4. What demographic interactions exist — age×sex, education×immigration cross-tabs?
 
 Following the dual-file development pattern, all analytical code lives in

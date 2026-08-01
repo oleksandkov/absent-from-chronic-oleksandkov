@@ -369,7 +369,7 @@ Graph g11 is g1 with the correspondence to Model 1 traded away for legibility. I
 This is the report's substantive output. Two questions to settle.
 
 1.  Is the level-wise presentation the right one, or should the report lead with the omnibus ranking in Table t41 and relegate levels to an appendix (decision 7)?
-2.  Should the ranking in Table t41 use unadjusted p-values, as it does, or the Benjamini–Hochberg column beside them (decision 10)? The unadjusted column is the screening quantity; the adjusted one guards against reading a table of 48 simultaneous tests as 48 independent findings.
+2.  Should the ranking in Table t41 use unadjusted p-values, as it does, or the Benjamini–Hochberg column beside them (decision 10)? The unadjusted column is the screening quantity; the adjusted one guards against reading a table of 49 simultaneous tests as 49 independent findings.
 :::
 
 ## Step 5 — The Cycle Term

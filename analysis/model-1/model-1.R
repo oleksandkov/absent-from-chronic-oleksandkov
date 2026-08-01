@@ -46,78 +46,24 @@ for (folder in c(local_data, fits_folder, prints_folder)) {
   if (!fs::dir_exists(folder)) { fs::dir_create(folder, recurse = TRUE) }
 }
 
-# The canonical candidate registry. This replaces the drifting per-EDA vectors
-# (eda-62 declared 11 predisposing variables, eda-65 declared 8) with one
-# source of truth. `status` records the inclusion decision; `exclusion_reason`
-# records why, and is empty for every included variable.
-candidate_registry <- tibble::tribble(
-  ~variable,                 ~domain,        ~variable_label,                  ~status,   ~exclusion_reason,
-  "cc_asthma",               "Exposure",     "Asthma",                         "include", "",
-  "cc_fibromyalgia",         "Exposure",     "Fibromyalgia",                   "include", "",
-  "cc_arthritis",            "Exposure",     "Arthritis",                      "include", "",
-  "cc_back_problems",        "Exposure",     "Back problems",                  "include", "",
-  "cc_hypertension",         "Exposure",     "Hypertension",                   "include", "",
-  "cc_migraine",             "Exposure",     "Migraine",                       "include", "",
-  "cc_copd",                 "Exposure",     "COPD",                           "exclude", "Asked only of respondents aged 35+; 100% missing below 35",
-  "cc_diabetes",             "Exposure",     "Diabetes",                       "include", "",
-  "cc_heart_disease",        "Exposure",     "Heart disease",                  "include", "",
-  "cc_cancer",               "Exposure",     "Cancer",                         "include", "",
-  "cc_ulcer",                "Exposure",     "Stomach / intestinal ulcer",     "include", "",
-  "cc_stroke",               "Exposure",     "Stroke",                         "include", "",
-  "cc_bowel_disorder",       "Exposure",     "Bowel disorder",                 "include", "",
-  "cc_fatigue_syndrome",     "Exposure",     "Chronic fatigue syndrome",       "include", "",
-  "cc_chem_sensitivity",     "Exposure",     "Multiple chemical sensitivities", "include", "",
-  "cc_mood_disorder",        "Exposure",     "Mood disorder",                  "include", "",
-  "cc_anxiety",              "Exposure",     "Anxiety disorder",               "include", "",
-  "age_group_3",             "Predisposing", "Age group",                      "include", "",
-  "dhhgage",                 "Predisposing", "Age (5-year group)",             "exclude", "Same construct as age_group_3; Section 2.2 specifies the 3-category recode",
-  "sex",                     "Predisposing", "Sex",                            "include", "",
-  "marital_status",          "Predisposing", "Marital status",                 "include", "",
-  "household_size",          "Predisposing", "Household size",                 "include", "",
-  "dhhgle5",                 "Predisposing", "Children age 0-5",               "include", "",
-  "dhhg611",                 "Predisposing", "Children age 6-11",              "include", "",
-  "dhhgl12",                 "Predisposing", "Children age 12+",               "include", "",
-  "education",               "Predisposing", "Education",                      "include", "",
-  "immigration_status",      "Predisposing", "Immigration status",             "include", "",
-  "visible_minority",        "Predisposing", "Visible minority",               "include", "",
-  "living_arrangements",     "Predisposing", "Living arrangements",            "include", "",
-  "income_hh",               "Facilitating", "Household income",               "include", "",
-  "province",                "Facilitating", "Province",                       "include", "",
-  "has_family_doctor",       "Facilitating", "Has family doctor",              "exclude", "Optional content: 100% missing in 2010-2011 outside Ontario; aliases cycle x province",
-  "employment_type",         "Facilitating", "Employment type",                "include", "",
-  "work_schedule",           "Facilitating", "Work schedule",                  "include", "",
-  "occupation_category",     "Facilitating", "Occupation category",            "include", "",
-  "smoking_status",          "Facilitating", "Smoking status",                 "include", "",
-  "bmi_category",            "Facilitating", "BMI category",                   "include", "",
-  "physical_activity",       "Facilitating", "Physical activity",              "include", "",
-  "alcohol_type",            "Facilitating", "Alcohol consumption",            "include", "",
-  "fruit_veg_daily",         "Facilitating", "Fruit / vegetable servings",     "include", "",
-  "work_stress",             "Facilitating", "Work stress",                    "include", "",
-  "health_perceived",        "Needs",        "Self-perceived general health",  "include", "",
-  "mental_health_perceived", "Needs",        "Self-perceived mental health",   "include", "",
-  "health_vs_prior_year",    "Needs",        "Health vs prior year",           "include", "",
-  "injured_past_12m",        "Needs",        "Injured in past 12 months",      "include", "",
-  "adl_meals",               "Needs",        "Needs help: meals",              "include", "",
-  "adl_errands",             "Needs",        "Needs help: errands",            "include", "",
-  "adl_housework",           "Needs",        "Needs help: housework",          "include", "",
-  "adl_personal_care",       "Needs",        "Needs help: personal care",      "include", "",
-  "adl_moving_indoors",      "Needs",        "Needs help: moving indoors",     "include", "",
-  "adl_finances",            "Needs",        "Needs help: finances",           "include", ""
-)
-
-# The three self-perceived measures that Section 5.4 toggles on and off.
-# Ratified 2026-07-29: functional-limitation items and injury status are NOT
-# perceived-health variables and remain in every specification.
-perceived_health_vars <- c(
-  "health_perceived", "mental_health_perceived", "health_vs_prior_year"
-)
-
-included_vars <- candidate_registry %>%
-  filter(status == "include") %>%
-  pull(variable)
-
-vars_excluding_perceived <- setdiff(included_vars, perceived_health_vars)
-vars_including_perceived <- included_vars
+# The canonical candidate registry lives in scripts/modeling/candidate-registry.R
+# and is shared with model-0 and model-00. Sourcing it, rather than restating it
+# here, is what stops the three model reports from drifting apart.
+#
+# It provides:
+#   candidate_registry        52 rows; `status` records the inclusion decision and
+#                             `exclusion_reason` records why, empty when included
+#   included_vars             49; everything in the study (descriptives, bivariate)
+#   bivariate_only_vars        1; in the study but withheld from the penalty
+#   lasso_vars                48; the predictor set offered to cv.glmnet
+#   perceived_health_vars      3; the measures Section 5.4 toggles
+#   vars_excluding_perceived / vars_including_perceived   derived from lasso_vars
+#
+# The second eligibility axis exists because `dhhgl12` is a deterministic
+# function of `dhhgle5` and `dhhg611`. A penalty splits a shared coefficient
+# arbitrarily among redundant columns, so `dhhgl12` is reported bivariately in
+# model-00 and withheld here.
+base::source("./scripts/modeling/candidate-registry.R")
 
 # The four specifications of Section 5.4. Note that Models 1 and 3 share a
 # single cross-validated fit, as do Models 2 and 4: the predictor set defines
@@ -204,7 +150,19 @@ decision_registry <- tibble::tribble(
   "Weighted likelihood; unweighted",
   "Weighted likelihood",
   "Section 5.4 passes survey weights to cv.glmnet. Note that folds are still drawn as though observations were independent; model-0 out4 quantified the consequence.",
-  "`weight_vector` in tweak-data-0"
+  "`weight_vector` in tweak-data-0",
+
+  13L, "Child-presence flag dhhgl12",
+  "Include in the penalty; exclude from the study; keep for descriptives and bivariate models only",
+  "Keep for descriptives and bivariate models only",
+  "dhhgl12 is the logical OR of dhhgle5 and dhhg611 in all 63,843 rows, so a design matrix carrying all three spans the same column space as their interaction. A penalty distributes a shared coefficient arbitrarily among redundant columns, which would make the selection result unstable and uninterpretable. Its marginal rate ratio is still a legitimate quantity, so it remains in model-00.",
+  "`bivariate_only_vars` in scripts/modeling/candidate-registry.R",
+
+  14L, "Homeownership",
+  "Omit; proxy by living_arrangements; include DHH_OWN directly",
+  "Include DHH_OWN directly as home_ownership",
+  "Section 2.2 requests homeownership. Earlier revisions recorded it as unavailable in the PUMF and used living_arrangements as a proxy; QC on 2026-08-01 showed DHH_OWN is present in both cycles with identical integer coding and 99.74% coverage. living_arrangements is retained on its own merits rather than as a substitute.",
+  "`home_ownership` row in scripts/modeling/candidate-registry.R"
 )
 
 domain_colours <- c(
@@ -344,14 +302,18 @@ tidy_nb <- function(nb_fit, column_map) {
 ds0 <- arrow::read_parquet(path_parquet)
 
 # ---- tweak-data-0 ------------------------------------------------------------
-# Decision 5: complete-case on the included candidate set only. Excluding
-# cc_copd and has_family_doctor first (decisions 2 and 3) is what makes a
-# complete-case analysis tenable at all.
+# Decision 5: complete-case on the candidate set actually offered to the
+# penalty. Excluding cc_copd and has_family_doctor first (decisions 2 and 3) is
+# what makes a complete-case analysis tenable at all.
+#
+# Note `lasso_vars`, not `included_vars`: decision 9 keeps `dhhgl12` in the
+# study but withholds it here, so it must not drive the complete-case filter
+# either.
 ds_model_raw <- ds0 %>%
-  select(all_of(c(outcome_var, weight_col, cycle_var, included_vars))) %>%
+  select(all_of(c(outcome_var, weight_col, cycle_var, lasso_vars))) %>%
   mutate(across(where(is.ordered), ~ factor(., ordered = FALSE))) %>%
   mutate(across(where(is.logical), to_yes_no)) %>%
-  mutate(across(all_of(c("dhhgle5", "dhhg611", "dhhgl12")), to_yes_no)) %>%
+  mutate(across(any_of(c("dhhgle5", "dhhg611", "dhhgl12")), to_yes_no)) %>%
   mutate(across(where(is.character), factor))
 
 n_source <- nrow(ds_model_raw)
@@ -397,8 +359,12 @@ cat("Columns this report draws on:\n")
 cat("  outcome:    ", outcome_var, "\n", sep = "")
 cat("  weight:     ", weight_col, " (master weight halved for pooling)\n", sep = "")
 cat("  forced in:  ", forced_vars, "\n", sep = "")
-cat("  candidates: ", length(included_vars), " of ", nrow(candidate_registry),
-    " registered (see Table t1)\n\n", sep = "")
+cat("  candidates: ", length(lasso_vars), " of ", nrow(candidate_registry),
+    " registered (see Table t1)\n", sep = "")
+cat("              ", length(included_vars), " are in the study; ",
+    length(bivariate_only_vars), " of those (",
+    paste(bivariate_only_vars, collapse = ", "),
+    ") is reported bivariately only\n\n", sep = "")
 
 ds0 %>%
   count(!!rlang::sym(cycle_var), name = "respondents") %>%
@@ -501,14 +467,24 @@ candidate_registry %>%
     Domain = domain,
     Variable = variable,
     Label = variable_label,
-    Status = ifelse(status == "include", "included", "EXCLUDED"),
-    `Reason for exclusion` = exclusion_reason
+    Status = dplyr::case_when(
+      status != "include"              ~ "EXCLUDED",
+      variable %in% bivariate_only_vars ~ "bivariate only",
+      TRUE                              ~ "included"
+    ),
+    `Reason for exclusion` = dplyr::if_else(
+      variable %in% bivariate_only_vars,
+      "Deterministic function of dhhgle5 and dhhg611; kept for descriptives and bivariate models, withheld from the penalty",
+      exclusion_reason
+    )
   ) %>%
   print_table(
     caption = paste0(
-      "Table t1: Candidate registry. ", sum(candidate_registry$status == "include"),
+      "Table t1: Candidate registry. ", length(lasso_vars),
       " of ", nrow(candidate_registry),
-      " variables enter the selection procedure; the three exclusions are justified in Table t3."
+      " variables enter the selection procedure; the three exclusions are justified in Table t3, and ",
+      paste(bivariate_only_vars, collapse = ", "),
+      " is held back from the penalty alone."
     ),
     align = c("l", "l", "l", "l", "l")
   )
@@ -555,12 +531,13 @@ missingness_by_cycle <- ds0 %>%
 
 complete_case_cascade <- tibble::tribble(
   ~scenario, ~variables_used,
-  "All 50 candidates", candidate_registry$variable,
+  paste0("All ", nrow(candidate_registry), " candidates"), candidate_registry$variable,
   "Drop cc_copd", setdiff(candidate_registry$variable, "cc_copd"),
   "Drop has_family_doctor", setdiff(candidate_registry$variable, "has_family_doctor"),
   "Drop both (chosen)", setdiff(candidate_registry$variable,
                                 c("cc_copd", "has_family_doctor")),
-  "Chosen set, minus dhhgage", included_vars
+  "Chosen set, minus dhhgage", included_vars,
+  "LASSO set (minus dhhgl12)", lasso_vars
 ) %>%
   mutate(
     n_variables = lengths(variables_used),

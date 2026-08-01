@@ -91,7 +91,8 @@ cc_vars <- c(
 
 predisposing_vars <- c(
   "age_group_3", "sex", "marital_status", "household_size",
-  "education", "immigration_status", "visible_minority", "living_arrangements"
+  "education", "immigration_status", "visible_minority", "home_ownership",
+  "living_arrangements"
 )
 
 facilitating_vars <- c(
@@ -348,7 +349,8 @@ ggsave(paste0(prints_folder, "g21_pattern_plot.png"),
 # Run Little's MCAR test by domain block
 mcar_results <- bind_rows(
   safe_mcar_test(ds0 %>% select(any_of(cc_vars)), "Chronic Conditions (17 vars)"),
-  safe_mcar_test(ds0 %>% select(any_of(predisposing_vars)), "Predisposing (8 vars)"),
+  safe_mcar_test(ds0 %>% select(any_of(predisposing_vars)),
+                 paste0("Predisposing (", length(predisposing_vars), " vars)")),
   safe_mcar_test(ds0 %>% select(any_of(facilitating_vars)), "Facilitating (12 vars)"),
   safe_mcar_test(ds0 %>% select(any_of(needs_vars)), "Needs (10 vars)"),
   safe_mcar_test(ds0 %>% select(any_of(c(cc_vars, predisposing_vars,

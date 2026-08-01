@@ -143,7 +143,7 @@ research_vars <- c(
   "CCC_280", "CCC_290",
   # Demographics
   "DHHGAGE", "DHH_SEX", "DHHGMS", "DHHGHSZ", "DHHGLE5",
-  "DHHG611", "DHHGL12", "GEOGPRV",
+  "DHHG611", "DHHGL12", "DHH_OWN", "GEOGPRV",
   # Socioeconomic
   "INCGHH", "EDUDR04", "EDUDH04", "SDCFIMM", "SDCGRES", "SDCGCGT",
   # Health behaviours

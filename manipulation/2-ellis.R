@@ -124,9 +124,16 @@ vars_confirmed <- c(
 
 vars_inferred <- c(
   # Additional demographics
-  "dhhgle5",   # Children <= 5 in household
-  "dhhg611",   # Children 6-11 in household
-  "dhhgl12",   # Children < 12 in household
+  "dhhgle5",   # Binary 0/1: any child <= 5 in household
+  "dhhg611",   # Binary 0/1: any child 6-11 in household
+  "dhhgl12",   # Binary 0/1: any child < 12 in household. NOTE (QC 2026-08-01):
+               #   deterministic OR of the two above (0 discordant rows of
+               #   63,843) and NOT the requested "children >= 12" construct.
+  "dhh_own",   # Dwelling owned by a household member (homeownership).
+               #   Admitted 2026-08-01 after QC: present in BOTH cycles,
+               #   99.67% coverage in the analytic sample, no optional-content
+               #   aliasing with cycle x province. Satisfies the Section 2.2
+               #   "homeownership" requirement directly.
   # Education
   "edudr04",   # Respondent education, 4 levels
   "edudh04",   # Household education, 4 levels
@@ -692,6 +699,30 @@ if ("sdcgcgt" %in% names(ds_analytic)) {
     )
 }
 
+if ("dhh_own" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # DHH_OWN: dwelling owned by a member of the household.
+      #   2010-2011 label text: "Dwelling - owned by a member of hhld"  1=YES   2=NO
+      #   2013-2014 label text: "Owned, Rented"                         1=OWNER 2=RENTED
+      # The label TEXT differs across cycles but the integer coding is identical,
+      # so no alias resolution is required.
+      #
+      # CRITICAL — missingness is represented DIFFERENTLY by cycle:
+      #   2010-2011 stores refusal / not-stated as SPSS SYSTEM MISSING (-> NA
+      #             after haven::zap_labels() in the Ferry): 1,475 rows.
+      #   2013-2014 stores them as EXPLICIT codes 7 / 8 / 9: 1,809 rows.
+      # The TRUE ~ NA_character_ fallback below catches both representations.
+      # Anything other than 1 or 2 becomes NA; do not "simplify" this to
+      # `dhh_own != 1 ~ "Renter"`, which would silently absorb codes 6/7/8/9.
+      home_ownership = dplyr::case_when(
+        dhh_own == 1 ~ "Owner",
+        dhh_own == 2 ~ "Renter",
+        TRUE         ~ NA_character_
+      ) %>% factor(levels = c("Owner", "Renter"))
+    )
+}
+
 if ("lbsdpft" %in% names(ds_analytic)) {
   ds_analytic <- ds_analytic %>%
     dplyr::mutate(
@@ -889,6 +920,7 @@ ds_out <- ds_analytic %>%
     # Demographics (recoded)
     age_group_3, dhhgage, sex, marital_status, household_size,
     dplyr::any_of(c("dhhgle5","dhhg611","dhhgl12")),
+    dplyr::any_of(c("home_ownership")),
     province, income_hh,
     dplyr::any_of(c("living_arrangements")),
     dplyr::any_of(c("education", "immigration_status", "visible_minority",

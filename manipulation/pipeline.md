@@ -168,6 +168,11 @@ DBI::dbDisconnect(con)
 - If n deviates > 5,000, review the exclusion logic and CCHS code mappings.
 - Check the outcome mean ≈ 1.35 and zero proportion ≈ 71%; observed: mean = 1.35, zero% = 70.5%.
 - Verify `immigration_status` non-NA n > 50,000 (non-immigrants now captured via SDCFIMM).
+- Verify the final table is 63,843 × **70** (70 columns since `home_ownership` was
+  admitted on 2026-08-01; it was 69 before).
+- Verify `home_ownership` non-NA n ≈ 63,677 (99.74%). If it is materially lower,
+  the `DHH_OWN` recode is absorbing the 2013-2014 not-stated codes 7/8/9 or the
+  2010-2011 system-missing values incorrectly.
 
 **After Lane 3**:
 
@@ -175,6 +180,8 @@ DBI::dbDisconnect(con)
 - If any parity test fails, re-run Lane 2; if data quality tests fail, review
   the recode blocks in `2-ellis.R`.
 - Baseline run (2026-05-20): 24 PASSED, 0 FAILED.
+- Latest run (2026-08-01, after admitting `home_ownership`): 0 FAILED. Lanes 0-3
+  all exited 0; final table 63,843 × 70.
 
 ## Common Issues
 
@@ -207,6 +214,13 @@ mapping in the exclusion steps. CCHS uses codes 6/7/8/9 for some variables and
 | Country of birth | `SDCGCBG` | `SDCGCB13` | `sdcgcbg_h` |
 
 All other research variables use identical names in both cycles.
+
+`DHH_OWN` is a special case: the name and the integer coding are identical in both
+cycles, so it needs no alias, but the label text differs ("Dwelling - owned by a
+member of hhld" vs "Owned, Rented") and not-stated responses are SPSS system
+missing in 2010-2011 versus explicit codes 7/8/9 in 2013-2014. The recode maps
+only `1` and `2` and sends everything else to `NA`. See `INPUT-manifest.md`
+§ Known Cross-Cycle Encoding Differences.
 
 ## Cross-Variable Dependency
 

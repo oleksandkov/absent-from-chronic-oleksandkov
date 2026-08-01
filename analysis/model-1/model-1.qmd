@@ -52,7 +52,7 @@ direction and magnitude, not as estimates for publication.
 
 **Research questions:**
 
-1. Which of the 50 registered candidate variables are eligible for selection at
+1. Which of the 52 registered candidate variables are eligible for selection at
    all, and on what evidence are the ineligible ones excluded?
 2. What analytic sample survives, and does surviving it distort the sample?
 3. What does each of the four specifications retain?

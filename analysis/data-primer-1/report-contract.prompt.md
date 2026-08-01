@@ -14,13 +14,13 @@ description: Compose analysis/data-primer-1/ univariate distributions and variab
 ## Mission
 
 Provide a complete univariate distribution profile and §2.2 variable traceability record
-for every variable in `cchs_analytic` (63,843 rows × 69 cols) produced by
+for every variable in `cchs_analytic` (63,843 rows × 70 cols) produced by
 `manipulation/2-ellis.R`. Serves as the canonical data reference for all subsequent EDAs
 and Reports in this project.
 
 ## Data Sources
 
-- **Primary:** `data-private/derived/cchs-2-tables/cchs_analytic.parquet` (63,843 rows × 69 cols)
+- **Primary:** `data-private/derived/cchs-2-tables/cchs_analytic.parquet` (63,843 rows × 70 cols)
 - **Supporting:** `data-public/metadata/CACHE-manifest.md`
 - **Traceability source:** `data-private/raw/2026-02-19/stats_instructions_v3.md` (§2.2 variable list)
 
@@ -37,7 +37,7 @@ and Reports in this project.
 
 | File | Format | Purpose |
 |------|--------|---------|
-| `univariate-distributions.qmd` | HTML, code-fold | Distributions of all 69 variables |
+| `univariate-distributions.qmd` | HTML, code-fold | Distributions of all 70 variables |
 | `variable-inclusion.qmd` | HTML, static | §2.2 traceability table |
 
 ## Target Sections — univariate-distributions
@@ -47,7 +47,7 @@ and Reports in this project.
 | 1.1 | Primary / sensitivity outcomes | `days_absent_total`, `days_absent_chronic` |
 | 1.2 | LOP components | `lopg040` – `lopg100` (8 vars) |
 | 2 | Chronic conditions prevalence | 17 `cc_*` (logical TRUE/FALSE) |
-| 3 | Predisposing (tabset) | `age_group_3`, `sex`, `marital_status`, `household_size`, `education`, `immigration_status`, `visible_minority`, `living_arrangements`; continuous: `dhhgage`, `dhhgle5`, `dhhg611` |
+| 3 | Predisposing (tabset) | `age_group_3`, `sex`, `marital_status`, `household_size`, `education`, `immigration_status`, `visible_minority`, `home_ownership`, `living_arrangements`; raw codes: `dhhgage`; binary child-presence flags: `dhhgle5`, `dhhg611`, `dhhgl12` |
 | 4 | Facilitating (tabset) | `income_hh`, `has_family_doctor`, `employment_type`, `work_schedule`, `smoking_status`, `bmi_category`, `physical_activity`, `alcohol_type`, `fruit_veg_daily`, `occupation_category`, `work_stress`, `province` |
 | 5 | Needs (tabset) | `health_perceived`, `mental_health_perceived`, `health_vs_prior_year`, `injured_past_12m`, `adl_meals`–`adl_finances` |
 | 6 | Survey design | `wts_m`, `wts_m_pooled`, `cchs_cycle_f`, `flag_complete_ccc`, `flag_complete_predictors`, `flag_analytic_complete` |

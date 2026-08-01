@@ -26,7 +26,7 @@ editor_options:
 This document provides a complete univariate profile of every variable in the `cchs_analytic` analysis-ready table produced by `manipulation/2-ellis.R`. It serves as the **canonical data reference** for all EDAs and Reports in this project.
 
 **Dataset:** CCHS 2010 + 2014 pooled analytic sample\
-**Rows:** 63,843 respondents **Cols:** 69 variables\
+**Rows:** 63,843 respondents **Cols:** 70 variables\
 **Source:** `data-private/derived/cchs-2-tables/cchs_analytic.parquet`\
 **Pipeline documentation:** `data-public/metadata/CACHE-manifest.md`\
 **Variable traceability:** [Variable Inclusion](variable-inclusion.html)
@@ -205,6 +205,19 @@ Predisposing variables characterise the respondent's socio-demographic backgroun
 ```{r display-visible-minority}
 ```
 
+### Home Ownership
+
+```{r display-home-ownership}
+```
+
+::: {.callout-note}
+`home_ownership` derives from `DHH_OWN`, which is present in both cycles. "Renter"
+means "not owned by a member of the household" and therefore also covers band
+housing and rent-free arrangements; it is not a tenure-type breakdown. Not-stated
+responses are SPSS system-missing in 2010-2011 but explicit codes 7/8/9 in
+2013-2014; both are mapped to `NA` by the Ellis recode.
+:::
+
 ### Living Arrangements
 
 ```{r display-living-arrangements}
@@ -226,7 +239,11 @@ Predisposing variables characterise the respondent's socio-demographic backgroun
 ```
 :::
 
-> **Note on missing household variables:** `dhhdfc12p` (children ≥ 12 yrs) has no PUMF equivalent. See [Variable Inclusion](variable-inclusion.html) §4.
+> **Note on the three child-presence flags:** `dhhgle5`, `dhhg611`, and `dhhgl12` are **binary 0/1 presence indicators** (0 = no such child in the household, 1 = one or more), not counts of children. All three are fully populated (0 missing across 63,843 rows).
+
+> **Note on `dhhgl12` redundancy:** `dhhgl12` denotes a child **under** 12 and is a deterministic function of the other two flags — `dhhgl12 == (dhhgle5 | dhhg611)` holds in all 63,843 rows, with zero discordant cases. Its marginal (22.8% positive) is therefore fully determined by the two component marginals (13.7% and 14.4%) and their overlap (3,340 households with both). Read it as a summary of the two, never as a third independent household characteristic.
+
+> **Note on missing household variables:** `dhhdfc12p` (children ≥ 12 yrs) has no PUMF equivalent and is a *different* construct from `dhhgl12`. See [Variable Inclusion](variable-inclusion.html) §4.
 
 ------------------------------------------------------------------------
 
