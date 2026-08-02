@@ -21,47 +21,29 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Mission
+# Mission of `eda-81`
 
-`model-00` estimated 47 unadjusted rate ratios, one model per predictor.
-`model-1` offered a penalty 48 candidates, kept some, and refit what it kept.
-Both reports are complete and both are hard to read, for the same reason: they
-each answer their own question well and neither is arranged for a reader trying
-to hold the two side by side.
+`model-00` estimated 47 unadjusted rate ratios, one model per predictor. `model-1` offered a penalty 48 candidates, kept some, and refit what it kept. Both reports are complete and both are hard to read, for the same reason: they each answer their own question well and neither is arranged for a reader trying to hold the two side by side.
 
 This report is the interpretation layer. It does two things.
 
-1. **Explains the penalty.** What `lambda` is, what the `lambda.min` and
-   `lambda.1se` rules each optimise, what Poisson deviance measures, and why the
-   perceived-health variables are toggled on and off rather than simply kept or
-   dropped. That is the **g0** family.
-2. **Aligns the evidence.** One graph, one shared row axis, three panels:
-   unadjusted signal, selection verdict, adjusted estimate. That is the **g1**
-   family.
+1.  **Explains the penalty.** What `lambda` is, what the `lambda.min` and `lambda.1se` rules each optimise, what Poisson deviance measures, and why the perceived-health variables are toggled on and off rather than simply kept or dropped. That is the **g0** family.
+2.  **Aligns the evidence.** One graph, one shared row axis, three panels: unadjusted signal, selection verdict, adjusted estimate. That is the **g1** family.
 
 ::: callout-important
 ## This report fits nothing
 
-Every number here was computed by `model-00` or `model-1` and written to disk by
-them. eda-81 opens no analytic parquet, calls no `glmnet`, and calls no
-`MASS::glm.nb`. It reads five files, joins them, and draws them. If a number here
-disagrees with the number in the source report, the fault is in this report's
-joining, and the join audit in Output out1 is where to look first.
+Every number here was computed by `model-00` or `model-1` and written to disk by them. eda-81 opens no analytic parquet, calls no `glmnet`, and calls no `MASS::glm.nb`. It reads five files, joins them, and draws them. If a number here disagrees with the number in the source report, the fault is in this report's joining, and the join audit in Output out1 is where to look first.
 :::
 
 **Research questions:**
 
-1. What does the LASSO penalty do to a coefficient, and what distinguishes the
-   `lambda.min` rule from the `lambda.1se` rule in what they are willing to buy?
-2. What is Poisson deviance, and what is a reader of `model-1` Graph g2 looking
-   at when the curve rises on both sides of a minimum?
-3. Why is perceived health toggled rather than simply included or excluded?
-4. Which variables did each of the four specifications retain, and where do the
-   four disagree?
-5. For a variable retained by the primary model, how does its adjusted rate ratio
-   compare with the unadjusted rate ratio the bivariate series reported for it?
-6. Which variables carried a strong unadjusted signal and were nonetheless
-   eliminated by the penalty?
+1.  What does the LASSO penalty do to a coefficient, and what distinguishes the `lambda.min` rule from the `lambda.1se` rule in what they are willing to buy?
+2.  What is Poisson deviance, and what is a reader of `model-1` Graph g2 looking at when the curve rises on both sides of a minimum?
+3.  Why is perceived health toggled rather than simply included or excluded?
+4.  Which variables did each of the four specifications retain, and where do the four disagree?
+5.  For a variable retained by the primary model, how does its adjusted rate ratio compare with the unadjusted rate ratio the bivariate series reported for it?
+6.  Which variables carried a strong unadjusted signal and were nonetheless eliminated by the penalty?
 
 # Environment
 
@@ -158,10 +140,7 @@ read_chunk("analysis/eda-81/eda-81.R")
 
 # Data Context
 
-For complete data documentation, see the
-[Data Primer](../data-primer-1/data-primer-1.html). This report's unit of
-analysis is not a respondent but a **model term**, so the context below describes
-the artifacts and the terms rather than the survey.
+For complete data documentation, see the [Data Primer](../data-primer-1/data-primer-1.html). This report's unit of analysis is not a respondent but a **model term**, so the context below describes the artifacts and the terms rather than the survey.
 
 ## Artifacts and their grain
 
@@ -169,18 +148,18 @@ the artifacts and the terms rather than the survey.
 #| label: data-context-tables
 #| code-summary: Which upstream artifact supplies which panel
 #| echo: false
+#| results: asis
 ```
 
 ## A single term, traced
 
-Where a data primer would show one respondent, this report shows one term:
-the same variable as it appears in the bivariate series, in each of the four
-penalised fits, and in the primary model's refit.
+Where a data primer would show one respondent, this report shows one term: the same variable as it appears in the bivariate series, in each of the four penalised fits, and in the primary model's refit.
 
 ```{r}
 #| label: data-context-person
 #| code-summary: One worked term across every artifact eda-81 joins
 #| echo: false
+#| results: asis
 ```
 
 ## The counts that size Graph g1
@@ -189,51 +168,30 @@ penalised fits, and in the primary model's refit.
 #| label: data-context-distributions
 #| code-summary: Variable and level counts across the two sources
 #| echo: false
+#| results: asis
 ```
 
 # Step 1: The Four Models Are One 2 x 2
 
-Section 5.4 asks for four models. Reading them as four separate analyses is the
-main source of confusion, because they are not four analyses. They are **two
-binary choices crossed**, and the two choices are unrelated to each other.
+Section 5.4 asks for four models. Reading them as four separate analyses is the main source of confusion, because they are not four analyses. They are **two binary choices crossed**, and the two choices are unrelated to each other.
 
 ## Axis one: which predictors are offered
 
-Three variables measure how a respondent *rates* their own health:
-self-perceived general health, self-perceived mental health, and health compared
-with the prior year. These are, unsurprisingly, among the strongest correlates of
-absence in the whole candidate set — look at the Needs band in the left panel of
-Graph g1 below, where self-perceived general health "Poor" sits near a
-ten-fold unadjusted rate ratio.
+Three variables measure how a respondent *rates* their own health: self-perceived general health, self-perceived mental health, and health compared with the prior year. These are, unsurprisingly, among the strongest correlates of absence in the whole candidate set — look at the Needs band in the left panel of Graph g1 below, where self-perceived general health "Poor" sits near a ten-fold unadjusted rate ratio.
 
-That strength is the problem. A person who missed 30 days of work last year and
-is asked "in general, how is your health?" is in part *reporting the absence*.
-The arrow between the two runs in both directions, and the survey cannot separate
-them. Include the three measures and they will dominate the penalty, absorbing
-signal that belongs to the chronic conditions the study is actually about. Exclude
-them and the model is blind to a real and well-measured construct.
+That strength is the problem. A person who missed 30 days of work last year and is asked "in general, how is your health?" is in part *reporting the absence*. The arrow between the two runs in both directions, and the survey cannot separate them. Include the three measures and they will dominate the penalty, absorbing signal that belongs to the chronic conditions the study is actually about. Exclude them and the model is blind to a real and well-measured construct.
 
-The proposal declines to choose, and it is right to decline. It asks for the
-analysis **both ways**, so the reader can see how much the conclusion depends on
-that judgement. That is what the toggle is: not indecision, but a stated
-sensitivity analysis with the axis named.
+The proposal declines to choose, and it is right to decline. It asks for the analysis **both ways**, so the reader can see how much the conclusion depends on that judgement. That is what the toggle is: not indecision, but a stated sensitivity analysis with the axis named.
 
 ::: callout-note
 ## What "perceived health" was ratified to mean
 
-The toggle covers exactly three variables. It does **not** cover the activities
-of daily living items ("needs help with housework") or injury status, which
-measure functional limitation and event history rather than perception, and which
-remain in every specification. This was settled on 2026-07-29 and is decision 6
-of `model-1`.
+The toggle covers exactly three variables. It does **not** cover the activities of daily living items ("needs help with housework") or injury status, which measure functional limitation and event history rather than perception, and which remain in every specification. This was settled on 2026-07-29 and is decision 6 of `model-1`.
 :::
 
 ## Axis two: which penalty is taken off the curve
 
-The LASSO does not choose a model. It chooses a *family* of models, one per value
-of the penalty `lambda`, and something else must choose a `lambda` from that
-family. Cross-validation supplies the evidence; the two rules are two different
-readings of that evidence. Step 2 explains them.
+The LASSO does not choose a model. It chooses a *family* of models, one per value of the penalty `lambda`, and something else must choose a `lambda` from that family. Cross-validation supplies the evidence; the two rules are two different readings of that evidence. Step 2 explains them.
 
 ## The grid
 
@@ -241,44 +199,31 @@ readings of that evidence. Step 2 explains them.
 #| label: t1
 #| code-summary: The four specifications stated as two crossed choices
 #| echo: false
+#| results: asis
 ```
 
 ```{r}
 #| label: t2
 #| code-summary: Lambda, deviance, and model size under each rule
 #| echo: false
+#| results: asis
 ```
 
-Read Table t2 across, for one predictor set at a time. `lambda.1se` accepts a
-*measurably* worse cross-validated deviance than `lambda.min` — but by
-construction no worse than one standard error — and is paid for that concession
-in variables it does not have to carry. Whether that is a good trade is the
-question Step 2 is built to let a reader answer for themselves.
+Read Table t2 across, for one predictor set at a time. `lambda.1se` accepts a *measurably* worse cross-validated deviance than `lambda.min` — but by construction no worse than one standard error — and is paid for that concession in variables it does not have to carry. Whether that is a good trade is the question Step 2 is built to let a reader answer for themselves.
 
 ::: callout-warning
 ## The reproduction targets were not met
 
-Section 5.5 anticipates 16, 9, 32, and 33 retained variables for Models 1 through
-4. The fits in `model-1` retained 9, 8, 37, and 41. This report does not
-investigate that gap — `model-1` Table t5 records it and owns it. It is flagged
-here because a reader coming to Graph g1 for the first time should know that the
-right-hand panel is thinner than the proposal expected.
+Section 5.5 anticipates 16, 9, 32, and 33 retained variables for Models 1 through 4. The fits in `model-1` retained 9, 8, 37, and 41. This report does not investigate that gap — `model-1` Table t5 records it and owns it. It is flagged here because a reader coming to Graph g1 for the first time should know that the right-hand panel is thinner than the proposal expected.
 :::
 
 # Step 2: The g0 Family — What the Penalty Does
 
 ## Graph g0: reading the curve
 
-Start with the vertical axis, because it is the one people skip. Every candidate
-model is asked to predict the days absent of respondents it was **not fitted on**.
-Poisson deviance is the accumulated cost of those predictions being wrong. Lower
-is better. Graph g02 takes that definition apart.
+Start with the vertical axis, because it is the one people skip. Every candidate model is asked to predict the days absent of respondents it was **not fitted on**. Poisson deviance is the accumulated cost of those predictions being wrong. Lower is better. Graph g02 takes that definition apart.
 
-Now the horizontal axis. `lambda` is the price the model pays per unit of
-coefficient. At the far left the price is near zero, every predictor is free to
-take whatever coefficient it likes, and the model overfits. At the far right the
-price is so high that every coefficient is crushed to zero and the model predicts
-one number for everybody. Somewhere between the two is a minimum.
+Now the horizontal axis. `lambda` is the price the model pays per unit of coefficient. At the far left the price is near zero, every predictor is free to take whatever coefficient it likes, and the model overfits. At the far right the price is so high that every coefficient is crushed to zero and the model predicts one number for everybody. Somewhere between the two is a minimum.
 
 ```{r}
 #| label: g0
@@ -290,18 +235,10 @@ one number for everybody. Somewhere between the two is a minimum.
 
 The two rules read this picture differently.
 
-- **`lambda.min`** takes the bottom of the curve. It answers: *which model
-  predicts held-out respondents best?* It is the honest answer to a prediction
-  question.
-- **`lambda.1se`** walks to the right along the dotted line, as far as it can go
-  without leaving the grey band of the best model, and takes the model it lands
-  on. It answers a different question: *what is the smallest model I cannot
-  statistically distinguish from the best one?*
+-   **`lambda.min`** takes the bottom of the curve. It answers: *which model predicts held-out respondents best?* It is the honest answer to a prediction question.
+-   **`lambda.1se`** walks to the right along the dotted line, as far as it can go without leaving the grey band of the best model, and takes the model it lands on. It answers a different question: *what is the smallest model I cannot statistically distinguish from the best one?*
 
-The 1-SE rule is a stance, not a calculation. It says: the difference between
-these two models is smaller than the noise in my estimate of that difference, so
-I will not pay for it in complexity. It is the conservative rule, and it is why
-`Model 1` — the primary specification — is small.
+The 1-SE rule is a stance, not a calculation. It says: the difference between these two models is smaller than the noise in my estimate of that difference, so I will not pay for it in complexity. It is the conservative rule, and it is why `Model 1` — the primary specification — is small.
 
 ## Graph g01: what the walk costs
 
@@ -313,12 +250,7 @@ I will not pay for it in complexity. It is the conservative rule, and it is why
 #| fig-height: 7.5
 ```
 
-The lower panel is the reason anyone uses the 1-SE rule. Walking from
-`lambda.min` to `lambda.1se` discards roughly three-quarters of the design
-columns, and the upper panel shows what that cost in fit: one standard error of
-cross-validated deviance, by construction. A reader who thinks that trade is a
-bad one should prefer `Model 3` over `Model 1`, and both are reported precisely
-so that preference can be exercised.
+The lower panel is the reason anyone uses the 1-SE rule. Walking from `lambda.min` to `lambda.1se` discards roughly three-quarters of the design columns, and the upper panel shows what that cost in fit: one standard error of cross-validated deviance, by construction. A reader who thinks that trade is a bad one should prefer `Model 3` over `Model 1`, and both are reported precisely so that preference can be exercised.
 
 ## Graph g02: what Poisson deviance counts
 
@@ -330,23 +262,13 @@ so that preference can be exercised.
 #| fig-height: 6.5
 ```
 
-This chunk plots a function, not a fit. Each curve is one respondent's
-contribution to the deviance, as the model's prediction for that respondent
-moves. Three things are worth taking away:
+This chunk plots a function, not a fit. Each curve is one respondent's contribution to the deviance, as the model's prediction for that respondent moves. Three things are worth taking away:
 
-1. **It is zero only when the prediction is exactly right** (the dots). Any other
-   prediction costs something. There is no free zone.
-2. **It rises on both sides.** This is why the curve in Graph g0 has a minimum
-   rather than a plateau: too little penalty and predictions scatter, too much
-   and they collapse toward the overall mean, and both directions cost.
-3. **The rise is asymmetric.** For a respondent who missed 30 days, predicting 3
-   is punished far harder than predicting 60. This matters for an outcome that is
-   mostly zeros with a long right tail: the deviance is dominated by the
-   respondents who missed a lot of work, which is a defensible property for this
-   research question but is a property, not a neutrality.
+1.  **It is zero only when the prediction is exactly right** (the dots). Any other prediction costs something. There is no free zone.
+2.  **It rises on both sides.** This is why the curve in Graph g0 has a minimum rather than a plateau: too little penalty and predictions scatter, too much and they collapse toward the overall mean, and both directions cost.
+3.  **The rise is asymmetric.** For a respondent who missed 30 days, predicting 3 is punished far harder than predicting 60. This matters for an outcome that is mostly zeros with a long right tail: the deviance is dominated by the respondents who missed a lot of work, which is a defensible property for this research question but is a property, not a neutrality.
 
-The number on the vertical axis of Graph g0 is the weighted average of this
-quantity over respondents held out of the fit.
+The number on the vertical axis of Graph g0 is the weighted average of this quantity over respondents held out of the fit.
 
 ## Graph g03: where the standard error comes from
 
@@ -358,51 +280,29 @@ quantity over respondents held out of the fit.
 #| fig-height: 6.5
 ```
 
-The bars are the point. Each is the mean plus and minus one standard error of the
-five held-out fold deviances at that `lambda`. They are wide relative to the
-difference between the two marked models — which is exactly the argument the 1-SE
-rule makes. If the data cannot distinguish two models, prefer the smaller one.
+The bars are the point. Each is the mean plus and minus one standard error of the five held-out fold deviances at that `lambda`. They are wide relative to the difference between the two marked models — which is exactly the argument the 1-SE rule makes. If the data cannot distinguish two models, prefer the smaller one.
 
 ::: callout-note
 ## What this graph does not show, and why
 
-The five individual fold curves would make the standard error more tangible still.
-They are not drawn because `model-1`'s `fit_lasso()` calls `cv.glmnet()` without
-`keep = TRUE`, so the per-fold prediction matrix and the fold assignment were
-never stored. Drawing them would require re-running the cross-validation, which
-this report's scope forbids. The stored `cvsd` is the same quantity summarised.
-This is local decision 6 of the contract, and it is a one-argument fix in
-`model-1` if fold-level detail is wanted.
+The five individual fold curves would make the standard error more tangible still. They are not drawn because `model-1`'s `fit_lasso()` calls `cv.glmnet()` without `keep = TRUE`, so the per-fold prediction matrix and the fold assignment were never stored. Drawing them would require re-running the cross-validation, which this report's scope forbids. The stored `cvsd` is the same quantity summarised. This is local decision 6 of the contract, and it is a one-argument fix in `model-1` if fold-level detail is wanted.
 :::
 
 ::: callout-tip
 ## Review point
 
-Before Step 3, a reader should be willing to agree that (a) `lambda.1se` and
-`lambda.min` answer different questions rather than one being more correct, and
-(b) the perceived-health toggle is a stated sensitivity analysis rather than an
-unresolved choice. A reader who rejects either should stop here, because the
-whole of Step 3 is arranged around them.
+Before Step 3, a reader should be willing to agree that (a) `lambda.1se` and `lambda.min` answer different questions rather than one being more correct, and (b) the perceived-health toggle is a stated sensitivity analysis rather than an unresolved choice. A reader who rejects either should stop here, because the whole of Step 3 is arranged around them.
 :::
 
 # Step 3: The g1 Family — Signal, Selection, Estimate
 
 ## Building the shared row axis
 
-All three panels of Graph g1 hang off one ordered list of rows. Building it once
-and auditing it is what makes the panels comparable line by line. Two
-construction choices are worth stating.
+All three panels of Graph g1 hang off one ordered list of rows. Building it once and auditing it is what makes the panels comparable line by line. Two construction choices are worth stating.
 
-**Every candidate level gets a row.** Not just the retained ones. An exhaustive
-spine is what makes an empty right-hand cell meaningful: a blank row is a
-variable the primary model *declined*, not a variable omitted from the display.
+**Every candidate level gets a row.** Not just the retained ones. An exhaustive spine is what makes an empty right-hand cell meaningful: a blank row is a variable the primary model *declined*, not a variable omitted from the display.
 
-**Reference rows are added for multi-level factors only.** A binary `No / Yes`
-variable already carries its reference in the row label, so adding 31 redundant
-rows would inflate the graph without adding information. A four-level factor has
-no readable geometry without its anchor at 1, so it gets one, drawn as an open
-circle. This is local decision 2 and is reversible by setting
-`reference_row_rule` to `"all"` or `"none"`.
+**Reference rows are added for multi-level factors only.** A binary `No / Yes` variable already carries its reference in the row label, so adding 31 redundant rows would inflate the graph without adding information. A four-level factor has no readable geometry without its anchor at 1, so it gets one, drawn as an open circle. This is local decision 2 and is reversible by setting `reference_row_rule` to `"all"` or `"none"`.
 
 ```{r}
 #| label: g1-data-prep
@@ -418,22 +318,61 @@ circle. This is local decision 2 and is reversible by setting
 #| echo: false
 ```
 
+## Reading the rate-ratio axis
+
+Every estimate panel in Graph g1 and Graph g11 is drawn on `scale_x_log10` and labelled *Rate ratio (log scale)*. That axis is not a display convenience layered onto a linear result. It is the scale the models were actually fitted on, and reading it as though it were linear will produce wrong statements about magnitude. The two scales are worth separating explicitly.
+
+### The scale the models were fitted on
+
+Both upstream reports fit count models with a **log link**. What is estimated is
+
+$$\log \mathbb{E}[\text{days absent}] = \beta_0 + \beta_1 x_1 + \dots + \beta_p x_p$$
+
+so each $\beta$ is **additive in the log of the expected count** and therefore **multiplicative in the count itself**. A rate ratio is simply $\exp(\beta)$; it never appears as a parameter. Three consequences follow, and all three are invisible on the drawn graph.
+
+**The penalty acts on $\beta$, not on the rate ratio.** LASSO minimises deviance plus $\lambda \sum_j |\beta_j|$. The quantity being shrunk is the *log* rate ratio, so shrinkage moves terms toward $\beta = 0$, which is $\mathrm{RR} = 1$ — never toward zero days. A term with $\mathrm{RR} = 0.5$ and a term with $\mathrm{RR} = 2.0$ have $\beta = \mp 0.693$ and cost the penalty **exactly the same amount**. On a ratio scale those two look like very different distances from the null (0.5 below versus 1.0 above); on the log scale they are identical, and the log scale is the one the algorithm sees.
+
+**Confidence intervals are built symmetric in $\beta$ and then exponentiated.** Any asymmetry you see in a ratio-scale interval is an artifact of that exponentiation, not evidence that the estimate is skewed.
+
+**The middle panel's coefficient and the right panel's coefficient are not the same number.** `model-1` uses the penalised fit only to decide *which* terms to keep, then refits the retained set by unpenalised negative binomial. The right panel carries the refit. The two agree closely but not exactly, and the gap is the shrinkage the penalty imposed while deciding.
+
+### The scale the graphs are drawn on
+
+Because the axis is logarithmic, **equal horizontal distances mean equal multiplicative factors**, not equal differences. Reading the panels:
+
+-   The reference line sits at 1, the null. Distance from that line — in either direction — is effect magnitude.
+-   Doubling and halving are the same distance from 1, on opposite sides. On a linear axis they would not be, and the visual weight of protective effects would be crushed against the left margin.
+-   Whiskers look symmetric about their point because in $\beta$ units they *are* symmetric. Reading them off the ratio labels will suggest a longer upper arm; that is the exponentiation, not the data.
+-   Attenuation between the left and right panels reads as a **horizontal displacement**, and that displacement is the logarithm of the ratio reported in the last column of Table t3.
+-   The window is clipped to $[0.2, 10]$ so that a handful of wide bivariate intervals cannot compress everything else into the centre.
+
+### A worked row: `Needs help: housework: Yes`
+
+This row appears in the Needs band of both graphs and is retained by all four specifications, so it can be traced from end to end.
+
+| Reading | $\beta$ (log scale) | Rate ratio | 95% CI |
+|---------------|---------------|---------------|---------------------------|
+| Unadjusted (`model-00`, series S1) | 1.487 | 4.42 | 3.87 – 5.05 |
+| Penalised coefficient (Model 1, `lambda.1se`) | 0.582 | 1.79 | not estimated under penalty |
+| Adjusted refit (Model 1, negative binomial) | 0.599 | 1.82 | 1.54 – 2.14 |
+
+**What the numbers say.** On its own, a respondent who needs help with housework reports **4.42 times** as many absence days as one who does not. Once the other terms Model 1 retained are in the model, **1.82 times**. Neither statement is about a number of days added; the model has no additive-days parameter to report.
+
+**What the movement measures.** On the fitted scale the coefficient falls from 1.487 to 0.599, a drop of 0.888. Exponentiating the drop gives $\exp(-0.888) = 0.41$, which is precisely the adjusted-over-unadjusted ratio in the last column of Table t3. On the drawn axis the point slides left by $\log_{10} 4.42 - \log_{10} 1.82 = 0.386$ decades. The same physical distance would carry a point from 1.00 to 0.41, or from 10.0 to 4.12 — which is what "equal distances mean equal factors" buys, and why the displacement can be compared across rows sitting at very different heights on the axis.
+
+**What the interval demonstrates.** The adjusted interval runs 0.28 below the estimate and 0.32 above it in ratio units — visibly lopsided if read from the labels. In $\beta$ units it is $0.599 \pm 0.164$, symmetric to three decimal places. The log axis restores that symmetry to the eye.
+
+**What it does not license.** The fall from 4.42 to 1.82 is *not* cleanly attributable to adjustment. The two panels are fitted on different row sets (see the caveats below Graph g1), and the interval on the right ignores the fact that the term list was selected from the same data. The displacement is a description of what the two reports produced, not an estimate of confounding.
+
 ## Graph g1
 
-Read it left to right. The left panel is what a variable looks like **on its
-own**. The middle panel is what four different penalties **decided about it**.
-The right panel is what it is worth **once the other retained variables are in
-the model**.
+Read it left to right. The left panel is what a variable looks like **on its own**. The middle panel is what four different penalties **decided about it**. The right panel is what it is worth **once the other retained variables are in the model**.
 
 Three reading notes:
 
-- The middle panel's brackets span every row their variable owns, so
-  `Household size` is one tall bar rather than four short ones. The bar is the
-  variable; the rows beside it are its levels.
-- The left and right panels share one x window, so a horizontal distance means
-  the same thing on both. An estimate that moves toward 1 between the panels was
-  attenuated by adjustment.
-- A blank right-hand row is the finding, not a gap in the drawing.
+-   The middle panel's brackets span every row their variable owns, so `Household size` is one tall bar rather than four short ones. The bar is the variable; the rows beside it are its levels.
+-   The left and right panels share one x window, so a horizontal distance means the same thing on both. An estimate that moves toward 1 between the panels was attenuated by adjustment.
+-   A blank right-hand row is the finding, not a gap in the drawing.
 
 ```{r}
 #| label: g1
@@ -446,45 +385,23 @@ Three reading notes:
 ::: callout-important
 ## Three caveats the panel geometry cannot show
 
-1. **The two estimate panels are not fitted on identical rows.** `model-00`
-   series S1 is per-predictor complete case (up to n = 63,843); `model-1` uses the
-   shared complete-case sample (n = 48,967). `model-00` series S2 exists to
-   quantify that gap and should be consulted before attributing any left-to-right
-   movement entirely to adjustment.
-2. **Neither panel shows bootstrap intervals.** Sections 5.3 and 5.4 both ask for
-   them. Replicate weights are absent from the 2010 and 2014 PUMFs and strata and
-   PSU identifiers are suppressed, so they are not computable outside a Research
-   Data Centre. Both reports state this; it is repeated here because a forest plot
-   invites a reader to trust its whiskers.
-3. **The right panel's intervals ignore selection.** The term list was chosen from
-   the same data used to estimate the coefficients, so the intervals are
-   optimistic in a way no correction in either report addresses.
+1.  **The two estimate panels are not fitted on identical rows.** `model-00` series S1 is per-predictor complete case (up to n = 63,843); `model-1` uses the shared complete-case sample (n = 48,967). `model-00` series S2 exists to quantify that gap and should be consulted before attributing any left-to-right movement entirely to adjustment.
+2.  **Neither panel shows bootstrap intervals.** Sections 5.3 and 5.4 both ask for them. Replicate weights are absent from the 2010 and 2014 PUMFs and strata and PSU identifiers are suppressed, so they are not computable outside a Research Data Centre. Both reports state this; it is repeated here because a forest plot invites a reader to trust its whiskers.
+3.  **The right panel's intervals ignore selection.** The term list was chosen from the same data used to estimate the coefficients, so the intervals are optimistic in a way no correction in either report addresses.
 :::
 
 ## Graph g11: the selection column, spent on estimates instead
 
-Graph g1 devotes a column to the selection verdict. That column turns out to be
-largely redundant, because in a wide enough layout **selection is already
-visible**: a variable a specification declined simply has no estimate in that
-specification's panel. Graph g11 spends the width on the three specifications g1
-had to leave out.
+Graph g1 devotes a column to the selection verdict. That column turns out to be largely redundant, because in a wide enough layout **selection is already visible**: a variable a specification declined simply has no estimate in that specification's panel. Graph g11 spends the width on the three specifications g1 had to leave out.
 
-Five panels, one row order, one x window. The design problem is horizontal
-traceability across five separated columns, and three devices carry it:
+Five panels, one row order, one x window. The design problem is horizontal traceability across five separated columns, and three devices carry it:
 
-- **Row labels are repeated at both outer edges.** The right-hand block is
-  left-aligned so that the two blocks mirror each other, and either can serve as
-  the reading anchor depending on which end of the graph the eye is at.
-- **Alternating grey bands mark variables**, not rows, so a multi-level factor
-  reads as one shaded block rather than four stripes.
-- **A hairline sits at every row**, and all five panels are drawn from the same
-  spine, so the rows cannot drift.
+-   **Row labels are repeated at both outer edges.** The right-hand block is left-aligned so that the two blocks mirror each other, and either can serve as the reading anchor depending on which end of the graph the eye is at.
+-   **Alternating grey bands mark variables**, not rows, so a multi-level factor reads as one shaded block rather than four stripes.
+-   **A hairline sits at every row**, and all five panels are drawn from the same spine, so the rows cannot drift.
+-   **All four estimate panels use the same logarithmic rate-ratio axis as Graph g1.** Equal horizontal distances are equal multiplicative factors, in this graph across five separated columns rather than two. The reading rules above apply unchanged.
 
-Reading the selection verdict off this graph: a row with an estimate was
-retained; a row with a grey cross at 1 belongs to a variable that specification
-was never shown; a wholly blank row belongs to a variable it was shown and
-declined. The four perceived-health blocks in the Needs band are the clearest
-case — crossed out in Models 1 and 3, estimated in Models 2 and 4.
+Reading the selection verdict off this graph: a row with an estimate was retained; a row with a grey cross at 1 belongs to a variable that specification was never shown; a wholly blank row belongs to a variable it was shown and declined. The four perceived-health blocks in the Needs band are the clearest case — crossed out in Models 1 and 3, estimated in Models 2 and 4.
 
 ```{r}
 #| label: g11-data-prep
@@ -502,17 +419,10 @@ case — crossed out in Models 1 and 3, estimated in Models 2 and 4.
 #| fig-height: 20
 ```
 
-The comparison g11 makes and g1 cannot is between the four specifications
-themselves. Two patterns are worth naming:
+The comparison g11 makes and g1 cannot is between the four specifications themselves. Two patterns are worth naming:
 
-- **The penalty rule matters far more than the perceived-health toggle.** Models
-  1 and 2 are sparse and Models 3 and 4 are dense, regardless of which predictor
-  set they were offered. The vertical axis of the 2×2 is doing most of the work.
-- **Perceived health does absorb signal, but locally.** Comparing Model 3 with
-  Model 4, the Needs band changes considerably while Exposure and Predisposing
-  barely move. The competition is with neighbouring health measures rather than
-  with the chronic conditions the study is about — which is reassuring for the
-  primary specification, though it is one comparison and not a proof.
+-   **The penalty rule matters far more than the perceived-health toggle.** Models 1 and 2 are sparse and Models 3 and 4 are dense, regardless of which predictor set they were offered. The vertical axis of the 2×2 is doing most of the work.
+-   **Perceived health does absorb signal, but locally.** Comparing Model 3 with Model 4, the Needs band changes considerably while Exposure and Predisposing barely move. The competition is with neighbouring health measures rather than with the chronic conditions the study is about — which is reassuring for the primary specification, though it is one comparison and not a proof.
 
 # Step 4: Reading the Primary Model
 
@@ -522,11 +432,10 @@ themselves. Two patterns are worth naming:
 #| label: t3
 #| code-summary: Model 1 adjusted rate ratios beside their unadjusted counterparts
 #| echo: false
+#| results: asis
 ```
 
-The last column is the ratio of the two. Below 1 means adjustment moved the
-estimate toward the null — the unadjusted association was partly carried by
-something else. Above 1 means the other predictors were masking it.
+The last column is the ratio of the two. Below 1 means adjustment moved the estimate toward the null — the unadjusted association was partly carried by something else. Above 1 means the other predictors were masking it.
 
 ## Table t4: where the two flanking panels disagree
 
@@ -534,25 +443,15 @@ something else. Above 1 means the other predictors were masking it.
 #| label: t4
 #| code-summary: Variables significant bivariately but eliminated, and the reverse
 #| echo: false
+#| results: asis
 ```
 
-Elimination despite a significant unadjusted association is the **expected**
-behaviour of a penalty, not a malfunction. Chronic conditions co-occur; a
-respondent with arthritis is more likely to have back problems. Once one of a
-correlated pair enters the model, the second buys little additional predictive
-accuracy and the penalty declines to pay for it. The eliminated variable is not
-thereby shown to be unrelated to absence — the left panel of Graph g1 shows that
-it is. It is shown to be *redundant given what was already selected*, which is a
-much narrower claim and one that depends on the selection order the penalty
-happened to take.
+Elimination despite a significant unadjusted association is the **expected** behaviour of a penalty, not a malfunction. Chronic conditions co-occur; a respondent with arthritis is more likely to have back problems. Once one of a correlated pair enters the model, the second buys little additional predictive accuracy and the penalty declines to pay for it. The eliminated variable is not thereby shown to be unrelated to absence — the left panel of Graph g1 shows that it is. It is shown to be *redundant given what was already selected*, which is a much narrower claim and one that depends on the selection order the penalty happened to take.
 
 ::: callout-warning
 ## What this report deliberately does not conclude
 
-Nothing here establishes that the retained variables cause absence, or that the
-eliminated ones do not. Selection under a penalty is a prediction procedure, and
-the estimates in the right panel inherit its optimism. This report clarifies what
-the two source reports did. It does not upgrade their epistemic status.
+Nothing here establishes that the retained variables cause absence, or that the eliminated ones do not. Selection under a penalty is a prediction procedure, and the estimates in the right panel inherit its optimism. This report clarifies what the two source reports did. It does not upgrade their epistemic status.
 :::
 
 # Session

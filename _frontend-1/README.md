@@ -46,3 +46,42 @@
 - **Navbar reordering**: Analytical sections now run `Predictors` → `Outcome` → `Model`,
   reflecting the analytical reading order (what predicts, what is predicted, how it is modelled).
   The site map navigation tree and proposal coverage table follow the same order.
+
+## 2026-08-02 — Navbar Restructure, Docs Section, Analysis Section
+
+- **Audience and use case**: Unchanged — a single expert reader (the PI) verifying that every
+  Project Proposal requirement has visible, traceable evidence. This revision is structural: it
+  removes navbar redundancy and gives the interpretation layer its own home.
+- **Messaging goal and tone**: Unchanged — professional, direct, evidence-oriented.
+- **Drop `Home` from the navbar**: The site title in the navbar brand already links to `index`,
+  so a separate `Home` entry is redundant. `index` remains in `content/` as the home page but is
+  absent from the navbar.
+- **Drop `Project` from the navbar**: The section held a single page (`Project Proposal`), which
+  does not justify a dedicated dropdown.
+- **New `Docs` section (last in the navbar)**: Houses two pages, in this order:
+  1. Site Map
+  2. Project Proposal
+  The `Project Proposal` page moves from `content/project/project-proposal.qmd` to
+  `content/docs/project-proposal.qmd`; `content/project/` is removed. `content/site-map.qmd`
+  stays where it is so that its existing relative links remain valid.
+- **New `Analysis` section**: One entry, labelled `Story 1`, published through Direct Line
+  (REDIRECTED) and targeting `analysis/eda-81/eda-81.html` — the interpretation layer that reads
+  `model-00` and `model-1` side by side.
+- **Navbar order**: `Data Primer` → `Predictors` → `Outcome` → `Model` → `Analysis` → `Pipeline`
+  → `Docs`. Evidence first, then interpretation, then infrastructure, then documentation.
+- **Landing page change**: Immediately below the study title and author line — and above
+  **Outcome in Focus** — add a short section that links to the Project Proposal page and states
+  why it is the authoritative reference for the rest of the site.
+- **Dependencies**: Extend `scripts/copy-analysis-html.R` to copy `analysis/eda-81/eda-81.html`
+  into `_site/content/analysis/`. Update the composed Site Map so its navigation tree and
+  proposal coverage table reflect the new sections, the new order, and the relocated
+  `Project Proposal` link (`docs/project-proposal.html`). Update the **About This Site** prose on
+  `index` so it no longer refers to a `Project` navbar section and does mention `Analysis`
+  and `Docs`.
+- **Exclusions and caveats**: Do not modify `analysis/eda-81/` during publishing. Its
+  `data-local/`, `prints/`, and `figure-png-iso/` folders remain excluded, as does
+  `report-contract.prompt.md`.
+- **Site map decision**: CONTINUE FROM EXISTING DRAFT. Additive and structural edits only —
+  reorder branches, add the `Analysis` and `Docs` branches, retarget the Project Proposal link,
+  and append one coverage row for `Story 1`. Leave the **Content Type** table and all existing
+  coverage row text unchanged.

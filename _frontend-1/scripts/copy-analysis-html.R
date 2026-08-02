@@ -46,4 +46,7 @@ copy_html("analysis/model-00/model-00.html", "model", "model-00.html")
 copy_html("analysis/model-0/model-0.html", "model", "model-0.html")
 copy_html("analysis/model-1/model-1.html", "model", "model-1.html")
 
+# Analysis (interpretation layer)
+copy_html("analysis/eda-81/eda-81.html", "analysis", "eda-81.html")
+
 message("Post-render hook complete: all redirect targets copied to _site/")

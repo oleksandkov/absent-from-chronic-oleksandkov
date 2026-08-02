@@ -7,10 +7,6 @@ project:
     - scripts/copy-analysis-html.R
   render:
     - content/index.qmd
-    - content/project/project-proposal.qmd
-    - content/pipeline/pipeline-guide.qmd
-    - content/pipeline/cache-manifest.qmd
-    - content/pipeline/input-manifest.qmd
     - content/data-primer/variable-inclusion.qmd
     - content/data-primer/univariate-distributions.qmd
     - content/predictors/exposure.qmd
@@ -24,27 +20,18 @@ project:
     - content/model/bivariate-models.qmd
     - content/model/lasso-rehearsal.qmd
     - content/model/variable-selection.qmd
+    - content/analysis/story-1.qmd
+    - content/pipeline/pipeline-guide.qmd
+    - content/pipeline/cache-manifest.qmd
+    - content/pipeline/input-manifest.qmd
     - content/site-map.qmd
+    - content/docs/project-proposal.qmd
 
 website:
   title: "Absent from Chronic"
   repo-url: https://github.com/RG-FIDES/absent-from-chronic
   navbar:
     left:
-      - text: "Home"
-        href: content/index.qmd
-      - text: "Project"
-        menu:
-          - text: "Project Proposal"
-            href: content/project/project-proposal.qmd
-      - text: "Pipeline"
-        menu:
-          - text: "Pipeline Guide"
-            href: content/pipeline/pipeline-guide.qmd
-          - text: "CACHE Manifest"
-            href: content/pipeline/cache-manifest.qmd
-          - text: "INPUT Manifest"
-            href: content/pipeline/input-manifest.qmd
       - text: "Data Primer"
         menu:
           - text: "Variable Inclusion"
@@ -79,8 +66,24 @@ website:
             href: content/model/lasso-rehearsal.qmd
           - text: "Variable Selection with Lasso (model-1)"
             href: content/model/variable-selection.qmd
-      - text: "Site Map"
-        href: content/site-map.qmd
+      - text: "Analysis"
+        menu:
+          - text: "Story 1"
+            href: content/analysis/story-1.qmd
+      - text: "Pipeline"
+        menu:
+          - text: "Pipeline Guide"
+            href: content/pipeline/pipeline-guide.qmd
+          - text: "CACHE Manifest"
+            href: content/pipeline/cache-manifest.qmd
+          - text: "INPUT Manifest"
+            href: content/pipeline/input-manifest.qmd
+      - text: "Docs"
+        menu:
+          - text: "Site Map"
+            href: content/site-map.qmd
+          - text: "Project Proposal"
+            href: content/docs/project-proposal.qmd
   page-footer:
     center: "*Absent from Chronic* | Marc-Andre Blanchette, Oleksandr Koval, Andriy Koval | 2026"
 

@@ -23,6 +23,7 @@ requireNamespace("glmnet", quietly = TRUE)
 requireNamespace("MASS", quietly = TRUE)
 requireNamespace("readr", quietly = TRUE)
 requireNamespace("knitr", quietly = TRUE)
+requireNamespace("survival", quietly = TRUE) # concordance() for the Section 5.6 C-statistic
 
 # ---- load-sources ------------------------------------------------------------
 base::source("./scripts/common-functions.R")
@@ -41,6 +42,20 @@ cycle_var <- "cchs_cycle_f"
 forced_vars <- cycle_var
 lasso_seed <- 42
 lasso_folds <- 5
+
+# Section 5.6 performance cross-validation. Deliberately named apart from
+# `lasso_folds`: that one tunes the penalty inside glmnet on a Poisson deviance,
+# this one estimates out-of-sample prediction error for the negative binomial
+# refits. They are both five-fold because Sections 5.4 and 5.6 both say five,
+# but they are not the same folds and they answer different questions.
+perf_folds <- 5
+perf_seed <- 42
+
+# Step 9 refits every specification on every fold twice over - once holding the
+# selected term set fixed, once re-running the whole LASSO inside each training
+# fold - so the block is cached. Set TRUE to rebuild.
+force_refit_cv <- FALSE
+cv_cache_path <- paste0(fits_folder, "cv-performance.rds")
 
 for (folder in c(local_data, fits_folder, prints_folder)) {
   if (!fs::dir_exists(folder)) { fs::dir_create(folder, recurse = TRUE) }
@@ -162,7 +177,37 @@ decision_registry <- tibble::tribble(
   "Omit; proxy by living_arrangements; include DHH_OWN directly",
   "Include DHH_OWN directly as home_ownership",
   "Section 2.2 requests homeownership. Earlier revisions recorded it as unavailable in the PUMF and used living_arrangements as a proxy; QC on 2026-08-01 showed DHH_OWN is present in both cycles with identical integer coding and 99.74% coverage. living_arrangements is retained on its own merits rather than as a substitute.",
-  "`home_ownership` row in scripts/modeling/candidate-registry.R"
+  "`home_ownership` row in scripts/modeling/candidate-registry.R",
+
+  15L, "Interval reporting for Table 3",
+  "Wald only; Wald plus a Huber-White sandwich; Wald plus Kish inflation; all three",
+  "All three, side by side",
+  "Decision 10 blocks the bootstrap the proposal asks for, so the honest response is to bracket the understatement rather than hide it. The sandwich captures the unequal-weighting component of the design effect; Kish inflation applies sqrt(deff) uniformly. Both are LOWER bounds, because strata and PSU identifiers are suppressed and neither instrument can see clustering. model-00 uses the same two instruments on Table 2, so Tables 2 and 3 are now on the same footing.",
+  "`tidy_nb()` and `kish_deff` in declare-globals",
+
+  16L, "Basis for the Section 5.6 cross-validation",
+  "Hold the LASSO-selected term set fixed across folds; re-run selection inside each training fold; both",
+  "Both, reported side by side",
+  "Section 5.6 says 'repeat model fitting 5 times', which reads as a fixed term set. That is the compliant number, and it is optimistic, because the penalty already saw every held-out fold. Re-running selection inside each training fold is the honest generalisation estimate and also measures how stable the selection itself is. Reporting only the first would overstate performance; reporting only the second would not answer the proposal.",
+  "`cv_performance` in the t63 chunk",
+
+  17L, "C-statistic for a count outcome",
+  "Omit; Harrell's C on predicted mean vs observed count; dichotomise the outcome and use AUC",
+  "Harrell's C on predicted mean vs observed count",
+  "Section 5.6 asks for 'Harrell's C adapted for count data'. Dichotomising would answer a different question (any absence vs none) and discard the count. Pairs tied on the outcome are not comparable and are excluded from the denominator; with 70.5% of respondents at zero days that is most pairs, so the comparable share is reported beside every C.",
+  "`harrell_c()` in declare-functions",
+
+  18L, "Information criteria under survey weighting",
+  "Report AIC/BIC as-is; report with a pseudo-likelihood caveat; omit",
+  "Report with a pseudo-likelihood caveat",
+  "glm.nb maximises a weighted pseudo-likelihood, so logLik is not a likelihood and AIC's 2k penalty is not calibrated to it. BIC is worse still: log(n) uses the unweighted row count against a weighted likelihood. Section 5.6 asks for both, so both are reported, but they rank models rather than measure them.",
+  "`t61` chunk",
+
+  19L, "Scale of the error metrics",
+  "Unweighted RMSE/MAE; weighted RMSE/MAE",
+  "Weighted",
+  "The models are estimated on a weighted likelihood and the target population is the weighted one, so an unweighted error metric scores a population the analysis is not about. Applies to the in-sample metrics in t61 and the cross-validated ones in t63 and t64 alike, so the two are comparable.",
+  "`model_fit_comparison` in the t61 chunk"
 )
 
 domain_colours <- c(
@@ -283,8 +328,41 @@ fit_nb <- function(model_frame, term_vars, outcome) {
   )
 }
 
-# Wald summary on the rate-ratio scale. NOT bootstrap: see decision 10.
-tidy_nb <- function(nb_fit, column_map) {
+# Huber-White sandwich covariance for a weighted negative binomial fit, with
+# theta held at its estimate. This is the unequal-weighting component of the
+# design effect and nothing more: strata and PSUs are suppressed in the PUMF, so
+# the clustering component is not recoverable. Decision 15.
+# The definition is shared verbatim with model-00's declare-functions chunk.
+# If one changes, the other must change with it, or Tables 2 and 3 stop being
+# comparable.
+robust_vcov <- function(nb_fit) {
+  design <- stats::model.matrix(nb_fit)
+  mu <- stats::fitted(nb_fit)
+  y <- nb_fit$y
+  w <- nb_fit$prior.weights
+  score <- w * (y - mu) / (1 + mu / nb_fit$theta)
+  bread <- stats::vcov(nb_fit)
+  meat <- crossprod(design * score)
+  bread %*% meat %*% bread
+}
+
+# Kish's approximate design effect from unequal weighting alone. Its square root
+# is the factor by which a design-based standard error would exceed the
+# model-based one if weighting were the only departure from simple random
+# sampling. A lower bound. Shared verbatim with model-00.
+kish_design_effect <- function(w) {
+  length(w) * sum(w^2) / (sum(w)^2)
+}
+
+# Wald summary on the rate-ratio scale, carrying three interval variants:
+#   - Wald        model-based, understates uncertainty (decision 10)
+#   - robust      Huber-White sandwich, sees unequal weighting only
+#   - Kish        Wald inflated by sqrt(design effect), applied uniformly
+# NOT bootstrap: the replicate weights the proposal assumes do not exist in the
+# 2010 or 2014 PUMF. Decisions 10 and 15.
+tidy_nb <- function(nb_fit, column_map, deff = 1) {
+  robust_se <- sqrt(diag(robust_vcov(nb_fit)))
+
   summary(nb_fit)$coefficients %>%
     as.data.frame() %>%
     tibble::rownames_to_column("column") %>%
@@ -292,10 +370,98 @@ tidy_nb <- function(nb_fit, column_map) {
     filter(column != "(Intercept)") %>%
     left_join(column_map, by = "column") %>%
     mutate(
+      se_robust = unname(robust_se[column]),
+      se_kish = std_error * sqrt(deff),
+      p_robust = 2 * stats::pnorm(-abs(estimate / se_robust)),
       rate_ratio = exp(estimate),
       ci_low = exp(estimate - 1.96 * std_error),
-      ci_high = exp(estimate + 1.96 * std_error)
+      ci_high = exp(estimate + 1.96 * std_error),
+      ci_low_robust = exp(estimate - 1.96 * se_robust),
+      ci_high_robust = exp(estimate + 1.96 * se_robust),
+      ci_low_kish = exp(estimate - 1.96 * se_kish),
+      ci_high_kish = exp(estimate + 1.96 * se_kish)
     )
+}
+
+# Section 5.6's C-statistic, adapted to a count outcome (decision 17). Pairs
+# tied on the outcome carry no information about discrimination and are excluded
+# from the denominator, so the comparable share travels with the statistic: a C
+# of 0.62 computed on 30% of pairs is a weaker claim than the same number
+# computed on 90%.
+harrell_c <- function(observed, predicted, weights) {
+  fit <- survival::concordance(observed ~ predicted, weights = weights)
+  counts <- fit$count
+  comparable <- sum(counts[c("concordant", "discordant", "tied.x")])
+  total <- comparable + sum(counts[c("tied.y", "tied.xy")])
+  tibble::tibble(
+    c_statistic = as.numeric(fit$concordance),
+    c_se = sqrt(as.numeric(fit$var)),
+    comparable_share = comparable / total
+  )
+}
+
+# Negative binomial log-likelihood on held-out rows, using the coefficients and
+# the theta estimated on the training rows. Weighted, per decision 19.
+nb_loglik <- function(observed, predicted, theta, weights) {
+  sum(weights * stats::dnbinom(observed, size = theta, mu = predicted, log = TRUE))
+}
+
+# Deterministic fold assignment. Every specification and both CV variants score
+# the same partition, so differences between them are differences in model, not
+# in luck of the draw.
+assign_folds <- function(n, k, seed) {
+  set.seed(seed)
+  sample(rep_len(seq_len(k), n))
+}
+
+# One training/testing pass for a GIVEN term set. Both CV variants of Step 9
+# call this; they differ only in where `term_vars` comes from.
+#
+# A factor level that appears in the test fold but not the training fold cannot
+# be scored by a model that never saw it. Those rows are dropped and counted
+# rather than allowed to propagate NA through the metrics.
+evaluate_fold <- function(frame, train_rows, test_rows, term_vars, outcome) {
+  train <- droplevels(frame[train_rows, , drop = FALSE])
+  test <- frame[test_rows, , drop = FALSE]
+
+  factor_terms <- term_vars[purrr::map_lgl(term_vars, ~ is.factor(train[[.x]]))]
+  scorable <- rep(TRUE, nrow(test))
+  for (this_var in factor_terms) {
+    scorable <- scorable & as.character(test[[this_var]]) %in% levels(train[[this_var]])
+  }
+  n_dropped <- sum(!scorable)
+  test <- test[scorable, , drop = FALSE]
+  for (this_var in factor_terms) {
+    test[[this_var]] <- factor(as.character(test[[this_var]]),
+                               levels = levels(train[[this_var]]))
+  }
+
+  fit <- fit_nb(train, term_vars, outcome)
+  fit_null <- fit_nb(train, character(0), outcome)
+
+  predicted <- stats::predict(fit, newdata = test, type = "response")
+  predicted_null <- stats::predict(fit_null, newdata = test, type = "response")
+  observed <- test[[outcome]]
+  w <- test$weight_scaled
+
+  loglik_test <- nb_loglik(observed, predicted, fit$theta, w)
+  loglik_test_null <- nb_loglik(observed, predicted_null, fit_null$theta, w)
+
+  dplyr::bind_cols(
+    tibble::tibble(
+      n_train = nrow(train),
+      n_test = nrow(test),
+      n_unscorable = n_dropped,
+      n_terms = length(stats::coef(fit)) - 1L,
+      theta = fit$theta,
+      converged = fit$converged,
+      rmse = sqrt(stats::weighted.mean((observed - predicted)^2, w)),
+      mae = stats::weighted.mean(abs(observed - predicted), w),
+      loglik = loglik_test,
+      mcfadden_r2 = 1 - loglik_test / loglik_test_null
+    ),
+    harrell_c(observed, predicted, w)
+  )
 }
 
 # ---- load-data ---------------------------------------------------------------
@@ -334,6 +500,13 @@ designs <- list(exclude = design_exclude, include = design_include)
 
 y_outcome <- ds1[[outcome_var]]
 weight_vector <- ds1$weight_scaled
+
+# Decision 15. Computed on the analytic sample rather than on the source file,
+# because it is the analytic sample the intervals in Step 8 describe. model-00
+# reports the universe value (3.595 on 63,843 rows); the two are not the same
+# quantity and should not be quoted interchangeably.
+kish_deff <- kish_design_effect(ds1[[weight_col]])
+kish_effective_n <- n_analytic / kish_deff
 
 variable_labels <- c(
   stats::setNames(candidate_registry$variable_label, candidate_registry$variable),
@@ -600,6 +773,7 @@ complete_case_cascade %>%
 # Evidence that the two exclusions are questionnaire skip patterns rather than
 # item non-response. Both patterns are deterministic, which is why no imputation
 # model could recover the missing values.
+cat("Output out1: Skip-pattern and optional-content evidence\n\n")
 cat("cc_copd: missing (%) by age group\n")
 ds0 %>%
   group_by(age_group_3) %>%
@@ -628,6 +802,7 @@ cat("Retaining it would encode cycle crossed with province, not health access.\n
 # quantifies how far the retained sample drifts from the source sample.
 
 # ---- out2 --------------------------------------------------------------------
+cat("Output out2: Sample construction arithmetic\n\n")
 cat("Source rows (Ellis analytic table):        ", scales::comma(n_source), "\n")
 cat("Complete cases on included candidates:     ", scales::comma(n_analytic), "\n")
 cat("Dropped:                                   ",
@@ -672,7 +847,7 @@ selection_check %>%
   )
 
 # ---- SECTION: Step 4 - The Decision Registry ----------------------------------
-# Twelve decisions stand between the Ellis table and the fitted models. Each is
+# Nineteen decisions stand between the Ellis table and the fitted models. Each is
 # recorded with the alternatives available and the object to edit to reverse it.
 
 # ---- t3 ----------------------------------------------------------------------
@@ -949,11 +1124,14 @@ print(g4_selection_grid)
 ggsave(paste0(prints_folder, "g4_selection_grid.png"),
        g4_selection_grid, width = 8.5, height = 11, dpi = 300)
 
-# ---- SECTION: Step 8 - Stage Two, Negative Binomial Refitting -----------------
+# ---- SECTION: Step 8 - Stage Two, Negative Binomial Estimation ----------------
 # Each retained set is re-estimated without penalty under a negative binomial
-# likelihood. Intervals are Wald, not bootstrap: see decision 10.
+# likelihood. This is where the estimates for publication are produced, and it
+# is the step that answers Section 5.5 and yields deliverable Table 3.
+# Intervals are Wald, sandwich, and Kish-inflated - not bootstrap: decisions
+# 10 and 15.
 
-# ---- t6 ----------------------------------------------------------------------
+# ---- t6-data-prep ------------------------------------------------------------
 nb_fits <- purrr::map(
   stats::setNames(model_specs$spec_id, model_specs$spec_id),
   function(this_spec) {
@@ -975,7 +1153,7 @@ saveRDS(nb_null, paste0(fits_folder, "nb_null.rds"))
 
 nb_coefficients <- purrr::imap_dfr(nb_fits, function(fit, this_spec) {
   fit_id <- model_specs$fit_id[model_specs$spec_id == this_spec]
-  tidy_nb(fit, designs[[fit_id]]$map) %>%
+  tidy_nb(fit, designs[[fit_id]]$map, deff = kish_deff) %>%
     mutate(spec_id = this_spec,
            model_label = model_specs$model_label[model_specs$spec_id == this_spec])
 }) %>%
@@ -984,6 +1162,41 @@ nb_coefficients <- purrr::imap_dfr(nb_fits, function(fit, this_spec) {
 
 readr::write_csv(nb_coefficients, paste0(local_data, "nb-coefficients.csv"))
 
+# ---- out5 --------------------------------------------------------------------
+cat("Output out5: Variance-estimation instruments for Section 5.5\n\n")
+cat("The proposal asks for 500 bootstrap replicate weights. They do not exist in\n")
+cat("the 2010 or 2014 PUMF (decision 10), and strata and PSU identifiers are\n")
+cat("suppressed, so no fully design-based variance estimator can be built. What\n")
+cat("follows are two LOWER bounds on how much the model-based intervals\n")
+cat("understate uncertainty. Neither instrument can see clustering, so the true\n")
+cat("inflation is larger than both.\n\n")
+
+cat("  analytic n:             ", scales::comma(n_analytic), "\n")
+cat("  Kish design effect:     ", sprintf("%.3f", kish_deff), "\n")
+cat("  Kish effective n:       ", scales::comma(round(kish_effective_n)),
+    " of ", scales::comma(n_analytic), "\n", sep = "")
+cat("  implied SE multiplier:  ", sprintf("%.3f", sqrt(kish_deff)),
+    "  (square root of the design effect)\n")
+
+sandwich_multipliers <- purrr::imap_dfr(nb_fits, function(fit, this_spec) {
+  tibble::tibble(
+    spec_id = this_spec,
+    ratio = sqrt(diag(robust_vcov(fit))) / sqrt(diag(stats::vcov(fit)))
+  )
+})
+
+cat("  sandwich SE multiplier: ",
+    sprintf("%.3f", stats::median(sandwich_multipliers$ratio)),
+    "  (median over every term in all four models)\n")
+cat("  sandwich range:         ",
+    sprintf("%.3f", min(sandwich_multipliers$ratio)), " to ",
+    sprintf("%.3f", max(sandwich_multipliers$ratio)), "\n\n", sep = "")
+
+cat("Table t62 reports all three interval variants side by side. A term whose\n")
+cat("Wald interval excludes 1 but whose Kish-inflated interval does not should\n")
+cat("be read as unresolved rather than as a finding.\n")
+
+# ---- t6 ----------------------------------------------------------------------
 nb_coefficients %>%
   mutate(
     term = paste0(variable_label, ifelse(level == "", "", paste0(": ", level))),
@@ -997,11 +1210,50 @@ nb_coefficients %>%
          any_of(c("Model 1", "Model 2", "Model 3", "Model 4"))) %>%
   print_table(
     caption = paste0(
-      "Table t6: Negative binomial rate ratios with 95% Wald intervals. ",
-      "An asterisk marks p < 0.05. These are NOT bootstrap intervals (decision 10), ",
-      "and they ignore the selection step that produced the term list."
+      "Table t6 (deliverable Table 3): Adjusted prevalence rate ratios with 95% ",
+      "Wald intervals across the four Section 5.4 specifications. An asterisk ",
+      "marks Wald p &lt; 0.05. These are NOT bootstrap intervals (decision 10), ",
+      "and they ignore the selection step that produced the term list. ",
+      "Table t62 carries the log-scale coefficients, standard errors, exact ",
+      "p-values, and two wider interval variants."
     ),
     align = c("l", "l", "r", "r", "r", "r")
+  )
+
+# ---- t62 ---------------------------------------------------------------------
+# The Section 5.5 compliance artifact: every quantity the proposal asks to be
+# reported, one row per estimated term per model.
+nb_coefficients %>%
+  mutate(
+    term = paste0(variable_label, ifelse(level == "", "", paste0(": ", level)))
+  ) %>%
+  arrange(model_label, factor(domain, levels = names(domain_colours)), term) %>%
+  transmute(
+    Model = model_label,
+    Domain = domain,
+    Term = term,
+    `Beta (log)` = sprintf("%.4f", estimate),
+    SE = sprintf("%.4f", std_error),
+    `SE robust` = sprintf("%.4f", se_robust),
+    PR = sprintf("%.3f", rate_ratio),
+    `95% CI (Wald)` = sprintf("%.3f-%.3f", ci_low, ci_high),
+    `95% CI (sandwich)` = sprintf("%.3f-%.3f", ci_low_robust, ci_high_robust),
+    `95% CI (Kish)` = sprintf("%.3f-%.3f", ci_low_kish, ci_high_kish),
+    `p (Wald)` = ifelse(p_value < 0.0001, "&lt;0.0001", sprintf("%.4f", p_value)),
+    `p (robust)` = ifelse(p_robust < 0.0001, "&lt;0.0001", sprintf("%.4f", p_robust))
+  ) %>%
+  print_table(
+    caption = paste0(
+      "Table t62 (deliverable Table 3, full ledger): Everything Section 5.5 ",
+      "asks to be reported - log-scale coefficient, standard error, prevalence ",
+      "rate ratio, 95% interval and Wald p-value - for every term in all four ",
+      "models. The sandwich and Kish columns bracket the understatement caused ",
+      "by the absent bootstrap weights (decisions 10 and 15); both are lower ",
+      "bounds. All intervals remain conditional on a selection step that used ",
+      "the same data."
+    ),
+    align = c("l", "l", "l", rep("r", 9)),
+    scroll_height = "700px"
   )
 
 # ---- g5 ----------------------------------------------------------------------
@@ -1041,20 +1293,28 @@ ggsave(paste0(prints_folder, "g5_forest.png"),
 
 # ---- t61 ---------------------------------------------------------------------
 null_loglik <- as.numeric(stats::logLik(nb_null))
+weighted_N <- sum(ds1[[weight_col]])
 
 model_fit_comparison <- purrr::imap_dfr(nb_fits, function(fit, this_spec) {
   fitted_values <- stats::fitted(fit)
   residuals_raw <- ds1[[outcome_var]] - fitted_values
+  concordance_row <- harrell_c(ds1[[outcome_var]], fitted_values, weight_vector)
   tibble::tibble(
     spec_id = this_spec,
+    n_analytic = n_analytic,
+    weighted_N = weighted_N,
     n_terms = length(stats::coef(fit)) - 1L,
     aic = stats::AIC(fit),
     bic = stats::BIC(fit),
     log_likelihood = as.numeric(stats::logLik(fit)),
     mcfadden_r2 = 1 - as.numeric(stats::logLik(fit)) / null_loglik,
     theta = fit$theta,
-    rmse = sqrt(mean(residuals_raw^2)),
-    mae = mean(abs(residuals_raw)),
+    # Decision 19: weighted, because the models are estimated on a weighted
+    # likelihood and the target population is the weighted one.
+    rmse = sqrt(stats::weighted.mean(residuals_raw^2, weight_vector)),
+    mae = stats::weighted.mean(abs(residuals_raw), weight_vector),
+    c_statistic = concordance_row$c_statistic,
+    c_comparable_share = concordance_row$comparable_share,
     converged = fit$converged
   )
 }) %>%
@@ -1066,24 +1326,33 @@ model_fit_comparison %>%
   transmute(
     Model = model_label,
     Role = role,
-    `Terms` = n_terms,
+    n = scales::comma(n_analytic),
+    `Weighted N` = scales::comma(round(weighted_N)),
+    Terms = n_terms,
     AIC = scales::comma(round(aic)),
     BIC = scales::comma(round(bic)),
     `McFadden R2` = sprintf("%.4f", mcfadden_r2),
     Theta = sprintf("%.4f", theta),
     RMSE = sprintf("%.3f", rmse),
     MAE = sprintf("%.3f", mae),
+    `C-statistic` = sprintf("%.4f", c_statistic),
     Converged = ifelse(converged, "yes", "NO")
   ) %>%
   print_table(
     caption = paste0(
-      "Table t61: Model comparison. In-sample metrics only; the cross-validated ",
-      "versions and the C-statistic that Section 5.6 requires are deferred."
+      "Table t61: Section 5.6 metrics computed IN SAMPLE. RMSE and MAE are ",
+      "weighted (decision 19). AIC and BIC come from a weighted pseudo-",
+      "likelihood and rank models rather than measure them (decision 18); BIC ",
+      "in particular sets log(n) on the unweighted row count against a weighted ",
+      "likelihood. The C-statistic excludes pairs tied on the outcome, which ",
+      "here is most pairs - see out6. The held-out versions of these numbers, ",
+      "which are the ones Section 5.6 actually asks for, are in Tables t63 and t64."
     ),
-    align = c("l", "l", "r", "r", "r", "r", "r", "r", "r", "l")
+    align = c("l", "l", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "l")
   )
 
 # ---- out3 --------------------------------------------------------------------
+cat("Output out3: Convergence, dispersion, and the null-model comparison\n\n")
 cat("Stage 1 - penalised Poisson fits\n\n")
 for (fit_name in names(lasso_fits)) {
   cv <- lasso_fits[[fit_name]]$cv
@@ -1109,13 +1378,245 @@ for (this_spec in names(nb_fits)) {
   cat("  terms estimated:  ", length(stats::coef(fit)) - 1L, "\n\n")
 }
 
-# ---- SECTION: Step 9 - Reproducibility Ledger ---------------------------------
+# ---- SECTION: Step 9 - Section 5.6, Held-Out Performance ---------------------
+# Section 5.6 asks for AIC, BIC, McFadden's pseudo-R-squared, a C-statistic, and
+# RMSE and MAE "computed on the withheld test fold", averaged over five folds.
+# Table t61 gave the in-sample versions. This step gives the held-out ones.
+#
+# Two variants are computed, per decision 16:
+#   t63  term set held FIXED across folds - the literal reading of Section 5.6,
+#        and optimistic, because the penalty already saw every held-out fold
+#   t64  selection RE-RUN inside each training fold - the honest generalisation
+#        estimate, and a measure of how stable the selection itself is
+# The gap between them is the price of doing selection and evaluation on the
+# same data, and it is a quantity worth having.
+
+# ---- t63-data-prep -----------------------------------------------------------
+if (!force_refit_cv && file.exists(cv_cache_path)) {
+  cv_performance <- readRDS(cv_cache_path)
+  cat("Loaded cached cross-validation results from ", cv_cache_path, "\n", sep = "")
+} else {
+  cat("Refitting the Section 5.6 cross-validation. This is the slow block.\n")
+  cv_start_time <- Sys.time()
+
+  fold_id <- assign_folds(n_analytic, perf_folds, perf_seed)
+  spec_terms_fixed <- purrr::map(
+    stats::setNames(model_specs$spec_id, model_specs$spec_id),
+    function(this_spec) {
+      kept <- selection_long %>% filter(spec_id == this_spec) %>% retained_variables()
+      union(forced_vars, setdiff(kept, forced_vars))
+    }
+  )
+
+  # Variant A - fixed term set.
+  cv_fixed <- purrr::map_dfr(seq_len(perf_folds), function(this_fold) {
+    test_rows <- which(fold_id == this_fold)
+    train_rows <- which(fold_id != this_fold)
+    cat("  fixed  | fold ", this_fold, " of ", perf_folds, "\n", sep = "")
+    purrr::imap_dfr(spec_terms_fixed, function(term_vars, this_spec) {
+      evaluate_fold(ds1, train_rows, test_rows, term_vars, outcome_var) %>%
+        mutate(spec_id = this_spec, fold = this_fold, variant = "fixed term set")
+    })
+  })
+
+  # Variant B - selection re-run inside each training fold.
+  cv_reselected <- purrr::map_dfr(seq_len(perf_folds), function(this_fold) {
+    test_rows <- which(fold_id == this_fold)
+    train_rows <- which(fold_id != this_fold)
+    cat("  reselect | fold ", this_fold, " of ", perf_folds, "\n", sep = "")
+
+    train_frame <- droplevels(ds1[train_rows, , drop = FALSE])
+    fold_designs <- list(
+      exclude = build_design(train_frame, c(forced_vars, vars_excluding_perceived)),
+      include = build_design(train_frame, c(forced_vars, vars_including_perceived))
+    )
+    fold_lassos <- purrr::map(
+      fold_designs,
+      ~ fit_lasso(.x, train_frame[[outcome_var]], train_frame$weight_scaled, lasso_seed)
+    )
+
+    purrr::pmap_dfr(
+      model_specs %>% select(spec_id, fit_id, lambda_rule),
+      function(spec_id, fit_id, lambda_rule) {
+        kept <- coefficients_at(fold_lassos[[fit_id]], fold_designs[[fit_id]],
+                                lambda_rule) %>%
+          retained_variables()
+        term_vars <- union(forced_vars, setdiff(kept, forced_vars))
+        evaluate_fold(ds1, train_rows, test_rows, term_vars, outcome_var) %>%
+          mutate(spec_id = spec_id, fold = this_fold,
+                 variant = "selection re-run", n_vars_selected = length(term_vars))
+      }
+    )
+  })
+
+  cv_performance <- bind_rows(cv_fixed, cv_reselected) %>%
+    left_join(model_specs %>% select(spec_id, model_label, role), by = "spec_id")
+
+  attr(cv_performance, "elapsed_minutes") <-
+    as.numeric(difftime(Sys.time(), cv_start_time, units = "mins"))
+  attr(cv_performance, "fold_id") <- fold_id
+  saveRDS(cv_performance, cv_cache_path)
+}
+
+readr::write_csv(cv_performance, paste0(local_data, "cv-performance-folds.csv"))
+
+cv_summary <- cv_performance %>%
+  group_by(variant, spec_id, model_label, role) %>%
+  summarise(
+    n_terms_mean = mean(n_terms),
+    n_terms_range = paste0(min(n_terms), "-", max(n_terms)),
+    rmse_mean = mean(rmse), rmse_sd = stats::sd(rmse),
+    mae_mean = mean(mae), mae_sd = stats::sd(mae),
+    mcfadden_mean = mean(mcfadden_r2), mcfadden_sd = stats::sd(mcfadden_r2),
+    c_mean = mean(c_statistic), c_sd = stats::sd(c_statistic),
+    comparable_share = mean(comparable_share),
+    unscorable = sum(n_unscorable),
+    all_converged = all(converged),
+    .groups = "drop"
+  ) %>%
+  arrange(variant, spec_id)
+
+readr::write_csv(cv_summary, paste0(local_data, "cv-performance-summary.csv"))
+
+# ---- t63 ---------------------------------------------------------------------
+cv_summary %>%
+  filter(variant == "fixed term set") %>%
+  transmute(
+    Model = model_label,
+    Role = role,
+    Terms = round(n_terms_mean),
+    `CV RMSE` = sprintf("%.3f (%.3f)", rmse_mean, rmse_sd),
+    `CV MAE` = sprintf("%.3f (%.3f)", mae_mean, mae_sd),
+    `CV McFadden R2` = sprintf("%.4f (%.4f)", mcfadden_mean, mcfadden_sd),
+    `CV C-statistic` = sprintf("%.4f (%.4f)", c_mean, c_sd),
+    `Comparable pairs` = scales::percent(comparable_share, accuracy = 0.1),
+    Converged = ifelse(all_converged, "all folds", "SOME FAILED")
+  ) %>%
+  print_table(
+    caption = paste0(
+      "Table t63: Section 5.6 five-fold cross-validated performance, term set ",
+      "held FIXED across folds. Each cell is the mean over five folds with the ",
+      "between-fold standard deviation in parentheses. Metrics are computed on ",
+      "the withheld fold only, weighted (decision 19). These numbers are ",
+      "optimistic: the LASSO that chose the term set saw every fold ",
+      "(decision 16). Table t64 removes that advantage."
+    ),
+    align = c("l", "l", "r", "r", "r", "r", "r", "r", "l")
+  )
+
+# ---- t64 ---------------------------------------------------------------------
+cv_summary %>%
+  filter(variant == "selection re-run") %>%
+  transmute(
+    Model = model_label,
+    Role = role,
+    `Terms (mean)` = round(n_terms_mean),
+    `Terms (range)` = n_terms_range,
+    `CV RMSE` = sprintf("%.3f (%.3f)", rmse_mean, rmse_sd),
+    `CV MAE` = sprintf("%.3f (%.3f)", mae_mean, mae_sd),
+    `CV McFadden R2` = sprintf("%.4f (%.4f)", mcfadden_mean, mcfadden_sd),
+    `CV C-statistic` = sprintf("%.4f (%.4f)", c_mean, c_sd),
+    Converged = ifelse(all_converged, "all folds", "SOME FAILED")
+  ) %>%
+  print_table(
+    caption = paste0(
+      "Table t64: The same five folds, with the entire LASSO re-run inside each ",
+      "training fold so that no held-out respondent contributed to selection. ",
+      "The term range shows how much the selected set moves when a fifth of the ",
+      "sample is withheld - a direct measure of selection stability that the ",
+      "single full-sample fit cannot provide."
+    ),
+    align = c("l", "l", "r", "r", "r", "r", "r", "r", "l")
+  )
+
+# ---- g6 ----------------------------------------------------------------------
+g6_data <- cv_performance %>%
+  select(model_label, variant, fold, rmse, mae, mcfadden_r2, c_statistic) %>%
+  tidyr::pivot_longer(c(rmse, mae, mcfadden_r2, c_statistic),
+                      names_to = "metric", values_to = "value") %>%
+  mutate(
+    metric = factor(
+      metric,
+      levels = c("rmse", "mae", "mcfadden_r2", "c_statistic"),
+      labels = c("RMSE (held-out)", "MAE (held-out)",
+                 "McFadden R2 (held-out)", "C-statistic (held-out)")
+    ),
+    model_label = factor(model_label, levels = rev(model_specs$model_label))
+  )
+
+g6_cv_spread <- g6_data %>%
+  ggplot(aes(x = value, y = model_label, colour = variant, shape = variant)) +
+  geom_point(size = 2, alpha = 0.55,
+             position = position_dodge(width = 0.55)) +
+  stat_summary(fun = mean, geom = "point", size = 4, alpha = 0.95,
+               position = position_dodge(width = 0.55)) +
+  facet_wrap(~ metric, scales = "free_x", nrow = 2) +
+  scale_colour_manual(values = c("fixed term set" = abcol[["magenta"]],
+                                 "selection re-run" = abcol[["blue"]])) +
+  labs(
+    title = "Graph g6: Held-Out Performance by Fold",
+    subtitle = paste0(
+      "Small points are the five individual folds; the large point is their mean.\n",
+      "Where the two series separate, the gap is the optimism introduced by ",
+      "selecting on the full sample."
+    ),
+    x = NULL, y = NULL, colour = NULL, shape = NULL
+  ) +
+  theme(legend.position = "top")
+
+print(g6_cv_spread)
+ggsave(paste0(prints_folder, "g6_cv_spread.png"),
+       g6_cv_spread, width = 10, height = 8, dpi = 300)
+
+# ---- out6 --------------------------------------------------------------------
+cat("Output out6: How to read the C-statistic on a count outcome\n\n")
+
+zero_share <- mean(ds1[[outcome_var]] == 0)
+cat("  share of respondents at zero days: ", scales::percent(zero_share, accuracy = 0.1), "\n", sep = "")
+cat("  comparable pair share (fixed):     ",
+    scales::percent(mean(cv_summary$comparable_share[cv_summary$variant == "fixed term set"]),
+                    accuracy = 0.1), "\n", sep = "")
+cat("\nHarrell's C counts a pair only when the two respondents differ on the\n")
+cat("outcome. Because most respondents share the value zero, most pairs are not\n")
+cat("comparable and never enter the denominator. The statistic therefore\n")
+cat("measures how well the model orders respondents who differ in days absent,\n")
+cat("and says nothing about how well it separates any-absence from none. That\n")
+cat("second question is a different one and is not what Section 5.6 asked for.\n\n")
+
+optimism <- cv_summary %>%
+  select(variant, model_label, rmse_mean, mcfadden_mean, c_mean) %>%
+  tidyr::pivot_wider(names_from = variant,
+                     values_from = c(rmse_mean, mcfadden_mean, c_mean))
+
+cat("Selection optimism (fixed minus re-run), per model:\n\n")
+optimism %>%
+  transmute(
+    Model = model_label,
+    `d RMSE` = sprintf("%+.4f", `rmse_mean_fixed term set` - `rmse_mean_selection re-run`),
+    `d McFadden` = sprintf("%+.4f", `mcfadden_mean_fixed term set` - `mcfadden_mean_selection re-run`),
+    `d C` = sprintf("%+.4f", `c_mean_fixed term set` - `c_mean_selection re-run`)
+  ) %>%
+  as.data.frame() %>%
+  print(row.names = FALSE)
+
+cat("\nA positive d McFadden or d C is the amount by which evaluating a model on\n")
+cat("data that helped select it flatters that model.\n")
+
+if (!is.null(attr(cv_performance, "elapsed_minutes"))) {
+  cat("\n  cross-validation runtime: ",
+      sprintf("%.1f", attr(cv_performance, "elapsed_minutes")), " minutes\n", sep = "")
+}
+
+# ---- SECTION: Step 10 - Reproducibility Ledger --------------------------------
 # Every fitted object and every derived table is written to disk so that a
-# reviewer can reload any single result without re-running the script.
+# reviewer can reload any single result without re-running the script, and so
+# that downstream reports can cite these artifacts rather than recompute them.
 
 # ---- t7 ----------------------------------------------------------------------
+# Only .rds and .csv are listed. Run logs and helper scripts may also live under
+# data-local/, but they are working residue, not evidence.
 artifact_manifest <- fs::dir_info(local_data, recurse = TRUE) %>%
-  filter(type == "file") %>%
+  filter(type == "file", grepl("\\.(rds|csv)$", path)) %>%
   mutate(
     path = fs::path_rel(path, local_root),
     kind = dplyr::case_when(
@@ -1138,25 +1639,41 @@ artifact_manifest %>%
     `Reload with` = reload
   ) %>%
   print_table(
-    caption = "Table t7: Artifact manifest. Every persisted object, with the call that reloads it.",
+    caption = paste0(
+      "Table t7: Artifact manifest. Every persisted object, with the call that ",
+      "reloads it. These files are the versioned evidentiary record for Sections ",
+      "5.4 through 5.6; downstream reports should read them rather than re-estimate."
+    ),
     align = c("l", "l", "r", "l")
   )
 
 # ---- out4 --------------------------------------------------------------------
-cat("Reproducibility parameters\n\n")
+cat("Output out4: Reproducibility parameters and residual scope\n\n")
 cat("  seed:                  ", lasso_seed, "\n")
-cat("  cross-validation folds:", lasso_folds, "\n")
+cat("  penalty CV folds:      ", lasso_folds, "\n")
+cat("  performance CV folds:  ", perf_folds, " (seed ", perf_seed, ")\n", sep = "")
 cat("  outcome:               ", outcome_var, "\n")
 cat("  weight:                ", weight_col, " (rescaled to mean 1)\n")
 cat("  forced-in terms:       ", paste(forced_vars, collapse = ", "), "\n")
 cat("  source parquet:        ", path_parquet, "\n")
-cat("  analytic n:            ", scales::comma(n_analytic), "\n\n")
-cat("Section 5.4 requirements NOT met by model-1:\n")
-cat("  - Bootstrap variance estimation (decision 10: replicate weights absent from PUMF)\n")
-cat("  - Section 5.6 cross-validated performance metrics and C-statistic\n")
+cat("  analytic n:            ", scales::comma(n_analytic), "\n")
+cat("  weighted N:            ", scales::comma(round(weighted_N)), "\n\n")
+
+cat("Proposal sections model-1 closes:\n")
+cat("  - Section 5.4 variable selection, all four specifications\n")
+cat("  - Section 5.5 primary multivariable models (Table 3 = t6 / t62)\n")
+cat("  - Section 5.6 model performance evaluation (t61 in-sample, t63 / t64 held out)\n\n")
+
+cat("Requirements NOT met, and why:\n")
+cat("  - Bootstrap variance estimation (decision 10: replicate weights absent from\n")
+cat("    the PUMF). Sandwich and Kish-inflated intervals stand in as lower bounds.\n")
 cat("  - Section 5.7 condition-specific models (19 subgroups)\n")
 cat("  - Section 5.9 sex-stratified models\n")
 cat("  - Section 5.1 Little's MCAR test and multiple imputation\n\n")
+
+cat("Downstream reports should read the artifacts in Table t7 rather than\n")
+cat("re-estimate. The fits, coefficients, and fold-level metrics persisted here\n")
+cat("are the versioned evidentiary record for Sections 5.4 through 5.6.\n\n")
 utils::sessionInfo()
 
 # nolint end

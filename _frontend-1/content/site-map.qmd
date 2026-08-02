@@ -14,15 +14,7 @@ each page to the relevant sections of the Project Proposal
 Absent from Chronic
 │
 🏠  Index                                    COMPOSED  ← README.md, CACHE-manifest.md, ai/project/mission.md
-│
-├── Project
-│   └── Project Proposal                     ADAPTED   ← stats_instructions_v3.md
-│                                                         (sanitize: strip data-private refs)
-├── Pipeline
-│   ├── Pipeline Guide                       ADAPTED   ← manipulation/pipeline.md
-│   │                                                     (shortcode injection, sanitize, strip PowerShell)
-│   ├── CACHE Manifest                       VERBATIM  ← data-public/metadata/CACHE-manifest.md
-│   └── INPUT Manifest                       VERBATIM  ← data-public/metadata/INPUT-manifest.md
+│   (home page — reached via the navbar title, not a navbar entry)
 │
 ├── Data Primer
 │   ├── Variable Inclusion                   VERBATIM  ← analysis/data-primer-1/variable-inclusion.qmd
@@ -58,8 +50,21 @@ Absent from Chronic
 │   └── Variable Selection with Lasso        REDIRECT  → analysis/model-1/model-1.html
 │       (model-1)
 │
-└── Site Map                                 COMPOSED  ← publishing-contract.prompt.md,
-                                                          stats_instructions_v3.md
+├── Analysis
+│   └── Story 1                              REDIRECT  → analysis/eda-81/eda-81.html
+│       (eda-81)
+│
+├── Pipeline
+│   ├── Pipeline Guide                       ADAPTED   ← manipulation/pipeline.md
+│   │                                                     (shortcode injection, sanitize, strip PowerShell)
+│   ├── CACHE Manifest                       VERBATIM  ← data-public/metadata/CACHE-manifest.md
+│   └── INPUT Manifest                       VERBATIM  ← data-public/metadata/INPUT-manifest.md
+│
+└── Docs
+    ├── Site Map                             COMPOSED  ← publishing-contract.prompt.md,
+    │                                                     stats_instructions_v3.md
+    └── Project Proposal                     ADAPTED   ← stats_instructions_v3.md
+                                                          (sanitize: strip data-private refs)
 ```
 
 ---
@@ -79,7 +84,7 @@ Absent from Chronic
 
 | Page | Proposal Section(s) | Coverage Status |
 |------|---------------------|----------------|
-| [Project Proposal](project/project-proposal.html) | §1–§6 (all) | Full text of the statistical analysis instructions as submitted by the PI. Contains all requirements, inclusion/exclusion criteria, variable specifications, analytic plan, and deliverables. |
+| [Project Proposal](docs/project-proposal.html) | §1–§6 (all) | Full text of the statistical analysis instructions as submitted by the PI. Contains all requirements, inclusion/exclusion criteria, variable specifications, analytic plan, and deliverables. |
 | [Pipeline Guide](pipeline/pipeline-guide.html) | §3.2 (pooling), §4.1 (outcome construction) | Documents the Ferry → Ellis → Test pipeline that harmonises variable names across cycles (§3.2), constructs `days_absent_total` and `days_absent_chronic` (§4.1), and applies all exclusion criteria (§3.1). |
 | [CACHE Manifest](pipeline/cache-manifest.html) | §2.2 (required variables), §3.1 (sample), §4.1–4.2 (outcome) | Authoritative record of the 63,843-row, 70-column analytic dataset. Confirms sample exclusion steps, outcome variable statistics (mean = 1.35, zero% = 70.5%), and all 17 chronic condition indicators available from the PUMF. |
 | [INPUT Manifest](pipeline/input-manifest.html) | §2.1 (database), §2.2 (survey modules) | Describes both raw CCHS SPSS files (2010-2011 and 2013-2014 cycles), confirms all required survey modules are present (LOP, CCC, GEN, DHH, SDC, INC, EDU, health behaviours, ADL, HCU, LBS), and documents known cross-cycle variable name differences. |
@@ -96,3 +101,4 @@ Absent from Chronic
 | [Bivariate Models (model-00)](model/bivariate-models.html) | §5.3 (Table 2), §4.2 (outcome checks) | Model-00: Implements §5.3 as one model per predictor across seven reviewable steps — the bivariate protocol, the interval problem, two analytic bases, the Table 2 build, the cycle term, and a sensitivity pass. Explicitly names the one §5.3 requirement that cannot be met with PUMF data, and closes with a reproducibility ledger. |
 | [Lasso Rehearsal with Predisposing (model-0)](model/lasso-rehearsal.html) | §5.4 (variable selection via LASSO) | Model-0: A scoped rehearsal that tests the project's reading of §5.4 on the predisposing block alone before committing to the full candidate set. Fits the penalized path, examines what each penalty retains, hands selection to a negative binomial second stage, and asks whether survey weights disturb cross-validation. Records what is confirmed and which §5.4 decisions remain open. |
 | [Variable Selection with Lasso (model-1)](model/variable-selection.html) | §5.4 (variable selection via LASSO), §5.5 (primary multivariable models) | Model-1: Implements §5.4 across the full candidate set in nine reviewable steps — candidate registry, missing data, analytic sample, decision registry, four specifications, penalised Poisson fitting, selection results, negative binomial refitting, and a reproducibility ledger. Flags the one decision that cannot be reversed and produces the predictor set carried into the §5.5 primary models. |
+| [Story 1 (eda-81)](analysis/story-1.html) | §5.3 (bivariate analysis), §5.4 (variable selection via LASSO) | EDA-81: The interpretation layer over `model-00` and `model-1`. Explains what the penalty is doing — what `lambda` is, what the `lambda.min` and `lambda.1se` rules each optimise, and why the perceived-health variables toggle on and off across specifications. Then aligns the evidence on one shared row axis: unadjusted signal (§5.3), selection verdict (§5.4), and adjusted estimate. |

@@ -1,6 +1,6 @@
 ---
-title: "Model 1: Variable Selection Across the Full Candidate Set"
-subtitle: "Section 5.4 implemented in nine reviewable steps"
+title: "Model 1: Selection, Estimation, and Performance"
+subtitle: "Sections 5.4, 5.5 and 5.6 implemented in ten reviewable steps"
 author: "Analysis Team"
 date: last-modified
 format:
@@ -21,72 +21,54 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Mission
+# Mission - `model-1`
 
-Model 0 rehearsed the LASSO machinery on one Andersen domain and returned a
-usable but narrow verdict. Model 1 executes Section 5.4 as written: the full
-candidate set, the primary outcome, and all four model specifications.
+Model 0 rehearsed the LASSO machinery on one Andersen domain and returned a usable but narrow verdict. Model 1 executes Sections 5.4, 5.5 and 5.6 as written: the full candidate set, the primary outcome, all four model specifications, the estimates that constitute deliverable Table 3, and the performance metrics that adjudicate between them.
 
-The proposal asks for four LASSO fits and a negative binomial refit of each. It
-does not say which candidates survive contact with the data, what to do when a
-variable is missing by survey design rather than by non-response, or how to
-reconcile a pooled two-cycle sample with predictors that only one province
-answered. Those questions are settled here, and every settlement is recorded.
+The proposal asks for four LASSO fits, a negative binomial refit of each, and a performance evaluation of the result. It does not say which candidates survive contact with the data, what to do when a variable is missing by survey design rather than by non-response, how to reconcile a pooled two-cycle sample with predictors that only one province answered, or what to do when the variance estimator it prescribes does not exist for these files. Those questions are settled here, and every settlement is recorded.
 
-**This report is built to be vetted, not merely read.** It is organised as nine
-steps. Each step produces artifacts a reviewer can check independently, and each
-closes with a *review point* naming exactly what a reader should agree or
-disagree with before the next step is allowed to stand. A reader who rejects a
-review point can stop there: everything downstream inherits it.
+**This report is built to be vetted, not merely read.** It is organised as ten steps. Each step produces artifacts a reviewer can check independently, and each closes with a *review point* naming exactly what a reader should agree or disagree with before the next step is allowed to stand. A reader who rejects a review point can stop there: everything downstream inherits it.
 
 ::: callout-important
-## What this report is not
+## The status of these estimates
 
-Model 1 is a **selection** report. It answers "which variables belong in the
-model," not "what is the effect of chronic conditions on absenteeism." The rate
-ratios in Step 8 are conditional on a selection procedure that used the same
-data, so their confidence intervals are optimistic. They are shown to
-demonstrate that the two-stage handoff works and to let a reviewer sanity-check
-direction and magnitude, not as estimates for publication.
+Model 1 is the **definitive estimation script**. The fitted objects, coefficient ledgers, and fold-level metrics it writes to disk are the versioned evidentiary record for Sections 5.4 through 5.6. Downstream reports should read those artifacts and interpret them; they should not re-estimate. Step 10 lists every artifact with the call that reloads it.
+
+Two caveats travel with every number here and cannot be removed by re-running anything:
+
+1.  **The intervals are not the intervals the proposal asked for.** Bootstrap replicate weights do not exist in the 2010 or 2014 PUMF (decision 10). Three interval variants are reported instead, two of which are explicit lower bounds on the understatement.
+2.  **Estimation and selection used the same data.** The rate ratios in Step 8 are conditional on a procedure that consumed the whole sample, so their intervals are optimistic before any weighting consideration. Step 9 measures how much, by re-running selection inside each training fold.
 :::
 
 **Research questions:**
 
-1. Which of the 52 registered candidate variables are eligible for selection at
-   all, and on what evidence are the ineligible ones excluded?
-2. What analytic sample survives, and does surviving it distort the sample?
-3. What does each of the four specifications retain?
-4. Do the retained sets match the counts the proposal anticipates (16, 9, 32, 33)?
-5. Does the two-stage Poisson-to-negative-binomial handoff hold at full scale?
+1.  Which of the 52 registered candidate variables are eligible for selection at all, and on what evidence are the ineligible ones excluded?
+2.  What analytic sample survives, and does surviving it distort the sample?
+3.  What does each of the four specifications retain?
+4.  Do the retained sets match the counts the proposal anticipates (16, 9, 32, 33)?
+5.  Does the two-stage Poisson-to-negative-binomial handoff hold at full scale?
+6.  What is the adjusted prevalence rate ratio for every retained term, and how wide is the interval once the missing bootstrap is accounted for?
+7.  How well do the four models predict on data they have not seen, and how much of their apparent performance is an artifact of selecting on the full sample?
 
 # Definition of Terms
 
-**Candidate registry.** The single table naming every variable eligible for
-selection, its Andersen domain, and — where it is excluded — the reason. Earlier
-exploratory work kept these lists in several places and they drifted. Step 1
-replaces them with one object that every later step reads from.
+**Candidate registry.** The single table naming every variable eligible for selection, its Andersen domain, and — where it is excluded — the reason. Earlier exploratory work kept these lists in several places and they drifted. Step 1 replaces them with one object that every later step reads from.
 
-**Design column.** After reference-cell dummy coding, a factor with $k$ levels
-becomes $k-1$ columns. LASSO penalizes columns; the proposal counts variables. A
-variable is *retained* here when at least one of its columns survives.
+**Design column.** After reference-cell dummy coding, a factor with $k$ levels becomes $k-1$ columns. LASSO penalizes columns; the proposal counts variables. A variable is *retained* here when at least one of its columns survives.
 
-**`lambda.min` / `lambda.1se`.** The penalty minimizing cross-validated
-deviance, and the largest penalty whose deviance remains within one standard
-error of that minimum. The latter buys parsimony at a cost in fit that
-cross-validation cannot distinguish from noise.
+**`lambda.min` / `lambda.1se`.** The penalty minimizing cross-validated deviance, and the largest penalty whose deviance remains within one standard error of that minimum. The latter buys parsimony at a cost in fit that cross-validation cannot distinguish from noise.
 
-**Forced variable.** A column exempted from the penalty via `penalty.factor = 0`,
-so it cannot be selected out. The cycle indicator is forced: a pooled sample
-requires it whether or not it earns its place.
+**Forced variable.** A column exempted from the penalty via `penalty.factor = 0`, so it cannot be selected out. The cycle indicator is forced: a pooled sample requires it whether or not it earns its place.
 
-**Missing by design.** An answer absent because the question was never asked —
-because of a skip pattern, or because the content was optional and a province
-declined it. Distinct from non-response, and it must be treated differently:
-imputing a value for a question nobody was asked invents data.
+**Missing by design.** An answer absent because the question was never asked — because of a skip pattern, or because the content was optional and a province declined it. Distinct from non-response, and it must be treated differently: imputing a value for a question nobody was asked invents data.
 
-**Structural alias.** A variable whose missingness pattern is a near-perfect
-function of another variable already in the model. Including it lets the model
-learn the design of the survey instead of the biology of the respondent.
+**Structural alias.** A variable whose missingness pattern is a near-perfect function of another variable already in the model. Including it lets the model learn the design of the survey instead of the biology of the respondent.
+
+**Design effect.** The ratio of the variance under the realised design to the variance under simple random sampling of the same size. Kish's approximation captures only the part contributed by unequal weighting; its square root is the factor by which a standard error should be widened. It is a *lower bound* here, because strata and cluster identifiers are suppressed in the public file and no estimator can see what they would have contributed.
+
+**Harrell's C.** The share of comparable respondent pairs the model orders correctly. A pair is comparable only when the two respondents differ on the outcome; pairs tied at zero days carry no information about discrimination and are excluded from the denominator. With seven respondents in ten at zero, most pairs are excluded, so the comparable share is reported beside every C.
+
+**Held out.** Computed on respondents the model was not fitted to. Section 5.6 asks for held-out error explicitly, and it is not the same quantity as the in-sample error a single fit reports.
 
 # Environment
 
@@ -184,9 +166,7 @@ read_chunk("analysis/model-1/model-1.R")
 
 # Data Context
 
-For complete data documentation, see the
-[Data Primer](../data-primer-1/data-primer-1.html). This section covers only
-what Model 1 touches.
+For complete data documentation, see the [Data Primer](../data-primer-1/data-primer-1.html). This section covers only what Model 1 touches.
 
 ## Tables and columns
 
@@ -198,9 +178,7 @@ what Model 1 touches.
 
 ## A single respondent
 
-The grain proof below matters more than it looks. Every count in this report is
-a count of respondents, and that claim holds only if one row means one person.
-The representative row that follows shows exactly what the penalty sees.
+The grain proof below matters more than it looks. Every count in this report is a count of respondents, and that claim holds only if one row means one person. The representative row that follows shows exactly what the penalty sees.
 
 ```{r}
 #| label: data-context-person
@@ -219,20 +197,14 @@ The representative row that follows shows exactly what the penalty sees.
 ::: callout-note
 ## Reading the outcome summary
 
-The variance-to-mean ratio is the number that governs the rest of the report. A
-Poisson likelihood assumes it equals 1. It does not, by a wide margin, which is
-why stage one uses Poisson only as a *selection* device — where the penalty
-dominates the likelihood — and stage two re-estimates under a negative binomial.
+The variance-to-mean ratio is the number that governs the rest of the report. A Poisson likelihood assumes it equals 1. It does not, by a wide margin, which is why stage one uses Poisson only as a *selection* device — where the penalty dominates the likelihood — and stage two re-estimates under a negative binomial.
 :::
 
 # Analysis
 
 ## Step 1 — The Candidate Registry
 
-Section 5.4 says "all candidate predictors." Establishing what that phrase
-denotes is the first substantive act of the analysis, and it is not a
-bookkeeping chore: two of the fifty registered variables turn out to be
-unusable, and finding that out is what makes the rest of the report possible.
+Section 5.4 says "all candidate predictors." Establishing what that phrase denotes is the first substantive act of the analysis, and it is not a bookkeeping chore: two of the fifty registered variables turn out to be unusable, and finding that out is what makes the rest of the report possible.
 
 ```{r}
 #| label: t1
@@ -251,18 +223,12 @@ unusable, and finding that out is what makes the rest of the report possible.
 ::: callout-tip
 ## Review point 1
 
-Agree or disagree that the registry is complete and correctly domained. Three
-variables are marked excluded; the evidence for two of them is presented in
-Step 2 and should be judged there. The third, `dhhgage`, is excluded because
-`age_group_3` already encodes age at the resolution Section 2.2 specifies, and
-offering both would give the penalty two versions of the same information.
+Agree or disagree that the registry is complete and correctly domained. Three variables are marked excluded; the evidence for two of them is presented in Step 2 and should be judged there. The third, `dhhgage`, is excluded because `age_group_3` already encodes age at the resolution Section 2.2 specifies, and offering both would give the penalty two versions of the same information.
 :::
 
 ## Step 2 — Missing Data
 
-The proposal's Section 5.1 permits a "missing" category when the missing share
-is small. Two candidates are nowhere near small, and neither is missing for a
-reason that imputation or a missing-category would honestly represent.
+The proposal's Section 5.1 permits a "missing" category when the missing share is small. Two candidates are nowhere near small, and neither is missing for a reason that imputation or a missing-category would honestly represent.
 
 ```{r}
 #| label: g1-data-prep
@@ -280,8 +246,7 @@ reason that imputation or a missing-category would honestly represent.
 #| fig-height: 8
 ```
 
-Two points sit far to the right of everything else, and they are far to the
-right for different reasons.
+Two points sit far to the right of everything else, and they are far to the right for different reasons.
 
 ```{r}
 #| label: out1
@@ -289,15 +254,9 @@ right for different reasons.
 #| echo: false
 ```
 
-The COPD question was administered only to respondents aged 35 and over: it is
-100% missing below that age and essentially complete above it. A missing
-indicator for COPD would therefore be a re-labelled age indicator, and
-`age_group_3` is already a candidate.
+The COPD question was administered only to respondents aged 35 and over: it is 100% missing below that age and essentially complete above it. A missing indicator for COPD would therefore be a re-labelled age indicator, and `age_group_3` is already a candidate.
 
-The family-doctor question is worse. In 2010–2011 it was optional content that
-only Ontario selected, so its missingness is an almost exact function of cycle
-crossed with province — both of which are in the model. Retaining it would let
-the penalty learn Statistics Canada's content-selection process.
+The family-doctor question is worse. In 2010–2011 it was optional content that only Ontario selected, so its missingness is an almost exact function of cycle crossed with province — both of which are in the model. Retaining it would let the penalty learn Statistics Canada's content-selection process.
 
 ```{r}
 #| label: t2
@@ -306,21 +265,14 @@ the penalty learn Statistics Canada's content-selection process.
 #| results: asis
 ```
 
-The cascade quantifies the price of each choice. Keeping both variables costs
-roughly two thirds of the sample; dropping both recovers about three quarters
-of it.
+The cascade quantifies the price of each choice. Keeping both variables costs roughly two thirds of the sample; dropping both recovers about three quarters of it.
 
 ::: callout-tip
 ## Review point 2
 
-Agree or disagree that `cc_copd` and `has_family_doctor` should be excluded
-rather than imputed or given a missing category. If you disagree, the cascade
-table tells you what the alternative costs in sample size, and decisions 2 and
-3 in Step 4 record how to reverse the choice.
+Agree or disagree that `cc_copd` and `has_family_doctor` should be excluded rather than imputed or given a missing category. If you disagree, the cascade table tells you what the alternative costs in sample size, and decisions 2 and 3 in Step 4 record how to reverse the choice.
 
-Note the deferred alternative: COPD remains analysable in an age-35-and-over
-subsample, which is where Section 5.7's condition-specific model for COPD would
-have to live in any case.
+Note the deferred alternative: COPD remains analysable in an age-35-and-over subsample, which is where Section 5.7's condition-specific model for COPD would have to live in any case.
 :::
 
 ## Step 3 — The Analytic Sample
@@ -331,10 +283,7 @@ have to live in any case.
 #| echo: false
 ```
 
-Complete-case analysis discards respondents, and discarding is only safe if the
-discarded resemble the retained. They do not have to match exactly — the model
-conditions on the variables shown — but a large divergence would signal that
-the estimates describe a population narrower than intended.
+Complete-case analysis discards respondents, and discarding is only safe if the discarded resemble the retained. They do not have to match exactly — the model conditions on the variables shown — but a large divergence would signal that the estimates describe a population narrower than intended.
 
 ```{r}
 #| label: t21
@@ -346,21 +295,16 @@ the estimates describe a population narrower than intended.
 ::: callout-tip
 ## Review point 3
 
-Agree or disagree that the analytic sample is close enough to the source
-population for complete-case analysis to stand. The comparison is descriptive,
-not a test; a formal treatment would require the multiple imputation Section 5.1
-contemplates, which decision 5 defers.
+Agree or disagree that the analytic sample is close enough to the source population for complete-case analysis to stand. The comparison is descriptive, not a test; a formal treatment would require the multiple imputation Section 5.1 contemplates, which decision 5 defers.
 :::
 
 ## Step 4 — The Decision Registry
 
-Everything the proposal left open, and how each gap was closed. This table is
-the spine of the report's reviewability: it names the alternatives that were
-available, the one taken, the reason, and whether the choice can be reversed.
+Everything the proposal left open, and how each gap was closed. This table is the spine of the report's reviewability: it names the alternatives that were available, the one taken, the reason, and whether the choice can be reversed.
 
 ```{r}
 #| label: t3
-#| code-summary: Twelve decisions, with alternatives and reversal instructions
+#| code-summary: Nineteen decisions, with alternatives and reversal instructions
 #| echo: false
 #| results: asis
 ```
@@ -368,35 +312,20 @@ available, the one taken, the reason, and whether the choice can be reversed.
 ::: callout-warning
 ## One decision cannot be reversed
 
-Decision 10 records that bootstrap variance estimation is impossible with these
-data. CCHS bootstrap replicate weights begin with the 2015 cycle; neither the
-2010 nor the 2014 Public Use Microdata File carries them, and strata and PSU
-identifiers are suppressed as well. Sections 5.3, 5.5, 5.7 and 5.9 all request
-bootstrap intervals, and none of them can be honoured without the Research Data
-Centre master files.
+Decision 10 records that bootstrap variance estimation is impossible with these data. CCHS bootstrap replicate weights begin with the 2015 cycle; neither the 2010 nor the 2014 Public Use Microdata File carries them, and strata and PSU identifiers are suppressed as well. Sections 5.3, 5.5, 5.7 and 5.9 all request bootstrap intervals, and none of them can be honoured without the Research Data Centre master files.
 
-Every interval in this report is therefore a Wald interval that treats the
-weighted sample as if it were a simple random sample of its effective size. It
-understates uncertainty. It is reported anyway because the alternative is
-reporting nothing, but it should not be read as the proposal's requested
-quantity.
+What model-1 does instead is decision 15: report the model-based Wald interval beside a Huber-White sandwich interval and a Kish-inflated interval, so a reader can see the range within which the true interval lies. Both alternatives are *lower bounds* — they capture unequal weighting and nothing else. The same two instruments are used on Table 2 in model-00, so Tables 2 and 3 are on the same footing.
 :::
 
 ::: callout-tip
 ## Review point 4
 
-Read all twelve decisions. Any one of them can be overturned; the "reversal"
-column says what to change. This is the table to argue with.
+Read all nineteen decisions. Any one of them can be overturned; the "reversal" column says what to change. This is the table to argue with.
 :::
 
 ## Step 5 — The Four Specifications
 
-Section 5.4 names four models. They are usually described as four LASSO fits,
-but they are not: they are two fits read at two penalties each. `cv.glmnet`
-returns an entire path, and `lambda.min` and `lambda.1se` are two points on it.
-Recognising this halves the computation and, more usefully, means Models 1 and 3
-are guaranteed nested — a comparison that would be merely probable if they came
-from independent fits.
+Section 5.4 names four models. They are usually described as four LASSO fits, but they are not: they are two fits read at two penalties each. `cv.glmnet` returns an entire path, and `lambda.min` and `lambda.1se` are two points on it. Recognising this halves the computation and, more usefully, means Models 1 and 3 are guaranteed nested — a comparison that would be merely probable if they came from independent fits.
 
 ```{r}
 #| label: t4
@@ -408,9 +337,7 @@ from independent fits.
 ::: callout-tip
 ## Review point 5
 
-Agree or disagree that "perceived health" means the three self-perceived
-measures and nothing more. The ADL items and the injury indicator remain in
-every specification. This scope was ratified on 2026-07-29 and is decision 6.
+Agree or disagree that "perceived health" means the three self-perceived measures and nothing more. The ADL items and the injury indicator remain in every specification. This scope was ratified on 2026-07-29 and is decision 6.
 :::
 
 ## Step 6 — Stage One, Penalised Poisson Fitting
@@ -431,11 +358,7 @@ every specification. This scope was ratified on 2026-07-29 and is decision 6.
 #| fig-height: 6
 ```
 
-Both curves are shallow to the left of their minima. That flatness is what makes
-the one-standard-error rule bite: over a wide range of penalties,
-cross-validation genuinely cannot tell the models apart, so `lambda.1se` sits
-far from `lambda.min` and discards a great deal at almost no measurable cost in
-deviance.
+Both curves are shallow to the left of their minima. That flatness is what makes the one-standard-error rule bite: over a wide range of penalties, cross-validation genuinely cannot tell the models apart, so `lambda.1se` sits far from `lambda.min` and discards a great deal at almost no measurable cost in deviance.
 
 ```{r}
 #| label: g3
@@ -445,16 +368,12 @@ deviance.
 #| fig-height: 6
 ```
 
-Reading right to left, the order in which coefficients leave zero is the order
-in which the data insist on them. In both panels the last survivors are drawn
-from the Needs and Exposure domains; the Facilitating domain collapses early.
+Reading right to left, the order in which coefficients leave zero is the order in which the data insist on them. In both panels the last survivors are drawn from the Needs and Exposure domains; the Facilitating domain collapses early.
 
 ::: callout-tip
 ## Review point 6
 
-Agree or disagree with the fitting choices visible here: five folds, seed 42,
-survey weights passed to `cv.glmnet`, and the cycle indicator exempted from the
-penalty. Decisions 8, 11 and 12 cover these.
+Agree or disagree with the fitting choices visible here: five folds, seed 42, survey weights passed to `cv.glmnet`, and the cycle indicator exempted from the penalty. Decisions 8, 11 and 12 cover these.
 :::
 
 ## Step 7 — Selection Results
@@ -466,21 +385,11 @@ penalty. Decisions 8, 11 and 12 cover these.
 #| results: asis
 ```
 
-The proposal anticipated 16, 9, 32 and 33 variables. Two features of the
-realised counts deserve attention.
+The proposal anticipated 16, 9, 32 and 33 variables. Two features of the realised counts deserve attention.
 
-First, the parsimonious specifications land near their targets while the
-permissive ones overshoot. That is the expected direction: `lambda.min` is
-chosen to minimise prediction error, not to be small, and the sample here is
-large enough that many weak signals clear the bar.
+First, the parsimonious specifications land near their targets while the permissive ones overshoot. That is the expected direction: `lambda.min` is chosen to minimise prediction error, not to be small, and the sample here is large enough that many weak signals clear the bar.
 
-Second, and more consequentially, **the ordering of Models 1 and 2 is
-reversed.** The proposal expects that adding the perceived-health variables
-*reduces* the retained set — 9 against 16 — on the reasoning that self-rated
-health absorbs the signal carried by the individual conditions. That absorption
-does occur here, and it is visible: the exposure domain loses variables when
-perceived health is offered. But the three perceived-health measures themselves
-enter, and they more than replace what they displaced.
+Second, and more consequentially, **the ordering of Models 1 and 2 is reversed.** The proposal expects that adding the perceived-health variables *reduces* the retained set — 9 against 16 — on the reasoning that self-rated health absorbs the signal carried by the individual conditions. That absorption does occur here, and it is visible: the exposure domain loses variables when perceived health is offered. But the three perceived-health measures themselves enter, and they more than replace what they displaced.
 
 ```{r}
 #| label: t51
@@ -497,42 +406,56 @@ enter, and they more than replace what they displaced.
 #| fig-height: 12
 ```
 
-Graph g4 is the report's central artifact and repays slow reading. Scanning down
-a column shows one specification's whole verdict; scanning across a row shows
-how stable a variable's selection is to the penalty rule and the predictor set.
-Variables retained in all four columns are robust. Variables appearing only in
-Models 3 and 4 are artifacts of a permissive penalty.
+Graph g4 is the report's central artifact and repays slow reading. Scanning down a column shows one specification's whole verdict; scanning across a row shows how stable a variable's selection is to the penalty rule and the predictor set. Variables retained in all four columns are robust. Variables appearing only in Models 3 and 4 are artifacts of a permissive penalty.
 
-The Facilitating domain is worth a pause: it retains nothing at all under
-either parsimonious specification. Province, income, occupation, work schedule,
-smoking, physical activity, BMI — none of them survive `lambda.1se`. They appear
-only when the penalty is relaxed.
+The Facilitating domain is worth a pause: it retains nothing at all under either parsimonious specification. Province, income, occupation, work schedule, smoking, physical activity, BMI — none of them survive `lambda.1se`. They appear only when the penalty is relaxed.
 
 ::: callout-tip
 ## Review point 7
 
 This is the report's substantive output. Two questions to settle:
 
-1. Is the divergence from the proposal's anticipated counts acceptable, or does
-   it indicate that a different lambda rule, coding scheme, or candidate set was
-   assumed when those numbers were written?
-2. Should "retained" continue to mean "at least one design column survived"?
-   Decision 9 records the alternative — carrying only the surviving levels into
-   stage two — which would produce smaller but harder-to-interpret models.
+1.  Is the divergence from the proposal's anticipated counts acceptable, or does it indicate that a different lambda rule, coding scheme, or candidate set was assumed when those numbers were written?
+2.  Should "retained" continue to mean "at least one design column survived"? Decision 9 records the alternative — carrying only the surviving levels into stage two — which would produce smaller but harder-to-interpret models.
 :::
 
-## Step 8 — Stage Two, Negative Binomial Refitting
+## Step 8 — Stage Two, Negative Binomial Estimation
 
-Each retained set is now re-estimated without penalty under a negative binomial
-likelihood, as Section 5.4 stage two directs. The penalty's job was selection;
-it biases coefficients toward zero and must not be carried into estimation.
+Each retained set is now re-estimated without penalty under a negative binomial likelihood, as Section 5.4 stage two directs. The penalty's job was selection; it biases coefficients toward zero and must not be carried into estimation.
+
+This step is where Section 5.5 is answered and where deliverable **Table 3** is produced. Before the estimates, the instruments used to bracket their uncertainty.
+
+```{r}
+#| label: t6-data-prep
+#| code-summary: Fit and persist the four negative binomial models and the null
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: out5
+#| code-summary: Variance-estimation instruments standing in for the absent bootstrap
+#| echo: false
+```
+
+The two multipliers disagree, and the disagreement is informative. Kish's is a single number applied to every term; the sandwich is estimated per term and so reflects which coefficients are actually sensitive to the weighting. Neither sees clustering. A reader who wants a single rule of thumb should take the larger of the two and treat it as still too small.
 
 ```{r}
 #| label: t6
-#| code-summary: Table t6 — negative binomial coefficients across all four models
+#| code-summary: Table t6 — negative binomial rate ratios across all four models
 #| echo: false
 #| results: asis
 ```
+
+```{r}
+#| label: t62
+#| code-summary: Table t62 — the full Section 5.5 coefficient ledger
+#| echo: false
+#| results: asis
+```
+
+Table t62 is the compliance artifact: every quantity Section 5.5 names, for every term, in all four models. Read the three interval columns together. Where the Wald and Kish intervals agree about whether they contain 1, the conclusion survives the weighting problem. Where they disagree, it does not, and the term should be described as unresolved rather than null or significant.
 
 ```{r}
 #| label: g5
@@ -542,16 +465,11 @@ it biases coefficients toward zero and must not be carried into estimation.
 #| fig-height: 11
 ```
 
-Comparing the LASSO coefficients in Step 7 with the rate ratios here shows the
-two stages doing distinct work. Sex, for instance, is retained by every
-specification but carries a nearly-zero penalised coefficient — it barely
-survived. Unpenalised, it recovers a substantial rate ratio. The penalty
-answered "does this variable belong?"; the refit answers "how much does it
-matter?", and the answers are not the same quantity.
+Comparing the LASSO coefficients in Step 7 with the rate ratios here shows the two stages doing distinct work. Sex, for instance, is retained by every specification but carries a nearly-zero penalised coefficient — it barely survived. Unpenalised, it recovers a substantial rate ratio. The penalty answered "does this variable belong?"; the refit answers "how much does it matter?", and the answers are not the same quantity.
 
 ```{r}
 #| label: t61
-#| code-summary: Table t61 — model comparison on fit and error
+#| code-summary: Table t61 — in-sample fit, error, and discrimination
 #| echo: false
 #| results: asis
 ```
@@ -562,30 +480,87 @@ matter?", and the answers are not the same quantity.
 #| echo: false
 ```
 
-Three cautions about the comparison table. The pseudo-$R^2$ values are small in
-absolute terms, which is unremarkable for individual-level count outcomes and
-should not be read as failure. AIC and BIC both favour the permissive
-specifications, which is what one expects when they are supersets. And the
-root-mean-square error moves in the *opposite* direction to the likelihood —
-richer models fit worse on the raw day scale — because a squared-error
-criterion on a heavily zero-inflated count is dominated by a handful of extreme
-observations, which the richer models chase. RMSE is reported for completeness
-and should be discounted here.
+Four cautions about the comparison table. The pseudo-$R^2$ values are small in absolute terms, which is unremarkable for individual-level count outcomes and should not be read as failure. AIC and BIC both favour the permissive specifications, which is what one expects when they are supersets — but both are computed from a *weighted pseudo-likelihood*, so they rank models rather than measure them, and BIC's $\log(n)$ penalty sets an unweighted row count against a weighted likelihood (decision 18). The root-mean-square error moves in the *opposite* direction to the likelihood — richer models fit worse on the raw day scale — because a squared-error criterion on a heavily zero-inflated count is dominated by a handful of extreme observations, which the richer models chase. And every number in t61 is in-sample; Section 5.6 asks for the held-out versions, which arrive in Step 9.
 
 ::: callout-tip
 ## Review point 8
 
-Agree or disagree that the two-stage handoff behaved correctly: all models
-converged, dispersion is estimated well away from the Poisson limit, and rate
-ratios move in plausible directions and magnitudes. Remember that these
-intervals are conditional on selection from the same data and are optimistic
-even before decision 10's weighting caveat.
+Agree or disagree that the estimates in Tables t6 and t62 are fit to serve as the study's Table 3: all models converged, dispersion is estimated well away from the Poisson limit, and rate ratios move in plausible directions and magnitudes. The specific question to settle is decision 15 — whether reporting three interval variants is the right response to the missing bootstrap, or whether one of them should be designated the interval of record.
 :::
 
-## Step 9 — Reproducibility Ledger
+## Step 9 — Section 5.6, Held-Out Performance
 
-Every fitted object and every intermediate table is written to disk, so a
-reviewer can re-open any result without re-running the estimation.
+Section 5.6 asks for AIC, BIC, McFadden's pseudo-$R^2$, a C-statistic, and RMSE and MAE "computed on the withheld test fold," averaged over five folds. Table t61 gave the in-sample versions of the first three. This step supplies the rest.
+
+A clarification first, because the two cross-validations in this report are easily confused. The folds in Step 6 belong to `cv.glmnet`: they tune the *penalty* on a Poisson deviance and are internal to selection. The folds here are a separate, explicitly seeded partition used to estimate *prediction error* for the negative binomial refits. They are both five-fold because both sections say five. They are not the same folds and they do not answer the same question.
+
+```{r}
+#| label: t63-data-prep
+#| code-summary: Five-fold cross-validation of all four specifications, both variants
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: t63
+#| code-summary: Table t63 — held-out performance, term set fixed across folds
+#| echo: false
+#| results: asis
+```
+
+Table t63 is the literal answer to Section 5.6: the term set is what the full-sample LASSO chose, and the negative binomial is refitted five times with a fifth of the sample withheld each time. It is also, for that reason, optimistic. The penalty that produced the term list saw every respondent, including the ones being predicted.
+
+```{r}
+#| label: t64
+#| code-summary: Table t64 — held-out performance, selection re-run inside each fold
+#| echo: false
+#| results: asis
+```
+
+Table t64 removes that advantage by re-running the entire two-stage procedure inside each training fold, so no held-out respondent contributed to selection. The term-count range is worth as much as the metrics: it says how far the selected set moves when a fifth of the sample is taken away, which no single full-sample fit can reveal.
+
+Two results deserve to be read together, because they point in opposite directions.
+
+The **performance** metrics barely move. Held-out RMSE, McFadden's $R^2$ and the C-statistic are almost identical whether selection saw the test fold or not; the differences printed in out6 are in the third or fourth decimal, and several have the wrong sign, which is what noise looks like. At roughly forty-nine thousand respondents the sample is large enough that selecting on it costs almost nothing in optimism. That is a genuine reassurance and it is worth stating plainly.
+
+The **selected set** moves a great deal. Model 1 retains ten variables on the full sample; across the five training folds it retains between eight and thirty-eight. The parsimonious specification is therefore not a stable object. It predicts about as well as any other fold's version, but *which* variables it names is substantially a function of which four-fifths of the sample it saw. Any narrative built on the identity of the Model 1 variable list — rather than on the estimates attached to it — needs to reckon with that range.
+
+```{r}
+#| label: g6
+#| code-summary: Graph g6 — held-out performance by fold
+#| echo: false
+#| fig-width: 10
+#| fig-height: 8
+```
+
+Graph g6 shows the five folds individually rather than only their mean. Between- fold spread is the honest error bar on a cross-validated metric, and a difference between two models that is smaller than the spread within either of them is not a difference.
+
+```{r}
+#| label: out6
+#| code-summary: Reading the C-statistic, and the size of the selection optimism
+#| echo: false
+```
+
+::: callout-important
+## The C-statistic here is a narrow instrument
+
+Harrell's C counts only pairs of respondents who differ on the outcome. Seven in ten respondents report zero days absent, so only about half of all pairs are comparable and the rest never enter the denominator. The reported C therefore measures how well the model *orders respondents who differ in days absent*. It says nothing about how well the model separates any absence from none — a question this outcome makes tempting to ask, but not one Section 5.6 asked, and not one a rate-ratio model is built to answer.
+:::
+
+::: callout-tip
+## Review point 9
+
+Three questions.
+
+1.  Which table is the Section 5.6 deliverable — t63, which follows the proposal's wording, or t64, which is what the numbers would be on new data? Decision 16 reports both rather than choosing; a reader may reasonably insist on a choice. Given how small the gap turns out to be, either answer is defensible.
+2.  Does the term-count range in t64 change how Model 1's variable list should be described in the manuscript? "The variables LASSO selected" and "the variables LASSO would select from a comparable sample" are not the same claim, and t64 says the second is much looser than the first.
+3.  Is the C-statistic worth reporting at all given the comparable-pair share in out6, or should it be accompanied by a discrimination measure suited to the zero-inflation? The latter is a modelling question, not a metrics question, and belongs to a dedicated evaluation report rather than here.
+:::
+
+## Step 10 — Reproducibility Ledger
+
+Every fitted object and every intermediate table is written to disk, so a reviewer can re-open any result without re-running the estimation — and so that downstream reports can cite these artifacts as fixed rather than recompute them.
 
 ```{r}
 #| label: t7
@@ -604,35 +579,22 @@ reviewer can re-open any result without re-running the estimation.
 
 **Settled.**
 
-- The candidate set is fixed and documented, replacing lists that had drifted
-  across earlier exploratory work.
-- Two variables are excluded on stated, checkable evidence about survey design
-  rather than on analyst preference.
-- All four specifications of Section 5.4 are estimated, with both stages, and
-  every fitted object is on disk.
-- Twelve open decisions are named, resolved, and marked for reversal.
+-   The candidate set is fixed and documented, replacing lists that had drifted across earlier exploratory work.
+-   Two variables are excluded on stated, checkable evidence about survey design rather than on analyst preference.
+-   *Section 5.4.* All four specifications are estimated, with both stages, and every fitted object is on disk.
+-   *Section 5.5.* Deliverable Table 3 is produced in two forms: a rate-ratio grid (t6) and a full ledger carrying log coefficients, standard errors, exact p-values and three interval variants (t62).
+-   *Section 5.6.* All five requested metrics are reported, in-sample (t61) and on withheld folds (t63), with an honest-selection counterpart (t64) that quantifies how much of the apparent performance is optimism. The answer is "almost none" — but the same exercise shows the *selected variable list* to be far less stable than the performance it delivers.
+-   Nineteen open decisions are named, resolved, and marked for reversal.
 
 **Not settled.**
 
-- *Variance estimation.* Decision 10 is data-blocked. Every interval here is
-  Wald. Delivering Section 5.5 as specified requires Research Data Centre access.
-- *Section 5.6.* Cross-validated predictive performance and the C-statistic are
-  not computed. The infrastructure is present — the folds already exist — but
-  the metrics are out of scope for a selection report.
-- *Section 5.7.* Nineteen condition-specific models are not fitted. Stroke
-  prevalence in the analytic sample is far below the threshold at which
-  subgroup estimates are trustworthy, and that constraint should be settled
-  before the subgroup work begins.
-- *Section 5.9.* Sex-stratified models are not fitted.
-- *Section 5.1.* Little's MCAR test and multiple imputation are not performed;
-  complete-case analysis stands in, with the cost measured in Steps 2 and 3.
+-   *Variance estimation.* Decision 10 is data-blocked. The sandwich and Kish intervals bracket the understatement from below; neither is the quantity Section 5.5 specifies. Delivering it requires Research Data Centre access.
+-   *Section 5.7.* Nineteen condition-specific models are not fitted. Stroke prevalence in the analytic sample is far below the threshold at which subgroup estimates are trustworthy, and that constraint should be settled before the subgroup work begins.
+-   *Section 5.9.* Sex-stratified models are not fitted.
+-   *Section 5.1.* Little's MCAR test and multiple imputation are not performed; complete-case analysis stands in, with the cost measured in Steps 2 and 3.
+-   *Model adequacy.* Whether a negative binomial is the right likelihood for an outcome with 70% zeros is not tested here. Calibration, rootograms, influence diagnostics, and hurdle or zero-inflated alternatives belong to a dedicated evaluation report reading the artifacts in Step 10.
 
-**Recommended next step.** Model 1 is a demonstration that the procedure runs
-and a record of what it required. If the review points above are accepted, the
-natural successor is a clean estimation script that takes the ratified
-decisions as given, drops the diagnostic apparatus, and adds the Section 5.6
-performance metrics — with the subgroup and stratified work handled separately,
-after the small-cell constraint is resolved.
+**How to use this report.** Model 1 is the estimation of record for Sections 5.4 through 5.6. Reports that follow should load the objects in Table t7 and interpret them; re-estimating would produce a second set of numbers with no better claim to authority and a real chance of drifting from these.
 
 # Session Information
 
