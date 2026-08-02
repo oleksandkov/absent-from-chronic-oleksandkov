@@ -66,7 +66,9 @@ selection, to adjusted estimate.
   is read off the curve.
 - **g1** — From unadjusted signal to selected model. The three-panel artifact aligning
   the bivariate forest, the selection grid, and the primary model's adjusted estimates
-  on one shared row axis.
+  on one shared row axis. **g11** extends this to five panels: the bivariate series plus
+  all four specifications, dropping the dedicated selection column because in that
+  layout the verdict is legible from the presence or absence of an estimate.
 
 ## Artifact Inventory
 
@@ -79,10 +81,10 @@ selection, to adjusted estimate.
 | g02 | Graph | What Poisson Deviance Counts | Per-respondent deviance contribution as a function of the predicted mean, for several observed day counts |
 | g03 | Graph | Where the Standard Error Comes From | Zoom on the minimum showing the SE bars and the exact construction of `lambda.1se` |
 | out1 | Output | Row Spine Join Audit | Confirm every bivariate level, selection variable, and NB term maps to exactly one spine row |
-| g1 | Graph | Bivariate Signal, Selection, and the Primary Model | The three-panel artifact on a shared 117-row axis |
+| g1 | Graph | Bivariate Signal, Selection, and the Primary Model | The three-panel artifact on a shared 119-row axis |
+| g11 | Graph | Every Specification on One Row Axis | Five panels — bivariate plus all four specifications — with mirrored row labels at both outer edges |
 | t3 | Table | The Primary Model's Term List | Model 1 adjusted rate ratios in readable form, with the bivariate estimate beside each |
 | t4 | Table | Where Selection and Bivariate Signal Disagree | Variables significant bivariately but eliminated, and the reverse |
-| g11 | Graph | *(planned, not built)* Compact three-panel variant restricted to variables retained by at least one model | A printable short form of g1 |
 
 ## Output Format
 
@@ -118,6 +120,8 @@ HTML
 | 4 | Panel assembly | `facet_grid` with free scales; `cowplot::plot_grid` | `cowplot::plot_grid` | The three panels need different x scales *and* different x types (continuous log rate ratio, discrete model label). One `facet_grid` cannot carry both. | `g1` chunk |
 | 5 | Selection states | Two (kept / dropped); four (forced / retained / eliminated / not offered) | Four | `cchs_cycle_f` was exempt from the penalty and `dhhgl12` and the three perceived-health measures were never offered. Collapsing these into "dropped" would state something false. | `selection_states` in `declare-globals` |
 | 6 | Fold-level detail in g03 | Draw the five individual fold curves; draw the stored standard error | The stored standard error | `model-1`'s `fit_lasso()` calls `cv.glmnet()` without `keep = TRUE`, so per-fold prediction matrices and the fold assignment were never stored. Drawing five curves would require re-running the cross-validation, which this report's scope forbids. The stored `cvsd` is the same quantity summarised. | Add `keep = TRUE` to `fit_lasso()` in `model-1.R` and re-run |
+| 7 | g11 label placement | Left edge only; both outer edges | Both outer edges, right block left-aligned | At 20 inches wide and 119 rows tall, a single label block on the left forces the eye to travel the full width to identify a row in the Model 4 panel. Mirroring the block puts an anchor within a few centimetres of any point in the graph. | `show_labels` argument in `build_estimate_panel()` |
+| 8 | g11 facet padding | Scale expansion; band geometry; both | Band geometry alone, expansion set to zero | The banding rectangles already extend half a row past each domain's outermost rows. Adding a scale expansion on top widened each facet's range past the neighbouring domain's outermost break, and `ggplot2` then drew that neighbour's label a second time at the foot of the block. Range is pinned by `g11_extent` so it does not depend on which variables happen to be banded. | `g11_y_expand` and `g11_extent` in `g11-data-prep` |
 
 ## Known Constraints
 

@@ -903,6 +903,230 @@ ggsave(paste0(prints_folder, "g1_selection_and_estimates.png"),
        g1_selection_and_estimates,
        width = 15, height = g1_figure_height, dpi = 300, limitsize = FALSE)
 
+# ---- g11-data-prep -----------------------------------------------------------
+# g11 spends the width g1 gave to the selection grid on four estimate panels
+# instead. Selection is then legible without a dedicated column: a variable a
+# specification declined simply has no estimate in that specification's panel.
+#
+# The builders below are defined here rather than in declare-functions because
+# they close over the row spine and the shared axis window, which do not exist
+# until g1-data-prep has run.
+
+g11_spec_ids <- c("model_1", "model_2", "model_3", "model_4")
+g11_spec_labels <- stats::setNames(model_labels_all, g11_spec_ids)
+
+# One shared x window across all five panels. A horizontal distance must mean
+# the same thing in the bivariate panel as in Model 4's.
+g11_axis_limits <- c(
+  max(0.2, min(c(table_two$ci_low, nb_coefficients$ci_low), na.rm = TRUE)),
+  min(10,  max(c(table_two$ci_high, nb_coefficients$ci_high), na.rm = TRUE))
+)
+
+# Horizontal traceability across five separated panels is the whole design
+# problem. Three devices carry it: an alternating band per variable, a hairline
+# gridline at every row, and the fact that all five panels are drawn from one
+# spine so their rows cannot drift.
+g11_bands <- row_spine %>%
+  group_by(domain, variable, variable_label) %>%
+  summarise(y_min = min(row_id) - 0.5, y_max = max(row_id) + 0.5, .groups = "drop") %>%
+  arrange(domain, variable_label) %>%
+  group_by(domain) %>%
+  mutate(shade = dplyr::row_number() %% 2 == 1) %>%
+  ungroup() %>%
+  filter(shade)
+
+# The bands already extend half a row past the first and last row of every
+# domain, which is exactly the padding a forest plot needs. Adding a scale
+# expansion on top of that would widen each facet's range past the neighbouring
+# domain's outermost break, and ggplot would then draw that neighbour's label a
+# second time at the foot of the block.
+g11_y_expand <- expansion(add = 0)
+
+# Bands cover alternate variables only, so they cannot be relied on to set the
+# range. This does: two invisible points per domain, exactly half a row outside
+# its first and last row.
+g11_extent <- row_spine %>%
+  group_by(domain) %>%
+  summarise(lo = min(row_id) - 0.5, hi = max(row_id) + 0.5, .groups = "drop") %>%
+  tidyr::pivot_longer(c(lo, hi), values_to = "row_id") %>%
+  select(domain, row_id)
+
+g11_band_layer <- function() {
+  geom_rect(
+    data = g11_bands,
+    aes(ymin = y_min, ymax = y_max,
+        xmin = g11_axis_limits[1], xmax = g11_axis_limits[2]),
+    fill = "grey93", inherit.aes = FALSE
+  )
+}
+
+g11_trace_theme <- function() {
+  theme(
+    panel.grid.major.y = element_line(colour = "grey88", linewidth = 0.25),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(colour = "grey93", linewidth = 0.25),
+    plot.subtitle = element_text(size = 9, face = "bold", hjust = 0.5)
+  )
+}
+
+# The four right-hand panels. `show_labels` places the mirrored row labels on
+# the outer edge of Model 4 only.
+build_estimate_panel <- function(this_spec, show_labels = FALSE) {
+  this_label <- unname(g11_spec_labels[this_spec])
+
+  status_here <- panel_middle %>%
+    filter(model_label == this_label) %>%
+    select(variable, status)
+
+  terms_here <- nb_coefficients %>%
+    filter(spec_id == this_spec) %>%
+    select(variable, level, rate_ratio, ci_low, ci_high, p_value)
+
+  panel_data <- row_spine %>%
+    left_join(terms_here, by = c("variable", "level")) %>%
+    left_join(status_here, by = "variable") %>%
+    mutate(
+      in_model = variable %in% unique(terms_here$variable),
+      rate_ratio = ifelse(is_reference & in_model, 1, rate_ratio),
+      marker = dplyr::case_when(
+        is_reference & in_model ~ "reference (fixed at 1)",
+        is.na(rate_ratio)       ~ NA_character_,
+        p_value < 0.05          ~ "p < 0.05",
+        TRUE                    ~ "not significant"
+      )
+    )
+
+  # Local decision 5, preserved without a dedicated column. A grey cross marks a
+  # variable this specification was never shown; a wholly blank row is one it
+  # was shown and declined.
+  never_offered <- panel_data %>%
+    filter(status == "not offered", !is_reference)
+
+  spec_row <- spec_grid %>% filter(model_label == this_label)
+
+  out <- ggplot(panel_data, aes(y = row_id)) +
+    g11_band_layer() +
+    geom_blank(data = g11_extent) +
+    geom_vline(xintercept = 1, colour = "grey55", linewidth = 0.4) +
+    geom_point(data = never_offered, aes(x = 1), shape = 4, size = 1.4,
+               colour = "grey58", inherit.aes = TRUE) +
+    geom_linerange(aes(xmin = ci_low, xmax = ci_high, colour = domain),
+                   linewidth = 0.5, na.rm = TRUE) +
+    geom_point(aes(x = rate_ratio, colour = domain, shape = marker, alpha = marker),
+               size = 1.9, fill = "white", stroke = 0.7, na.rm = TRUE) +
+    facet_grid(domain ~ ., scales = "free_y", space = "free_y") +
+    scale_x_log10(labels = scales::label_number(accuracy = 0.1)) +
+    coord_cartesian(xlim = g11_axis_limits) +
+    scale_colour_manual(values = domain_colours, guide = "none") +
+    scale_shape_manual(values = marker_shapes, guide = "none", na.translate = FALSE) +
+    scale_alpha_manual(values = marker_alpha, guide = "none", na.translate = FALSE) +
+    labs(
+      subtitle = paste0(
+        toupper(this_label), "\n", spec_row$role[1], "\n",
+        "health ", spec_row$perceived_health[1], ", ", spec_row$lambda_rule[1]
+      ),
+      x = "Rate ratio (log)", y = NULL
+    ) +
+    g11_trace_theme()
+
+  if (show_labels) {
+    out +
+      scale_y_continuous(position = "right", breaks = row_spine$row_id,
+                         labels = row_spine$term_label,
+                         expand = g11_y_expand) +
+      theme(axis.text.y.right = element_text(hjust = 0, size = 7.2),
+            strip.text.y = element_text(angle = 0, size = 8))
+  } else {
+    out +
+      scale_y_continuous(breaks = row_spine$row_id, labels = NULL,
+                         expand = g11_y_expand) +
+      theme(strip.text.y = element_blank())
+  }
+}
+
+# The leftmost panel. Same geometry, different source: one model per predictor
+# rather than one model containing many.
+g11_bivariate_panel <- panel_left %>%
+  ggplot(aes(y = row_id)) +
+  g11_band_layer() +
+  geom_blank(data = g11_extent) +
+  geom_vline(xintercept = 1, colour = "grey55", linewidth = 0.4) +
+  geom_linerange(aes(xmin = ci_low_robust, xmax = ci_high_robust),
+                 colour = "grey78", linewidth = 1.5, na.rm = TRUE) +
+  geom_linerange(aes(xmin = ci_low, xmax = ci_high, colour = domain),
+                 linewidth = 0.5, na.rm = TRUE) +
+  geom_point(aes(x = rate_ratio, colour = domain, shape = marker, alpha = marker),
+             size = 1.9, fill = "white", stroke = 0.7, na.rm = TRUE) +
+  facet_grid(domain ~ ., scales = "free_y", space = "free_y", switch = "y") +
+  scale_y_continuous(breaks = row_spine$row_id, labels = row_spine$term_label,
+                     expand = g11_y_expand) +
+  scale_x_log10(labels = scales::label_number(accuracy = 0.1)) +
+  coord_cartesian(xlim = g11_axis_limits) +
+  scale_colour_manual(values = domain_colours, guide = "none") +
+  scale_shape_manual(values = marker_shapes, guide = "none", na.translate = FALSE) +
+  scale_alpha_manual(values = marker_alpha, guide = "none", na.translate = FALSE) +
+  labs(subtitle = "BIVARIATE\nmodel-00, series S1\none model per predictor",
+       x = "Rate ratio (log)", y = NULL) +
+  g11_trace_theme() +
+  theme(axis.text.y = element_text(size = 7.2, hjust = 1),
+        strip.placement = "outside",
+        strip.text.y.left = element_text(angle = 0, size = 8))
+
+# ---- g11 ---------------------------------------------------------------------
+g11_panels <- cowplot::plot_grid(
+  plotlist = c(
+    list(g11_bivariate_panel),
+    purrr::map(g11_spec_ids, ~ build_estimate_panel(.x, show_labels = .x == "model_4"))
+  ),
+  nrow = 1, align = "h", axis = "tb",
+  rel_widths = c(2.15, 0.80, 0.80, 0.80, 2.15)
+)
+
+g11_title <- cowplot::ggdraw() +
+  cowplot::draw_label(
+    "Graph g11: Every Specification on One Row Axis",
+    fontface = "bold", size = 13, hjust = 0, x = 0.004, y = 0.82
+  ) +
+  cowplot::draw_label(
+    paste0(
+      "Graph g1 spent a column on the selection verdict. Here that column is spent on estimates instead, ",
+      "because in this layout selection is already visible: a variable a specification declined has no estimate in\n",
+      "its panel. Five panels, one row order, one x window. Row labels are repeated at both outer edges - ",
+      "right-hand labels are left-aligned so the two label blocks mirror each other and either can be used as the\n",
+      "reading anchor. Alternating grey bands mark variables and a hairline sits at every row, so a predictor can ",
+      "be traced straight across all five panels.\n",
+      "Open circles are reference levels, fixed at 1 by construction. Faded points are p >= 0.05. A grey cross at 1 ",
+      "marks a variable that specification was never shown; a wholly blank row is one it was shown and declined."
+    ),
+    size = 8, hjust = 0, x = 0.004, y = 0.30, lineheight = 1.25
+  )
+
+g11_caveat <- cowplot::ggdraw() +
+  cowplot::draw_label(
+    paste0(
+      "Caveats carried from the source reports. The bivariate panel is not fitted on the same rows as the four model panels: ",
+      "model-00 series S1 is per-predictor complete case (up to n = 63,843) while model-1 uses the shared complete-case sample ",
+      "(n = 48,967); model-00 series S2 quantifies that gap.\n",
+      "No panel shows the bootstrap intervals Sections 5.3 and 5.4 ask for - replicate weights are absent from the 2010 and 2014 PUMFs. ",
+      "The four model panels additionally ignore the selection step that chose their term lists, so their intervals are optimistic. ",
+      "Models 1 and 3 are two readings of one cross-validated fit, as are Models 2 and 4."
+    ),
+    size = 7.4, hjust = 0, x = 0.004, colour = "grey35", lineheight = 1.25
+  )
+
+g11_all_specifications <- cowplot::plot_grid(
+  g11_title,
+  g11_panels,
+  g11_caveat,
+  ncol = 1,
+  rel_heights = c(1.7, g1_figure_height - 3.2, 0.9)
+)
+
+print(g11_all_specifications)
+ggsave(paste0(prints_folder, "g11_all_specifications.png"),
+       g11_all_specifications,
+       width = 20, height = g1_figure_height + 0.6, dpi = 300, limitsize = FALSE)
+
 
 # ---- SECTION: Step 4 - Reading the Primary Model ------------------------------
 # The right panel of g1 in numbers, and the disagreements between the two

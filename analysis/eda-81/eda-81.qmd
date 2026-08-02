@@ -461,6 +461,59 @@ Three reading notes:
    optimistic in a way no correction in either report addresses.
 :::
 
+## Graph g11: the selection column, spent on estimates instead
+
+Graph g1 devotes a column to the selection verdict. That column turns out to be
+largely redundant, because in a wide enough layout **selection is already
+visible**: a variable a specification declined simply has no estimate in that
+specification's panel. Graph g11 spends the width on the three specifications g1
+had to leave out.
+
+Five panels, one row order, one x window. The design problem is horizontal
+traceability across five separated columns, and three devices carry it:
+
+- **Row labels are repeated at both outer edges.** The right-hand block is
+  left-aligned so that the two blocks mirror each other, and either can serve as
+  the reading anchor depending on which end of the graph the eye is at.
+- **Alternating grey bands mark variables**, not rows, so a multi-level factor
+  reads as one shaded block rather than four stripes.
+- **A hairline sits at every row**, and all five panels are drawn from the same
+  spine, so the rows cannot drift.
+
+Reading the selection verdict off this graph: a row with an estimate was
+retained; a row with a grey cross at 1 belongs to a variable that specification
+was never shown; a wholly blank row belongs to a variable it was shown and
+declined. The four perceived-health blocks in the Needs band are the clearest
+case — crossed out in Models 1 and 3, estimated in Models 2 and 4.
+
+```{r}
+#| label: g11-data-prep
+#| code-summary: Panel builders, the shared axis window, and the banding that carries the eye across
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: g11
+#| code-summary: Five panels on one row axis, with mirrored labels at both edges
+#| echo: false
+#| fig-width: 20
+#| fig-height: 20
+```
+
+The comparison g11 makes and g1 cannot is between the four specifications
+themselves. Two patterns are worth naming:
+
+- **The penalty rule matters far more than the perceived-health toggle.** Models
+  1 and 2 are sparse and Models 3 and 4 are dense, regardless of which predictor
+  set they were offered. The vertical axis of the 2×2 is doing most of the work.
+- **Perceived health does absorb signal, but locally.** Comparing Model 3 with
+  Model 4, the Needs band changes considerably while Exposure and Predisposing
+  barely move. The competition is with neighbouring health measures rather than
+  with the chronic conditions the study is about — which is reassuring for the
+  primary specification, though it is one comparison and not a proof.
+
 # Step 4: Reading the Primary Model
 
 ## Table t3: the right panel in numbers
