@@ -20,7 +20,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Mission
+# Mission of `eda-5`
 
 This EDA opens the "black box" of `days_absent_total` by examining the 8 individual LOP reason categories from which it is constructed. It directly addresses:
 
@@ -120,9 +120,17 @@ read_chunk("analysis/eda-5/eda-5.R")
 
 ```{r}
 #| label: declare-globals
-#| code-summary: Paths, LOP component map, constants
+#| code-summary: Paths, LOP component map, palettes, and constants
 #| echo: true
 #| results: show
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| code-summary: Analysis-specific helper functions (assign_day_range)
+#| echo: true
+#| results: hide
 #| code-fold: true
 ```
 
@@ -175,7 +183,7 @@ For complete data documentation, see the [Data Primer](../data-primer-1/univaria
 
 ```{r}
 #| label: g0-data-prep
-#| code-summary: Zero / non-zero group counts and weighted shares
+#| code-summary: Zero / non-zero group counts, with the non-zero group split by day-range band
 #| echo: true
 #| cache: true
 #| results: show
@@ -189,8 +197,8 @@ For complete data documentation, see the [Data Primer](../data-primer-1/univaria
 #| echo: true
 #| cache: true
 #| fig-width: 10
-#| fig-height: 3
-#| fig-cap: "G0: The analytical sample splits approximately 70/30 between workers with no missed days and those with ≥1 missed day — consistent with the zero-inflated structure described in the initial exploration of the data and confirmed in the 2026-05-15 review session. Sample size used for plotting: n = 63,843 respondents."
+#| fig-height: 3.6
+#| fig-cap: "G0: The analytical sample splits approximately 70/30 between workers with no missed days and those with ≥1 missed day — consistent with the zero-inflated structure described in the initial exploration of the data and confirmed in the 2026-05-15 review session. The non-zero segment is drawn as a gradient strip in the day-range ramp rather than a single block, so the reader can see which slice of the sample G01–G06 go on to decompose and G07–G09 go on to partition. Sample size used for plotting: n = 63,843 respondents."
 print(g0_lop_zero_vs_nonzero)
 ```
 
@@ -294,6 +302,89 @@ print(g05_lop_days_faceted_x31)
 #| fig-height: 9
 #| fig-cap: "G06: Same faceted structure as G05, but y now represents weighted days contributed by each bin (sum of survey weight × days in bin), not respondent counts. X remains fixed to 1-31 days and y is fixed to the observed weighted maximum across facets. Plotting unit is reason-level records (reason x respondent): n = 22,456 records. Respondents with multiple reasons can appear in more than one facet."
 print(g06_lop_weighted_days_faceted_x31)
+```
+
+## G07–G09 — From Reasons to Outcome Groups
+
+**Framing question**: Within the 18,837 respondents who missed at least one day, who missed it to a chronic condition?
+
+G0 through G06 read the ≥1-day group through the **reason** lens: eight LOP components, each with its own distribution. That lens is deliberately many-to-one — a respondent who missed two days to a cold and five to a chronic condition appears in two facets, and the facet totals therefore exceed the number of people.
+
+To hand this group over to [EDA-72](../eda-72/eda-72.html), we need a **partition** instead: every respondent counted once, in exactly one place. So we collectively gather all seven non-chronic components into a single group. That bucket is not a substantive category — nobody has "a non-chronic condition." It exists to serve as the **reference** against which the group reporting at least one day missed to a chronic condition can be read.
+
+**The three outcome groups** (definitions and colours carried over unchanged from EDA-72, so the two reports interlock):
+
+| Group | Definition | Colour |
+|-------------------|----------------------------------|-------------------|
+| **No Days** | `days_absent_total == 0` | light grey |
+| **Chronic Days** | `days_absent_chronic > 0` — at least one day attributed to a chronic condition | reddish-brown |
+| **Non-Chronic Days** | `days_absent_chronic == 0 & days_absent_total > 0` — missed days, none of them chronic | dark blue |
+
+The groups are mutually exclusive and exhaustive. Chronic Days and Non-Chronic Days together reconstitute exactly the "at least one missed day" segment of G0 (n = 18,837), which the script asserts rather than assumes.
+
+> **Measurement caution inherited from EDA-72**: `days_absent_chronic` is a *component* of `days_absent_total`, not a parallel measure. Every graph below therefore places both groups on the same variable, `days_absent_total`. One group's chronic count is never compared against another group's total.
+
+```{r}
+#| label: g07-data-prep
+#| code-summary: Derive the three outcome groups; assert they reconstitute the G0 ≥1-day segment
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+### G07 - Three-Group Partition
+
+```{r}
+#| label: g07
+#| code-summary: G07 — Horizontal stacked bar, the three outcome groups
+#| echo: true
+#| cache: true
+#| fig-width: 10
+#| fig-height: 3.8
+#| fig-cap: "G07: The same bar as G0, now split three ways. The ≥1-day group divides into a small Chronic Days group and a Non-Chronic Days group roughly four times its size. Because the split is a partition, the two positive-day segments sum exactly to the G0 non-zero segment. Sample size used for plotting: n = 63,843 respondents."
+print(g07_outcome_group_partition)
+```
+
+```{r}
+#| label: g08-data-prep
+#| code-summary: Bin days for each outcome group plus a combined panel
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+### G08 - Group Facets
+
+```{r}
+#| label: g08
+#| code-summary: G08 — Three-facet histogram, chronic / non-chronic / combined
+#| echo: true
+#| cache: false
+#| fig-width: 10
+#| fig-height: 9
+#| fig-cap: "G08: The G03 construction re-cut by outcome group. Unlike G03, the facets are mutually exclusive, so each respondent is counted exactly once and the two group facets sum to the combined facet. Free y-scales keep the small Chronic Days facet readable next to the much larger Non-Chronic one. Sample size used for plotting: n = 37,674 plotted records (18,837 group records + 18,837 combined-facet records)."
+print(g08_outcome_group_faceted)
+```
+
+### G09 - Overlaid Comparison
+
+```{r}
+#| label: g09-data-prep
+#| code-summary: Compute within-group percentages for the two positive-day groups
+#| echo: true
+#| cache: true
+#| results: show
+```
+
+```{r}
+#| label: g09
+#| code-summary: G09 — Chronic and non-chronic distributions overlaid on within-group percentages
+#| echo: true
+#| cache: false
+#| fig-width: 10
+#| fig-height: 5.5
+#| fig-cap: "G09: G08 with the combined facet dropped and the two groups overlaid in a single panel. The vertical axis is a within-group percentage because the groups differ in size by roughly a factor of four; each curve sums to 100% over its own group. This makes the shape difference legible: the non-chronic group is concentrated in the shortest absences, while the chronic group is flatter and carries the long right tail. Sample size used for plotting: n = 18,837 respondents (3,626 chronic + 15,211 non-chronic)."
+print(g09_outcome_group_overlay)
 ```
 
 ## G1 — Prevalence of Each LOP Reason Category

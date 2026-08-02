@@ -51,13 +51,26 @@ role of the chronic-condition component.
    absence?
 6. Are all 8 LOP components complete in the analytical sample, validating the element-wise
    exclusion step that removed 405 respondents with incomplete LOP data?
+7. Within the respondents who missed at least one day, how does the group reporting chronic
+   days compare with the collapsed non-chronic reference group — and does that split
+   reconcile exactly with the outcome-group partition used in eda-72?
 
 ## Target Graph Families
 
-- **G0** (§4.2): Orientation — zero vs non-zero split in the analytical sample
-  - g0: horizontal stacked bar (zero vs ≥1 day)
+- **G0** (§4.2): Orientation — zero vs non-zero split, then two ways of opening the
+  non-zero group (by reason, then by outcome group)
+  - g0: horizontal stacked bar (zero vs ≥1 day); the ≥1-day segment is a gradient strip
+    in the day-range ramp, tying it to g01–g06 and g07–g09
   - g01: histogram of total missed days among non-zero group, coloured by day range
   - g02: day-range breakdown stacked bar (1–5, 6–10, 11–15, 16–30, 31+)
+  - g03: faceted histograms of days absent by LOP reason, plus a Total facet
+  - g04: same facets with free x and y scales
+  - g05: reason-only facets, x fixed to 1–31 and y fixed to the observed maximum
+  - g06: g05 structure with y as weighted days contributed per bin
+  - g07: three-group outcome partition (No Days / Chronic Days / Non-Chronic Days),
+    definitions and colours carried over unchanged from eda-72
+  - g08: three-facet histogram — chronic, non-chronic, and the two combined
+  - g09: chronic and non-chronic overlaid on within-group percentages
 - **G1** (§4.1): Prevalence of each LOP reason — % of sample reporting ≥1 day per reason
   - g1: horizontal bar chart, ordered by weighted prevalence
   - g11: faceted by survey cycle (2010–2011 vs 2013–2014)
@@ -84,6 +97,9 @@ HTML (interactive, code-fold, table of contents)
 ## Upstream EDAs
 
 - eda-1: style reference only
+- eda-72: source of the three-group outcome partition (No Days / Chronic Days /
+  Non-Chronic Days) and its colour convention; g07–g09 adopt both unchanged so the two
+  reports interlock
 - eda-3 (pending): will cover primary vs sensitivity outcome comparison and §4.1 weighted
   distributional statistics; this EDA complements that planned analysis
 
