@@ -21,6 +21,7 @@ project:
     - content/model/lasso-rehearsal.qmd
     - content/model/variable-selection.qmd
     - content/model/condition-specific-models.qmd
+    - content/model/sex-stratified-models.qmd
     - content/analysis/story-1.qmd
     - content/pipeline/pipeline-guide.qmd
     - content/pipeline/cache-manifest.qmd
@@ -70,6 +71,8 @@ website:
             href: content/model/variable-selection.qmd
           - text: "Condition-Specific Models (model-2)"
             href: content/model/condition-specific-models.qmd
+          - text: "Sex-Stratified Models (model-3)"
+            href: content/model/sex-stratified-models.qmd
       - text: "Analysis"
         menu:
           - text: "Story 1"

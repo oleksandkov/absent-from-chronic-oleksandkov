@@ -1,0 +1,9 @@
+---
+title: "Sex-Stratified Models"
+format:
+  html:
+    page-layout: full
+    toc: false
+---
+
+<meta http-equiv="refresh" content="0; url=model-3.html">

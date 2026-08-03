@@ -231,6 +231,44 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
       "problemMatcher": []
     },
+    {
+      "label": "Run Model-3 Script",
+      "detail": "Run analysis/model-3/model-3.R (sex-stratified models, Sections 5.9 and 5.10)",
+      "type": "shell",
+      "command": "Rscript",
+      "args": [
+        "analysis/model-3/model-3.R"
+      ],
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Render Model-3 QMD",
+      "detail": "Render analysis/model-3/model-3.qmd to HTML",
+      "type": "shell",
+      "command": "quarto",
+      "args": [
+        "render",
+        "analysis/model-3/model-3.qmd"
+      ],
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Render Frontend-1 Site",
+      "detail": "Render the _frontend-1 Quarto website into _frontend-1/_site",
+      "type": "shell",
+      "command": "quarto",
+      "args": [
+        "render"
+      ],
+      "options": { "cwd": "${workspaceFolder}/_frontend-1" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
 
     // ── Diagram rendering ─────────────────────────────────────────────────────
     {

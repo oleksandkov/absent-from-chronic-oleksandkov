@@ -1,0 +1,668 @@
+---
+title: "Model 3: Sex-Stratified Models"
+subtitle: "Sections 5.9 and 5.10 implemented in ten reviewable steps"
+author: "Analysis Team"
+date: last-modified
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    toc-depth: 3
+    code-fold: show
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission — `model-3`
+
+Model 1 asked "what predicts absence among Canadian workers?" and answered it once. Model 2 asked it seventeen more times, once inside each chronic-condition subgroup. Model 3 asks it twice — once among female respondents and once among male respondents — which is what Section 5.9 requests. It is a self-contained estimation script: it reads the Ellis parquet, builds its own frames, runs its own selection, and persists its own evidence. Nothing in it is loaded from model-1 or model-2.
+
+What it borrows from both is *shape*. The same ten steps, the same artifact roles — `t6` is the deliverable table, `t62` the full ledger, `t61` the in-sample metrics, `t63` and `t64` the held-out ones, `t7` the manifest — and the same helper functions under the same names. A reader who has read either predecessor should be able to read this one without relearning anything.
+
+One thing genuinely differs, and it is the reason model-3 exists as a separate script rather than as a re-run of model-1 on two subsets. Section 5.9 asks not only for two models but for the **difference** between them: the stratification is there to "highlight potential differences in the determinants of absenteeism between men and women." Two selected models cannot supply that difference cleanly, because a term absent from one of them may be absent because the association is absent, or because a penalty declined to select it — and the output does not distinguish the two. Artifacts `t65`, `g5` and `g51` answer the comparison question on a *union model* instead, and Step 8 explains why.
+
+**This report is built to be vetted, not merely read.** As in model-1 and model-2, it is organised as ten steps, each closing with a *review point* naming exactly what a reader should agree or disagree with before the next step is allowed to stand.
+
+::: callout-important
+## The status of these estimates
+
+Model 3 is the **definitive estimation script for Sections 5.9 and 5.10**. The fitted objects, coefficient ledgers, and fold-level metrics it writes to disk are the versioned evidentiary record for those sections. Downstream reports should read those artifacts and interpret them; they should not re-estimate. Step 10 lists every artifact with the call that reloads it.
+
+Three caveats travel with every number here and cannot be removed by re-running anything:
+
+1.  **The intervals are not the intervals the proposal asked for.** Bootstrap replicate weights do not exist in the 2010 or 2014 PUMF (inherited decision 10). Three interval variants are reported instead, two of which are explicit lower bounds on the understatement.
+2.  **Estimation and selection used the same stratum.** The rate ratios in Step 8 are conditional on a procedure that consumed the whole stratum. Step 9 measures how much that flatters them.
+3.  **The female–male comparison in Table t65 is a screen, not a set of confirmatory tests.** It carries no multiplicity control, and every row inherits the selection step that produced the union term set.
+:::
+
+**Research questions:**
+
+1.  What does Section 5.9 mean by "female" and "male" in files that carry a binary sex item and no gender item, and what follows from that for how this report may be worded?
+2.  Do the two strata differ in *composition* before any model is fitted, and by enough to confound a later difference in what the penalty selects?
+3.  What does the Section 5.4 LASSO procedure retain inside each stratum, and do the two strata retain the same things?
+4.  What is the adjusted prevalence rate ratio for every retained term in every stratum, and how wide is the interval once the missing bootstrap is accounted for?
+5.  Where do the female and male associations genuinely differ, as distinct from where the two selections happened to disagree?
+6.  How well does each sex-stratified model predict on respondents it has not seen, and how stable is its selected variable list when a fifth of a stratum is withheld?
+
+# Definition of Terms
+
+**Stratum.** The set of respondents of one sex within the model-1 complete-case frame. The two strata are disjoint and exhaustive: together they *partition* the Section 5.5 analytic sample, so every respondent in Table 3 appears in exactly one row-block of Table 5. This is the structural difference from model-2, whose seventeen subgroups overlapped heavily.
+
+**Sex, not gender.** The PUMF carries `DHH_SEX`, a binary item, in both cycles. Neither cycle carries a gender-identity question. The report says *sex* throughout and does not use the two words interchangeably. Decision 31 records this; it is a property of the instrument, not a modelling choice.
+
+**Stratification as interaction.** Fitting the model separately by sex allows *every* coefficient to differ between the sexes, including the dispersion parameter. A single set of sex-by-term interactions in a pooled model would allow only the chosen terms to differ. Stratification is therefore the more permissive of the two, which is why no interactions are introduced on top of it (decision 33).
+
+**Union model.** A negative binomial model fitted, without penalty, on the union of the terms *either* stratum retained under the primary specification — then fitted separately in each stratum. It is the basis of the female–male comparison (decision 39). Its purpose is to guarantee that every term has an estimate on both sides, so that "not selected" is never read as "null."
+
+**Ratio of rate ratios.** The female rate ratio divided by the male one, for the same term in the union model. A value of 1 means the association is identical in the two strata. Its interval and $z$-test use $\mathrm{se} = \sqrt{\mathrm{se}_F^2 + \mathrm{se}_M^2}$, which is valid precisely because the two strata are disjoint samples.
+
+**`lambda.min` / `lambda.1se`.** The penalty minimising cross-validated deviance, and the largest penalty whose deviance remains within one standard error of that minimum. Section 5.5 designates the second as primary. Model 2 reversed that designation for small subgroups; model-3 does *not* adopt the reversal, and decision 35 says why.
+
+**Unstable term.** A term whose standard error exceeds 2 on the log scale, meaning its rate-ratio interval spans more than four orders of magnitude. Such terms are marked rather than removed; their point estimates should not be quoted.
+
+**Standardised difference.** For a design column, the female-minus-male difference in weighted means divided by the pooled standard deviation. It is used in Step 2 to describe how far the two strata differ in composition, before any model is fitted.
+
+**Held out.** Computed on respondents the model was not fitted to. Section 5.10 asks for held-out error explicitly, and it is not the same quantity as the in-sample error a single fit reports.
+
+# Environment
+
+```{r}
+#| code-summary: Reconciles working directory between execution modes
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir='../../') # keep this chunk isolated
+```
+
+```{r}
+#| label: set_options
+#| code-summary: Report-wide formatting options
+#| echo: false
+#| results: hide
+#| message: false
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results = 'show',
+  message = FALSE,
+  warning = FALSE,
+  comment = NA,
+  tidy = FALSE,
+  fig.path = 'figure-png-iso/'
+)
+echo_chunks <- FALSE
+message_chunks <- FALSE
+options(width = 100)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/model-3/model-3.R")
+```
+
+```{r}
+#| label: load-packages
+#| code-summary: Packages used in the current report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: Project functions and Alberta visual identity colours
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: Paths, seed, the stratification variable, the four specifications, and the decision registry
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| code-summary: Helpers for stratum construction, penalised fitting, and negative binomial refitting
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+# Data
+
+```{r}
+#| label: load-data
+#| code-summary: Load the Ellis respondent-level analytical parquet
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: tweak-data-0
+#| code-summary: Build the complete-case frame and partition it into the two strata
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: inspect-data-0
+#| code-summary: Structure of the source table
+#| echo: false
+#| code-fold: true
+```
+
+# Data Context
+
+For complete data documentation, see the [Data Primer](../data-primer-1/data-primer-1.html). This section covers only what Model 3 touches. The estimation Model 3 stratifies is documented in [Model 1](../model-1/model-1.html); the condition-specific companion is [Model 2](../model-2/model-2.html).
+
+## Tables and columns
+
+```{r}
+#| label: data-context-tables
+#| code-summary: Which table this analysis reads, and the partition it builds from it
+#| echo: false
+```
+
+## A single respondent
+
+One row from the female stratum, shown in full. Two things are worth checking in it: that a row is a person, and that the stratifying variable reads `Female` — which is the whole reason sex is removed from the candidate set inside its own stratum.
+
+```{r}
+#| label: data-context-person
+#| code-summary: Grain proof and one respondent from the female stratum
+#| echo: false
+```
+
+## Distributions
+
+The outcome is shown *inside* the strata, with the pooled sample beside it, because the Section 5.9 models are fitted to the strata and the reader needs to see whether stratifying changes the shape of the outcome or only its level.
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: The outcome inside each stratum, with the pooled sample for reference
+#| echo: false
+```
+
+::: callout-note
+## Reading the stratum outcome summary
+
+Two features govern everything downstream. The variance-to-mean ratio stays far above 1 in both strata, so stage two is negative binomial throughout, exactly as in model-1 and model-2 — and the ratio is of similar magnitude in the two, so the same likelihood is appropriate on both sides of the comparison. And the share of respondents at zero days stays high in both, which is why the C-statistic in Step 9 is a narrow instrument here and why its comparable-pairs share is reported beside every value.
+:::
+
+# Analysis
+
+## Step 1 — The Stratification Variable
+
+Section 5.9 says "female respondents" and "male respondents." Establishing what those words denote in terms of items that exist in the 2010 and 2014 Public Use Microdata Files is the first substantive act of the report. Unlike model-2's condition roster, nothing is lost in the mapping — but the vocabulary is not interchangeable and the report has to commit to one.
+
+```{r}
+#| label: t1
+#| code-summary: The stratification variable as the PUMF carries it
+#| echo: false
+#| results: asis
+```
+
+Two rows of Table t1 are the ones to read. There is no gender item in either cycle, so the report says *sex* and means the `DHH_SEX` question; and sex leaves the candidate set when it becomes the stratification, because a variable that is constant inside a stratum carries no information there.
+
+```{r}
+#| label: t11
+#| code-summary: Sex stratum inventory
+#| echo: false
+#| results: asis
+```
+
+Table t11 carries both sample sizes Section 5.9 asks for — unweighted $n$ and weighted $N$ — and one it does not: the number of respondents in each stratum reporting at least one day absent. That third column is the one that limits a count model, and it does not divide between the strata in the same proportion the sample size does.
+
+::: callout-tip
+## Review point 1
+
+Agree or disagree with the stratification in Table t1. Three specific questions:
+
+1.  Is `DHH_SEX` the intended stratifier, or was a gender construct meant — in which case the analysis cannot be delivered from these files and needs a different data source.
+2.  Should the report be worded in terms of sex throughout, as decision 31 commits it to, or is "men and women" acceptable shorthand in the manuscript despite the instrument being a sex item?
+3.  Section 5.9 asks for two models. Should a third, pooled model with sex-by-term interactions be reported beside them, or does the stratification supersede it? Decision 33 records the argument that stratification is the more permissive of the two.
+:::
+
+## Step 2 — Stratum Feasibility and Composition
+
+Neither stratum is small, so the feasibility question that dominated model-2 is not in doubt here. The question that replaces it is *composition*: the female and male strata are different populations, and a difference in what the penalty selects may be a difference in who is in the stratum rather than in how absence is produced.
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: Compute per-stratum candidate counts, design width, and between-stratum standardised differences
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: g1
+#| code-summary: Graph g1 — how the two strata differ before any model is fitted
+#| echo: false
+#| fig-width: 8.5
+#| fig-height: 8.5
+```
+
+Graph g1 is the diagnostic that model-2 did not need. Every point is a design column that the Section 5.4 candidate set would produce, and its position is how far the two strata differ on it. The dotted lines mark $\pm 0.1$, the conventional threshold below which an imbalance is treated as negligible. Columns that sit far from zero are the ones to hold in mind for the rest of the report: if such a variable is later retained in one stratum and not the other, prevalence is a live explanation and association is not the only one.
+
+```{r}
+#| label: t2
+#| code-summary: Stratum feasibility ledger
+#| echo: false
+#| results: asis
+```
+
+The last two columns of Table t2 are the reason model-2's small-subgroup machinery is absent here. Both strata carry hundreds of respondents per design column, so no minimum-size floor is needed, no $n < 500$ flag applies, and the penalty is not doing the work that the data cannot.
+
+```{r}
+#| label: out1
+#| code-summary: What stratification does to the candidate set
+#| echo: false
+```
+
+::: callout-tip
+## Review point 2
+
+Agree or disagree with three choices about the candidate set.
+
+1.  Decision 33 removes sex and nothing else. Should any other variable be removed a priori inside a stratum — for example, items whose meaning differs by sex — or is dropping only what becomes constant the right rule?
+2.  Should the standardised differences in Graph g1 carry a formal threshold that triggers an action, or are they a reading aid only? They currently trigger nothing; they exist so that a later asymmetry in selection can be checked against composition.
+3.  Decision 32 filters the model-1 frame rather than re-deriving complete cases inside each stratum. Filtering keeps Table 5 describing the same respondents as Table 3, at the cost of importing model-1's missingness rule. Is that the right trade?
+:::
+
+## Step 3 — The Stratum Samples
+
+```{r}
+#| label: out2
+#| code-summary: Sample construction arithmetic, and the size of the composition gap
+#| echo: false
+```
+
+The two strata sum exactly to the analytic frame. That arithmetic is worth stating because it is what model-2 could not state: seventeen condition subgroups overlapped heavily and summed to far more than their frame, which required a comorbidity correction before any coefficient could be read. Nothing of the kind is needed here. What replaces it is the imbalance counted at the foot of out2.
+
+```{r}
+#| label: t21
+#| code-summary: Chronic-condition prevalence within each stratum
+#| echo: false
+#| results: asis
+```
+
+Table t21 is the specific form the composition problem takes in this study. The exposures the proposal is about — the chronic conditions — are themselves unequally distributed between the sexes. A condition retained in the female model and not the male one may be more prevalent among women, more strongly associated with absence among women, or simply better powered there. Table t21 settles the first of those three. The second is what Step 8 exists to answer; the third is what Step 9 measures.
+
+::: callout-tip
+## Review point 3
+
+Agree or disagree that prevalence differences are reported and left standing rather than adjusted for. The alternative would be to reweight one stratum to the other's composition, which would make the two models describe a common hypothetical population but would no longer describe either observed one. Section 5.9 asks for models of female and male respondents, which is what is estimated; the reweighted alternative is a different question and is not attempted here.
+:::
+
+## Step 4 — The Decision Registry
+
+Model 3 inherits nineteen decisions from model-1 and makes ten of its own. It does **not** inherit model-2's decisions 20 through 30, which are specific to condition subgroups; where model-3 needs the same device — the unstable-term flag, the within-stratum design effect, the two cross-validation variants — it re-makes the decision on its own account, so that changing model-2 cannot silently change model-3.
+
+```{r}
+#| label: t3
+#| code-summary: Decisions 31 through 40, with alternatives and reversal instructions
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: t31
+#| code-summary: The nineteen decisions inherited from model-1
+#| echo: false
+#| results: asis
+```
+
+::: callout-warning
+## The same decision cannot be reversed here either
+
+Inherited decision 10 records that bootstrap variance estimation is impossible with these data. Section 5.9 asks for 500 bootstrap replicate weights in the same words Sections 5.3, 5.5 and 5.7 use, and the answer is the same: CCHS bootstrap replicate weights begin with the 2015 cycle, neither the 2010 nor the 2014 PUMF carries them, and strata and PSU identifiers are suppressed.
+
+Model 3 responds as its predecessors do — a Wald interval beside a Huber–White sandwich interval and a Kish-inflated interval — with the design effect computed *within each stratum* (decision 36), because the weight distribution inside a sex stratum is not the weight distribution of the pooled sample. Output out5 shows how far the two differ.
+:::
+
+::: callout-tip
+## Review point 4
+
+Read decisions 31 through 40. Three are consequential and the rest are bookkeeping:
+
+1.  **Decision 34** carries all four Section 5.4 specifications rather than the two model-2 could afford. This is what makes Table 5 readable row-for-row against Table 3.
+2.  **Decision 35** keeps `lambda.1se` primary, declining model-2's reversal. The argument is scale, and Table t5 supplies the evidence for or against it.
+3.  **Decision 39** builds the female–male comparison on a union model rather than on the two selected models. This is the report's central methodological choice and Step 8 is where its consequences appear.
+:::
+
+## Step 5 — The Four Specifications
+
+Section 5.9 says selection should follow the Section 5.4 procedure. Section 5.4 describes four specifications, arranged on two axes: a perceived-health toggle and a penalty rule. Model 2 carried only two of them, because a condition subgroup of a few hundred respondents cannot support a four-way comparison. A sex stratum is roughly half the Section 5.5 analytic sample, so that constraint does not apply and model-3 answers the reference literally.
+
+```{r}
+#| label: t4
+#| code-summary: The four specifications carried into each stratum
+#| echo: false
+#| results: asis
+```
+
+The arithmetic in the "shares a fit with" column matters for reading the rest of the report. The predictor set defines the cross-validated fit; the penalty rule selects a model from it. Two predictor sets in two strata therefore cost four penalised fits, not eight, and Models 1 and 3 differ only in where on the same path they are read.
+
+::: callout-tip
+## Review point 5
+
+Agree or disagree that all four specifications should be carried into the deliverable table. The alternative is to report only Model 1 and relegate the rest to an appendix, which would make Table 5 far shorter and would match the way Section 5.9 is worded — it asks for "a model," singular, per sex. The argument for carrying four is that it makes the sex-stratified table comparable with Table 3 specification by specification, and that the cost is a wider table rather than more computation.
+:::
+
+## Step 6 — Stage One, Per-Stratum Penalised Poisson
+
+Four weighted L1-penalised Poisson fits: two strata by two predictor sets, each with its own five-fold cross-validated penalty path.
+
+```{r}
+#| label: g2-data-prep
+#| code-summary: Fit and persist one cross-validated penalised Poisson model per stratum and predictor set
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: g2
+#| code-summary: Graph g2 — cross-validated deviance inside each stratum
+#| echo: false
+#| fig-width: 10
+#| fig-height: 8
+```
+
+The quantity to read in Graph g2 is the distance between the two dashed lines relative to the depth of the minimum. That distance is how much room the penalty has: where the curve is flat over a wide range, cross-validation cannot distinguish penalties there, and the two rules will disagree a great deal about how many variables to keep. Comparing the female and male panels of the same predictor set is the first indication of whether the two strata are equally decisive.
+
+```{r}
+#| label: g3
+#| code-summary: Graph g3 — coefficient paths by Andersen domain, one panel per fit
+#| echo: false
+#| fig-width: 10
+#| fig-height: 8
+```
+
+Reading each panel right to left, the order in which coefficients leave zero is the order in which that stratum insists on them. Comparing the female and male panels of the same predictor set is the first visual answer to Section 5.9 — but only the first, and a weak one: the paths show what the penalty did, not what the associations are, and Step 8 is where the two are separated.
+
+::: callout-tip
+## Review point 6
+
+Agree or disagree with the fitting choices, which are inherited unchanged from model-1: five folds, seed 42, survey weights passed to `cv.glmnet`, cycle exempt from the penalty. One consideration is new. Each stratum's folds are cut inside that stratum, so the female and male cross-validations are independent and use different respondents. An alternative would cut folds once in the pooled frame and inherit them, which would make the two penalty paths share a fold structure. Neither is obviously right; the current choice keeps each stratum a self-contained analysis.
+:::
+
+## Step 7 — Selection Results
+
+```{r}
+#| label: t5
+#| code-summary: What each stratum retained under each of the four specifications
+#| echo: false
+#| results: asis
+```
+
+Two comparisons carry Table t5. Reading **across** a specification, the gap between the two strata is the first quantitative answer to Section 5.9: if the female and male models retain different numbers of variables, the determinants of absence are not equally identifiable in the two populations. Reading **down** a stratum, the gap between the `1SE` rows and the `min` rows is the evidence for decision 35 — whether the parsimonious rule still has something to say at stratum scale, which is exactly the question on which model-2 answered differently.
+
+```{r}
+#| label: t51
+#| code-summary: Which variables each stratum retained, and under which specifications
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: g4
+#| code-summary: Graph g4 — selection grid, female against male in every specification
+#| echo: false
+#| fig-width: 11
+#| fig-height: 13
+```
+
+Graph g4 is the visual form of the selection result, and it is read across the two columns of a panel rather than down. A row coloured in both columns is a predictor both sexes insist on. A row coloured in one is where Section 5.9 has something to say — **potentially**. The word is doing real work: an asymmetry in this grid is a fact about the *procedure*, and it becomes a fact about the *data* only if the other stratum's estimate for that term is also small, which the grid cannot show. Table t65 is where that check happens, and Step 8 explains why it needs a different model to do it.
+
+::: callout-tip
+## Review point 7
+
+Two questions to settle before the estimates in Step 8 may be read.
+
+1.  Should "retained" continue to mean "at least one design column survived"? Inherited decision 9 records the alternative. It matters here because a factor retained in one stratum on the strength of a single level will appear in Graph g4 as a whole-variable asymmetry.
+2.  Is the asymmetry in Graph g4 worth reporting in its own right, or only as a route to Table t65? Model 2 reported its selection grid as a central artifact because cross-condition recurrence was itself a finding. Here the analogous claim would be weaker, since two columns cannot establish a pattern the way seventeen can.
+:::
+
+## Step 8 — Stage Two, Negative Binomial Estimation
+
+Each retained set is re-estimated without penalty under a negative binomial likelihood, inside its own stratum. This step answers Section 5.9 and produces deliverable **Table 5**. Before the estimates, the instruments used to bracket their uncertainty.
+
+```{r}
+#| label: t6-data-prep
+#| code-summary: Fit and persist the eight sex-stratified negative binomial models
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: out5
+#| code-summary: Variance-estimation instruments, computed within each stratum
+#| echo: false
+```
+
+The design effect is computed within each stratum rather than inherited from the pooled sample, because a design effect describes the weight distribution of the sample whose intervals it widens. Both instruments should land close to their model-1 values, and that is the expected result rather than a reassuring one: halving a sample does not change how unequal its weights are.
+
+```{r}
+#| label: t6
+#| code-summary: Table t6 — sex-stratified rate ratios under all four specifications
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: t62
+#| code-summary: Table t62 — the full Section 5.9 coefficient ledger
+#| echo: false
+#| results: asis
+```
+
+Table t62 is the compliance artifact: every quantity Section 5.9 names — unweighted $n$, weighted $N$, coefficient, standard error, prevalence rate ratio, interval and Wald $p$-value — for every term in every sex-stratified model. Read the three interval columns together, as in model-1: where the Wald and Kish intervals agree about whether they contain 1, the conclusion survives the weighting problem; where they disagree, the term is unresolved rather than null or significant.
+
+### The comparison Section 5.9 actually asks for
+
+Tables t6 and t62 report the two models. They do not — and cannot — report the difference between them, because a term is present in one of them and absent from the other for two reasons that the tables cannot separate: the association may be absent, or the penalty may simply have declined to select it. Reading a blank cell as a null is the single most likely misreading of Table 5, and it is a misreading the table's own structure invites.
+
+Decision 39 removes the ambiguity by refitting both strata, without penalty, on the **union** of the terms either stratum retained under the primary specification. Every term then has an estimate on both sides. What the penalty did is reported separately, as a fact about the procedure, in the "Retained in" column.
+
+```{r}
+#| label: t65
+#| code-summary: Table t65 — the female–male comparison, estimated on the union model
+#| echo: false
+#| results: asis
+```
+
+Table t65 is this report's central artifact and the reason model-3 is not simply model-1 run twice. Three columns are read together. "Retained in" says what the selection procedure did. "PR female" and "PR male" say what the data say, for every term, on both sides. "Ratio F / M" is the multiplicative gap between them, with an interval built from the two independent stratum standard errors.
+
+The rows worth attention are the ones where those two accounts disagree — a term retained in only one stratum whose ratio of rate ratios is nonetheless close to 1 is a selection artifact, not a sex difference; a term retained in both whose ratio is far from 1 is a sex difference that the selection grid conceals entirely.
+
+::: callout-important
+## Table t65 is a screen, not a set of tests
+
+Every $p$-value in it is a single-comparison Wald test, computed over a term set that a LASSO chose using the same respondents. There is no multiplicity control, and the selection step is not accounted for in any of the intervals. The table's purpose is to *rank* candidate sex differences so that a small number can be discussed with the care they need — not to certify any of them. The Kish-inflated $p$-value column is there as a reminder of how much of the apparent precision belongs to the assumption of simple random sampling.
+:::
+
+```{r}
+#| label: g5
+#| code-summary: Graph g5 — the same terms estimated in both strata
+#| echo: false
+#| fig-width: 10
+#| fig-height: 13
+```
+
+Graph g5 is Table t65 in the form that makes the comparison visible: each term appears twice, once per stratum, ordered by the size of the gap. The top and bottom of each domain panel are where Section 5.9 has something to say; the middle is where the two sexes agree.
+
+```{r}
+#| label: g51
+#| code-summary: Graph g51 — how far each association differs between the sexes
+#| echo: false
+#| fig-width: 10
+#| fig-height: 13
+```
+
+Graph g51 plots the difference itself rather than the two estimates. A point at 1 means the association is identical in the two strata; distance from 1 is the size of the sex difference and the interval is its uncertainty. The filled points are a screening device with the same caveat as Table t65 attached: with this many comparisons and no multiplicity control, some intervals will exclude 1 by construction.
+
+```{r}
+#| label: t61
+#| code-summary: Table t61 — in-sample fit, error, and discrimination by stratum
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: out3
+#| code-summary: Convergence, dispersion, and the empty-selection count
+#| echo: false
+```
+
+One warning about Table t61 that it shares with model-2's version: **the rows are not comparable across strata.** Each is computed on a different sample with a different outcome distribution, and AIC and BIC come from a weighted pseudo-likelihood on different data. Read the table down a stratum — comparing the four specifications within one sex — and never across. The dispersion parameter is the one exception, and only because decision 37 rescales the weights inside each stratum specifically to make it comparable.
+
+Output out3 answers Section 5.9's request that non-convergence be reported, and counts empty selections. The empty-selection count is also the direct evidence for decision 35: if the parsimonious penalty returns something in every stratum, Section 5.5's designation of it as primary needs no amendment, and model-2's reversal stays confined to the subgroups that motivated it.
+
+::: callout-tip
+## Review point 8
+
+Agree or disagree that Tables t6, t62 and t65 together are fit to serve as the study's Table 5. Four questions:
+
+1.  Should the deliverable table carry all four specifications, or should Model 1 stand alone with the rest in an appendix?
+2.  Is decision 39's union model the right basis for the female–male comparison? The alternatives — comparing the two selected models directly, or restricting to terms selected in both — are recorded with it. Both are simpler and both are more likely to be misread.
+3.  Should Table t65 carry any multiplicity adjustment, or is a screen presented as a screen the honest presentation? Adjusting would change what the table is for.
+4.  Is the `UNSTABLE` flag at a standard error of 2 on the log scale the right threshold at this sample size? It was set for model-2's small subgroups and re-made here; at stratum scale it may be too permissive to catch anything.
+:::
+
+## Step 9 — Section 5.10, Held-Out Performance
+
+Section 5.10 asks for AIC, BIC, McFadden's pseudo-$R^2$, a C-statistic, and RMSE and MAE "computed on the withheld test fold," averaged over five folds, for each sex-stratified model. Table t61 gave the in-sample versions. This step supplies the rest.
+
+Unlike Section 5.8, Section 5.10 does not offer leave-one-out as an alternative — which is consistent, because both strata are large. Five folds also keep model-3 on the same footing as model-1 and model-2. Decision 38.
+
+```{r}
+#| label: t63-data-prep
+#| code-summary: Five-fold cross-validation of every stratum and specification, both variants
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: t63
+#| code-summary: Table t63 — held-out performance, term set fixed across folds
+#| echo: false
+#| results: asis
+```
+
+Table t63 is the literal answer to Section 5.10: the term set is what the whole stratum's LASSO chose, and the negative binomial is refitted five times with a fifth of the stratum withheld each time. It is also, for that reason, optimistic — the penalty that produced the term list saw every respondent it is now being scored on.
+
+```{r}
+#| label: t64
+#| code-summary: Table t64 — held-out performance, selection re-run inside each fold
+#| echo: false
+#| results: asis
+```
+
+Table t64 removes that advantage by re-running the whole two-stage procedure inside each training fold. The term-count range is the column to read first. Model 1 found the selected set unstable even at $n = 48{,}932$, ranging from eight to thirty-eight terms across folds; a stratum is about half that, so a wider range here is the expected result and a narrow one would be the surprise.
+
+```{r}
+#| label: g6
+#| code-summary: Graph g6 — held-out performance by fold, female against male
+#| echo: false
+#| fig-width: 11
+#| fig-height: 5.5
+```
+
+Graph g6 shows the five folds individually rather than only their mean, for the primary specification. The comparison it is built for is between the *spread* of the folds and the *gap* between the two strata. Where the fold points scatter more widely than the strata differ, a difference in held-out performance between the sexes is not a difference, and the means printed in Tables t63 and t64 should not be set side by side without that qualification.
+
+```{r}
+#| label: out6
+#| code-summary: Reading the C-statistic, and the size of the selection optimism
+#| echo: false
+```
+
+::: callout-important
+## The C-statistic needs its comparable-pairs share
+
+Harrell's C counts only pairs of respondents who differ on the outcome. Most respondents in both strata report zero days, so most pairs are incomparable and never enter the denominator — and the share that does enter is not the same in the two strata, because the strata do not have the same proportion of respondents with a non-zero outcome. A female and a male C-statistic are therefore computed over different fractions of their respective samples, and comparing them without the comparable-pairs share beside each is not a valid comparison. Table t63 reports the share on every row for exactly this reason.
+:::
+
+::: callout-tip
+## Review point 9
+
+Three questions.
+
+1.  Which table is the Section 5.10 deliverable — t63, which follows the proposal's wording, or t64, which is what the numbers would be on new data? Model 1 found the gap negligible; whether that holds at stratum scale is what out6 measures, and the answer should decide this.
+2.  Does the term-count range in t64 change how a sex-specific variable list may be described in the manuscript? If the selected set moves substantially under refitting, the honest sentence is about the estimates in Table t65 rather than about the identity of either stratum's selected set.
+3.  Should the female and male models be compared on held-out performance at all? Section 5.10 asks for the metrics per model and does not ask for the comparison; Graph g6 supplies it because the question is natural, but the comparable-pairs problem means it is easy to over-read.
+:::
+
+## Step 10 — Reproducibility Ledger
+
+Every fitted object and every intermediate table is written to disk, so a reviewer can re-open any result without re-running the estimation, and so that downstream reports can cite these artifacts as fixed rather than recompute them.
+
+```{r}
+#| label: t7
+#| code-summary: Table t7 — persisted artifacts
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: out4
+#| code-summary: Seeds, versions, and the scope Model 3 does not cover
+#| echo: false
+```
+
+# What Model 3 Settles, and What It Does Not
+
+**Settled.**
+
+-   The stratifying variable is established as `DHH_SEX` and the report is committed to saying *sex* rather than *gender*, with the reason recorded rather than assumed.
+-   The two strata are shown to partition the Section 5.5 analytic sample exactly, so Table 5 describes the same respondents as Table 3, with no overlap and no loss.
+-   The composition difference between the strata is measured *before* any model is fitted, so that a later asymmetry in selection can be checked against prevalence rather than attributed to association by default.
+-   *Section 5.9.* A sex-stratified model is estimated for each sex under all four Section 5.4 specifications, with both sample sizes reported.
+-   Deliverable **Table 5** is produced in two forms: a rate-ratio grid (t6) and a full ledger carrying log coefficients, standard errors, exact $p$-values and three interval variants (t62).
+-   The female–male comparison Section 5.9 asks for is delivered on a basis that cannot confuse "not selected" with "null" (t65, g5, g51), and the selection asymmetry is reported separately as a fact about the procedure.
+-   *Section 5.10.* All five requested metrics are reported, in-sample (t61) and on withheld folds (t63), with an honest-selection counterpart (t64) that quantifies how much of the apparent performance is optimism and how far each stratum's selected set moves under refitting.
+-   Non-convergence and empty selections are counted and named.
+-   Ten new decisions are named, resolved, and marked for reversal.
+
+**Not settled.**
+
+-   *Variance estimation.* Inherited decision 10 is data-blocked. The sandwich and Kish intervals bracket the understatement from below; neither is the quantity Section 5.9 specifies. Delivering it requires Research Data Centre access.
+-   *Gender.* Neither cycle carries a gender item, so a gender-stratified analysis is not available from these files at any level of effort.
+-   *The sex differences themselves.* Table t65 ranks candidates; it does not certify any of them. Every row carries the selection step in its interval and none carries a multiplicity adjustment. Confirming a specific sex difference is a pre-registered, single-hypothesis exercise that these data can motivate but not complete.
+-   *Composition versus association.* Where a sex difference coincides with a prevalence difference in Table t21, the two explanations are not separated here. Separating them requires a reweighting or decomposition analysis that answers a different question from the one Section 5.9 asks.
+-   *Section 5.1.* Little's MCAR test and multiple imputation are not performed; complete-case analysis stands in, inherited from model-1 along with its cost.
+-   *Model adequacy inside strata.* Whether a negative binomial is the right likelihood for a stratum outcome that is still majority zeros is not tested here, any more than it was in model-1 or model-2. Calibration, rootograms and hurdle alternatives belong to a dedicated evaluation report reading the artifacts in Step 10.
+
+**How to use this report.** Model 3 is the estimation of record for Sections 5.9 and 5.10. With it, every modelling section of the proposal has an estimation of record: 5.3 in model-00, 5.4 to 5.6 in model-1, 5.7 to 5.8 in model-2, and 5.9 to 5.10 here. Reports that follow should load the objects in Table t7 and interpret them; re-estimating would produce a second set of numbers with no better claim to authority and a real chance of drifting from these.
+
+# Session Information
+
+```{r}
+#| label: session-info
+#| code-summary: Reproducibility environment
+#| echo: false
+report_render_duration <- round(
+  as.numeric(difftime(Sys.time(), report_render_start_time, units = "secs")), 1
+)
+cat("Rendered at:      ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n", sep = "")
+cat("Render duration:  ", report_render_duration, " seconds\n\n", sep = "")
+sessionInfo()
+```
