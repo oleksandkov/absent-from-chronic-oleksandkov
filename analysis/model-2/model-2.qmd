@@ -1,0 +1,639 @@
+---
+title: "Model 2: Condition-Specific Models"
+subtitle: "Sections 5.7 and 5.8 implemented in ten reviewable steps"
+author: "Analysis Team"
+date: last-modified
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    toc-depth: 3
+    code-fold: show
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission — `model-2`
+
+Model 1 answered the question "what predicts absence among Canadian workers?" Model 2 asks it seventeen more times, once inside each chronic-condition subgroup, which is what Sections 5.7 and 5.8 request. It is a self-contained estimation script: it reads the Ellis parquet, builds its own frames, runs its own selection, and persists its own evidence. Nothing in it is loaded from model-1.
+
+What it does borrow from model-1 is *shape*. The same ten steps, the same artifact roles — `t6` is the deliverable table, `t62` the full ledger, `t61` the in-sample metrics, `t63` and `t64` the held-out ones, `t7` the manifest — and the same helper functions under the same names. A reader who has read model-1 should be able to read this one without relearning anything, and should be able to diff the two scripts and see only what genuinely differs.
+
+The proposal asks for 19 condition-specific models. It does not say which 19 items in the CCC module answer to the 19 names in Section 2.2, what to do when two of the names are the same question, how to handle a condition whose question is asked only of respondents over 35, whether the other sixteen conditions belong in the model, or which of Section 5.4's four specifications "the same LASSO procedure" refers to. Those questions are settled here, and every settlement is recorded.
+
+**This report is built to be vetted, not merely read.** As in model-1, it is organised as ten steps, each closing with a *review point* naming exactly what a reader should agree or disagree with before the next step is allowed to stand.
+
+::: callout-important
+## The status of these estimates
+
+Model 2 is the **definitive estimation script for Sections 5.7 and 5.8**. The fitted objects, coefficient ledgers, and fold-level metrics it writes to disk are the versioned evidentiary record for those sections. Downstream reports should read those artifacts and interpret them; they should not re-estimate. Step 10 lists every artifact with the call that reloads it.
+
+Three caveats travel with every number here and cannot be removed by re-running anything:
+
+1.  **The intervals are not the intervals the proposal asked for.** Bootstrap replicate weights do not exist in the 2010 or 2014 PUMF (inherited decision 10). Three interval variants are reported instead, two of which are explicit lower bounds on the understatement.
+2.  **Estimation and selection used the same subgroup.** The rate ratios in Step 8 are conditional on a procedure that consumed the whole subgroup. Step 9 measures how much that flatters them.
+3.  **A condition-specific model does not isolate its condition.** It conditions on it. The subgroups overlap heavily, and Step 3 measures the overlap before any model is fitted.
+:::
+
+**Research questions:**
+
+1.  Which of the 19 chronic conditions named in Section 2.2 can actually be modelled from these two PUMF cycles, and what happens to the ones that cannot?
+2.  Is each condition subgroup large enough to support a variable-selection procedure designed for a sample of fifty thousand — and by what measure of "large enough"?
+3.  How far do the subgroups overlap, and what does that overlap do to the reading of a condition-specific coefficient?
+4.  What does the Section 5.4 LASSO procedure retain inside each subgroup, and does the parsimonious penalty retain anything at all at this scale?
+5.  Which predictors of absence are specific to a condition, and which recur across most of them?
+6.  What is the adjusted prevalence rate ratio for every retained term in every subgroup, and how wide is the interval once the missing bootstrap is accounted for?
+7.  How well does each condition-specific model predict on respondents it has not seen, and how stable is its selected variable list when a fifth of a small subgroup is withheld?
+
+# Definition of Terms
+
+**Condition roster.** The table mapping each of the 19 constructs Section 2.2 names onto the CCC item that answers it. Two of the nineteen have no item of their own, so nineteen requested models resolve to seventeen fitted ones. Step 1 establishes this before any estimation.
+
+**Index condition.** The condition whose subgroup is being modelled. It is constant inside its own subgroup by construction and therefore carries no information there, so it is removed from the candidate set — and only from that one model.
+
+**Main frame / age 35+ frame.** Two complete-case frames. The main frame is model-1's analytic sample, unchanged, and hosts sixteen subgroups. The age 35+ frame additionally requires the COPD item to be observed, which restricts it to respondents old enough to have been asked. It hosts one subgroup.
+
+**Comorbidity.** The presence of conditions other than the index one. The subgroups are not disjoint: most respondents in any subgroup carry at least one other condition. The other sixteen conditions therefore remain in the candidate set, so a coefficient in Table 4 is adjusted for what else the respondent carries.
+
+**`lambda.min` / `lambda.1se`.** The penalty minimising cross-validated deviance, and the largest penalty whose deviance remains within one standard error of that minimum. At the scale of a condition subgroup the second frequently returns nothing at all, which is why the first is designated primary here and the second is reported as a sensitivity.
+
+**Empty selection.** A specification that retained no variable beyond the unpenalised cycle indicator. It is a legitimate result and it is counted, not hidden: Table t5 reports how often each penalty produced one.
+
+**Unstable term.** A term whose standard error exceeds 2 on the log scale, meaning its rate-ratio interval spans more than four orders of magnitude. It arises when a factor level is represented by a handful of respondents in a small subgroup. Such terms are marked rather than removed; their point estimates should not be quoted.
+
+**Respondents per design column.** The subgroup size divided by the number of columns offered to the penalty. Section 5.7 flags subgroups below 500 respondents; this ratio is the quantity that actually governs whether a selection procedure has anything to work with, and it is reported beside the count of respondents with at least one day absent.
+
+**Held out.** Computed on respondents the model was not fitted to. Section 5.8 asks for held-out error explicitly, and it is not the same quantity as the in-sample error a single fit reports.
+
+# Environment
+
+```{r}
+#| code-summary: Reconciles working directory between execution modes
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir='../../') # keep this chunk isolated
+```
+
+```{r}
+#| label: set_options
+#| code-summary: Report-wide formatting options
+#| echo: false
+#| results: hide
+#| message: false
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results = 'show',
+  message = FALSE,
+  warning = FALSE,
+  comment = NA,
+  tidy = FALSE,
+  fig.path = 'figure-png-iso/'
+)
+echo_chunks <- FALSE
+message_chunks <- FALSE
+options(width = 100)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/model-2/model-2.R")
+```
+
+```{r}
+#| label: load-packages
+#| code-summary: Packages used in the current report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: Project functions and Alberta visual identity colours
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: Paths, seed, the condition roster, the specification table, and the decision registry
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| code-summary: Helpers for subgroup construction, penalised fitting, and negative binomial refitting
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+# Data
+
+```{r}
+#| label: load-data
+#| code-summary: Load the Ellis respondent-level analytical parquet
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: tweak-data-0
+#| code-summary: Build the two complete-case frames and the label lookups
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: inspect-data-0
+#| code-summary: Structure of the source table
+#| echo: false
+#| code-fold: true
+```
+
+# Data Context
+
+For complete data documentation, see the [Data Primer](../data-primer-1/data-primer-1.html). This section covers only what Model 2 touches. The estimation that Model 2 extends is documented in [Model 1](../model-1/model-1.html).
+
+## Tables and columns
+
+```{r}
+#| label: data-context-tables
+#| code-summary: Which table this analysis reads, and the two frames it builds from it
+#| echo: false
+```
+
+## A single respondent
+
+One row from a condition subgroup, shown in full. Two things are worth checking in it: that a row is a person, and that the index condition reads `Yes` — which is the whole reason it is removed from that model's candidate set.
+
+```{r}
+#| label: data-context-person
+#| code-summary: Grain proof and one respondent from a condition subgroup
+#| echo: false
+```
+
+## Distributions
+
+The outcome is shown *inside* subgroups rather than in the pooled sample, because that is what the Section 5.7 models are fitted to and the two are not the same shape.
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: The outcome inside each condition subgroup
+#| echo: false
+```
+
+::: callout-note
+## Reading the subgroup outcome summary
+
+Two features govern everything downstream. The variance-to-mean ratio stays far above 1 in every subgroup, so stage two is negative binomial throughout, exactly as in model-1. And the share of respondents at zero days stays high even after conditioning on a chronic condition — selecting on disease raises the mean but does not make this a dense count. That second fact is why the C-statistic in Step 9 is a narrow instrument here, and why RMSE moves in directions that likelihood-based measures do not.
+:::
+
+# Analysis
+
+## Step 1 — The Condition Roster
+
+Section 5.7 says "each of the 19 chronic conditions." Establishing what those nineteen are, in terms of items that exist in the 2010 and 2014 Public Use Microdata Files, is the first substantive act of the report — and it does not come out to nineteen.
+
+```{r}
+#| label: t1
+#| code-summary: The 19 requested constructs mapped to CCC items
+#| echo: false
+#| results: asis
+```
+
+Two rows of the roster do not survive the mapping. "Mental illness (depression, bipolar)" and "mood disorder" are the same CCC question — the module asks one item covering depression, bipolar disorder, mania and dysthymia — so they yield one model, not two. "Digestive diseases" has no item distinct from bowel disorder in either cycle. A third row, COPD, exists but is asked only of respondents aged 35 and over, and is handled by giving it a frame of its own.
+
+```{r}
+#| label: t11
+#| code-summary: Condition subgroup inventory
+#| echo: false
+#| results: asis
+```
+
+Table t11 carries both sample sizes Section 5.7 asks for — unweighted $n$ and weighted $N$ — and one it does not: the number of respondents in each subgroup reporting at least one day absent. That third column is the one to read. A negative binomial model of a count outcome learns from variation in the count, and a subgroup of a thousand respondents of whom two hundred have a non-zero outcome is a thinner object than its $n$ suggests.
+
+::: callout-tip
+## Review point 1
+
+Agree or disagree with the mapping in Table t1. Three specific questions:
+
+1.  Is collapsing "mental illness" and "mood disorder" into the single CCC item correct, or was a separate construct intended that would require a different data source?
+2.  Section 2.2 pairs "cardiovascular disease/stroke" as one construct. The CCC module carries heart disease and stroke as separate items and they are modelled separately here. Should they instead be combined into one subgroup?
+3.  Is "digestive diseases" genuinely absent, or is it meant to denote the bowel-disorder item under another name?
+:::
+
+## Step 2 — Subgroup Feasibility
+
+Section 5.7 anticipates that some subgroups will be small and asks for them to be flagged at $n < 500$. That threshold is necessary but not sufficient, because what a selection procedure needs is not respondents but respondents *per parameter*.
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: Compute per-subgroup candidate counts, design width, and verdicts
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: g1
+#| code-summary: Graph g1 — subgroup size against the Section 5.7 threshold
+#| echo: false
+#| fig-width: 10
+#| fig-height: 7
+```
+
+The two point series in Graph g1 are the story of this report. The filled points are the subgroup sizes Section 5.7 asks about; the hollow points are the respondents who actually contribute variation to a count model. The gap between them is roughly constant in proportion and large in every subgroup.
+
+```{r}
+#| label: t2
+#| code-summary: Subgroup feasibility ledger
+#| echo: false
+#| results: asis
+```
+
+The final column is the honest measure. Where it falls below one, the design matrix has more columns than the subgroup has informative respondents, and the only reason estimation is possible at all is the penalty. Those rows are not invalid, but the model they produce is a description of the penalty as much as of the data, and Step 9 will show how unstable it is.
+
+```{r}
+#| label: out1
+#| code-summary: Where the nineteen conditions went, and why COPD needs its own frame
+#| echo: false
+```
+
+::: callout-tip
+## Review point 2
+
+Agree or disagree with two thresholds and one frame.
+
+1.  `min_fit_n` = 100 is the point below which no model is attempted. Section 5.7 does not name such a threshold; it asks for a flag at 500 and for non-convergence to be reported. Should the floor be higher, lower, or removed in favour of fitting everything and reporting the wreckage?
+2.  Should the "respondents per column" ratio in Table t2 carry a threshold of its own, and if so what?
+3.  Decision 21 gives COPD a supplementary frame rather than omitting it as model-1 did. The COPD subgroup is therefore drawn from a different denominator than the other sixteen, and its age composition is restricted by construction. Is that the right trade, or should COPD be reported as unavailable?
+:::
+
+## Step 3 — The Subgroup Samples
+
+```{r}
+#| label: out2
+#| code-summary: Sample construction arithmetic across the two frames
+#| echo: false
+```
+
+The sum of the sixteen main-frame subgroup sizes exceeds the number of distinct respondents who have any condition, by a wide margin. That arithmetic is not a defect; it is the design of Section 5.7. But it has a consequence for interpretation that has to be settled before any coefficient is read.
+
+```{r}
+#| label: t21
+#| code-summary: Comorbidity overlap among the subgroups
+#| echo: false
+#| results: asis
+```
+
+A Section 5.7 model does not isolate its index condition. It *selects* on it. Everyone in the arthritis subgroup carries whatever else they carry, and Table t21 shows that most of them carry a good deal. This is why the other sixteen conditions stay in the candidate set (decision 24): a model of absence among people with arthritis that ignored whether they also have a mood disorder would credit arthritis with an association belonging to the pair.
+
+It is also why "the arthritis model" is a phrase to use carefully. What Table 4 reports for that row is *the predictors of absence among workers who have arthritis*, adjusted for their other conditions — not the effect of arthritis, which is a Section 5.3 and 5.5 quantity and lives in model-00 and model-1.
+
+::: callout-tip
+## Review point 3
+
+Agree or disagree that the other conditions belong in each subgroup's candidate set. The alternative — dropping them — would make each model a description of the demographic and occupational predictors within a disease group, which is arguably closer to what "predictors of absenteeism within that subgroup" means in plain reading. Decision 24 records the alternative and how to take it.
+:::
+
+## Step 4 — The Decision Registry
+
+Model 2 inherits nineteen decisions from model-1 and makes eleven of its own. The inherited ones are listed by title only; restating their reasoning here would create a second copy that drifts from the first.
+
+```{r}
+#| label: t3
+#| code-summary: Decisions 20 through 30, with alternatives and reversal instructions
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: t31
+#| code-summary: The nineteen decisions inherited from model-1
+#| echo: false
+#| results: asis
+```
+
+::: callout-warning
+## The same decision cannot be reversed here either
+
+Inherited decision 10 records that bootstrap variance estimation is impossible with these data. Section 5.7 asks for bootstrap intervals in the same words Sections 5.3, 5.5 and 5.9 use, and the answer is the same: CCHS bootstrap replicate weights begin with the 2015 cycle, neither the 2010 nor the 2014 PUMF carries them, and strata and PSU identifiers are suppressed.
+
+Model 2 responds as model-00 and model-1 do — a Wald interval beside a Huber–White sandwich interval and a Kish-inflated interval — with one difference. The design effect is computed *within each subgroup* (decision 29), because the weight distribution inside a condition subgroup is not the weight distribution of the pooled sample. Output out5 shows how much it varies.
+:::
+
+::: callout-tip
+## Review point 4
+
+Read decisions 20 through 30. Decisions 20, 21 and 25 are the consequential ones: what counts as a condition, whether COPD is modelled at all, and which penalty rule is designated primary at subgroup scale. Any of them can be overturned; the "reversal" column says what to change.
+:::
+
+## Step 5 — The Two Specifications
+
+Section 5.7 says variable selection "should follow the same LASSO procedure described in Section 5.4." Section 5.4 describes four specifications, arranged on two axes: a perceived-health toggle and a penalty rule. Only one of those axes survives the reference.
+
+The perceived-health toggle exists to answer a Section 5.4 question — whether self-rated health absorbs the signal carried by the individual conditions. Section 5.7 asks for *one* model per condition, and Section 5.5 designates the specification that excludes perceived health as primary. So model-2 carries that predictor set and reads it at both penalties, which means one cross-validated fit per condition yields both rows.
+
+```{r}
+#| label: t4
+#| code-summary: The two specifications carried into every subgroup
+#| echo: false
+#| results: asis
+```
+
+::: callout-tip
+## Review point 5
+
+Agree or disagree that `lambda.min` should be designated primary inside subgroups, reversing model-1's ordering. The argument is in decision 25 and the evidence is in Table t5: if the parsimonious rule returns an empty set in most subgroups, it cannot answer the question Section 5.7 asks, however defensible it is at full sample size. If you disagree, both specifications are estimated and reported side by side throughout, so nothing needs re-running — only the designation changes.
+:::
+
+## Step 6 — Stage One, Per-Condition Penalised Poisson
+
+Seventeen weighted L1-penalised Poisson fits, one per subgroup, each with its own five-fold cross-validated penalty path and its own candidate set.
+
+```{r}
+#| label: g2-data-prep
+#| code-summary: Fit and persist one cross-validated penalised Poisson model per condition
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: g2
+#| code-summary: Graph g2 — cross-validated deviance inside each subgroup
+#| echo: false
+#| fig-width: 13
+#| fig-height: 11
+```
+
+Panels are ordered by subgroup size, so the sequence of small multiples is also a sequence in statistical power. The quantity to read across them is the width of the one-standard-error band relative to the depth of the minimum. Where the band is wide and the curve shallow, cross-validation cannot distinguish penalties over a broad range, and `lambda.1se` will sit far to the right of `lambda.min` and discard nearly everything.
+
+```{r}
+#| label: g3
+#| code-summary: Graph g3 — coefficient paths by domain, one panel per condition
+#| echo: false
+#| fig-width: 13
+#| fig-height: 11
+```
+
+Reading each panel right to left, the order in which coefficients leave zero is the order in which that subgroup insists on them. Comparing panels shows whether the same domains lead in every condition or whether each disease has its own hierarchy.
+
+::: callout-tip
+## Review point 6
+
+Agree or disagree with the fitting choices, which are inherited unchanged from model-1: five folds, seed 42, survey weights passed to `cv.glmnet`, cycle exempt from the penalty. The one new consideration is that five folds of a subgroup are much thinner than five folds of the Section 5.5 sample, which is visible in the width of the bands in Graph g2.
+:::
+
+## Step 7 — Selection Results
+
+```{r}
+#| label: t5
+#| code-summary: What each subgroup retained under each penalty rule
+#| echo: false
+#| results: asis
+```
+
+Two comparisons carry the table. Reading across, the gap between the `min` and `1SE` columns is the evidence for decision 25 — whether the parsimonious rule has anything to say at this scale. Reading down, the relationship between subgroup size and the number of variables retained shows whether selection is tracking evidence or tracking sample size.
+
+```{r}
+#| label: t51
+#| code-summary: Which variables each condition retained
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: g4
+#| code-summary: Graph g4 — selection grid across the condition-specific models
+#| echo: false
+#| fig-width: 12
+#| fig-height: 14
+```
+
+Graph g4 is this report's central artifact, and it is read in two directions.
+
+Reading **down a column** gives one condition's whole verdict: the variables that predict absence among workers who have that disease. That is the Section 5.7 deliverable in visual form.
+
+Reading **across a row** gives something Section 5.7 does not ask for but which falls out of asking it seventeen times. A variable coloured across many columns predicts absence more or less regardless of which chronic condition a worker carries; a variable coloured in one or two columns is specific to those diseases. The first kind belongs in a general model of absence, which is what model-1 estimates. The second kind is what a condition-specific analysis exists to find.
+
+::: callout-tip
+## Review point 7
+
+This is the report's substantive output alongside Table 4. Two questions to settle:
+
+1.  Are the recurring rows in Graph g4 genuine cross-condition predictors, or are they variables that a large subgroup can afford to retain and a small one cannot? The subgroup-size ordering of the columns is there to make that check possible; a row that fills the left of the grid and empties toward the right is a power artifact, not a finding.
+2.  Should "retained" continue to mean "at least one design column survived"? Inherited decision 9 records the alternative. It matters more here than in model-1, because a factor with many levels retained on the strength of one thin cell contributes a term that Table t62 may then mark unstable.
+:::
+
+## Step 8 — Stage Two, Negative Binomial Estimation
+
+Each retained set is re-estimated without penalty under a negative binomial likelihood, inside its own subgroup. This step answers Section 5.7 and produces deliverable **Table 4**. Before the estimates, the instruments used to bracket their uncertainty.
+
+```{r}
+#| label: t6-data-prep
+#| code-summary: Fit and persist the condition-specific negative binomial models
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: out5
+#| code-summary: Variance-estimation instruments, computed within each subgroup
+#| echo: false
+```
+
+The design effect varies across subgroups, which is the reason it is computed within them rather than inherited from the pooled sample. A single number applied to all seventeen would widen some intervals too much and others not enough, and the direction of the error would be unknowable from the table.
+
+The sandwich multipliers spread more widely than they do in model-1, and the low end of that spread should not be read as good news. A multiplier below 1 means the sandwich estimator has landed in a cell too thin to estimate its own variance reliably; it is a symptom of the same smallness that decision 27 flags, not a demonstration that the model-based interval was conservative.
+
+```{r}
+#| label: t6
+#| code-summary: Table t6 — condition-specific rate ratios under both penalty rules
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: t62
+#| code-summary: Table t62 — the full Section 5.7 coefficient ledger
+#| echo: false
+#| results: asis
+```
+
+Table t62 is the compliance artifact: every quantity Section 5.7 names — unweighted $n$, weighted $N$, coefficient, prevalence rate ratio, interval and Wald $p$-value — for every term in every condition-specific model. Read the three interval columns together, as in model-1: where the Wald and Kish intervals agree about whether they contain 1, the conclusion survives the weighting problem; where they disagree, the term is unresolved rather than null or significant.
+
+Read the `UNSTABLE` flag first, though. A term carrying it comes from a factor level held up by a handful of respondents, and its interval is uninformative regardless of what the three variants say about it.
+
+```{r}
+#| label: g5
+#| code-summary: Graph g5 — predictors that recur across condition-specific models
+#| echo: false
+#| fig-width: 12
+#| fig-height: 10
+```
+
+Graph g5 takes the terms retained in the greatest number of subgroups and shows their estimates wherever they were retained, with conditions ordered by subgroup size. A term whose rate ratios cluster tightly across many diseases is a general predictor of absence that happens to have been found seventeen times over. A term whose rate ratios scatter is either genuinely condition-dependent or under-determined, and the ordering by subgroup size usually tells which.
+
+```{r}
+#| label: t61
+#| code-summary: Table t61 — in-sample fit, error, and discrimination by condition
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: out3
+#| code-summary: Convergence, dispersion, and the empty-selection count
+#| echo: false
+```
+
+One warning about Table t61 that does not apply to model-1's version of it: **these rows are not comparable across conditions.** Each is computed on a different subgroup, of a different size, with a different outcome distribution. AIC and BIC in particular are computed from a weighted pseudo-likelihood on different data, so a smaller AIC in one row says nothing whatever about the row above it. Read the table down a condition — comparing the two specifications within a disease — and never across.
+
+Output out3 answers Section 5.7's explicit request that non-convergence be reported. It also counts the empty selections, which are not failures but are results a reader needs to see stated rather than inferred from a blank row in Table 4.
+
+::: callout-tip
+## Review point 8
+
+Agree or disagree that Tables t6 and t62 are fit to serve as the study's Table 4. The specific questions to settle:
+
+1.  Should conditions flagged small in Table t11 be published at all, or reported as attempted-and-withheld? Section 5.7 asks for a flag, which is what is implemented; a stricter reading would suppress them.
+2.  Is the `UNSTABLE` flag at a standard error of 2 on the log scale the right threshold, and should flagged terms be shown or withheld?
+3.  Should the deliverable table carry both penalty rules, or should one be chosen and the other relegated to an appendix?
+:::
+
+## Step 9 — Section 5.8, Held-Out Performance
+
+Section 5.8 asks for AIC, BIC, McFadden's pseudo-$R^2$, a C-statistic, and RMSE and MAE "computed on the withheld test fold," averaged over five folds, for every condition-specific model. Table t61 gave the in-sample versions. This step supplies the rest.
+
+It also declines an invitation. Section 5.8 offers leave-one-out as an option for small subgroups, at the analyst's discretion. It is declined for a technical reason rather than a convenience one: Harrell's C is computed over *pairs* of held-out respondents, and a leave-one-out fold contains one respondent. The C-statistic Section 5.8 asks for in the same paragraph would be undefined, and the between-fold spread that makes a cross-validated number readable would not exist. Five folds also keep model-2 on the same footing as model-1's Tables t63 and t64. Decision 28.
+
+```{r}
+#| label: t63-data-prep
+#| code-summary: Five-fold cross-validation of every condition and specification, both variants
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: t63
+#| code-summary: Table t63 — held-out performance, term set fixed across folds
+#| echo: false
+#| results: asis
+```
+
+Table t63 is the literal answer to Section 5.8: the term set is what the full subgroup's LASSO chose, and the negative binomial is refitted five times with a fifth of the subgroup withheld each time. It is also, for that reason, optimistic — the penalty that produced the term list saw every respondent it is now being scored on.
+
+```{r}
+#| label: t64
+#| code-summary: Table t64 — held-out performance, selection re-run inside each fold
+#| echo: false
+#| results: asis
+```
+
+Table t64 removes that advantage by re-running the whole two-stage procedure inside each training fold. The term-count range is the column to read first. Model 1 found the selected set unstable even at forty-nine thousand respondents, ranging from eight to thirty-eight terms across folds. At subgroup scale the same measurement is the honest description of what a condition-specific selection can and cannot establish.
+
+```{r}
+#| label: g6
+#| code-summary: Graph g6 — held-out performance by fold, condition by condition
+#| echo: false
+#| fig-width: 13
+#| fig-height: 9
+```
+
+Graph g6 shows the five folds individually rather than only their mean, for the primary specification. Where the fold points for a condition scatter across the panel, the mean printed in Table t63 is not a number to quote, and the spread — not the mean — is the result.
+
+```{r}
+#| label: out6
+#| code-summary: Reading the C-statistic, and the size of the selection optimism
+#| echo: false
+```
+
+::: callout-important
+## The C-statistic is narrower here than in model-1
+
+Harrell's C counts only pairs of respondents who differ on the outcome. Conditioning on a chronic condition raises mean days absent but leaves most respondents at zero, so most pairs remain incomparable and never enter the denominator. The comparable share is reported beside every C in Table t63 for that reason. A C of 0.63 computed on a third of pairs in a subgroup of eight hundred is a much weaker claim than the same number computed on half of pairs in a sample of forty-nine thousand, and the two should not be set side by side without that qualification.
+:::
+
+::: callout-tip
+## Review point 9
+
+Three questions.
+
+1.  Which table is the Section 5.8 deliverable — t63, which follows the proposal's wording, or t64, which is what the numbers would be on new data? Model 1 found the gap negligible; whether that holds at subgroup scale is exactly what out6 measures, and the answer should decide this.
+2.  Does the term-count range in t64 change how a condition-specific variable list may be described in the manuscript? For most subgroups the honest sentence is likely to be about the estimates rather than about the identity of the selected set.
+3.  Is five-fold cross-validation defensible for the smallest subgroups, or should those rows be reported without cross-validated metrics at all rather than with metrics whose between-fold spread swamps their mean?
+:::
+
+## Step 10 — Reproducibility Ledger
+
+Every fitted object and every intermediate table is written to disk, so a reviewer can re-open any result without re-running the estimation, and so that downstream reports can cite these artifacts as fixed rather than recompute them.
+
+```{r}
+#| label: t7
+#| code-summary: Table t7 — persisted artifacts
+#| echo: false
+#| results: asis
+```
+
+```{r}
+#| label: out4
+#| code-summary: Seeds, versions, and the scope Model 2 does not cover
+#| echo: false
+```
+
+# What Model 2 Settles, and What It Does Not
+
+**Settled.**
+
+-   The nineteen conditions Section 2.2 names are mapped onto the items the PUMF carries, and the shortfall to seventeen is documented rather than silently absorbed.
+-   COPD, which model-1 had to exclude, is recovered on a frame where its question was actually asked.
+-   *Section 5.7.* A condition-specific model is estimated for every analysable condition, under both penalty rules, with both sample sizes reported and small subgroups flagged as the section directs.
+-   Deliverable **Table 4** is produced in two forms: a rate-ratio grid (t6) and a full ledger carrying log coefficients, standard errors, exact $p$-values and three interval variants (t62).
+-   *Section 5.8.* All five requested metrics are reported, in-sample (t61) and on withheld folds (t63), with an honest-selection counterpart (t64) that quantifies how much of the apparent performance is optimism and how far the selected set moves under refitting.
+-   Non-convergence and empty selections are counted and named, as Section 5.7 requires.
+-   The overlap between subgroups is measured before any model is fitted, so no coefficient in Table 4 can be mistaken for the effect of its index condition.
+-   Eleven new decisions are named, resolved, and marked for reversal.
+
+**Not settled.**
+
+-   *Variance estimation.* Inherited decision 10 is data-blocked. The sandwich and Kish intervals bracket the understatement from below; neither is the quantity Section 5.7 specifies. Delivering it requires Research Data Centre access.
+-   *Two of the nineteen conditions.* "Digestive diseases" has no PUMF item, and "mental illness" is not separable from mood disorder. Neither gap is closeable from these files.
+-   *Section 5.9.* Sex-stratified models remain outstanding. They are the natural next script, and they follow this one's shape almost exactly: two subgroups instead of seventeen, cut on `sex` rather than on a condition.
+-   *Section 5.1.* Little's MCAR test and multiple imputation are not performed; complete-case analysis stands in, inherited from model-1 along with its cost.
+-   *Model adequacy inside subgroups.* Whether a negative binomial is the right likelihood for a subgroup outcome that is still majority zeros is not tested here, any more than it was in model-1. Calibration, rootograms and hurdle alternatives belong to a dedicated evaluation report reading the artifacts in Step 10.
+
+**How to use this report.** Model 2 is the estimation of record for Sections 5.7 and 5.8. Reports that follow should load the objects in Table t7 and interpret them; re-estimating would produce a second set of numbers with no better claim to authority and a real chance of drifting from these.
+
+# Session Information
+
+```{r}
+#| label: session-info
+#| code-summary: Reproducibility environment
+#| echo: false
+report_render_duration <- round(
+  as.numeric(difftime(Sys.time(), report_render_start_time, units = "secs")), 1
+)
+cat("Rendered at:      ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n", sep = "")
+cat("Render duration:  ", report_render_duration, " seconds\n\n", sep = "")
+sessionInfo()
+```
