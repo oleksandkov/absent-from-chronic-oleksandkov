@@ -1,0 +1,9 @@
+---
+title: "Condition-Specific Models"
+format:
+  html:
+    page-layout: full
+    toc: false
+---
+
+<meta http-equiv="refresh" content="0; url=model-2.html">

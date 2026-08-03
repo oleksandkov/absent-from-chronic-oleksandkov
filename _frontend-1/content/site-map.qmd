@@ -47,8 +47,10 @@ Absent from Chronic
 │   │   (model-00)
 │   ├── Lasso Rehearsal with Predisposing    REDIRECT  → analysis/model-0/model-0.html
 │   │   (model-0)
-│   └── Variable Selection with Lasso        REDIRECT  → analysis/model-1/model-1.html
-│       (model-1)
+│   ├── Variable Selection with Lasso         REDIRECT  → analysis/model-1/model-1.html
+│   │   (model-1)
+│   └── Condition-Specific Models             REDIRECT  → analysis/model-2/model-2.html
+│       (model-2)
 │
 ├── Analysis
 │   └── Story 1                              REDIRECT  → analysis/eda-81/eda-81.html
@@ -63,8 +65,10 @@ Absent from Chronic
 └── Docs
     ├── Site Map                             COMPOSED  ← publishing-contract.prompt.md,
     │                                                     stats_instructions_v3.md
-    └── Project Proposal                     ADAPTED   ← stats_instructions_v3.md
-                                                          (sanitize: strip data-private refs)
+    ├── Project Proposal                     ADAPTED   ← stats_instructions_v3.md
+    │                                                     (sanitize: strip data-private refs)
+    └── Minding the Agents                   REDIRECT  → analysis/talks/minding-the-agents/slides.html
+        (talk slides)
 ```
 
 ---
@@ -101,4 +105,5 @@ Absent from Chronic
 | [Bivariate Models (model-00)](model/bivariate-models.html) | §5.3 (Table 2), §4.2 (outcome checks) | Model-00: Implements §5.3 as one model per predictor across seven reviewable steps — the bivariate protocol, the interval problem, two analytic bases, the Table 2 build, the cycle term, and a sensitivity pass. Explicitly names the one §5.3 requirement that cannot be met with PUMF data, and closes with a reproducibility ledger. |
 | [Lasso Rehearsal with Predisposing (model-0)](model/lasso-rehearsal.html) | §5.4 (variable selection via LASSO) | Model-0: A scoped rehearsal that tests the project's reading of §5.4 on the predisposing block alone before committing to the full candidate set. Fits the penalized path, examines what each penalty retains, hands selection to a negative binomial second stage, and asks whether survey weights disturb cross-validation. Records what is confirmed and which §5.4 decisions remain open. |
 | [Variable Selection with Lasso (model-1)](model/variable-selection.html) | §5.4 (variable selection via LASSO), §5.5 (primary multivariable models) | Model-1: Implements §5.4 across the full candidate set in nine reviewable steps — candidate registry, missing data, analytic sample, decision registry, four specifications, penalised Poisson fitting, selection results, negative binomial refitting, and a reproducibility ledger. Flags the one decision that cannot be reversed and produces the predictor set carried into the §5.5 primary models. |
+| [Condition-Specific Models (model-2)](model/condition-specific-models.html) | §5.7 (condition-specific models), §5.8 (comparison across conditions) | Model-2: Repeats the Model-1 selection-and-estimation procedure once inside each chronic-condition subgroup, in ten reviewable steps mirroring Model-1's artifact roles (`t6` deliverable table, `t62` full ledger, `t61` in-sample metrics, `t63`/`t64` held-out metrics, `t7` manifest). Records every settlement the proposal leaves open — which CCC items answer to the §2.2 condition names, duplicate-question handling, age-restricted universes, whether the remaining conditions stay in the model, and which §5.4 specification "the same LASSO procedure" refers to. |
 | [Story 1 (eda-81)](analysis/story-1.html) | §5.3 (bivariate analysis), §5.4 (variable selection via LASSO) | EDA-81: The interpretation layer over `model-00` and `model-1`. Explains what the penalty is doing — what `lambda` is, what the `lambda.min` and `lambda.1se` rules each optimise, and why the perceived-health variables toggle on and off across specifications. Then aligns the evidence on one shared row axis: unadjusted signal (§5.3), selection verdict (§5.4), and adjusted estimate. |

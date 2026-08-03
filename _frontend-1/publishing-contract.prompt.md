@@ -150,12 +150,20 @@ it.
 - **Label**: Variable Selection with Lasso (model-1)
 - **Page**: `content/model/variable-selection.qmd`
 
+#### Condition-Specific Models
+
+- **Protocol**: Direct Line (REDIRECTED)
+- **Source**: `./analysis/model-2/model-2.html`
+- **Label**: Condition-Specific Models (model-2)
+- **Page**: `content/model/condition-specific-models.qmd`
+
 **Section notes**:
 
 - The `Model` dropdown sits between `Outcome` and `Analysis` in the navbar.
-- Entry order is `model-00`, `model-0`, `model-1` — rehearsal-to-commitment order, not numeric order.
-- The post-render hook `scripts/copy-analysis-html.R` must copy all three HTML targets into
-  `_site/content/model/` as `model-00.html`, `model-0.html`, and `model-1.html`.
+- Entry order is `model-00`, `model-0`, `model-1`, `model-2` — rehearsal-to-commitment order,
+  not numeric order.
+- The post-render hook `scripts/copy-analysis-html.R` must copy all four HTML targets into
+  `_site/content/model/` as `model-00.html`, `model-0.html`, `model-1.html`, and `model-2.html`.
 
 ---
 
@@ -210,8 +218,9 @@ it.
 
 ### Docs
 
-`Docs` is the final navbar section. It holds the two pages that describe the site and the
-requirements it answers, in this order: `Site Map`, then `Project Proposal`.
+`Docs` is the final navbar section. It holds the three pages that describe the site, the
+requirements it answers, and the harness that produced it, in this order: `Site Map`,
+`Project Proposal`, then `Minding the Agents`.
 
 #### Site Map
 
@@ -267,11 +276,24 @@ requirements it answers, in this order: `Site Map`, then `Project Proposal`.
   - Do not reference `data-private/` paths in the rendered page — present as if the document is
     standalone.
 
+#### Minding the Agents
+
+- **Protocol**: Direct Line (REDIRECTED)
+- **Source**: `./analysis/talks/minding-the-agents/slides.html` (rendered revealjs deck from
+  `./analysis/talks/minding-the-agents/slides.qmd`)
+- **Page**: `content/docs/minding-the-agents.qmd` — a meta-refresh stub forwarding to
+  `minding-the-agents/slides.html`.
+- **Assets**: The deck is not self-contained. The post-render hook
+  `scripts/copy-analysis-html.R` copies the whole bundle —
+  `slides.html`, `slides_files/`, and `images/` — into
+  `_site/content/docs/minding-the-agents/`, preserving the deck's relative `images/` and
+  `slides_files/` references.
+
 ---
 
 ## Navbar
 
-The navbar carries seven sections, in this exact order:
+The navbar carries seven sections on the left, in this exact order:
 
 1. **Data Primer**
 2. **Predictors**
@@ -283,6 +305,10 @@ The navbar carries seven sections, in this exact order:
 
 The `index` page is **not** a navbar entry — the navbar brand title ("Absent from Chronic") is
 its only link. There is no `Home` entry and no `Project` section.
+
+The navbar right side carries a single GitHub icon link to the development repository
+(<https://github.com/RG-FIDES/absent-from-chronic>), opening in a new tab, positioned
+alongside the search control.
 
 ---
 

@@ -45,8 +45,41 @@ copy_html("analysis/eda-65/eda-65.html", "predictors", "eda-65.html")
 copy_html("analysis/model-00/model-00.html", "model", "model-00.html")
 copy_html("analysis/model-0/model-0.html", "model", "model-0.html")
 copy_html("analysis/model-1/model-1.html", "model", "model-1.html")
+copy_html("analysis/model-2/model-2.html", "model", "model-2.html")
 
 # Analysis (interpretation layer)
 copy_html("analysis/eda-81/eda-81.html", "analysis", "eda-81.html")
+
+# Helper: copy a self-referencing HTML bundle (slides + libs + images) into _site
+copy_bundle <- function(source_rel, dest_subdir, members) {
+  src_dir <- file.path(project_root, source_rel)
+  dest_dir <- file.path(site_dir, "content", dest_subdir)
+  if (!dir.exists(src_dir)) {
+    warning("Bundle source not found: ", src_dir)
+    return(invisible(NULL))
+  }
+  if (!dir.exists(dest_dir)) dir.create(dest_dir, recursive = TRUE)
+  for (member in members) {
+    member_path <- file.path(src_dir, member)
+    if (!file.exists(member_path)) {
+      warning("Bundle member not found: ", member_path)
+      next
+    }
+    file.copy(
+      member_path,
+      dest_dir,
+      overwrite = TRUE,
+      recursive = dir.exists(member_path)
+    )
+    message("Copied: ", member_path, " -> ", dest_dir)
+  }
+}
+
+# Docs (talks) - revealjs deck with its own libs and images
+copy_bundle(
+  "analysis/talks/minding-the-agents",
+  "docs/minding-the-agents",
+  c("slides.html", "slides_files", "images")
+)
 
 message("Post-render hook complete: all redirect targets copied to _site/")

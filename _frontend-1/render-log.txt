@@ -1,0 +1,70 @@
+scripts/copy-contract-assets.R
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/eda-5/prints/g01_lop_days_histogram.png -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/content/images/g01_lop_days_histogram.png
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/eda-71/prints/g23_chronic_vs_other_only_raw_split_distribution.png -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/content/images/g23_chronic_vs_other_only_raw_split_distribution.png
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/libs/images/pipeline-architecture.jpg -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/content/images/pipeline-architecture.jpg
+Pre-render asset hook complete.
+
+
+[ 1/21] content\index.qmd
+
+[ 2/21] content\data-primer\variable-inclusion.qmd
+
+[ 3/21] content\data-primer\univariate-distributions.qmd
+
+[ 4/21] content\predictors\exposure.qmd
+
+[ 5/21] content\predictors\predisposing.qmd
+
+[ 6/21] content\predictors\facilitating.qmd
+
+[ 7/21] content\predictors\needs.qmd
+
+[ 8/21] content\predictors\missingness.qmd
+
+[ 9/21] content\outcome\day-decomposition.qmd
+
+[10/21] content\outcome\distribution-shapes.qmd
+
+[11/21] content\outcome\rescaling.qmd
+
+[12/21] content\model\bivariate-models.qmd
+
+[13/21] content\model\lasso-rehearsal.qmd
+
+[14/21] content\model\variable-selection.qmd
+
+[15/21] content\analysis\story-1.qmd
+
+[16/21] content\pipeline\pipeline-guide.qmd
+
+[17/21] content\pipeline\cache-manifest.qmd
+
+[18/21] content\pipeline\input-manifest.qmd
+
+[19/21] content\site-map.qmd
+
+[20/21] content\docs\project-proposal.qmd
+
+[21/21] content\docs\minding-the-agents.qmd
+
+scripts/copy-analysis-html.R
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/data-primer-1/univariate-distributions.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/data-primer/univariate-distributions.html
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/eda-5/eda-5.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/outcome/eda-5.html
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/eda-71/eda-71.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/outcome/eda-71.html
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/eda-72/eda-72.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/outcome/eda-72.html
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/eda-61/eda-61.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/predictors/eda-61.html
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/eda-62/eda-62.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/predictors/eda-62.html
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/eda-63/eda-63.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/predictors/eda-63.html
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/eda-64/eda-64.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/predictors/eda-64.html
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/eda-65/eda-65.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/predictors/eda-65.html
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/model-00/model-00.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/model/model-00.html
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/model-0/model-0.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/model/model-0.html
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/model-1/model-1.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/model/model-1.html
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/eda-81/eda-81.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/analysis/eda-81.html
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/talks/minding-the-agents/slides.html -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/docs/minding-the-agents
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/talks/minding-the-agents/slides_files -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/docs/minding-the-agents
+Copied: C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/analysis/talks/minding-the-agents/images -> C:/Users/andriy.koval/Documents/GitHub/absent-from-chronic/_frontend-1/_site/content/docs/minding-the-agents
+Post-render hook complete: all redirect targets copied to _site/
+
+Output created: _site\content\docs\minding-the-agents.html
+

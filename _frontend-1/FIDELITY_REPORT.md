@@ -7,7 +7,7 @@
 ## Contract Protocol Counts
 
 - VERBATIM pages: 3
-- REDIRECTED pages: 12
+- REDIRECTED pages: 15
 - ADAPTED pages: 3
 - COMPOSED pages: 2
 

@@ -20,12 +20,14 @@ project:
     - content/model/bivariate-models.qmd
     - content/model/lasso-rehearsal.qmd
     - content/model/variable-selection.qmd
+    - content/model/condition-specific-models.qmd
     - content/analysis/story-1.qmd
     - content/pipeline/pipeline-guide.qmd
     - content/pipeline/cache-manifest.qmd
     - content/pipeline/input-manifest.qmd
     - content/site-map.qmd
     - content/docs/project-proposal.qmd
+    - content/docs/minding-the-agents.qmd
 
 website:
   title: "Absent from Chronic"
@@ -66,6 +68,8 @@ website:
             href: content/model/lasso-rehearsal.qmd
           - text: "Variable Selection with Lasso (model-1)"
             href: content/model/variable-selection.qmd
+          - text: "Condition-Specific Models (model-2)"
+            href: content/model/condition-specific-models.qmd
       - text: "Analysis"
         menu:
           - text: "Story 1"
@@ -84,6 +88,13 @@ website:
             href: content/site-map.qmd
           - text: "Project Proposal"
             href: content/docs/project-proposal.qmd
+          - text: "Minding the Agents"
+            href: content/docs/minding-the-agents.qmd
+    right:
+      - icon: github
+        href: https://github.com/RG-FIDES/absent-from-chronic
+        aria-label: "Source repository on GitHub"
+        target: _blank
   page-footer:
     center: "*Absent from Chronic* | Marc-Andre Blanchette, Oleksandr Koval, Andriy Koval | 2026"
 

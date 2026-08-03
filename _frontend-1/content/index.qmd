@@ -81,8 +81,4 @@ linkage — and the Project Proposal itself.
 The data pipeline follows a three-lane Ferry → Ellis → Test pattern, beginning from two raw
 CCHS SPSS files and producing a validated analytic SQLite database and Parquet archive.
 
-{{< include _pipeline-diagram.qmd >}}
-
-The rendered pipeline architecture diagram is shown below for reference.
-
 ![Pipeline architecture diagram. Lanes 0–3 process raw CCHS files through metadata extraction, full transport (Ferry), analytic transformation (Ellis), and automated validation (Test). Source: libs/images/pipeline-architecture.jpg.](images/pipeline-architecture.jpg){width=90%}
