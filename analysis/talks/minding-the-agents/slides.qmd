@@ -1,0 +1,517 @@
+---
+title: "Minding the Agents"
+subtitle: "Building Harnesses for Scientific Reporting"
+author: "Andriy Koval"
+date: "2026-07-13"
+format:
+  revealjs:
+    theme: serif
+    slide-number: true
+    footer: "Andriy Koval | minding-the-agents | 2026-04-20"
+    transition: slide
+    incremental: false
+    smaller: false
+    include-after-body: overview-top-left-anchor.html
+---
+
+
+# (A) Starting thoughts 
+
+[*As we approach designing harnesses for scientific reporting, let us consider principles that could guide our thinking.*]{style="font-size: 90%;"}
+
+::: {style="font-size: 83%; width: 100%;"}
+**A1** The harness we build is an expression of the objectives we perceive.
+
+**A2** Agent exists to help you pay attention, to guide your focus. 
+
+**A3** With language we inject our mind into files.
+:::
+
+## A1 Reflection and Expression {background-color="#E9F7EF" style="font-size: 80%;"}
+
+::: {.columns}
+::: {.column width="40%"}
+
+[**A1** The harness we build is an expression of the objectives we perceive.]{style="font-size: 70%;"}
+
+::: {style="font-size: 90%;"}
+**Reflection** — skills and templates **will** be shaped by our mental models and cognitive habits, intended or not
+
+**Expression** — skills and templates **should** therefore be built to express opinions, not merely to execute tasks
+
+
+:::
+:::
+
+::: {.column style="font-size: 80%;"}
+
+[Each script is unique, but united by a common structure.]{style="font-size: 75%;"}
+
+<div style="margin: 0;">
+  <img src="images/internal-script-structure.jpg" alt="Internal script structure mapped onto exposition, development, and recapitulation" style="width: 100%; display: block;">
+</div>
+
+[Genres, styles, compositional conventions and techniques]{style="font-size: 75%;"}
+
+
+<div style="margin: 0;">
+  <img src="images/generic-fugal-structure.jpg" alt="Generic fugal structure showing exposition, middle section, final section, and coda across three voices" style="width: 100%; display: block;">
+  <p style="font-size: 0.62em; margin-top: 0.35em; margin-bottom: 0;">
+    Generic fugal structure — <a href="https://composerfocus.com/how-to-write-a-fugue/">composerfocus.com</a>
+  </p>
+</div>
+:::
+:::
+
+## A2 Focus and Learning {background-color="#D4EFDF"}
+
+[**A2** Agent exists to help you pay attention, to guide your focus.]{style="font-size: 70%;"}
+
+Ramifications of this principle for harness design:
+
+- The shape of the harness is meant for humans  
+- Human learning is agent's success criterion
+
+
+## A3 Words and Images {background-color="#A9DFBF" style="font-size: 80%;"}
+
+[**A3** With language we inject our mind into files.]{style="font-size: 70%;"}
+
+<div style="margin: 0; text-align: center;">
+  <img src="images/ai-communication-model.png" alt="Communication model showing two humans, each paired with an LLM, exchanging representations of a statistical model" style="max-height: 72vh; max-width: 100%; display: block; margin: 0 auto;">
+</div>
+
+
+# [(B) Scientific Reporting]{style="font-size: 80%;"}
+
+[*Three territories of the reporting workflow, each solving a distinct problem.*]{style="font-size: 80%;"}
+
+::: {style="font-size: 80%; width: 100%;"}
+**B1** [Manipulation]{style="color: red;"} — Raw data arrives in the shape of its source, not of our question; [`./manipulation`]{style="color: red;"} is where we reshape it and earn a trustworthy rectangle.
+
+**B2** [Analysis]{style="color: red;"} — Data does not speak on its own; [`./analysis`]{style="color: red;"} is where we compose and catalogue the artifacts created during interrogation.
+
+**B3** [Frontend]{style="color: red;"} — Some reports will never face external readers; [`./_frontend-N`]{style="color: red;"} is where we decide what to show, to whom, and how.
+:::
+
+
+## B1 `./manipulation` {background-color="#D6EAF8" style="font-size: 80%;"}
+
+::: {.columns}
+::: {.column width="50%"}
+
+[The rectangle we need is never the rectangle we are given. Manipulation is where we earn it. ]{style="font-size: 85%;"}
+
+[Representative issues and challenges:]{style="font-size: 65%;"}
+
+::: {style="font-size: 68%;"}
+
+**Grain confusion** — two tables joined at different levels of aggregation silently inflate counts; always state the unit before the join
+
+**Universe filters** — some questions are asked only of a subset; applying analysis to the full sample treats non-answers as implicit responses
+
+**Naming drift** — the same concept is spelled differently across sources or vintages; a rename script quietly forks the schema
+
+**Label–value mismatch** — factor labels in the codebook do not match the stored codes; recoding from memory rather than the codebook corrupts the variable
+
+:::
+:::
+
+::: {.column style="font-size: 80%;"}
+
+Territory in this project
+
+::: {style="font-size: 0.87em;"}
+```text
+./manipulation/
+├── 0-extract-dictionary/
+│   └── 0-extract-dictionary.py
+├── 0-extract-metadata.R    harvest SPSS labels
+├── 1-ferry.R               .sav  ──► cchs-1.sqlite
+├── 2-ellis.R               ──► cchs_analytic.parquet
+├── 3-test-ellis-cache.R    24 assertions
+├── pipeline.md             execution + diagnostics
+├── pipeline-project-spec.md   cohort contract
+└── pipeline-validation.dcf    declares the target
+
+./data-public/metadata/
+├── INPUT-manifest.md       what arrived
+└── CACHE-manifest.md       what is served
+
+./
+flow.R                      runs the lanes in order
+config.yml                  where the sources live
+```
+:::
+
+How data is refined into a worthy rectangle
+
+::: {style="font-size: 0.90em;"}
+```text
+sample_flow             n remaining     excluded
+0  full pooled sample       126,431            —
+1  age 15-75                112,352       14,079
+2  employed past 3 mo        64,248       48,104
+3  non-proxy respondent      64,248            0
+4  complete LOP outcome      63,843          405
+```
+:::
+:::
+:::
+
+## B2 `./analysis` {background-color="#FDEBD0" style="font-size: 80%;"}
+
+::: {.columns}
+::: {.column width="50%"}
+
+[A clean rectangle is silent. Analysis is where we build the instruments that make it speak.]{style="font-size: 85%;"}
+
+::: {style="font-size: 68%;"}
+**Scope discipline** — one folder holds one monothematic engagement, not a drawer of everything
+
+**Provenance** — every derived table and figure traces back to a documented source column, not to memory
+
+**Variation is evidence** — alternate cuts of the same question are siblings, not replacements; the discarded view stays part of the record
+
+**A scratch pad is not a report** — until it renders, it does not exist
+
+**Genre shapes expectation** — each engagement belongs to a recognizable form: exploratory (EDA), inferential (model estimation), or presentational (report)
+:::
+:::
+
+::: {.column style="font-size: 80%;"}
+
+Territory in this project
+
+::: {style="font-size: 0.90em;"}
+```text
+analysis/
+├── README.md               the index of what exists
+├── data-primer-1/          validated, canonical reference
+├── eda-5/    outcome — decompose the 8 LOP parts
+├── eda-61/   exposure — chronic conditions
+├── eda-62/   predisposing — who the worker is
+├── eda-63/   facilitating — access and behaviour
+├── eda-64/   needs — perceived health, ADL
+├── eda-65/   missingness
+├── eda-71/   outcome — distribution shapes
+└── eda-72/   predisposing × outcome groups
+
+analysis/eda-61/            one engagement, in full
+├── report-contract.prompt.md
+├── eda-61.R                laboratory
+├── eda-61.qmd              publication layer
+├── prints/                 8.5 × 5.5 in @ 300 dpi
+├── figure-png-iso/
+└── data-local/
+```
+:::
+
+[How one engagement moves]{style="font-size: 75%;"}
+
+::: {style="font-size: 0.90em;"}
+```text
+report-contract.prompt.md   the question, agreed in writing
+        │
+        ▼
+     eda-61.R    laboratory    ──ggsave()──►  prints/
+        │  read_chunk()
+        ▼
+     eda-61.qmd  publication   ──render──►    eda-61.html
+```
+:::
+:::
+:::
+
+## B3 `_frontend-*` {background-color="#EBDEF0" style="font-size: 80%;"}
+
+::: {.columns}
+::: {.column width="50%"}
+
+[A repository is not an argument. The frontend is where we choose the reader, and answer for the choice.]{style="font-size: 85%;"}B
+
+::: {style="font-size: 68%;"}
+**Exposure** — private paths, credentials, and working notes must not survive the trip to a public artifact
+
+**Register** — a filename or a command is meaningful to an engineer and noise to an external reader
+
+**Custody** — a document copied verbatim must arrive unedited, or the site must say plainly that it did not
+
+**Assembly** — many independently authored reports must appear under one coherent navigation without being rewritten
+
+**Self-containment** — a published page owns its own assets, or it rots the moment the source repository moves
+:::
+:::
+
+::: {.column style="font-size: 78%;"}
+
+Territory in this project
+
+::: {style="font-size: 0.85em;"}
+```text
+_frontend-1/
+├── publishing-contract.prompt.md   the editorial spec
+├── _quarto.yml                     the navbar is the offer
+├── content/                        EDITED
+│   ├── index.qmd                   COMPOSED
+│   ├── site-map.qmd                COMPOSED
+│   ├── project/
+│   │   └── project-proposal.qmd    ADAPTED
+│   ├── pipeline/
+│   │   ├── pipeline-guide.qmd      ADAPTED
+│   │   ├── cache-manifest.qmd      VERBATIM
+│   │   └── input-manifest.qmd      VERBATIM
+│   ├── data-primer/                ADAPTED + REDIRECT
+│   ├── analysis/                   7 × REDIRECT
+│   └── images/
+├── scripts/
+│   ├── copy-contract-assets.R      pre-render
+│   ├── copy-analysis-html.R        post-render
+│   └── audit-fidelity.R            the gate
+├── FIDELITY_REPORT.md   protocol honoured?
+├── TRANSFORM_LOG.md     what was changed, and why
+├── BUILD_REPORT.md      did every page arrive?
+└── _site/                          PRINTED
+```
+:::
+
+[How the protocols move content]{style="font-size: 75%;"}
+
+::: {style="font-size: 0.87em;"}
+```text
+RAW                     protocol      EDITED        PRINTED
+CACHE-manifest.md  ──►  VERBATIM   ─┐
+pipeline.md        ──►  ADAPTED    ─┤
+eda-72.html        ──►  REDIRECT   ─┼─► content/ ──► _site/
+(no single source) ──►  COMPOSED   ─┘
+                                    │
+                    TRANSFORM_LOG.md — every change, with a reason
+```
+:::
+:::
+:::
+
+# (C) Agent Harnesses {style="font-size: 80%;"}
+
+::: {.columns}
+::: {.column width="33%"}
+
+**Pipeline Orchestra**
+
+[*Engineering: raw data → trustworthy rectangle*]{style="font-size: 80%;"}
+
+::: {style="font-size: 65%;"}
+**Agent** `@pipeline-engineer`
+
+**Writes to** `manipulation/`
+
+**Flow** source → ferry → ellis → served
+
+**Governs** transport, transformation, and validation of incoming data
+
+**Accountability** INPUT-manifest records what arrived; CACHE-manifest records what is served
+:::
+:::
+
+::: {.column width="33%"}
+
+**Composing Orchestra**
+
+[*Reporting: clean data → analytical artifact*]{style="font-size: 80%;"}
+
+::: {style="font-size: 65%;"}
+**Agent** `@report-composer`
+
+**Writes to** `analysis/`
+
+**Flow** contract → `.R` laboratory → `.qmd` publication
+
+**Governs** monothematic engagement: one question, one folder, one artifact family
+
+**Accountability** report-contract anchors scope; artifacts are numbered and inventoried
+:::
+:::
+
+::: {.column width="33%"}
+
+**Publishing Orchestra**
+
+[*Publishing: existing artifacts → curated site*]{style="font-size: 80%;"}
+
+::: {style="font-size: 65%;"}
+**Agents** `@interviewer` + `@writer`
+
+**Writes to** `_frontend-N/`
+
+**Flow** RAW → EDITED (`content/`) → PRINTED (`_site/`)
+
+**Governs** editorial selection, audience register, and protocol fidelity
+
+**Accountability** TRANSFORM_LOG records every change; fidelity report is the gate
+:::
+:::
+:::
+
+
+## C1 Pipeline Orchestra {background-color="#AED6F1" style="font-size: 80%;"}
+
+
+::: {.columns}
+::: {.column width="50%" style="font-size: 100%;"}
+
+[Procedures and conventions for extracting, transporting, and transforming raw data]{style="font-size: 90%;"}
+
+
+[General form could be expressed as:]{style="font-size: 90%;"}
+
+```text
+Script           ferry        ellis
+Data      Source ----> Staged ----> Served
+Manifest         INPUT        CACHE
+```
+[But specific implementation will reflect the complexity of each project]{style="font-size: 90%;"}
+<div style="margin: 0;">
+  <img src="images/pipeline-architecture.jpg" alt="Pipeline architecture diagram" style="width: 100%; display: block;">
+  <p style="font-size: 0.62em; margin-top: 0.35em; margin-bottom: 0;">
+    Pipeline architecture in <em>absent-from-chronic</em>
+  </p>
+</div>
+:::
+
+::: {.column style="font-size: 80%;"}
+
+Project-agnostic harness
+
+```text
+.github/
+├── pipeline-orchestra.md
+├── agents/
+│   └── pipeline-engineer.agent.md
+├── copilot/
+│   └── pipeline-orchestra-SKILL.md
+├── hooks/
+│   ├── ellis-validation-reminder.json
+│   └── scripts/
+│       └── check-ellis-validation.ps1
+├── instructions/
+│   └── pipeline-scripts.instructions.md
+├── prompts/
+│   ├── pipeline-bootstrap.prompt.md
+│   ├── pipeline-ellis.prompt.md
+│   ├── pipeline-validate.prompt.md
+│   ├── pipeline-audit.prompt.md
+│   └── pipeline-diagram.prompt.md
+├── skills/
+│   └── validate-cache-manifest/
+└── templates/
+    └── pipeline-diagram-template.mmd
+```
+[Governs preparation of data source into analysis-ready rectangles]{style="font-size: 90%;"}
+
+:::
+:::
+
+## C2 Composing Orchestra{background-color="#FAD7A0"}
+
+
+
+::: {.columns}
+::: {.column width="50%"}
+
+[Rules and practices for composing monothematic narratives of data engagement]{style="font-size: 70%;"}
+
+One question → one graph family. Artifacts nest as thought unfolds.
+
+::: {style="font-size: 0.65em;"}
+```text
+Question 1  ──►  g1          "first look"
+                 ├─ g11        └─ facet by sex
+                 │   └─ g111       └─ palette test
+                 └─ g12        └─ facet by age
+
+Question 2  ──►  g2          "first look"
+                 ├─ g21
+                 └─ g22
+
+  g = graph   t = table   fig = figure   out = output
+```
+:::
+:::
+
+::: {.column style="font-size: 80%;"}
+
+Project-agnostic harness
+
+```text
+.github/
+├── composing-orchestra.md
+├── agents/
+│   └── report-composer.agent.md
+├── copilot/
+│   └── composing-orchestra-SKILL.md
+├── instructions/
+│   ├── artifact-naming.instructions.md
+│   └── report-composition.instructions.md
+├── prompts/
+│   └── composing-new.prompt.md
+└── templates/
+    ├── composing-contract-template.md
+    ├── composing-template.R
+    ├── composing-template.qmd
+    ├── data-primer-template.qmd
+    └── report-audit-checklist.md
+```
+:::
+:::
+
+## C3 Publishing Orchestra {background-color="#D7BDE2"}
+
+::: {.columns}
+::: {.column width="50%"}
+
+[Editorial, organizational, and aesthetic choices for delivering a customized communication.]{style="font-size: 70%;"}
+
+Governs publication of a customized frontend.
+
+::: {style="font-size: 0.62em;"}
+```text                 
+Agent         Interviewer + Writer       quarto
+Data      RAW ------------.------> EDITED ----> PRINTED
+Artifact              contract    content/       _site/
+```
+:::
+
+:::
+
+::: {.column style="font-size: 75%;"}
+
+Project-agnostic harness
+
+```text
+.github/
+├── publishing-orchestra.md
+├── agents/
+│   ├── publishing-interviewer.agent.md
+│   └── publishing-writer.agent.md
+├── copilot/
+│   └── publishing-orchestra-SKILL.md
+├── hooks/
+│   ├── publishing-validation-reminder.json
+│   └── scripts/
+│       └── check-publishing-validation.ps1
+├── instructions/
+│   └── publishing-rules.instructions.md
+├── prompts/
+│   ├── publishing-new.prompt.md
+│   ├── publishing-validate.prompt.md
+│   └── publishing-write.prompt.md
+├── skills/
+│   └── publishing-fidelity-audit/
+│       └── SKILL.md
+└── templates/
+    ├── audit-fidelity-template.R
+    └── publishing-contract-template.md
+```
+:::
+:::
+
