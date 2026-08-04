@@ -23,6 +23,7 @@ project:
     - content/model/condition-specific-models.qmd
     - content/model/sex-stratified-models.qmd
     - content/analysis/story-1.qmd
+    - content/analysis/story-2.qmd
     - content/pipeline/pipeline-guide.qmd
     - content/pipeline/cache-manifest.qmd
     - content/pipeline/input-manifest.qmd
@@ -75,8 +76,10 @@ website:
             href: content/model/sex-stratified-models.qmd
       - text: "Analysis"
         menu:
-          - text: "Story 1"
+          - text: "Story 1: Reading the Four Models (eda-81)"
             href: content/analysis/story-1.qmd
+          - text: "Story 2: What the Three Frames Say (eda-82)"
+            href: content/analysis/story-2.qmd
       - text: "Pipeline"
         menu:
           - text: "Pipeline Guide"

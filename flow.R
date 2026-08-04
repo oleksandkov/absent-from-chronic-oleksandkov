@@ -183,6 +183,25 @@ ds_rail  <- tibble::tribble(
   # "run_qmd"   , "analysis/eda-71/eda-71.qmd",     # EDA-71: LOP outcome profile — distribution structure for modeling context (composed, not yet active)
   # "run_qmd"   , "analysis/eda-72/eda-72.qmd",     # EDA-72: Predisposition profiles across chronic-absence groups (composed, not yet active)
 
+  # ---- Series 8: Model Interpretation ----------------------------------------
+  # Reads artifacts persisted by model-00 and model-1; must run AFTER both.
+  # "run_r"     , "analysis/eda-81/eda-81.R",       # EDA-81: penalty rules and the selection-vs-estimate alignment (composed, not yet active)
+  # "run_qmd"   , "analysis/eda-81/eda-81.qmd",     # EDA-81: Reading the four models (composed, not yet active)
+
+  # ---- Model 2: Condition-Specific Models (Sections 5.7 and 5.8) --------------
+  # Self-contained: reads the Ellis parquet directly, does not depend on model-1.
+  # "run_r"     , "analysis/model-2/model-2.R",     # Model-2: 17 condition-specific NB models (composed, not yet active)
+  # "run_qmd"   , "analysis/model-2/model-2.qmd",   # Model-2: deliverable Table 4 + Section 5.8 performance
+
+  # ---- Model 3: Sex-Stratified Models (Sections 5.9 and 5.10) ----------------
+  # Self-contained: reads the Ellis parquet directly, does not depend on model-1.
+  # "run_r"     , "analysis/model-3/model-3.R",     # Model-3: 8 sex-stratified NB models + union model (composed, not yet active)
+  # "run_qmd"   , "analysis/model-3/model-3.qmd",   # Model-3: deliverable Table 5 + Section 5.10 performance
+
+  # ---- EDA-82: Model Synthesis (Story 2) -------------------------------------
+  # Reads artifacts persisted by model-1, model-2, and model-3; must run AFTER all three.
+  # "run_r"     , "analysis/eda-82/eda-82.R",       # EDA-82: synthesis across the three modelling frames (composed, not yet active)
+  # "run_qmd"   , "analysis/eda-82/eda-82.qmd",     # EDA-82: Story 2 — what the three frames together say (composed, not yet active)
 
 )
 

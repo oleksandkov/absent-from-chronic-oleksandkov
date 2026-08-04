@@ -50,6 +50,7 @@ copy_html("analysis/model-3/model-3.html", "model", "model-3.html")
 
 # Analysis (interpretation layer)
 copy_html("analysis/eda-81/eda-81.html", "analysis", "eda-81.html")
+copy_html("analysis/eda-82/eda-82.html", "analysis", "eda-82.html")
 
 # Helper: copy a self-referencing HTML bundle (slides + libs + images) into _site
 copy_bundle <- function(source_rel, dest_subdir, members) {
