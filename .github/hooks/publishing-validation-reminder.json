@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "powershell -NoProfile -File .github/hooks/scripts/check-publishing-validation.ps1",
+        "timeout": 5
+      }
+    ]
+  }
+}

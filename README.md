@@ -1,6 +1,6 @@
 #  Absent from Chronic
 
-Replication of statistical analysis
+[Website](https://absent-from-chronic-site.vercel.app/content/index.html)(*_frontend-1*)
 
 ## About This Project
 
@@ -44,6 +44,12 @@ powershell -ExecutionPolicy Bypass -File scripts/ps1/run-interactive-flow.ps1
 ```
 
 See `manipulation/pipeline.md` for the full pipeline reference including input/output tables, white-list design, exclusion criteria, and troubleshooting.
+
+<!-- PIPELINE-DIAGRAM -->
+![Pipeline Architecture](libs/images/pipeline-architecture.jpg)
+
+> Diagram source: [manipulation/pipeline.md](manipulation/pipeline.md) — render with the
+> **Render Pipeline Diagram** VS Code task or `Rscript utility/render-pipeline-diagram.R`
 
 ### Running the analysis scripts (`analysis/`)
 
@@ -129,7 +135,7 @@ The template includes an intelligent memory system that maintains project contin
 
 3. **Install R Dependencies** 
    
-   **Choose your preferred approach** (see `docs/environment-management.md` for detailed comparison):
+   **Choose your preferred approach** (see `guides/environment-management.md` for detailed comparison):
 
    **Option A: Enhanced CSV System (Default - Flexible)**
    ```r
@@ -140,13 +146,7 @@ The template includes an intelligent memory system that maintains project contin
    Rscript utility/install-packages.R
    ```
    
-   **Option B: renv (Strict Reproducibility)**
-   ```r
-   # For exact reproducibility (research publication)
-   Rscript utility/init-renv.R
-   ```
-   
-   **Option C: Conda (Cross-Language Projects)**
+   **Option B: Conda (Cross-Language Projects)**
    ```bash
    # For R + Python workflows
    conda env create -f environment.yml
@@ -178,8 +178,8 @@ Each personal could be customized by adding specific documents to the dynamic pa
 
 This repo includes a two-agent publishing system for generating static Quarto websites from analytics content.
 - **Interviewer** (`@publishing-interviewer`): Plans the site, produces the contract.
-- **Writer** (`@publishing-writer`): Assembles `edited_content/`, renders `_site/`.
-- Design doc: `.github/publishing-orchestra-3.md`
+- **Writer** (`@publishing-writer`): Assembles `content/`, renders `_site/`.
+- Design doc: `.github/publishing-orchestra.md`
 - Migration guide: `.github/migration.md`
 
 ## Composing Orchestra
@@ -187,7 +187,7 @@ This repo includes a two-agent publishing system for generating static Quarto we
 This repo includes a single-agent system for bootstrapping and developing analytical reports (EDA or presentation Report) in `analysis/`.
 - **Report Composer** (`@report-composer`): Scaffolds directories, conducts adaptive interviews, iteratively develops .R + .qmd reports with a per-report Data Context section.
 - **Data Primer** (`analysis/data-primer-1/`): Centralized, human-verified data reference composed once via `@report-composer`. All EDAs and Reports link to it.
-- Design doc: `.github/composing-orchestra-1.md`
+- Design doc: `.github/composing-orchestra.md`
 - Bootstrap prompt: `.github/prompts/composing-new.prompt.md`
 - Instructions: `.github/instructions/report-composition.instructions.md` (applies to `analysis/**`)
 - Templates: `.github/templates/composing-*.{R,qmd,md}` + `data-primer-template.qmd`

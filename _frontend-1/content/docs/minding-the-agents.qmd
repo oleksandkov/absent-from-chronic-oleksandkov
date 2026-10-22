@@ -1,0 +1,9 @@
+---
+title: "Minding the Agents"
+format:
+  html:
+    page-layout: full
+    toc: false
+---
+
+<meta http-equiv="refresh" content="0; url=minding-the-agents/slides.html">

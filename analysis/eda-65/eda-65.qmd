@@ -1,0 +1,293 @@
+---
+title: "EDA 65 — Missing Data Mechanism: Little's MCAR Test & Missingness Visualization"
+subtitle: "Systematic assessment of missing-data patterns across the Andersen Model domains"
+author: "Analysis Team"
+date: "2026-05-23"
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    code-fold: true
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission
+
+This EDA conducts a systematic missing-data assessment for the CCHS analytic dataset.
+It addresses the request from Marc-André Blanchette (2026-05-15 review) to evaluate the
+missing-data mechanism using Little's MCAR test and to visualize variable-level
+missingness patterns.
+
+**Research Questions:**
+
+1. What is the missingness rate for each analysis variable, and do variables cluster by
+   missingness level?
+2. What are the most common missingness *patterns* (combinations of jointly-missing variables)?
+3. Is missingness completely at random (MCAR) within each Andersen model domain, or is
+   there evidence of structure (MAR/MNAR)?
+4. Does missingness concentrate in specific age groups (evidence of age-gated questions)?
+5. Does missingness differ between the two CCHS cycles?
+
+**Method:** Little's MCAR test (Little, 1988) tests the null hypothesis that missing data
+are Missing Completely At Random. A significant result (p < 0.05) indicates that the
+pattern of missingness depends on observed values — i.e., the data are at least MAR.
+
+> **Reference:** Little, R. J. A. (1988). A test of missing completely at random for
+> multivariate data with missing values. *Journal of the American Statistical
+> Association*, 83(404), 1198–1202.
+
+Following the dual-file development pattern, all analytical code lives in
+`analysis/eda-65/eda-65.R`. This document sources those chunks for presentation.
+
+```{r}
+#| code-summary: Reconciles working directory between execution modes
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir = "../../")
+```
+
+```{r}
+#| label: set_options
+#| code-summary: Report-wide formatting options
+#| echo: false
+#| results: hide
+#| message: false
+cat("Working directory: ", getwd())
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results   = "show",
+  message   = FALSE,
+  warning   = FALSE,
+  comment   = NA,
+  tidy      = FALSE,
+  out.width = "960px",
+  fig.width  = 10,
+  fig.height = 6,
+  fig.path   = "figure-png-iso/"
+)
+options(width = 100)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/eda-65/eda-65.R")
+```
+
+# Environment
+
+> Reviews the components of the working environment. Non-technical readers may skip this section.
+
+```{r}
+#| label: load-packages
+#| code-summary: Packages used in the current report
+#| echo: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: Project-level scripts
+#| echo: true
+#| results: hide
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: Paths and variable definitions
+#| echo: true
+#| results: hide
+```
+
+```{r}
+#| label: declare-functions
+#| code-summary: Analysis-specific helper functions
+#| echo: true
+```
+
+# Data
+
+```{r}
+#| label: load-data
+#| code-summary: Load analytical parquet
+#| cache: true
+```
+
+```{r}
+#| label: data-context-tables
+#| code-summary: Data provenance
+#| echo: false
+```
+
+---
+
+# Graph Family G1: Variable-Level Missingness
+
+<!-- Research question: What is the missingness rate for each variable? -->
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: Calculate per-variable missingness
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g1
+#| code-summary: Missingness rate by variable (bar chart)
+#| code-fold: true
+#| fig-cap: "Per-variable missingness rate coloured by Andersen model domain"
+#| fig-height: 9
+```
+
+```{r}
+#| label: g11
+#| code-summary: Missingness heatmap (subsample)
+#| code-fold: true
+#| fig-cap: "Missingness pattern visualisation (5,000-row random subsample)"
+#| fig-height: 7
+```
+
+---
+
+# Graph Family G2: Missingness Patterns
+
+<!-- Research question: What are the most common combinations of missing variables? -->
+
+```{r}
+#| label: g2-data-prep
+#| code-summary: Calculate missingness patterns
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g2
+#| code-summary: Number of missing variables per respondent
+#| code-fold: true
+#| fig-cap: "Distribution of missingness burden across the sample"
+```
+
+```{r}
+#| label: g21
+#| code-summary: Top 15 missingness patterns (upset-style)
+#| code-fold: true
+#| fig-cap: "Most frequent combinations of jointly-missing variables"
+#| fig-height: 7
+```
+
+---
+
+# Graph Family G3: Little's MCAR Test
+
+> **Little's MCAR test** (1988) evaluates the null hypothesis that missingness is
+> completely at random. The test is run separately for each Andersen model domain and
+> for all predictors combined. A significant p-value (p < 0.05) indicates that
+> missingness is *not* MCAR — it depends on observed values (at minimum MAR).
+
+```{r}
+#| label: g3-data-prep
+#| code-summary: Run Little's MCAR test by domain
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g3
+#| code-summary: MCAR test summary plot
+#| code-fold: true
+#| fig-cap: "Little's MCAR test by domain — bars above the dashed line reject MCAR"
+```
+
+**Interpretation guide:**
+
+- If **p < 0.05** (bar above dashed line): Reject MCAR → missingness has structure.
+  This is expected for age-gated variables (COPD, BMI) where younger respondents are
+  systematically missing.
+- If **p ≥ 0.05** (bar below line): Consistent with MCAR → missingness appears random.
+- The test cannot distinguish MAR from MNAR — only that MCAR is violated.
+
+---
+
+# Graph Family G4: Missingness by Age Group
+
+> **Context**: If missingness is concentrated in the youngest age group (15–24), this
+> confirms age-gated survey design rather than data quality problems.
+
+```{r}
+#| label: g4-data-prep
+#| code-summary: Missingness by age group
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g4
+#| code-summary: Heatmap of missingness by age group
+#| code-fold: true
+#| fig-cap: "Variables with high missingness in the 15-24 group are age-gated questions"
+#| fig-height: 8
+```
+
+---
+
+# Graph Family G5: Missingness by Cycle
+
+```{r}
+#| label: g5-data-prep
+#| code-summary: Missingness by CCHS cycle
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g5
+#| code-summary: Paired dot-plot of missingness by cycle
+#| code-fold: true
+#| fig-cap: "Comparing % missing between 2010-2011 and 2013-2014 cycles"
+#| fig-height: 8
+```
+
+---
+
+# Summary
+
+```{r}
+#| label: save-results
+#| echo: false
+#| results: hide
+```
+
+```{r}
+#| echo: false
+d_local <- readRDS("analysis/eda-65/data-local/eda-65.rds")
+knitr::kable(
+  d_local$mcar_results %>% select(block, statistic, df, p_value, note),
+  col.names = c("Domain Block", "Chi-sq", "df", "p-value", "Interpretation"),
+  digits    = c(0, 1, 0, 4, 0),
+  caption   = "Little's MCAR Test Results by Variable Domain"
+)
+```
+
+---
+
+```{r}
+#| label: session-info
+#| echo: false
+#| results: hide
+report_render_stop_time <- Sys.time()
+cat(
+  "Report rendered at:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
+  "\nElapsed:", round(difftime(report_render_stop_time, report_render_start_time, units = "secs"), 1),
+  "seconds\n"
+)
+sessionInfo()
+```

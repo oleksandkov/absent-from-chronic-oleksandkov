@@ -1,0 +1,292 @@
+---
+title: "EDA 63 — Facilitating Variable Profile: Access & Health Behaviours"
+subtitle: "Andersen Behavioral Model — Facilitating Domain"
+author: "Analysis Team"
+date: "2026-05-22"
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    code-fold: true
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission
+
+This EDA profiles the 12 facilitating variables (health-system access and health
+behaviours) from the Andersen Behavioral Model framework. These represent enabling
+resources and behavioural choices that moderate the pathway between predisposition /
+need and actual health service use (and work absence).
+
+**Research Questions:**
+
+1. What is the weighted distribution of each facilitating variable in the employed population?
+2. How does each facilitating variable relate to the primary outcome (`days_absent_total`) —
+   mean days, median days, and zero-proportion?
+3. What is the missing-data pattern across the 12 facilitating variables?
+4. What behaviour clustering patterns exist — smoking×BMI×activity co-profiles?
+
+Following the dual-file development pattern, all analytical code lives in
+`analysis/eda-63/eda-63.R`. This document sources those chunks for presentation.
+
+# Definition of Terms
+
+**Facilitating factors**: In the Andersen Behavioral Model, these are enabling resources
+and conditions that permit or impede health service use — income, geography, insurance,
+health care access — as well as health behaviours (smoking, physical activity, diet) that
+moderate the disease–absence pathway.
+
+**Province/Region**: Province is shown at both granular (13 levels) and regional grouping
+(Atlantic, Quebec, Ontario, Prairies, British Columbia, Territories) levels for readability.
+
+**`days_absent_total`**: Primary outcome. Row-wise sum of all 8 LOP component variables,
+representing total workdays missed in the past 3 months due to health reasons.
+
+```{r}
+#| code-summary: Reconciles working directory between execution modes
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir = "../../")
+```
+
+```{r}
+#| label: set_options
+#| code-summary: Report-wide formatting options
+#| echo: false
+#| results: hide
+#| message: false
+cat("Working directory: ", getwd())
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results   = "show",
+  message   = FALSE,
+  warning   = FALSE,
+  comment   = NA,
+  tidy      = FALSE,
+  out.width = "960px",
+  fig.width  = 10,
+  fig.height = 6,
+  fig.path   = "figure-png-iso/"
+)
+options(width = 100)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/eda-63/eda-63.R")
+```
+
+# Environment
+
+> Reviews the components of the working environment. Non-technical readers may skip this section.
+
+```{r}
+#| label: load-packages
+#| code-summary: Packages used in the current report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: Collection of custom functions used in current repository
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: Values used throughout the report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| code-summary: Custom functions defined for use in this report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+# Data
+
+```{r}
+#| label: load-data
+#| code-summary: Load data from Ellis parquet outputs
+#| warning: false
+#| code-fold: true
+#| cache: true
+```
+
+## Data Context
+
+For complete data documentation, see the
+[Data Primer](../data-primer-1/data-primer-1.html).
+
+```{r}
+#| label: data-context-tables
+#| code-summary: Tables and variables used in this analysis
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-person
+#| code-summary: Representative individual
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: Level counts for facilitating variables
+#| code-fold: true
+```
+
+```{r}
+#| label: tweak-data-0
+#| code-summary: Ensure factor types and add regional grouping
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: inspect-data-0
+#| code-summary: Data overview
+#| code-fold: true
+```
+
+# Analysis
+
+## Graph Family G1: Variable Distributions
+
+<!-- Research question: What is the weighted distribution of each facilitating variable? -->
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: Prepare distribution summaries
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g1
+#| code-summary: Unweighted distribution of facilitating variables
+#| code-fold: true
+#| fig-cap: "Unweighted frequency distribution by variable level"
+#| fig-height: 8
+```
+
+```{r}
+#| label: g11
+#| code-summary: Weighted distribution — Province (13 levels)
+#| code-fold: true
+#| fig-cap: "Population-weighted distribution by province"
+```
+
+```{r}
+#| label: g12
+#| code-summary: Weighted distribution by CCHS cycle
+#| code-fold: true
+#| fig-cap: "Distribution comparison between 2010-2011 and 2013-2014 cycles"
+#| fig-height: 8
+```
+
+## Graph Family G2: Outcome Relationship
+
+<!-- Research question: How does each facilitating variable relate to days_absent_total? -->
+
+```{r}
+#| label: g2-data-prep
+#| code-summary: Prepare outcome summaries by variable level
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g2
+#| code-summary: Mean days absent by facilitating variable level
+#| code-fold: true
+#| fig-cap: "Weighted mean days absent by level"
+#| fig-height: 8
+```
+
+```{r}
+#| label: g21
+#| code-summary: Mean days absent by province (granular, 13 levels)
+#| code-fold: true
+#| fig-cap: "Weighted mean days absent — all provinces sorted by value"
+```
+
+```{r}
+#| label: g22
+#| code-summary: Mean days absent by region (grouped)
+#| code-fold: true
+#| fig-cap: "Weighted mean days absent — provinces grouped into regions"
+```
+
+## Graph Family G3: Missing Data Profile
+
+<!-- Research question: What is the missing-data pattern across facilitating variables? -->
+
+```{r}
+#| label: g3-data-prep
+#| code-summary: Compute missingness statistics
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g3
+#| code-summary: Missingness profile across facilitating variables
+#| code-fold: true
+#| fig-cap: "Percentage and count of missing values per variable"
+```
+
+```{r}
+#| label: g31
+#| code-summary: Missingness by CCHS cycle
+#| code-fold: true
+#| fig-cap: "Missing data rates by survey cycle"
+```
+
+## Graph Family G4: Behaviour Clustering
+
+<!-- Research question: What behaviour clustering patterns exist? -->
+
+```{r}
+#| label: g4-data-prep
+#| code-summary: Compute behaviour cross-tabulation summaries
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g4
+#| code-summary: Smoking status × BMI category interaction
+#| code-fold: true
+#| fig-cap: "Mean days absent by smoking status and BMI"
+```
+
+```{r}
+#| label: g41
+#| code-summary: Smoking status × physical activity interaction
+#| code-fold: true
+#| fig-cap: "Mean days absent by smoking status and physical activity level"
+```

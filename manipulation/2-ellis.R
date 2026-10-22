@@ -1,1575 +1,967 @@
-#' ---
-#' title: "Ellis Lane 2: CCHS Data Transformation — White-List Analytical Dataset"
-#' author: "Andriy Koval"
-#' date: "2026-02-19"
-#' ---
-#'
-#' ============================================================================
-#' ELLIS PATTERN: Transform Ferry Output into Analysis-Ready Dataset
-#' ============================================================================
-#'
-#' **Purpose**: Select, harmonize, recode, and validate CCHS microdata from
-#' two survey cycles (2010-2011, 2013-2014) into a single pooled analytical
-#' dataset containing only the variables required by stats_instructions_v3.md.
-#'
-#' **White-List Philosophy**: This Ellis script explicitly selects ~60-80
-#' analysis-relevant variables from the hundreds in the raw SPSS files.
-#' Variables are grouped by conceptual category. Unrecognized white-list names
-#' trigger WARNINGS (not errors) so the analyst can verify against data
-#' dictionaries in ./data-private/raw/2026-02-19/ and update this script.
-#'
-#' **Input**: ./data-private/derived/cchs-1.sqlite
-#'   - Table: cchs_2010_raw  (CCHS 2010-2011, all columns)
-#'   - Table: cchs_2014_raw  (CCHS 2013-2014, all columns)
-#'
-#' **Output**:
-#'   Primary: ./data-private/derived/cchs-2-tables/  (Parquet — preserves factors)
-#'     - cchs_analytical.parquet  : pooled white-listed analytical dataset
-#'     - sample_flow.parquet      : sequential exclusion counts (flowchart data)
-#'   Secondary: ./data-private/derived/cchs-2.sqlite  (for ad-hoc SQL exploration)
-#'     - cchs_analytical  : same data, factors stored as character
-#'     - sample_flow      : same data
-#'
-#' **Required Variables** (see ./data-public/derived/required-variables-and-sample.md):
-#'   Confirmed: LOPG040, LOPG070, LOPG082-086, LOPG100, LOP_015, DHHGAGE,
-#'              ADM_PRX, WTS_M, GEODPMF
-#'   Inferred:  CCC module (19 conditions), DHH demographics, INC, GEN, ALC,
-#'              SMK, HWT, PAC, HCU, LBF, FVC, RAC, INJ modules
-#'              (Verify against PDF data dictionaries in data-private/raw/)
-#'
-#' **References**:
-#'   - stats_instructions_v3.md   (analysis plan)
-#'   - required-variables-and-sample.md  (confirmed variable names)
-#'   - CCHS_2010_DataDictionary_Freqs-ver2.pdf  (verify INFERRED names)
-#'   - CCHS_2014_DataDictionary_Freqs.pdf       (verify INFERRED names)
-#'
-#' ============================================================================
-
-#+ echo=F
-# rmarkdown::render(input = "./manipulation/2-ellis.R") # run to knit
-# ---- setup -------------------------------------------------------------------
-rm(list = ls(all.names = TRUE))
-cat("\014")
-
-# ============================================================
-# PIPELINE FLAGS  —  Edit these or let run-interactive-flow.ps1 manage them
-# ============================================================
-#
-# strict_cycle_integrity
-#   Controls what happens when one of the two CCHS survey cycles (2010-2011
-#   or 2013-2014) loads as an empty table from cchs-1.sqlite.
-#   Affects rows: acts as a guard — does NOT exclude rows, only prevents a
-#   silent single-cycle run when both cycles are required for valid analysis.
-#     FALSE = emit a warning and continue with available cycle(s);
-#             useful during development or when only one dataset is present.
-#     TRUE  = stop with an error if any cycle is empty (strict pooled mode).
-#
-# apply_sample_exclusions
-#   Applies the inclusion/exclusion criteria from stats_instructions_v3.md §3.1:
-#     – Keep only respondents employed in the past 3 months  (lop_015 == 1)
-#     – Keep only ages 15–75                                 (dhhgage in range)
-#     – Exclude proxy respondents                            (adm_prx == 1)
-#   Affects rows: removes out-of-scope respondents; reduces analytic sample.
-#     FALSE = skip these filters; retain full pooled sample.
-#     TRUE  = apply the three filters above (recommended for analysis).
-#
-# apply_completeness_exclusion  (§3.1 criterion 4b)
-#   After the above filters, also drops any respondent with NA on ANY of the
-#   19 CCC chronic-condition indicators OR on any key predictor variable.
-#   Affects rows: drops incomplete cases from cchs_analytical.parquet / SQLite.
-#   Affects columns: none (columns are kept; only rows with NA in CCC/predictors
-#                   are removed when TRUE).
-#     FALSE = do NOT drop incomplete cases here; handle missingness downstream
-#             (e.g., multiple imputation, complete-case sensitivity analysis).
-#     TRUE  = enforce full §3.1 compliance by removing incomplete cases now.
-#
-strict_cycle_integrity       <- FALSE
-apply_sample_exclusions      <- TRUE
-apply_completeness_exclusion <- FALSE
-
-script_start <- Sys.time()
-verbose      <- FALSE   # set FALSE to suppress progress output; key results always print
-vcat         <- function(...) if (verbose) cat(...)
+rm(list = ls(all.names = TRUE)) # Clear the memory of variables from previous run.
+cat("\014") # Clear the console
+cat("Working directory: ", getwd()) # Must be set to Project Directory
 
 # ---- load-packages -----------------------------------------------------------
 library(magrittr)
 library(dplyr)
 library(tidyr)
+library(forcats)
 library(stringr)
 library(janitor)
 requireNamespace("DBI")
 requireNamespace("RSQLite")
-requireNamespace("checkmate")
 requireNamespace("arrow")
+requireNamespace("config")
 requireNamespace("fs")
 
 # ---- load-sources ------------------------------------------------------------
-project_root <- if (dir.exists("scripts") && dir.exists("manipulation")) {
-  "."
-} else if (dir.exists("../scripts") && dir.exists("../manipulation")) {
-  ".."
-} else {
-  stop("Cannot locate project root. Run from project root or from manipulation/.")
-}
-
-base::source(file.path(project_root, "scripts", "common-functions.R"))
+base::source("./scripts/common-functions.R")
 
 # ---- declare-globals ---------------------------------------------------------
+config <- config::get()
 
-# Input (ferry output)
-input_sqlite_candidates <- unique(c(
-  file.path(project_root, "data-private", "derived", "cchs-1.sqlite"),
-  file.path(".", "data-private", "derived", "cchs-1.sqlite"),
-  file.path("..", "data-private", "derived", "cchs-1.sqlite")
-))
-input_sqlite <- input_sqlite_candidates[file.exists(input_sqlite_candidates)][1]
-if (is.na(input_sqlite)) input_sqlite <- input_sqlite_candidates[1]
-table_2010    <- "cchs_2010_raw"
-table_2014    <- "cchs_2014_raw"
+path_ferry  <- config$database$cchs$ferry_sqlite
+path_ellis  <- config$database$cchs$ellis_sqlite
+parquet_dir <- config$database$cchs$ellis_parquet_dir
 
-# Output — SQLite (secondary: ad-hoc SQL exploration; factors as character)
-output_sqlite <- file.path(project_root, "data-private", "derived", "cchs-2.sqlite")
-output_dir    <- dirname(output_sqlite)
-if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
+prints_folder <- "./manipulation/prints/"
+if (!fs::dir_exists(prints_folder)) fs::dir_create(prints_folder, recursive = TRUE)
 
-# Output — Parquet (primary: preserves R factor types, levels, and order)
-output_parquet_dir <- file.path(project_root, "data-private", "derived", "cchs-2-tables")
-if (!fs::dir_exists(output_parquet_dir)) fs::dir_create(output_parquet_dir, recurse = TRUE)
+report_render_start_time <- Sys.time()
 
-# --------------------------------------------------------------------------
-# WHITE-LIST: Variables selected for the analytical dataset
-# --------------------------------------------------------------------------
-#
-# CONFIRMED = explicitly named in required-variables-and-sample.md
-# INFERRED  = derived from CCHS PUMF naming conventions
-#             MUST BE VERIFIED against PDF data dictionaries:
-#             ./data-private/raw/2026-02-19/CCHS_2010_DataDictionary_Freqs-ver2.pdf
-#             ./data-private/raw/2026-02-19/CCHS_2014_DataDictionary_Freqs.pdf
-#
-# Variable names below are AFTER janitor::clean_names() (lowercase, snake_case).
-# Original CCHS names: LOPG040 → lopg040, CCC_015 → ccc_015, DHH_SEX → dhh_sex
-# --------------------------------------------------------------------------
-
-vars_confirmed <- c(
-  # --- LOP module: outcome components (8 variables) ---
-  "lopg040",   # CONFIRMED: days lost – chronic condition (also: sensitivity outcome)
-  "lopg070",   # CONFIRMED: days lost – injury
-  "lopg082",   # CONFIRMED: days lost – cold
-  "lopg083",   # CONFIRMED: days lost – flu/influenza
-  "lopg084",   # CONFIRMED: days lost – stomach flu (gastroenteritis)
-  "lopg085",   # CONFIRMED: days lost – respiratory infection
-  "lopg086",   # CONFIRMED: days lost – other infectious disease
-  "lopg100",   # CONFIRMED: days lost – other physical/mental health
-
-  # --- Sample construction filters ---
-  "lop_015",   # CONFIRMED: employed in past 3 months (1=Yes; inclusion criterion)
-  "dhhgage",   # CONFIRMED: age group (inclusion: 15-75; recoded to 3-cat predictor)
-  "adm_prx",   # CONFIRMED: proxy indicator (1=Proxy; exclusion criterion)
-
-  # --- Survey design ---
-  "wts_m",     # CONFIRMED: master survey weight (labelled WGHT_FINAL in instructions)
-  "geodpmf"    # CONFIRMED: health region / strata identifier
-)
-
-vars_inferred_ccc <- c(
-  # --- CCC module: 19 chronic conditions (binary Yes/No each) ---
-  # Codes 1=Yes, 2=No; special NAs: 6=Not applicable, 7=DK, 8=Refusal, 9=Not stated
-  #
-  # METADATA STATUS per cchs_variable_labels.csv (extract-metadata.R):
-  #   VERIFIED  = variable and label confirmed in both SAV cycles
-  #   NOT FOUND = absent from both SAV files; verify against PDF data dictionaries
-  #
-  "ccc_031",   # VERIFIED: asthma                                   (CCC_031; both cycles)
-  "ccc_041",   # VERIFIED: fibromyalgia                             (CCC_041; both cycles)
-  "ccc_051",   # VERIFIED: arthritis (excl. fibromyalgia)           (CCC_051; both cycles)
-  "ccc_061",   # VERIFIED: back problems (excl. fibro/arthritis)    (CCC_061; both cycles)
-  "ccc_071",   # VERIFIED: hypertension (high blood pressure)       (CCC_071; both cycles)
-  "ccc_081",   # VERIFIED: migraine headaches                       (CCC_081; both cycles)
-  "ccc_091",   # VERIFIED: COPD / chronic bronchitis / emphysema    (CCC_091; both cycles)
-  "ccc_101",   # VERIFIED: diabetes                                 (CCC_101; both cycles)
-  "ccc_121",   # VERIFIED: heart disease                            (CCC_121; both cycles)
-  "ccc_131",   # VERIFIED: cancer (any type)                        (CCC_131; both cycles)
-  "ccc_141",   # VERIFIED: intestinal / stomach ulcer               (CCC_141; both cycles)
-  "ccc_151",   # VERIFIED: effects of stroke                        (CCC_151; both cycles)
-  "ccc_171",   # VERIFIED: bowel disorder (Crohn's/colitis/IBS)     (CCC_171; both cycles)
-  "ccc_251",   # VERIFIED: chronic fatigue syndrome (CFS)           (CCC_251; both cycles)
-  "ccc_261",   # VERIFIED: multiple chemical sensitivities (MCS)    (CCC_261; both cycles)
-  "ccc_280",   # VERIFIED: mood disorder (depression/bipolar/etc.)  (CCC_280; both cycles)
-  "ccc_290",   # VERIFIED: anxiety disorder (phobia/OCD/panic)      (CCC_290; both cycles)
-  "ccc_300",   # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
-                #   Intended: other mental illness (schizophrenia etc.)
-                #   Verify against CCHS_2010_DataDictionary_Freqs-ver2.pdf
-  "ccc_185"    # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
-                #   Intended: digestive diseases (other than ulcer/bowel disorder)
-                #   Verify against CCHS_2010_DataDictionary_Freqs-ver2.pdf
-)
-
-vars_inferred_predisposing <- c(
-  # --- Predisposing variables ---
-  # Codes below are standard CCHS PUMF; verify against data dictionaries
-  "dhh_sex",    # INFERRED: sex (1=Male, 2=Female)
-  "dhhgms",     # INFERRED: marital status (1=Married, 2=Common-law,
-                #            3=Widowed/Divorced/Separated, 4=Single)
-  "dhhdghsz",   # VERIFIED: household size — alias resolves to dhhghsz (DHHGHSZ in SAV)
-  "edudh04",    # INFERRED: education level (derived; 4 categories)
-                #            Alt candidate: "edudr04"
-  "sdcfimm",    # VERIFIED: immigrant flag — SDCFIMM; codes 1=YES (immigrant), 2=NO
-                #   NOTE: SAV has only 2 codes; no code 3 in data (code 3 recode is dead)
-  "sdcdgcb",    # VERIFIED: visible minority — alias resolves to sdcgcgt (SDCGCGT in SAV)
-                #   codes: 1=WHITE, 2=VISIBLE MINORITY
-  "dhhglvg",    # VERIFIED: living arrangements — DHHGLVG in SAV (both cycles)
-                #   codes: 1=Unattached alone, 2=Unattached w/others, 3=Spouse/partner only,
-                #          4=Parent+spouse+child, 5=Single parent w/child, 6=Child in parent/sib hhld,
-                #          7=Child in two-parent hhld, 8=Other; special NAs: 96=N/A, 99=NOT STATED
-  # --- Children in household by age group (§2.2 predisposing) ---
-  "dhhgle5",    # VERIFIED: persons ≤5 yrs in hhld — DHHGLE5 in SAV (both cycles)
-                #   codes: 0=None, 1=1 or more; special NAs: 6/7/8/9
-  "dhhg611",    # VERIFIED: persons 6–11 yrs in hhld — DHHG611 in SAV (both cycles)
-                #   codes: 0=None, 1=1 or more; special NAs: 6/7/8/9
-  "dhhdfc12p",  # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
-                #   Intended: number of children ≥ 12 yrs in household
-  # --- Student status (§2.2 predisposing) ---
-  "sdcdgstud"   # NOT FOUND in SAV metadata — NEEDS EXTERNAL DICT VERIFICATION
-                #   Intended: student status (full-time / part-time / not a student)
-)
-
-vars_inferred_facilitating <- c(
-  # --- Facilitating variables ---
-  "incdghh",   # VERIFIED: household income 5-category — alias resolves to incghh (INCGHH in SAV)
-                #   codes: 1=<$20k, 2=$20k-$39.9k, 3=$40k-$59.9k, 4=$60k-$79.9k, 5=$80k+
-  "geodgprv",  # VERIFIED: province — alias resolves to geogprv (GEOGPRV in SAV)
-               #   codes: 10=NL, 11=PEI, 12=NS, 13=NB, 24=QC, 35=ON, 46=MB, 47=SK, 48=AB, 59=BC, 60=YT/NT/NU
-  "hcu_1aa",   # VERIFIED: has regular family doctor — HCU_1AA in SAV; codes 1=YES, 2=NO
-  "lbfdghp",   # VERIFIED: employment type — alias resolves to lbsg31 (LBSG31 in SAV)
-               #   codes: 1=EMPLOYEE, 2=SELF-EMPLOYED  (no code 3 in data; unpaid worker recode is dead)
-  "lbfdgft",   # VERIFIED: work schedule — alias resolves to lbsdpft (LBSDPFT in SAV)
-               #   codes: 1=FULL-TIME, 2=PART-TIME
-  "fvcdgtot",  # VERIFIED: fruit & veg intake — alias resolves to fvcgtot (FVCGTOT in SAV)
-               #   NOTE: FVCGTOT is a 3-category derived variable (1=<5/day, 2=5-10/day, 3=>10/day)
-               #   NOT a continuous count; treat as ordinal/categorical in analysis
-  "alcdttm",   # VERIFIED: type of drinker (12 months) — ALCDTTM in SAV (both cycles)
-               #   codes: 1=Regular drinker, 2=Occasional drinker, 3=No drink last 12m
-               #   NOTE: code 3 collapses former + never drinkers; only 3 substantive levels
-  "smkdsty",   # VERIFIED: smoking status derived — SMKDSTY in SAV
-               #   codes: 1=DAILY, 2=OCCASIONAL (current), 3=ALWAYS OCCASIONAL (former),
-               #          4=FORMER DAILY, 5=FORMER OCCASIONAL, 6=NEVER SMOKED
-               #   special NAs: 96=NOT APPLICABLE, 97=DK, 98=REFUSAL, 99=NOT STATED
-  "hwtgisw",   # VERIFIED: BMI classification (18+) self-report — HWTGISW in SAV (both cycles)
-               #   codes: 1=Underweight, 2=Normal weight, 3=Overweight, 4=Obese; special NAs: 6/7/8/9
-  "pacdpai",   # VERIFIED: physical activity index — PACDPAI in SAV
-               #   codes: 1=ACTIVE, 2=MODERATE ACTIVE, 3=INACTIVE
-  "gen_07",    # VERIFIED: perceived life stress — GEN_07 in SAV
-               #   codes: 1=NOT AT ALL, 2=NOT VERY, 3=A BIT, 4=QUITE A BIT, 5=EXTREMELY
-               #   NOTE: GEN_07 = perceived LIFE stress; GEN_09 = perceived WORK stress
-               #   Confirm which is intended as 'job_stress' against stats_instructions
-  # --- Occupation category (§2.2 facilitating) ---
-  "lbsgsoc"    # VERIFIED: occupation group (5-category) — LBSGSOC in SAV (both cycles)
-               #   codes: 1=Group 1 (Mgmt/Art/Educ), 2=Group 2 (Business/Finance),
-               #          3=Group 3 (Sales/Service), 4=Group 4 (Trades/Transport),
-               #          5=Group 5 (Prim.Ind./Processing); special NAs: 6/7/8/9
-)
-
-vars_inferred_needs <- c(
-  # --- Needs variables ---
-  "gen_01",    # VERIFIED: self-perceived general health — GEN_01 in SAV
-               #   codes: 1=EXCELLENT, 2=VERY GOOD, 3=GOOD, 4=FAIR, 5=POOR
-  "gen_02a",   # VERIFIED: self-perceived mental health — alias resolves to gen_02b (GEN_02B in SAV)
-               #   codes: 1=EXCELLENT, 2=VERY GOOD, 3=GOOD, 4=FAIR, 5=POOR
-               #   WARNING: GEN_02 is "health compared to 1 yr ago" (NOT mental health);
-               #            GEN_02A2 is "life satisfaction" 0-10 scale (NOT mental health)
-  "gen_02",    # VERIFIED: self-perceived health compared to 1 year ago — GEN_02 in SAV
-               #   codes: 1=MUCH BETTER, 2=SOMEWHAT BETTER, 3=ABOUT THE SAME,
-               #          4=SOMEWHAT WORSE, 5=MUCH WORSE
-  "rac_1",     # VERIFIED: activity limitations — RAC_1 in SAV
-               #   ACTUAL CODES (3-category): 1=SOMETIMES, 2=OFTEN, 3=NEVER
-               #   WARNING: prior recode used binary (1=Yes, 2=No) — WRONG; corrected below
-  "inj_01"     # VERIFIED: injury in past 12 months — INJ_01 in SAV; 1=YES, 2=NO
-)
-
-vars_inferred_id <- c(
-  # --- Identifiers / metadata (exceptions for data quality checks) ---
-  "adm_rno"    # INFERRED: respondent sequence number (deduplication check)
-)
-
-# Combine all white-listed variables
-vars_whitelist_all <- c(
-  vars_confirmed,
-  vars_inferred_ccc,
-  vars_inferred_predisposing,
-  vars_inferred_facilitating,
-  vars_inferred_needs,
-  vars_inferred_id
-)
-
-# Bootstrap weight pattern (500 variables: bsw001 through bsw500 or similar)
-# Selected via grepl pattern after loading — NOT listed individually here
-bootstrap_pattern <- "^bsw"   # matches bsw001, bsw002, ..., bsw500
+# Analytic age bounds — DHHGAGE category codes (codebook: codes 1-16, not year values)
+# Code 2 = 15-17 years (first group >= 15), code 15 = 75-79 years (last group <= 79)
+DHHGAGE_CODE_MIN <- 2L
+DHHGAGE_CODE_MAX <- 15L
 
 # ---- declare-functions -------------------------------------------------------
-
-# Attempt to select white-listed variables from a data frame.
-# CONFIRMED variables trigger an error if missing.
-# INFERRED variables trigger a warning if missing and are silently dropped.
-select_whitelist <- function(data, confirmed, inferred, bootstrap_pat,
-                             cycle_label = "") {
-  all_cols <- names(data)
-
-  # Confirmed: must be present
-  missing_confirmed <- setdiff(confirmed, all_cols)
-  if (length(missing_confirmed) > 0) {
-    stop(sprintf(
-      "[%s] MISSING CONFIRMED variables (%d): %s\n%s",
-      cycle_label, length(missing_confirmed),
-      paste(missing_confirmed, collapse = ", "),
-      "Check ferry output: did 1-ferry.R run successfully?"
-    ))
-  }
-
-  # Inferred: warn if missing, skip silently
-  missing_inferred <- setdiff(inferred, all_cols)
-  found_inferred   <- intersect(inferred, all_cols)
-  if (length(missing_inferred) > 0) {
-    warning(sprintf(
-      "[%s] %d INFERRED variable(s) NOT found — dropped from white-list:\n  %s\n  Verify names against PDF data dictionaries in data-private/raw/2026-02-19/",
-      cycle_label, length(missing_inferred),
-      paste(missing_inferred, collapse = ", ")
-    ))
-  }
-
-  # Bootstrap weights: pattern-matched
-  boot_cols <- grep(bootstrap_pat, all_cols, value = TRUE)
-  if (length(boot_cols) == 0) {
-    warning(sprintf("[%s] No bootstrap weight columns found matching pattern '%s'",
-                    cycle_label, bootstrap_pat))
-  } else {
-    vcat(sprintf("  Bootstrap weights found: %d columns (%s ... %s)\n",
-                length(boot_cols), boot_cols[1], utils::tail(boot_cols, 1)))
-  }
-
-  keep_cols <- c(confirmed, found_inferred, boot_cols)
-  data[, keep_cols, drop = FALSE]
+# Map CCHS "not applicable" / refusal / unknown codes to NA
+# CCHS standard special codes: 6, 7, 8, 9, 96, 97, 98, 99
+recode_cchs_na <- function(x) {
+  dplyr::case_when(
+    x %in% c(6, 7, 8, 9, 96, 97, 98, 99) ~ NA_real_,
+    TRUE ~ as.double(x)
+  )
 }
 
-# Harmonize known cross-cycle alias names to canonical white-list names.
-# If canonical is missing and an alias exists, copy alias into canonical.
-harmonize_aliases <- function(data, alias_map, cycle_label = "") {
-  for (canonical in names(alias_map)) {
-    if (canonical %in% names(data)) next
-
-    aliases <- alias_map[[canonical]]
-    found <- intersect(aliases, names(data))
-    if (length(found) > 0) {
-      data[[canonical]] <- data[[found[1]]]
-      vcat(sprintf("  [%s] harmonized alias: %s <- %s\n",
-                  cycle_label, canonical, found[1]))
-    }
-  }
-  data
-}
-
-# Ensure columns exist before recoding; add as NA when absent.
-ensure_columns <- function(data, cols, context_label = "") {
-  missing_cols <- setdiff(cols, names(data))
-  if (length(missing_cols) > 0) {
-    for (col in missing_cols) {
-      data[[col]] <- NA
-    }
-    warning(sprintf(
-      "[%s] Added %d missing column(s) as NA for downstream compatibility: %s",
-      context_label, length(missing_cols), paste(missing_cols, collapse = ", ")
-    ))
-  }
-  data
-}
-
-# Safely recode a numeric vector into a factor.
-# Returns NA (with a warning) for any values not in the code map.
-safe_recode_factor <- function(x, code_map, ordered = FALSE) {
-  result <- code_map[as.character(x)]
-  n_unmatched <- sum(is.na(result) & !is.na(x))
-  if (n_unmatched > 0) {
-    warning(sprintf("%d value(s) not in code map — set to NA", n_unmatched))
-  }
-  factor(result, levels = unique(code_map), ordered = ordered)
-}
-
-# ==============================================================================
-# SECTION 1: DATA IMPORT
-# ==============================================================================
-
-# ---- load-data ---------------------------------------------------------------
-vcat("\n", strrep("=", 70), "\n")
-vcat("SECTION 1: DATA IMPORT\n")
-vcat(strrep("=", 70), "\n")
-
-if (!file.exists(input_sqlite)) {
-  stop("Ferry output not found: ", input_sqlite,
-  "\nSearched: ", paste(input_sqlite_candidates, collapse = "; "),
-  "\nRun manipulation/1-ferry.R first.")
-}
-
-cnn <- DBI::dbConnect(RSQLite::SQLite(), input_sqlite)
-ds_2010_raw <- DBI::dbGetQuery(cnn, sprintf("SELECT * FROM %s", table_2010))
-ds_2014_raw <- DBI::dbGetQuery(cnn, sprintf("SELECT * FROM %s", table_2014))
-DBI::dbDisconnect(cnn)
-
-# Input guardrails for cycle availability
-if (nrow(ds_2010_raw) == 0L && nrow(ds_2014_raw) == 0L) {
-  stop(
-    sprintf(
-      paste0(
-        "Both ferry input tables are empty in %s.\\n",
-        "- %s rows: %s\\n",
-        "- %s rows: %s\\n",
-        "Cannot proceed: run 1-ferry.R with valid raw inputs."
-      ),
-      input_sqlite,
-      table_2010, format(nrow(ds_2010_raw), big.mark = ","),
-      table_2014, format(nrow(ds_2014_raw), big.mark = ",")
+# Append a step to the sample-flow audit table
+add_flow_step <- function(flow_tbl, step_num, description, n_remaining) {
+  n_prev  <- if (nrow(flow_tbl) == 0) NA_integer_ else dplyr::last(flow_tbl$n_remaining)
+  n_excl  <- if (is.na(n_prev)) NA_integer_ else n_prev - n_remaining
+  pct_rem <- if (is.na(n_prev)) 100 else round(100 * n_remaining / n_prev, 1)
+  dplyr::bind_rows(
+    flow_tbl,
+    tibble::tibble(
+      step         = step_num,
+      description  = description,
+      n_remaining  = as.integer(n_remaining),
+      n_excluded   = as.integer(n_excl),
+      pct_remaining = pct_rem
     )
   )
 }
 
-if (nrow(ds_2010_raw) == 0L || nrow(ds_2014_raw) == 0L) {
-  msg <- sprintf(
-    paste0(
-      "One ferry input table is empty in %s.\\n",
-      "- %s rows: %s\\n",
-      "- %s rows: %s\\n",
-      "Likely cause: missing raw .sav file or failed ingest in 1-ferry.R."
-    ),
-    input_sqlite,
-    table_2010, format(nrow(ds_2010_raw), big.mark = ","),
-    table_2014, format(nrow(ds_2014_raw), big.mark = ",")
-  )
+cat("\n---- SECTION: Import from Ferry --------------------------------------\n")
+# ---- load-data ---------------------------------------------------------------
+con <- DBI::dbConnect(RSQLite::SQLite(), dbname = path_ferry)
 
-  if (strict_cycle_integrity) {
-    stop(msg, "\\nstrict_cycle_integrity=TRUE: stopping.")
-  } else {
-    warning(msg, "\\nContinuing with available cycle(s) because strict_cycle_integrity=FALSE.")
-  }
-}
+ds_2010_raw <- DBI::dbReadTable(con, "cchs_2010")
+ds_2014_raw <- DBI::dbReadTable(con, "cchs_2014")
 
-# Harmonize known alias names before white-list selection.
-# Entries verified against cchs_value_labels.csv (extract-metadata.R).
-alias_map <- list(
-  edudh04  = c("edudr04"),          # EDUDR04 present in both SAV cycles
-  sdcdgcb  = c("sdcgcgt"),          # VERIFIED: SDCGCGT = visible minority (1=White, 2=Visible minority)
-  geodgprv = c("geogprv"),          # VERIFIED: GEOGPRV = province of residence
-  hcu_1aa  = c("hcu_1a", "hcudgmd"),# VERIFIED: HCU_1AA in SAV (1=YES, 2=NO)
-  lbfdghp  = c("lbsg31"),           # VERIFIED: LBSG31 in SAV (1=EMPLOYEE, 2=SELF-EMPLOYED; no code 3)
-  lbfdgft  = c("lbsdpft"),          # VERIFIED: LBSDPFT in SAV (1=FULL-TIME, 2=PART-TIME)
-  incdghh  = c("incghh"),           # VERIFIED: INCGHH in SAV (5-category household income)
-  fvcdgtot = c("fvcgtot"),          # VERIFIED: FVCGTOT in SAV (3-cat: <5/5-10/>10 per day)
-  dhhdghsz = c("dhhghsz"),          # VERIFIED: DHHGHSZ in SAV (household size 1-5+)
-  gen_02a  = c("gen_02b"),          # VERIFIED: GEN_02B = self-perceived mental health
-                                    #   (GEN_02 = health vs. 1 yr ago — NOT mental health)
-  inj_01   = c("injdgyrs")          # VERIFIED: INJ_01 in SAV (1=YES, 2=NO)
+DBI::dbDisconnect(con)
+
+cat("  Loaded cchs_2010:", nrow(ds_2010_raw), "rows x", ncol(ds_2010_raw), "cols\n")
+cat("  Loaded cchs_2014:", nrow(ds_2014_raw), "rows x", ncol(ds_2014_raw), "cols\n")
+
+# ---- SECTION: Two-Tier White-List --------------------------------------------
+# Tier 1 — CONFIRMED: essential to research. Missing = hard error, pipeline stops.
+# Tier 2 — INFERRED:  expected but not critical. Missing = warning, graceful drop.
+#
+# Verify after alias resolution (see next section) — these are post-harmonization names.
+
+vars_confirmed <- c(
+  # Outcome: LOP days-absent components (must sum to construct primary outcome)
+  "lop_015",    # Employed in past 3 months? (inclusion gate)
+  "lopg040",    # Days lost: chronic condition
+  "lopg070",    # Days lost: injury
+  "lopg082",    # Days lost: cold
+  "lopg083",    # Days lost: flu / influenza
+  "lopg084",    # Days lost: stomach flu
+  "lopg085",    # Days lost: respiratory infection
+  "lopg086",    # Days lost: other infectious disease
+  "lopg100",    # Days lost: other physical or mental health reason
+  # 17 resolvable chronic conditions (binary)
+  "ccc_031",   # Asthma
+  "ccc_041",   # Fibromyalgia
+  "ccc_051",   # Arthritis
+  "ccc_061",   # Back problems (excl. fibromyalgia / arthritis)
+  "ccc_071",   # High blood pressure / hypertension
+  "ccc_081",   # Migraine
+  "ccc_091",   # COPD
+  "ccc_101",   # Diabetes
+  "ccc_121",   # Heart disease (cardiovascular)
+  "ccc_131",   # Cancer
+  "ccc_141",   # Stomach / intestinal ulcer
+  "ccc_151",   # Stroke effects (cardiovascular / stroke)
+  "ccc_171",   # Bowel disorder (Crohn's / colitis)
+  "ccc_251",   # Chronic fatigue syndrome
+  "ccc_261",   # Multiple chemical sensitivities
+  "ccc_280",   # Mood disorder
+  "ccc_290",   # Anxiety disorder
+  # Core demographics
+  "dhhgage",   # Age (derived grouped)
+  "dhh_sex",   # Sex
+  "dhhgms",    # Marital status
+  "dhhghsz",   # Household size
+  "geogprv",   # Province of residence
+  "incghh",    # Total household income (all sources)
+  # Survey weight
+  "wts_m",
+  # Proxy indicator
+  "adm_prx"
 )
 
-ds_2010_raw <- harmonize_aliases(ds_2010_raw, alias_map, cycle_label = "CCHS2010")
-ds_2014_raw <- harmonize_aliases(ds_2014_raw, alias_map, cycle_label = "CCHS2014")
-
-vcat(sprintf("📥 Loaded CCHS 2010-2011: %s rows, %s columns\n",
-            format(nrow(ds_2010_raw), big.mark = ","),
-            format(ncol(ds_2010_raw), big.mark = ",")))
-vcat(sprintf("📥 Loaded CCHS 2013-2014: %s rows, %s columns\n",
-            format(nrow(ds_2014_raw), big.mark = ","),
-            format(ncol(ds_2014_raw), big.mark = ",")))
-
-# ---- apply-whitelist ---------------------------------------------------------
-vcat("\n📋 Applying white-list variable selection...\n")
-
-vars_inferred_all <- c(vars_inferred_ccc, vars_inferred_predisposing,
-                       vars_inferred_facilitating, vars_inferred_needs,
-                       vars_inferred_id)
-
-ds_2010_wl <- select_whitelist(ds_2010_raw, vars_confirmed, vars_inferred_all,
-                                bootstrap_pattern, cycle_label = "CCHS2010")
-ds_2014_wl <- select_whitelist(ds_2014_raw, vars_confirmed, vars_inferred_all,
-                                bootstrap_pattern, cycle_label = "CCHS2014")
-
-vcat(sprintf("  CCHS 2010-2011 after white-list: %s rows, %s columns\n",
-            format(nrow(ds_2010_wl), big.mark = ","),
-            format(ncol(ds_2010_wl), big.mark = ",")))
-vcat(sprintf("  CCHS 2013-2014 after white-list: %s rows, %s columns\n",
-            format(nrow(ds_2014_wl), big.mark = ","),
-            format(ncol(ds_2014_wl), big.mark = ",")))
-
-# ---- add-cycle-indicator -----------------------------------------------------
-vcat("\n🔢 Adding cycle indicator variable...\n")
-
-ds_2010_wl <- ds_2010_wl %>% mutate(cycle = 0L)   # 0 = CCHS 2010-2011
-ds_2014_wl <- ds_2014_wl %>% mutate(cycle = 1L)   # 1 = CCHS 2013-2014
-
-vcat("  cycle = 0: CCHS 2010-2011\n")
-vcat("  cycle = 1: CCHS 2013-2014\n")
-
-# ---- harmonize-and-stack -----------------------------------------------------
-vcat("\n🔗 Harmonizing variable names between cycles and stacking...\n")
-#
-# If variable names differ between 2010 and 2014 cycles, rename to a common
-# schema here. Common CCHS harmonization issues:
-#   - Some derived variables changed names between cycles
-#   - Verify using CCHS_2010_Alpha_Index.pdf vs CCHS_2014_Alpha_Index.pdf
-#
-# Currently: column names are assumed identical after clean_names().
-# If differences are found during execution, add rename() steps below.
-#
-# Example template (uncomment and adjust):
-# ds_2014_wl <- ds_2014_wl %>%
-#   rename(
-#     old_2014_name_1 = new_common_name_1,
-#     old_2014_name_2 = new_common_name_2
-#   )
-
-# Align columns: use union; fill missing columns with NA
-all_cols <- union(names(ds_2010_wl), names(ds_2014_wl))
-ds_2010_aligned <- ds_2010_wl[, intersect(all_cols, names(ds_2010_wl)), drop = FALSE]
-ds_2014_aligned <- ds_2014_wl[, intersect(all_cols, names(ds_2014_wl)), drop = FALSE]
-
-# Add missing columns as NA in each cycle's dataset
-for (col in setdiff(all_cols, names(ds_2010_aligned))) {
-  ds_2010_aligned[[col]] <- NA
-}
-for (col in setdiff(all_cols, names(ds_2014_aligned))) {
-  ds_2014_aligned[[col]] <- NA
-}
-
-ds0 <- bind_rows(ds_2010_aligned, ds_2014_aligned) %>%
-  select(cycle, everything())   # cycle first
-
-vcat(sprintf("  ✓ Pooled (both cycles): %s rows, %s columns\n",
-            format(nrow(ds0), big.mark = ","),
-            format(ncol(ds0), big.mark = ",")))
-vcat(sprintf("  ✓ CCHS 2010-2011: %s rows\n", format(sum(ds0$cycle == 0L), big.mark = ",")))
-vcat(sprintf("  ✓ CCHS 2013-2014: %s rows\n", format(sum(ds0$cycle == 1L), big.mark = ",")))
-
-if (sum(ds0$cycle == 0L, na.rm = TRUE) == 0L || sum(ds0$cycle == 1L, na.rm = TRUE) == 0L) {
-  msg <- paste0(
-    "Cycle integrity check before transformations: one cycle has 0 rows in pooled ds0.\n",
-    "Inspect white-list/alias mappings and upstream ferry input tables."
-  )
-  if (strict_cycle_integrity) {
-    stop(msg)
-  } else {
-    warning(msg)
-  }
-}
-
-# ==============================================================================
-# SECTION 2: ELLIS TRANSFORMATIONS
-# ==============================================================================
-
-vcat("\n", strrep("=", 70), "\n")
-vcat("SECTION 2: ELLIS TRANSFORMATIONS\n")
-vcat(strrep("=", 70), "\n")
-
-# ---- tweak-data-1-outcomes ---------------------------------------------------
-vcat("\n🔧 Step 1: Construct outcome variables\n")
-#
-# Primary outcome: days_absent_total
-#   Sum of all 8 LOP reason variables. NA treated as 0 when at least one
-#   non-NA value exists across the 8 components. When ALL are NA, treat as 0
-#   (no reported absence reasons) to preserve structural zeros.
-#
-# Sensitivity outcome: days_absent_chronic
-#   Single variable lopg040 (days lost due to chronic condition only).
-#
-# NOTE: The prior analysis capped the range at 0–90 days. Values outside
-#       this range should be treated as data quality issues and flagged.
-
-lop_vars <- c("lopg040", "lopg070", "lopg082", "lopg083",
-              "lopg084", "lopg085", "lopg086", "lopg100")
-
-ds1 <- ds0 %>%
-  mutate(
-    # Primary outcome: rowwise sum (NA-safe: at least one component must be non-NA)
-    days_absent_total = rowSums(
-      across(all_of(lop_vars), ~ as.numeric(.x)),
-      na.rm = TRUE
-    ),
-    # Flag respondents where ALL 8 LOP components are NA.
-    # In CCHS skip-patterns this generally indicates no absences (structural zero).
-    outcome_all_na = rowSums(is.na(across(all_of(lop_vars)))) == length(lop_vars),
-    days_absent_total = if_else(outcome_all_na, 0, days_absent_total),
-
-    # Sensitivity outcome: chronic condition days only
-    days_absent_chronic = as.numeric(lopg040)
-  )
-
-# Enforce valid range for primary outcome (0-90 days).
-# Values outside this range are treated as data quality issues and set to NA.
-invalid_total <- !is.na(ds1$days_absent_total) &
-  (ds1$days_absent_total < 0 | ds1$days_absent_total > 90)
-n_invalid_total <- sum(invalid_total)
-if (n_invalid_total > 0) {
-  warning(sprintf(
-    "%d respondents have days_absent_total outside 0-90 and were set to NA",
-    n_invalid_total
-  ))
-  ds1$days_absent_total[invalid_total] <- NA_real_
-}
-
-vcat(sprintf("   ✓ days_absent_total range: %g – %g (n non-NA: %s)\n",
-            min(ds1$days_absent_total, na.rm = TRUE),
-            max(ds1$days_absent_total, na.rm = TRUE),
-            format(sum(!is.na(ds1$days_absent_total)), big.mark = ",")))
-vcat(sprintf("   ✓ days_absent_chronic range: %g – %g (n non-NA: %s)\n",
-            min(ds1$days_absent_chronic, na.rm = TRUE),
-            max(ds1$days_absent_chronic, na.rm = TRUE),
-            format(sum(!is.na(ds1$days_absent_chronic)), big.mark = ",")))
-
-# ---- tweak-data-2-exclusions -------------------------------------------------
-vcat("\n🔧 Step 2: Sample inclusion mode\n")
-#
-# If apply_sample_exclusions=TRUE, apply legacy exclusions (Section 3.1):
-#   1. Age outside 15-75 (dhhgage)
-#   2. Not employed in past 3 months (lop_015 != 1)
-#   3. Proxy respondent (adm_prx == 1)
-#   4. Incomplete outcome or predictor data
-#
-# If apply_sample_exclusions=FALSE (default), retain full pooled sample
-# from ferry output (employed + unemployed + not stated), after white-listing.
-#
-# CCHS DHHGAGE codes (VERIFIED: extracted from attr(DHHGAGE, 'labels') in both SAV files;
-#   identical across 2010-2011 and 2013-2014 cycles):
-#   1=12-14yrs, 2=15-17yrs, 3=18-19yrs, 4=20-24yrs, 5=25-29yrs, 6=30-34yrs,
-#   7=35-39yrs, 8=40-44yrs, 9=45-49yrs, 10=50-54yrs, 11=55-59yrs, 12=60-64yrs,
-#   13=65-69yrs, 14=70-74yrs, 15=75-79yrs, 16=80+yrs
-# Include: codes 2-15 (15-79 yrs). Age 75 is in code 15 (75-79); code 15 is kept
-# since data cannot distinguish 75 from 76-79 in the PUMF grouped variable.
-#
-# LOP_015: 1=Yes (employed), 2=No, 6=Not applicable, 9=Not stated
-# ADM_PRX: 1=Proxy, 2=Not proxy
-
-# Identify predictor variables (non-structural white-listed columns)
-predictor_cols <- setdiff(
-  names(ds1),
-  c("cycle", lop_vars, "days_absent_total", "days_absent_chronic",
-    "outcome_all_na", "lop_015", "dhhgage", "adm_prx",
-    "wts_m", "geodpmf",
-    grep(bootstrap_pattern, names(ds1), value = TRUE))
+vars_inferred <- c(
+  # Additional demographics
+  "dhhgle5",   # Binary 0/1: any child <= 5 in household
+  "dhhg611",   # Binary 0/1: any child 6-11 in household
+  "dhhgl12",   # Binary 0/1: any child < 12 in household. NOTE (QC 2026-08-01):
+               #   deterministic OR of the two above (0 discordant rows of
+               #   63,843) and NOT the requested "children >= 12" construct.
+  "dhh_own",   # Dwelling owned by a household member (homeownership).
+               #   Admitted 2026-08-01 after QC: present in BOTH cycles,
+               #   99.67% coverage in the analytic sample, no optional-content
+               #   aliasing with cycle x province. Satisfies the Section 2.2
+               #   "homeownership" requirement directly.
+  # Education
+  "edudr04",   # Respondent education, 4 levels
+  "edudh04",   # Household education, 4 levels
+  # Immigration / ethnicity
+  "sdcfimm",   # Immigrant flag YES/NO (primary non-immigrant signal)
+  "sdcgres",   # Length of time in Canada (recent vs long-term immigrant)
+  "sdcgcgt",   # Cultural / racial origin
+  # Health behaviours
+  "hwtgisw",   # BMI category (international standard, 18+)
+  "hwtgbmi",   # BMI (continuous, self-report)
+  "alcdttm",   # Alcohol use — type of drinker (12 months)
+  "fvcgtot",   # Fruit and vegetable consumption (daily)
+  "pacdpai",   # Leisure physical activity index
+  # Smoking status (derived)
+  "smkgstp",   # Years since stopping smoking completely
+  # General / perceived health
+  "gen_01",    # Self-perceived general health
+  "gen_02",    # Self-perceived health compared to prior year
+  "gen_02b",   # Self-perceived mental health
+  "gen_09",    # Self-perceived work stress
+  # Functional limitations (ADL module)
+  "adl_01",    # Needs help: preparing meals
+  "adl_02",    # Needs help: appointments / errands
+  "adl_03",    # Needs help: housework
+  "adl_04",    # Needs help: personal care
+  "adl_05",    # Needs help: moving inside house
+  "adl_06",    # Needs help: personal finances
+  # Employment type
+  "lbsdpft",   # Full-time / part-time status (derived)
+  # Family doctor / primary care
+  "hcu_1aa_h", # Has regular medical doctor (harmonized name — see alias block)
+  # Student status
+  "sdcg9",     # Full-time or part-time student
+  # Injury
+  "inj_01",    # Injured in past 12 months
+  # Additional facilitating variables (added for data-primer-1 coverage)
+  "smkdsty",   # Smoking status — type of smoker (6-category derived)
+  "lbsg31",    # Employment type — employee vs. self-employed
+  "lbsgsoc",   # Occupation category (5-group SOC; 2014 PUMF uses group numbers only)
+  "dhhglvg"    # Living arrangements (8-level household composition)
 )
 
-# Track sample sizes at each step
-n_step <- integer(0)
-n_step["n_start"] <- nrow(ds1)
+cat("\n  White-list summary:\n")
+cat("    CONFIRMED vars (Tier 1):", length(vars_confirmed), "\n")
+cat("    INFERRED  vars (Tier 2):", length(vars_inferred), "\n")
 
-# Apply sequential filters only when explicitly requested
-if (isTRUE(apply_sample_exclusions)) {
-  vcat("   Mode: legacy exclusions enabled (employment filter applied)\n")
+cat("\n---- SECTION: Cross-Cycle Alias Resolution ---------------------------\n")
+# ---- alias-resolution --------------------------------------------------------
+# CCHS 2010 and 2014 use different variable names for some constructs.
+# This block renames 2010 variables to match 2014 names (or a harmonized name)
+# BEFORE the white-list check is applied.
+#
+# Verified cross-cycle differences:
+#   Construct           2010 name   2014 name      Harmonized name
+#   Regular family doc  ACC_50A     HCU_1AA        hcu_1aa_h
+#   Country of birth    SDCGCBG     SDCGCB13       sdcgcbg_h
+#
+# All other variables in the white-lists appear under identical names in both cycles.
 
-  ds2 <- ds1
+# Add cycle identifier before renaming
+ds_2010_raw$cchs_cycle <- 0L   # 0 = 2010-2011
+ds_2014_raw$cchs_cycle <- 1L   # 1 = 2013-2014
 
-  # Step 1: Age 15–75
-  # DHHGAGE codes 2–15 correspond to ages 15–79.
-  # Code 15 = 75-79 yrs (grouped; no single-year resolution in PUMF).
-  # The instruction says exclude >75, but since ages 75-79 share one code,
-  # code 15 is RETAINED to capture 75-year-olds — ages 76-79 in code 15
-  # are an unavoidable inclusion given the grouped derived variable.
-  # VERIFY if a single-year age variable is available in the restricted-access file.
-  in_age_range <- ds2$dhhgage %in% 2:15   # codes 2=15-17 through 15=75-79
-  n_step["n_after_age"] <- sum(in_age_range, na.rm = TRUE)
-  ds2 <- ds2 %>% filter(dhhgage %in% 2:15)
+# Apply clean_names first so we work in lowercase throughout
+ds_2010 <- ds_2010_raw %>% janitor::clean_names()
+ds_2014 <- ds_2014_raw %>% janitor::clean_names()
 
-  # Step 2: Employed in past 3 months
-  in_employed <- ds2$lop_015 == 1
-  n_step["n_after_employment"] <- sum(in_employed, na.rm = TRUE)
-  ds2 <- ds2 %>% filter(lop_015 == 1)
-
-  # Step 3: Exclude proxy respondents
-  not_proxy <- ds2$adm_prx != 1 | is.na(ds2$adm_prx)
-  n_step["n_after_proxy"] <- sum(not_proxy, na.rm = TRUE)
-  ds2 <- ds2 %>% filter(adm_prx != 1 | is.na(adm_prx))
-
-  # Step 4: Complete outcome (days_absent_total must be non-NA)
-  complete_outcome <- !is.na(ds2$days_absent_total)
-  n_step["n_after_complete_outcome"] <- sum(complete_outcome, na.rm = TRUE)
-  ds2 <- ds2 %>% filter(!is.na(days_absent_total))
-
-  vcat(sprintf("   ✓ Starting pool:             %s\n", format(n_step["n_start"], big.mark = ",")))
-  vcat(sprintf("   ✓ After age 15-75:           %s  (-%s excluded)\n",
-              format(n_step["n_after_age"], big.mark = ","),
-              format(n_step["n_start"] - n_step["n_after_age"], big.mark = ",")))
-  vcat(sprintf("   ✓ After employed filter:     %s  (-%s excluded)\n",
-              format(n_step["n_after_employment"], big.mark = ","),
-              format(n_step["n_after_age"] - n_step["n_after_employment"], big.mark = ",")))
-  vcat(sprintf("   ✓ After proxy exclusion:     %s  (-%s excluded)\n",
-              format(n_step["n_after_proxy"], big.mark = ","),
-              format(n_step["n_after_employment"] - n_step["n_after_proxy"], big.mark = ",")))
-  vcat(sprintf("   ✓ After complete outcome:    %s  (-%s excluded)\n",
-              format(n_step["n_after_complete_outcome"], big.mark = ","),
-              format(n_step["n_after_proxy"] - n_step["n_after_complete_outcome"], big.mark = ",")))
-} else {
-  vcat("   Mode: full pooled sample (no exclusions applied)\n")
-
-  ds2 <- ds1
-  n_step["n_after_age"] <- n_step["n_start"]
-  n_step["n_after_employment"] <- n_step["n_start"]
-  n_step["n_after_proxy"] <- n_step["n_start"]
-  n_step["n_after_complete_outcome"] <- n_step["n_start"]
-
-  vcat(sprintf("   ✓ Starting pool:             %s\n", format(n_step["n_start"], big.mark = ",")))
-  vcat(sprintf("   ✓ Full pooled retained:      %s  (-0 excluded)\n",
-              format(n_step["n_after_complete_outcome"], big.mark = ",")))
-
-  if (verbose) {
-  cat("\n   Employment distribution retained (lop_015):\n")
-  print(ds2 %>%
-          count(lop_015, name = "n") %>%
-          arrange(lop_015))
-  }
-}
-
-# Step 5b (optional): CCC + predictor completeness (§3.1 criterion 4b)
-# Controlled by `apply_completeness_exclusion` in the globals section.
-# NOTE: ds2 is still pre-recode at this point — only structural NAs from
-#       import are detected here. CCHS special codes (6/7/8/9) become NA
-#       only after Step 3 factor recoding. For full §3.1 compliance, verify
-#       that recode order matches the intended exclusion timing.
-if (isTRUE(apply_completeness_exclusion)) {
-  vcat("\n   Step 5b: CCC + predictor completeness exclusion\n")
-  ccc_cols_found      <- intersect(vars_inferred_ccc, names(ds2))
-  predictor_cols_full <- intersect(c(ccc_cols_found, predictor_cols), names(ds2))
-  complete_predictors <- apply(
-    ds2[, predictor_cols_full, drop = FALSE], 1,
-    function(row) !any(is.na(row))
+# Rename 2010 variables to harmonized names
+ds_2010 <- ds_2010 %>%
+  dplyr::rename(
+    hcu_1aa_h  = any_of("acc_50a"),    # Has regular family doctor (2010)
+    sdcgcbg_h  = any_of("sdcgcbg")     # Country of birth 2010 → harmonized
   )
-  n_step["n_after_complete_predictors"] <- sum(complete_predictors, na.rm = TRUE)
-  n_before_step5b <- nrow(ds2)
-  ds2 <- ds2[complete_predictors, ]
-  vcat(sprintf("   ✓ After CCC + predictor completeness: %s  (-%s excluded)\n",
-              format(n_step["n_after_complete_predictors"], big.mark = ","),
-              format(n_before_step5b - n_step["n_after_complete_predictors"], big.mark = ",")))
-}
 
-if (verbose) {
-  cat("\n   Cycle counts after exclusions:\n")
-  print(ds2 %>%
-          count(cycle, name = "n") %>%
-          arrange(cycle))
-}
-
-if (sum(ds2$cycle == 0L, na.rm = TRUE) == 0L || sum(ds2$cycle == 1L, na.rm = TRUE) == 0L) {
-  msg <- paste0(
-    "Cycle integrity check after exclusions: one cycle has 0 rows.\n",
-    "Verify variable coding consistency across cycles (especially dhhgage, lop_015, adm_prx, LOP outcomes)."
+# Rename 2014 variables to harmonized names
+ds_2014 <- ds_2014 %>%
+  dplyr::rename(
+    hcu_1aa_h  = any_of("hcu_1aa"),    # Has regular medical doctor (2014)
+    sdcgcbg_h  = any_of("sdcgcb13")   # Country of birth 2014 → harmonized
   )
-  if (strict_cycle_integrity) {
-    stop(msg)
-  } else {
-    warning(msg)
-  }
-}
 
-n_final <- nrow(ds2)
-cat(sprintf("\n   Final analytical sample: %s\n", format(n_final, big.mark = ",")))
-if (isTRUE(apply_sample_exclusions)) {
-  vcat(sprintf("   Reference (legacy exclusions): 64,141\n"))
-  if (abs(n_final - 64141) > 5000) {
-    warning(sprintf(
-      "Final sample size (%d) differs from reference (64,141) by >5,000.\nVerify exclusion variable codes against data dictionaries.",
-      n_final
-    ))
-  }
-} else {
-  vcat(sprintf("   Reference mode: full pooled sample from ferry output (employment not filtered)\n"))
-}
+cat("  Alias resolution complete.\n")
 
-# Build sample_flow table (for reproducing Figure 1 flowchart)
+# ---- SECTION: White-List Enforcement -----------------------------------------
+
+# Enforce Tier 1 (CONFIRMED) — hard stop if any variable is absent from either source
+missing_confirmed_2010 <- setdiff(vars_confirmed, names(ds_2010))
+missing_confirmed_2014 <- setdiff(vars_confirmed, names(ds_2014))
+
+if (length(missing_confirmed_2010) > 0) {
+  stop(
+    "CONFIRMED variables missing from cchs_2010:\n",
+    paste(" -", missing_confirmed_2010, collapse = "\n")
+  )
+}
+if (length(missing_confirmed_2014) > 0) {
+  stop(
+    "CONFIRMED variables missing from cchs_2014:\n",
+    paste(" -", missing_confirmed_2014, collapse = "\n")
+  )
+}
+cat("  Tier 1 check PASSED — all CONFIRMED variables present in both cycles.\n")
+
+# Enforce Tier 2 (INFERRED) — warn and drop if missing
+missing_inferred_2010 <- setdiff(vars_inferred, names(ds_2010))
+missing_inferred_2014 <- setdiff(vars_inferred, names(ds_2014))
+missing_inferred_any  <- unique(c(missing_inferred_2010, missing_inferred_2014))
+
+if (length(missing_inferred_any) > 0) {
+  warning(
+    "INFERRED variables not present in at least one cycle (will be dropped gracefully):\n",
+    paste(" -", missing_inferred_any, collapse = "\n")
+  )
+  vars_inferred <- setdiff(vars_inferred, missing_inferred_any)
+}
+cat("  Tier 2 check: retaining", length(vars_inferred), "INFERRED variables.\n")
+
+# Select white-listed columns (plus cycle flag) from each cycle
+all_vars_to_keep <- c(vars_confirmed, vars_inferred, "cchs_cycle")
+
+ds_2010 <- ds_2010 %>% dplyr::select(dplyr::any_of(all_vars_to_keep))
+ds_2014 <- ds_2014 %>% dplyr::select(dplyr::any_of(all_vars_to_keep))
+
+cat("\n---- SECTION: Pool Cycles + Weight Adjustment ------------------------\n")
+# ---- pool-cycles -------------------------------------------------------------
+# Bind rows from both cycles. Column alignment is maintained because both data
+# frames are already filtered to the same white-listed variable set.
+#
+# Survey weight adjustment (Statistics Canada recommendation for pooling two
+# CCHS annual cycles): divide each respondent's master weight by the number
+# of cycles pooled. With two cycles, divide by 2.
+# Source: CCHS User Guide — combining annual cycles.
+ds_pooled <- dplyr::bind_rows(ds_2010, ds_2014) %>%
+  dplyr::mutate(wts_m_pooled = wts_m / 2)
+
+cat("  Pooled rows:", nrow(ds_pooled),
+    "  (2010:", nrow(ds_2010), " + 2014:", nrow(ds_2014), ")\n")
+
+cat("\n---- SECTION: Sample Exclusion Pipeline -----------------------------\n")
+# ---- sample-exclusion --------------------------------------------------------
+# Track each exclusion step in an audit table.
+# Final sample should approximate the n=64,141 reported in the prior analysis.
+
 sample_flow <- tibble::tibble(
-  step = c(
-    "1_start",
-    "2_after_age_15_75",
-    "3_after_employed",
-    "4_after_no_proxy",
-    "5_after_complete_outcome"
-  ),
-  description = c(
-    "Starting pool (both CCHS cycles pooled)",
-    if (isTRUE(apply_sample_exclusions)) "Exclude respondents outside age 15-75" else "No exclusion applied (full pooled sample mode)",
-    if (isTRUE(apply_sample_exclusions)) "Exclude respondents not employed (past 3 months)" else "No exclusion applied (employment retained)",
-    if (isTRUE(apply_sample_exclusions)) "Exclude proxy respondents" else "No exclusion applied (proxy retained)",
-    if (isTRUE(apply_sample_exclusions)) "Exclude respondents with missing outcome (days absent)" else "No exclusion applied (outcome missingness retained)"
-  ),
-  n_remaining = as.integer(c(
-    n_step["n_start"],
-    n_step["n_after_age"],
-    n_step["n_after_employment"],
-    n_step["n_after_proxy"],
-    n_step["n_after_complete_outcome"]
-  )),
-  n_excluded  = as.integer(c(
-    0L,
-    n_step["n_start"]            - n_step["n_after_age"],
-    n_step["n_after_age"]        - n_step["n_after_employment"],
-    n_step["n_after_employment"] - n_step["n_after_proxy"],
-    n_step["n_after_proxy"]      - n_step["n_after_complete_outcome"]
-  )),
-  pct_remaining = round(n_remaining / n_step["n_start"] * 100, 1)
+  step          = integer(),
+  description   = character(),
+  n_remaining   = integer(),
+  n_excluded    = integer(),
+  pct_remaining = numeric()
 )
 
-# Conditionally append step 6 (CCC + predictor completeness)
-if (isTRUE(apply_completeness_exclusion) && "n_after_complete_predictors" %in% names(n_step)) {
-  sample_flow <- rbind(sample_flow, tibble::tibble(
-    step          = "6_after_complete_ccc_predictors",
-    description   = "Exclude respondents with missing values on any CCC condition or predictor variable (§3.1)",
-    n_remaining   = as.integer(n_step["n_after_complete_predictors"]),
-    n_excluded    = as.integer(n_step["n_after_complete_outcome"] - n_step["n_after_complete_predictors"]),
-    pct_remaining = round(n_step["n_after_complete_predictors"] / n_step["n_start"] * 100, 1)
-  ))
+# Step 0: Full pooled sample
+sample_flow <- add_flow_step(sample_flow, 0L,
+  "Full pooled sample (2010 + 2014)", nrow(ds_pooled))
+
+# Step 1: Restrict to age 15-75 (DHHGAGE codes 2-15)
+# dhhgage is a category code 1-16, not a year value.
+# Code 2 = 15-17 yrs (lower bound), code 15 = 75-79 yrs (upper bound).
+ds_analytic <- ds_pooled %>% dplyr::filter(dhhgage >= DHHGAGE_CODE_MIN, dhhgage <= DHHGAGE_CODE_MAX)
+sample_flow <- add_flow_step(sample_flow, 1L,
+  paste0("Age 15\u201375 (DHHGAGE codes ", DHHGAGE_CODE_MIN, "\u2013", DHHGAGE_CODE_MAX, ")"),
+  nrow(ds_analytic))
+
+# Step 2: Employed in past 3 months (LOP_015 = 1)
+# LOP_015 codes: 1 = Yes, 2 = No; 6/7/8/9 = special (map to NA)
+ds_analytic <- ds_analytic %>%
+  dplyr::mutate(lop_015 = dplyr::if_else(lop_015 == 1L, 1L, NA_integer_)) %>%
+  dplyr::filter(!is.na(lop_015))
+sample_flow <- add_flow_step(sample_flow, 2L,
+  "Employed in past 3 months (LOP_015 = 1)", nrow(ds_analytic))
+
+# Step 3: Exclude proxy respondents (ADM_PRX = 1)
+# ADM_PRX codes: 1 = proxy interview, 2 = not proxy
+ds_analytic <- ds_analytic %>%
+  dplyr::filter(adm_prx != 1L | is.na(adm_prx))
+sample_flow <- add_flow_step(sample_flow, 3L,
+  "Exclude proxy respondents (ADM_PRX = 1)", nrow(ds_analytic))
+
+# Step 4: Exclude genuine non-response on outcome LOP components
+# LOP day-count variables: valid range 1-90 (days); 0 is never recorded.
+# NA (SPSS system-missing) = "NOT APPLICABLE" — the component count question
+#   was not asked because the respondent had no days absent for that reason.
+#   This is the survey skip pattern, not a data quality problem. Treated as 0.
+# Code 99 = NOT STATED — genuine non-response; respondent was asked but gave
+#   no valid answer. Excluded.
+# No numeric codes 96, 97, 98 appear in the data (confirmed via codebook query).
+lop_day_vars <- c("lopg040", "lopg070", "lopg082", "lopg083",
+                  "lopg084", "lopg085", "lopg086", "lopg100")
+
+ds_analytic <- ds_analytic %>%
+  dplyr::mutate(dplyr::across(
+    dplyr::all_of(lop_day_vars),
+    ~dplyr::case_when(
+      is.na(.) ~ 0,           # Not applicable = 0 days absent for this reason
+      . == 99  ~ NA_real_,    # Not stated = genuine non-response → exclude
+      TRUE     ~ as.double(.) # Valid day count (1–90)
+    )
+  )) %>%
+  dplyr::filter(dplyr::if_all(dplyr::all_of(lop_day_vars), ~!is.na(.)))
+
+sample_flow <- add_flow_step(sample_flow, 4L,
+  "Complete outcome data (all 8 LOP day-count variables)", nrow(ds_analytic))
+
+# Step 5: Flag completeness of chronic condition indicators (no row exclusion)
+# CCC codes: 1 = Yes, 2 = No; 6/7/8/9 = special → NA.
+# flag_complete_ccc = TRUE when all 17 CCC variables are non-NA.
+# CCC_091 (COPD) was administered to a sub-sample in both cycles (~70% coverage);
+# forcing complete-case exclusion here would drop ~22,000 rows.
+ccc_vars <- c("ccc_031","ccc_041","ccc_051","ccc_061","ccc_071",
+              "ccc_081","ccc_091","ccc_101","ccc_121","ccc_131",
+              "ccc_141","ccc_151","ccc_171","ccc_251","ccc_261",
+              "ccc_280","ccc_290")
+
+ds_analytic <- ds_analytic %>%
+  dplyr::mutate(
+    dplyr::across(
+      dplyr::all_of(ccc_vars),
+      ~dplyr::case_when(. %in% c(6, 7, 8, 9) ~ NA_real_, TRUE ~ as.double(.))
+    ),
+    flag_complete_ccc = dplyr::if_all(dplyr::all_of(ccc_vars), ~!is.na(.))
+  )
+
+n_ccc_complete <- sum(ds_analytic$flag_complete_ccc)
+cat("  flag_complete_ccc:", n_ccc_complete, "rows have all 17 CCC indicators\n")
+
+# Step 6: Flag completeness of key predictor variables (no row exclusion)
+# NOTE: dhhgage is excluded intentionally — its valid codes (1-16) overlap with
+# the standard CCHS special-code range (6-9). Applying the bulk NA recode would
+# silently drop all respondents aged 30-49 (codes 6-9). Age missingness is
+# effectively impossible after the code-range filter in step 1.
+# flag_complete_predictors = TRUE when all key predictors are non-NA.
+key_predictor_vars <- c("dhh_sex", "dhhgms", "dhhghsz",
+                        "geogprv", "incghh")
+
+ds_analytic <- ds_analytic %>%
+  dplyr::mutate(
+    dplyr::across(
+      dplyr::all_of(key_predictor_vars),
+      ~dplyr::case_when(. %in% c(6, 7, 8, 9, 96, 97, 98, 99) ~ NA_real_, TRUE ~ as.double(.))
+    ),
+    flag_complete_predictors = dplyr::if_all(dplyr::all_of(key_predictor_vars), ~!is.na(.))
+  )
+
+n_pred_complete <- sum(ds_analytic$flag_complete_predictors)
+cat("  flag_complete_predictors:", n_pred_complete, "rows have all key predictors\n")
+
+# Combined completeness flag — convenience toggle for subsetting in analysis
+ds_analytic <- ds_analytic %>%
+  dplyr::mutate(flag_analytic_complete = flag_complete_ccc & flag_complete_predictors)
+
+n_analytic <- sum(ds_analytic$flag_analytic_complete)
+cat("  flag_analytic_complete:", n_analytic, "rows fully complete (CCC + predictors)\n")
+
+# Print sample flow audit table
+cat("\n  Sample Flow Audit:\n")
+print(sample_flow, n = Inf)
+
+# Warn if final n is far from the prior-analysis reference of 64,141
+if (abs(nrow(ds_analytic) - 64141L) > 5000L) {
+  warning(
+    "Final analytic n = ", nrow(ds_analytic),
+    " deviates >5,000 from prior-analysis reference (64,141). ",
+    "Check exclusion criteria and variable coding."
+  )
 }
 
-if (verbose) {
-  cat("\n   Sample flow table:\n")
-  print(as.data.frame(sample_flow[, c("step", "n_remaining", "n_excluded")]))
+cat("\n---- SECTION: Construct Outcome Variable -----------------------------\n")
+# ---- construct-outcome -------------------------------------------------------
+# Primary outcome: total workdays absent in the past 3 months (any health reason)
+# Formula: sum of all 8 LOP day-count components (NAs already removed above)
+# Range: 0-90 days (per stats_instructions_v3 Section 4.1)
+# Reference mean from prior analysis: 1.35 (SE = 0.02); 70.59% zero values
+
+ds_analytic <- ds_analytic %>%
+  dplyr::mutate(
+    # Sum across all LOP day-count components
+    days_absent_total = lopg040 + lopg070 + lopg082 + lopg083 +
+                        lopg084 + lopg085 + lopg086 + lopg100,
+
+    # Cap at 90 days (study-defined maximum per stats_instructions_v3 §4.1)
+    days_absent_total = pmin(days_absent_total, 90),
+
+    # Sensitivity outcome: days absent due to chronic condition only
+    days_absent_chronic = pmin(lopg040, 90)
+  )
+
+cat("  Outcome summary (days_absent_total):\n")
+cat("    Mean (unweighted):", round(mean(ds_analytic$days_absent_total), 2), "\n")
+cat("    Zeros (%):", round(100 * mean(ds_analytic$days_absent_total == 0), 1), "\n")
+cat("    Max:", max(ds_analytic$days_absent_total), "\n")
+
+cat("\n---- SECTION: Recode Predictor Variables -----------------------------\n")
+# ---- recode-demographics -----------------------------------------------------
+# All factor recode blocks follow the same pattern:
+#   1. Map CCHS special codes (6/7/8/9/96/97/98/99) to NA
+#   2. Define levels explicitly — never rely on source ordering
+#   3. Use factor() with named levels for transparency
+#
+# CCHS codebook references are cited per variable.
+
+ds_analytic <- ds_analytic %>%
+  dplyr::mutate(
+
+    # ---- Age group (3 categories per stats_instructions_v3 §2.2)
+    # DHHGAGE codes: 2=15-17, 3=18-19, 4=20-24, 5=25-29, ..., 10=50-54,
+    #                11=55-59, 12=60-64, ..., 15=75-79
+    # Regrouped to: 15-24 (codes 2-4), 25-54 (codes 5-10), 55-75 (codes 11-15)
+    age_group_3 = dplyr::case_when(
+      dhhgage %in% c(2, 3, 4)    ~ "15-24",
+      dhhgage %in% c(5:10)       ~ "25-54",
+      dhhgage %in% c(11:15)      ~ "55-75",
+      TRUE                       ~ NA_character_
+    ) %>% factor(levels = c("15-24", "25-54", "55-75")),
+
+    # ---- Sex  (CCHS DHH_SEX: 1=Male, 2=Female)
+    sex = dplyr::case_when(
+      dhh_sex == 1 ~ "Male",
+      dhh_sex == 2 ~ "Female",
+      TRUE         ~ NA_character_
+    ) %>% factor(levels = c("Male", "Female")),
+
+    # ---- Marital status (DHHGMS: 1=MARRIED, 2=COMMON-LAW, 3=WIDOW/SEP/DIV, 4=SINGLE/NEVER MAR)
+    marital_status = dplyr::case_when(
+      dhhgms == 1 ~ "Married",
+      dhhgms == 2 ~ "Common-law",
+      dhhgms == 3 ~ "Widowed / Separated / Divorced",
+      dhhgms == 4 ~ "Single / Never married",
+      TRUE        ~ NA_character_
+    ) %>% factor(levels = c("Married", "Common-law",
+                             "Widowed / Separated / Divorced",
+                             "Single / Never married")),
+
+    # ---- Household size (DHHGHSZ: 1=1 PERSON, 2=2 PERSONS, 3=3 PERSONS,
+    #                               4=4 PERSONS, 5=5 OR + PERSONS; 6-9=NA)
+    # Code 5 is an upper-bounded category ("5 or more") — stored as ordered factor
+    # to preserve correct semantics and prevent false arithmetic precision.
+    household_size = dplyr::case_when(
+      dhhghsz == 1 ~ "1 person",
+      dhhghsz == 2 ~ "2 persons",
+      dhhghsz == 3 ~ "3 persons",
+      dhhghsz == 4 ~ "4 persons",
+      dhhghsz == 5 ~ "5 or more persons",
+      TRUE         ~ NA_character_
+    ) %>% factor(levels = c("1 person", "2 persons", "3 persons",
+                             "4 persons", "5 or more persons"),
+                 ordered = TRUE),
+
+    # ---- Province of residence (GEOGPRV: 10-62; codes follow Statistics Canada)
+    province = dplyr::case_when(
+      geogprv == 10 ~ "NL", geogprv == 11 ~ "PEI", geogprv == 12 ~ "NS",
+      geogprv == 13 ~ "NB", geogprv == 24 ~ "QC",  geogprv == 35 ~ "ON",
+      geogprv == 46 ~ "MB", geogprv == 47 ~ "SK",  geogprv == 48 ~ "AB",
+      geogprv == 59 ~ "BC", geogprv == 60 ~ "YK",  geogprv == 61 ~ "NT",
+      geogprv == 62 ~ "NU",
+      TRUE          ~ NA_character_
+    ) %>% factor(levels = c("NL","PEI","NS","NB","QC","ON",
+                             "MB","SK","AB","BC","YK","NT","NU")),
+
+    # ---- Household income (INCGHH: 1=NO OR <$20,000, 2=$20-$39K,
+    #                                3=$40-$59K, 4=$60-$79K, 5=$80K+)
+    income_hh = dplyr::case_when(
+      incghh == 1 ~ "No income or < $20,000",
+      incghh == 2 ~ "$20,000 - $39,999",
+      incghh == 3 ~ "$40,000 - $59,999",
+      incghh == 4 ~ "$60,000 - $79,999",
+      incghh == 5 ~ "$80,000 +",
+      TRUE        ~ NA_character_
+    ) %>% factor(levels = c("No income or < $20,000","$20,000 - $39,999",
+                             "$40,000 - $59,999","$60,000 - $79,999",
+                             "$80,000 +")),
+
+    # ---- CYCLE factor
+    cchs_cycle_f = dplyr::case_when(
+      cchs_cycle == 0L ~ "2010-2011",
+      cchs_cycle == 1L ~ "2013-2014",
+      TRUE             ~ NA_character_
+    ) %>% factor(levels = c("2010-2011", "2013-2014"))
+
+  ) # end mutate demographics
+
+# ---- recode-chronic-conditions -----------------------------------------------
+# CCC variables: 1 = Yes (has condition), 2 = No; 6/7/8/9 = NA (already set above)
+# Recode to logical indicators: TRUE = has condition
+ds_analytic <- ds_analytic %>%
+  dplyr::mutate(dplyr::across(
+    dplyr::all_of(ccc_vars),
+    ~dplyr::case_when(. == 1 ~ TRUE, . == 2 ~ FALSE, TRUE ~ NA)
+  )) %>%
+  dplyr::rename(
+    cc_asthma            = ccc_031,
+    cc_fibromyalgia      = ccc_041,
+    cc_arthritis         = ccc_051,
+    cc_back_problems     = ccc_061,
+    cc_hypertension      = ccc_071,
+    cc_migraine          = ccc_081,
+    cc_copd              = ccc_091,
+    cc_diabetes          = ccc_101,
+    cc_heart_disease     = ccc_121,
+    cc_cancer            = ccc_131,
+    cc_ulcer             = ccc_141,
+    cc_stroke            = ccc_151,
+    cc_bowel_disorder    = ccc_171,
+    cc_fatigue_syndrome  = ccc_251,
+    cc_chem_sensitivity  = ccc_261,
+    cc_mood_disorder     = ccc_280,
+    cc_anxiety           = ccc_290
+  )
+
+# ---- recode-health-behaviours ------------------------------------------------
+ds_analytic <- ds_analytic %>%
+  dplyr::mutate(
+
+    # BMI category (HWTGISW: 1=Underweight, 2=Normal, 3=Overweight, 4=Obese; 9=NA)
+    bmi_category = dplyr::case_when(
+      hwtgisw == 1 ~ "Underweight",
+      hwtgisw == 2 ~ "Normal weight",
+      hwtgisw == 3 ~ "Overweight",
+      hwtgisw == 4 ~ "Obese",
+      TRUE         ~ NA_character_
+    ) %>% factor(levels = c("Underweight","Normal weight","Overweight","Obese")),
+
+    # Alcohol use — type of drinker (ALCDTTM: 1=REGULAR DRINKER, 2=OCCASIO. DRINKER,
+    #                                          3=NO DRINK LAST12M; 6/7/8/9=NA)
+    # Codebook has 3 valid codes only. Code 3 captures all non-drinkers in the past
+    # 12 months and does not distinguish former drinkers from lifetime abstainers.
+    alcohol_type = dplyr::case_when(
+      alcdttm == 1 ~ "Regular drinker",
+      alcdttm == 2 ~ "Occasional drinker",
+      alcdttm == 3 ~ "Did not drink in past 12 months",
+      TRUE         ~ NA_character_
+    ) %>% factor(levels = c("Regular drinker","Occasional drinker",
+                             "Did not drink in past 12 months")),
+
+    # Physical activity index (PACDPAI: 1=Active, 2=Moderately active, 3=Inactive)
+    physical_activity = dplyr::case_when(
+      pacdpai == 1 ~ "Active",
+      pacdpai == 2 ~ "Moderately active",
+      pacdpai == 3 ~ "Inactive",
+      TRUE         ~ NA_character_
+    ) %>% factor(levels = c("Active","Moderately active","Inactive")),
+
+    # Fruit and vegetable consumption (FVCGTOT: 1=LESS 5 PER DAY, 2=5-10 TIMES/DAY,
+    #                                           3=MORE 10 TIMES/DAY; 6/7/8/9=NA)
+    # FVCGTOT is a 3-code category variable, not a raw count of daily servings.
+    fruit_veg_daily = dplyr::case_when(
+      fvcgtot == 1 ~ "Less than 5 per day",
+      fvcgtot == 2 ~ "5 to 10 per day",
+      fvcgtot == 3 ~ "More than 10 per day",
+      TRUE         ~ NA_character_
+    ) %>% factor(levels = c("Less than 5 per day","5 to 10 per day",
+                             "More than 10 per day"))
+
+  )
+
+# ---- recode-perceived-health -------------------------------------------------
+ds_analytic <- ds_analytic %>%
+  dplyr::mutate(
+
+    # Self-perceived general health (GEN_01: 1=Excellent, 2=VGood, 3=Good, 4=Fair, 5=Poor)
+    health_perceived = dplyr::case_when(
+      gen_01 == 1 ~ "Excellent",
+      gen_01 == 2 ~ "Very good",
+      gen_01 == 3 ~ "Good",
+      gen_01 == 4 ~ "Fair",
+      gen_01 == 5 ~ "Poor",
+      TRUE        ~ NA_character_
+    ) %>% factor(levels = c("Excellent","Very good","Good","Fair","Poor")),
+
+    # Self-perceived mental health (GEN_02B: 1=Excellent, 2=VGood, 3=Good, 4=Fair, 5=Poor)
+    mental_health_perceived = dplyr::case_when(
+      gen_02b == 1 ~ "Excellent",
+      gen_02b == 2 ~ "Very good",
+      gen_02b == 3 ~ "Good",
+      gen_02b == 4 ~ "Fair",
+      gen_02b == 5 ~ "Poor",
+      TRUE         ~ NA_character_
+    ) %>% factor(levels = c("Excellent","Very good","Good","Fair","Poor")),
+
+    # Self-perceived health compared to prior year
+    # (GEN_02: 1=MUCH BETTER, 2=SOMEWHAT BETTER, 3=ABOUT THE SAME,
+    #          4=SOMEWHAT WORSE, 5=MUCH WORSE; 6/7/8/9=NA)
+    health_vs_prior_year = dplyr::case_when(
+      gen_02 == 1 ~ "Much better",
+      gen_02 == 2 ~ "Somewhat better",
+      gen_02 == 3 ~ "About the same",
+      gen_02 == 4 ~ "Somewhat worse",
+      gen_02 == 5 ~ "Much worse",
+      TRUE        ~ NA_character_
+    ) %>% factor(levels = c("Much better","Somewhat better","About the same",
+                             "Somewhat worse","Much worse"))
+
+  )
+
+# ---- recode-inferred-conditionally -------------------------------------------
+# Inferred variables: only recode if they survived the white-list drop
+if ("edudr04" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # EDUDR04: 1=Less than sec, 2=Secondary grad, 3=Some post-sec, 4=Post-sec grad
+      education = dplyr::case_when(
+        edudr04 == 1 ~ "Less than secondary",
+        edudr04 == 2 ~ "Secondary graduate",
+        edudr04 == 3 ~ "Some post-secondary",
+        edudr04 == 4 ~ "Post-secondary graduate",
+        TRUE         ~ NA_character_
+      ) %>% factor(levels = c("Less than secondary","Secondary graduate",
+                               "Some post-secondary","Post-secondary graduate"))
+    )
 }
 
-# ---- tweak-data-3-factors ----------------------------------------------------
-vcat("\n🔧 Step 3: Factor recoding\n")
-#
-# All CCHS numeric codes below are based on standard PUMF documentation.
-# VERIFY each recode against:
-#   CCHS_2010_DataDictionary_Freqs-ver2.pdf
-#   CCHS_2014_DataDictionary_Freqs.pdf
-#
-# Pattern: original raw numeric column → recoded factor column
-# Labelling convention: Human-readable ordered factor where meaningful
-#
-# NOTE ON CCHS CODES: Special codes 6=Not applicable, 7=Don't know,
-#   8=Refusal, 9=Not stated are mapped to NA throughout.
+if ("sdcfimm" %in% names(ds_analytic) && "sdcgres" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # immigration_status: derived from TWO variables jointly.
+      #
+      # SDCFIMM (Immigrant - F): 1=YES (immigrant), 2=NO (non-immigrant), 9=NOT STATED.
+      # SDCGRES (Length/time in Canada): 1=0-9 yrs (recent), 2=10+ yrs (long-term), 9=NOT STATED.
+      #
+      # CRITICAL DATA QUALITY NOTE:
+      # SPSS stores SDCGRES code 6 ("NOT APPLICABLE", i.e., Canadian-born) as SYSTEM MISSING.
+      # After haven::zap_labels() in the Ferry, that column is NA — NOT numeric 6.
+      # Therefore `sdcgres == 6` NEVER fires. Non-immigrants must be identified via
+      # SDCFIMM == 2 (NO) instead.
+      #
+      # Joint recode logic:
+      #   SDCFIMM=1 & SDCGRES=1  → Recent immigrant (0-9 yrs)
+      #   SDCFIMM=1 & SDCGRES=2  → Long-term immigrant (10+ yrs)
+      #   SDCFIMM=2              → Non-immigrant (Canadian-born)
+      #   All other combinations  → NA (NOT STATED / REFUSAL / unknown)
+      immigration_status = dplyr::case_when(
+        sdcfimm == 1 & sdcgres == 1 ~ "Recent immigrant (0-9 yrs in Canada)",
+        sdcfimm == 1 & sdcgres == 2 ~ "Long-term immigrant (10+ yrs in Canada)",
+        sdcfimm == 2                 ~ "Non-immigrant (Canadian-born)",
+        TRUE                         ~ NA_character_
+      ) %>% factor(levels = c("Non-immigrant (Canadian-born)",
+                               "Long-term immigrant (10+ yrs in Canada)",
+                               "Recent immigrant (0-9 yrs in Canada)"))
+    )
+} else if ("sdcgres" %in% names(ds_analytic)) {
+  # Fallback: sdcfimm was dropped — use sdcgres alone (non-immigrants will be NA)
+  warning("sdcfimm not found — immigration_status will lack Non-immigrant category.")
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      immigration_status = dplyr::case_when(
+        sdcgres == 1 ~ "Recent immigrant (0-9 yrs in Canada)",
+        sdcgres == 2 ~ "Long-term immigrant (10+ yrs in Canada)",
+        TRUE         ~ NA_character_
+      ) %>% factor(levels = c("Non-immigrant (Canadian-born)",
+                               "Long-term immigrant (10+ yrs in Canada)",
+                               "Recent immigrant (0-9 yrs in Canada)"))
+    )
+}
 
-special_na_codes <- c(6, 7, 8, 9, 96, 97, 98, 99)
+if ("sdcgcgt" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # SDCGCGT: 1=White, 2=Non-White (visible minority), 9=NA
+      visible_minority = dplyr::case_when(
+        sdcgcgt == 1 ~ "White",
+        sdcgcgt == 2 ~ "Visible minority",
+        TRUE         ~ NA_character_
+      ) %>% factor(levels = c("White","Visible minority"))
+    )
+}
 
-# Inferred recode source variables may be absent in one/both cycles.
-# Ensure they exist as NA columns so mutate()/case_when() never fails.
-recode_source_vars <- c(
-  "dhhgage", "dhh_sex", "dhhgms", "edudh04", "sdcfimm", "sdcdgcb",
-  "incdghh", "hcu_1aa", "lbfdghp", "lbfdgft", "alcdttm", "smkdsty",
-  "hwtgisw", "pacdpai", "gen_01", "gen_02a", "gen_02", "rac_1", "inj_01",
-  # Added: previously missing from recode pipeline
-  "dhhglvg",    # living arrangements
-  "gen_07",     # job stress level
-  "sdcdgstud",  # student status
-  "lbsgsoc"     # occupation category
-)
+if ("dhh_own" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # DHH_OWN: dwelling owned by a member of the household.
+      #   2010-2011 label text: "Dwelling - owned by a member of hhld"  1=YES   2=NO
+      #   2013-2014 label text: "Owned, Rented"                         1=OWNER 2=RENTED
+      # The label TEXT differs across cycles but the integer coding is identical,
+      # so no alias resolution is required.
+      #
+      # CRITICAL — missingness is represented DIFFERENTLY by cycle:
+      #   2010-2011 stores refusal / not-stated as SPSS SYSTEM MISSING (-> NA
+      #             after haven::zap_labels() in the Ferry): 1,475 rows.
+      #   2013-2014 stores them as EXPLICIT codes 7 / 8 / 9: 1,809 rows.
+      # The TRUE ~ NA_character_ fallback below catches both representations.
+      # Anything other than 1 or 2 becomes NA; do not "simplify" this to
+      # `dhh_own != 1 ~ "Renter"`, which would silently absorb codes 6/7/8/9.
+      home_ownership = dplyr::case_when(
+        dhh_own == 1 ~ "Owner",
+        dhh_own == 2 ~ "Renter",
+        TRUE         ~ NA_character_
+      ) %>% factor(levels = c("Owner", "Renter"))
+    )
+}
 
-ds2 <- ensure_columns(ds2, recode_source_vars, context_label = "factor recoding inputs")
+if ("lbsdpft" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # LBSDPFT: 1=Full-time, 2=Part-time, 9=NA
+      work_schedule = dplyr::case_when(
+        lbsdpft == 1 ~ "Full-time",
+        lbsdpft == 2 ~ "Part-time",
+        TRUE         ~ NA_character_
+      ) %>% factor(levels = c("Full-time","Part-time"))
+    )
+}
 
-ds3 <- ds2 %>%
-  mutate(
+if ("hcu_1aa_h" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # HCU_1AA (2014) / ACC_50A (2010) harmonized: 1=Yes, 2=No
+      has_family_doctor = dplyr::case_when(
+        hcu_1aa_h == 1 ~ "Yes",
+        hcu_1aa_h == 2 ~ "No",
+        TRUE           ~ NA_character_
+      ) %>% factor(levels = c("Yes","No"))
+    )
+}
 
-    # --- Age group (3 categories per stats_instructions_v3) ---
-    # DHHGAGE codes: 2=15-17, 3=18-19, 4=20-24, 5=25-29, 6=30-34, 7=35-39,
-    #   8=40-44, 9=45-49, 10=50-54, 11=55-59, 12=60-64, 13=65-69, 14=70-74,
-    #   15=75-79  (VERIFIED: identical in both cycles; extracted from SAV metadata)
-    age_group = factor(
-      case_when(
-        dhhgage %in% 2:4  ~ "15-24",       # 15-24 yrs
-        dhhgage %in% 5:10 ~ "25-54",       # 25-54 yrs
-        dhhgage %in% 11:15 ~ "55-75",      # 55-75 yrs
-        TRUE ~ NA_character_
-      ),
-      levels = c("15-24", "25-54", "55-75"),
-      ordered = TRUE
-    ),
+if ("adlf6r" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # ADLF6R: derived flag — 1=needs help for at least one task, 2=no help needed
+      functional_limitation = dplyr::case_when(
+        adlf6r == 1 ~ "Needs help",
+        adlf6r == 2 ~ "No help needed",
+        TRUE        ~ NA_character_
+      ) %>% factor(levels = c("No help needed","Needs help"))
+    )
+}
 
-    # --- Sex ---
-    # DHH_SEX: 1=Male, 2=Female
-    sex = factor(
-      case_when(
-        dhh_sex == 1 ~ "Male",
-        dhh_sex == 2 ~ "Female",
-        dhh_sex %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Male", "Female")
-    ),
-
-    # --- Marital status ---
-    # DHHGMS: 1=Married, 2=Common-law, 3=Widowed/Divorced/Separated, 4=Single
-    marital_status = factor(
-      case_when(
-        dhhgms == 1 ~ "Married",
-        dhhgms == 2 ~ "Common-law",
-        dhhgms == 3 ~ "Widowed/Divorced/Separated",
-        dhhgms == 4 ~ "Single",
-        dhhgms %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Single", "Married", "Common-law", "Widowed/Divorced/Separated")
-    ),
-
-    # --- Education (derived 4-category, EDUDH04 or EDUDR04) ---
-    # Numeric codes are consistent across cycles; label wording differs:
-    #   Code | 2010-2011 label          | 2013-2014 label
-    #   -----+--------------------------+---------------------------
-    #     1  | < THAN SECONDARY         | < SEC. SCHOOL GR       (cosmetic)
-    #     2  | SECONDARY GRAD.          | SEC. SCHOOL. GR.       (cosmetic)
-    #     3  | OTHER POST-SEC.          | SOME POST-SEC ED        *** CONCEPTUAL ***
-    #     4  | POST-SEC. GRAD.          | POST-SEC CERT          (cosmetic)
-    #
-    # ⚠️  CROSS-CYCLE DISCREPANCY — Code 3 decision:
-    #   2010: "Other post-secondary" implies incomplete/non-degree programs
-    #         (certificates, diplomas, vocational) but NOT "some college".
-    #   2014: "Some post-secondary" implies partial post-secondary attendance.
-    #   These are plausibly the same population (non-graduate post-secondary
-    #   participants), but there is conceptual ambiguity. The label "Some
-    #   post-secondary" is adopted here as the common denominator.
-    #   ► This decision must be flagged in the Methods section and treated
-    #     as a limitation for the education predictor interpretation.
-    #     See cchs_value_label_diffs.csv (EDUDR04) for the source comparison.
-    education = factor(
-      case_when(
-        edudh04 == 1 ~ "Less than secondary",
-        edudh04 == 2 ~ "Secondary graduate",
-        edudh04 == 3 ~ "Some post-secondary",   # see note above re: cross-cycle ambiguity
-        edudh04 == 4 ~ "Post-secondary graduate",
-        edudh04 %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Less than secondary", "Secondary graduate",
-                 "Some post-secondary", "Post-secondary graduate"),
-      ordered = TRUE
-    ),
-
-    # --- Immigration status ---
-    # SDCFIMM: 1=Immigrant, 2=Non-immigrant; 3=Non-permanent resident
-    immigration_status = factor(
-      case_when(
-        sdcfimm == 1 ~ "Immigrant",
-        sdcfimm == 2 ~ "Non-immigrant",
-        sdcfimm == 3 ~ "Non-permanent resident",
-        sdcfimm %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Non-immigrant", "Immigrant", "Non-permanent resident")
-    ),
-
-    # --- Visible minority / ethnic origin ---
-    # SDCDGCB: 1=White (not visible min), 2=Visible minority
-    visible_minority = factor(
-      case_when(
-        sdcdgcb == 1 ~ "White",
-        sdcdgcb == 2 ~ "Visible minority",
-        sdcdgcb %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("White", "Visible minority")
-    ),
-
-    # --- Household income (5 categories) ---
-    # INCDGHH: 1=<$20k, 2=$20k-$39.9k, 3=$40k-$59.9k, 4=$60k-$79.9k, 5=$80k+
-    income_5cat = factor(
-      case_when(
-        incdghh == 1 ~ "< $20k",
-        incdghh == 2 ~ "$20k - $39.9k",
-        incdghh == 3 ~ "$40k - $59.9k",
-        incdghh == 4 ~ "$60k - $79.9k",
-        incdghh == 5 ~ "$80k+",
-        incdghh %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("< $20k", "$20k - $39.9k", "$40k - $59.9k",
-                 "$60k - $79.9k", "$80k+"),
-      ordered = TRUE
-    ),
-
-    # --- Has regular family doctor ---
-    # HCU_1AA: 1=Yes, 2=No
-    has_family_doctor = factor(
-      case_when(
-        hcu_1aa == 1 ~ "Yes",
-        hcu_1aa == 2 ~ "No",
-        hcu_1aa %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Yes", "No")
-    ),
-
-    # --- Employment type (self-employed vs employee) ---
-    # LBFDGHP: 1=Employee, 2=Self-employed, 3=Unpaid family worker
-    employment_type = factor(
-      case_when(
-        lbfdghp == 1 ~ "Employee",
-        lbfdghp == 2 ~ "Self-employed",
-        lbfdghp == 3 ~ "Unpaid family worker",
-        lbfdghp %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Employee", "Self-employed", "Unpaid family worker")
-    ),
-
-    # --- Work schedule (full-time vs part-time) ---
-    # LBFDGFT: 1=Full-time, 2=Part-time
-    work_schedule = factor(
-      case_when(
-        lbfdgft == 1 ~ "Full-time",
-        lbfdgft == 2 ~ "Part-time",
-        lbfdgft %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Full-time", "Part-time")
-    ),
-
-    # --- Alcohol use (derived type of drinker) ---
-    # ALCDTTM: 1=Regular drinker, 2=Occasional drinker, 3=No drink last 12m
-    #   NOTE: code 3 collapses former + never drinkers; 3-level factor only
-    alcohol_type = factor(
-      case_when(
-        alcdttm == 1 ~ "Regular drinker",
-        alcdttm == 2 ~ "Occasional drinker",
-        alcdttm == 3 ~ "Former or never drinker",
-        alcdttm %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Former or never drinker", "Occasional drinker", "Regular drinker")
-    ),
-
-    # --- Smoking status (derived) ---
-    # SMKDSTY — VERIFIED: both SAV cycles.
-    #   Actual codes: 1=DAILY, 2=OCCASIONAL (current), 3=ALWAYS OCCASIONAL (former),
-    #                 4=FORMER DAILY, 5=FORMER OCCASIONAL, 6=NEVER SMOKED
-    #   Special NAs: 96/97/98/99 (NOT 6/7/8/9 — code 6=Never must come before special_na_codes)
-    #   → Collapsed: Daily / Occasional / Former (3+4+5) / Never
-    smoking_status = factor(
-      case_when(
-        smkdsty == 1 ~ "Daily",
-        smkdsty == 2 ~ "Occasional",
-        smkdsty %in% 3:5 ~ "Former",
-        smkdsty == 6 ~ "Never",
-        smkdsty %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Never", "Former", "Occasional", "Daily"),
-      ordered = TRUE
-    ),
-
-    # --- BMI category (derived) ---
-    # HWTGISW: 1=Underweight (<18.5), 2=Normal weight (18.5-24.9),
-    #          3=Overweight (25-29.9), 4=Obese (30+)
-    bmi_category = factor(
-      case_when(
-        hwtgisw == 1 ~ "Underweight",
-        hwtgisw == 2 ~ "Normal weight",
-        hwtgisw == 3 ~ "Overweight",
-        hwtgisw == 4 ~ "Obese",
-        hwtgisw %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Underweight", "Normal weight", "Overweight", "Obese"),
-      ordered = TRUE
-    ),
-
-    # --- Physical activity index (derived) ---
-    # PACDPAI: 1=Active, 2=Moderately active, 3=Inactive
-    physical_activity = factor(
-      case_when(
-        pacdpai == 1 ~ "Active",
-        pacdpai == 2 ~ "Moderately active",
-        pacdpai == 3 ~ "Inactive",
-        pacdpai %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Active", "Moderately active", "Inactive"),
-      ordered = TRUE
-    ),
-
-    # --- Self-perceived general health ---
-    # GEN_01: 1=Excellent, 2=Very good, 3=Good, 4=Fair, 5=Poor
-    self_health_general = factor(
-      case_when(
-        gen_01 == 1 ~ "Excellent",
-        gen_01 == 2 ~ "Very good",
-        gen_01 == 3 ~ "Good",
-        gen_01 == 4 ~ "Fair",
-        gen_01 == 5 ~ "Poor",
-        gen_01 %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Excellent", "Very good", "Good", "Fair", "Poor"),
-      ordered = TRUE
-    ),
-
-    # --- Self-perceived mental health ---
-    # GEN_02B: 1=Excellent, 2=Very good, 3=Good, 4=Fair, 5=Poor
-    # VERIFIED: GEN_02B label = "Self-perceived mental health" in both SAV cycles.
-    # alias_map resolves gen_02a → gen_02b when gen_02a is absent from raw data.
-    # ALERT: GEN_02 is "health compared to 1 yr ago" (NOT mental health);
-    #        GEN_02A2 is "satisfaction with life" 0-10 scale (NOT mental health).
-    self_health_mental = factor(
-      case_when(
-        gen_02a == 1 ~ "Excellent",
-        gen_02a == 2 ~ "Very good",
-        gen_02a == 3 ~ "Good",
-        gen_02a == 4 ~ "Fair",
-        gen_02a == 5 ~ "Poor",
-        gen_02a %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Excellent", "Very good", "Good", "Fair", "Poor"),
-      ordered = TRUE
-    ),
-
-    # --- Health compared to 1 year ago ---
-    # GEN_02: 1=Much better, 2=Somewhat better, 3=About the same,
-    #         4=Somewhat worse, 5=Much worse
-    # VERIFIED: GEN_02 label = "Self-perceived hlth - compared 1 yr ago" in both SAV cycles.
-    health_vs_lastyear = factor(
-      case_when(
-        gen_02 == 1 ~ "Much better",
-        gen_02 == 2 ~ "Somewhat better",
-        gen_02 == 3 ~ "About the same",
-        gen_02 == 4 ~ "Somewhat worse",
-        gen_02 == 5 ~ "Much worse",
-        gen_02 %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Much better", "Somewhat better", "About the same",
-                 "Somewhat worse", "Much worse"),
-      ordered = TRUE
-    ),
-
-    # --- Functional limitations / activity limitations ---
-    # RAC_1 — VERIFIED: 3-category variable in both SAV cycles.
-    #   Actual codes: 1=SOMETIMES (limited), 2=OFTEN (limited), 3=NEVER (limited)
-    #   Codes 1 and 2 are both affirmative (limited), code 3 = not limited.
-    #   Former binary recode (1=Yes, 2=No) was WRONG — code 2=OFTEN was silently
-    #   mapped to NA, losing all "often limited" respondents.
-    activity_limitation = factor(
-      case_when(
-        rac_1 %in% c(1, 2) ~ "Yes",   # 1=SOMETIMES or 2=OFTEN → limited
-        rac_1 == 3          ~ "No",    # 3=NEVER → not limited
-        rac_1 %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Yes", "No")
-    ),
-
-    # --- Injury status ---
-    # INJ_01: 1=Yes, 2=No
-    injury_past_year = factor(
-      case_when(
+if ("inj_01" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # INJ_01: 1=Yes (injured in past 12 months), 2=No
+      injured_past_12m = dplyr::case_when(
         inj_01 == 1 ~ "Yes",
         inj_01 == 2 ~ "No",
-        inj_01 %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Yes", "No")
-    ),
+        TRUE        ~ NA_character_
+      ) %>% factor(levels = c("No","Yes"))
+    )
+}
 
-    # --- Living arrangements (§2.2 predisposing) ---
-    # DHHGLVG: 1=Unattached alone, 2=Unattached w/others, 3=Spouse/partner only,
-    #          4=Parent+spouse+child, 5=Single parent w/child,
-    #          6=Child in parent/sibling hhld, 7=Child in two-parent hhld, 8=Other
-    #   Special NAs: 96=NOT APPLICABLE, 99=NOT STATED (already in special_na_codes)
-    living_arrangements = factor(
-      case_when(
-        dhhglvg == 1 ~ "Unattached, alone",
-        dhhglvg == 2 ~ "Unattached, with others",
-        dhhglvg == 3 ~ "Spouse/partner only",
-        dhhglvg == 4 ~ "Parent, spouse, and child",
+# ---- recode-facilitating-extended -------------------------------------------
+# Additional facilitating variables added for data-primer-1 coverage.
+
+if ("smkdsty" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # SMKDSTY: 1=Daily, 2=Occasional (current), 3=Always occasional (current),
+      #          4=Former daily, 5=Former occasional, 6=Never smoked
+      # Collapse to 4 analytic groups: Daily / Occasional / Former / Never
+      smoking_status = dplyr::case_when(
+        smkdsty == 1             ~ "Daily",
+        smkdsty %in% c(2, 3)    ~ "Occasional",
+        smkdsty %in% c(4, 5)    ~ "Former",
+        smkdsty == 6             ~ "Never smoked",
+        TRUE                     ~ NA_character_
+      ) %>% factor(levels = c("Never smoked", "Former", "Occasional", "Daily"))
+    )
+}
+
+if ("lbsg31" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # LBSG31: 1=Employee, 2=Self-employed; 6/7/8/9=NA
+      employment_type = dplyr::case_when(
+        lbsg31 == 1 ~ "Employee",
+        lbsg31 == 2 ~ "Self-employed",
+        TRUE        ~ NA_character_
+      ) %>% factor(levels = c("Employee", "Self-employed"))
+    )
+}
+
+if ("lbsgsoc" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # LBSGSOC: 5-group SOC. 2010 PUMF uses descriptive labels; 2014 uses
+      # generic GROUP 1-5 labels. Numeric codes align identically across cycles.
+      # Using 2010 descriptive labels throughout for interpretability.
+      occupation_category = dplyr::case_when(
+        lbsgsoc == 1 ~ "Management / Education / Arts",
+        lbsgsoc == 2 ~ "Business / Finance",
+        lbsgsoc == 3 ~ "Sales / Services",
+        lbsgsoc == 4 ~ "Trades / Transport",
+        lbsgsoc == 5 ~ "Primary industry / Processing",
+        TRUE         ~ NA_character_
+      ) %>% factor(levels = c(
+        "Management / Education / Arts",
+        "Business / Finance",
+        "Sales / Services",
+        "Trades / Transport",
+        "Primary industry / Processing"
+      ))
+    )
+}
+
+if ("dhhglvg" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # DHHGLVG: 1-8 household composition; 96=NOT APPLICABLE, 99=NOT STATED
+      living_arrangements = dplyr::case_when(
+        dhhglvg == 1 ~ "Unattached, living alone",
+        dhhglvg == 2 ~ "Unattached, living with others",
+        dhhglvg == 3 ~ "Couple, no children",
+        dhhglvg == 4 ~ "Couple with children",
         dhhglvg == 5 ~ "Single parent with child",
-        dhhglvg == 6 ~ "Child in parent/sibling household",
-        dhhglvg == 7 ~ "Child in two-parent household",
-        dhhglvg == 8 ~ "Other",
-        dhhglvg %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Unattached, alone", "Unattached, with others",
-                 "Spouse/partner only", "Parent, spouse, and child",
-                 "Single parent with child", "Child in parent/sibling household",
-                 "Child in two-parent household", "Other")
-    ),
-
-    # --- Job stress level (§2.2 facilitating) ---
-    # GEN_07: 1=Not at all stressful, 2=Not very stressful, 3=A bit stressful,
-    #          4=Quite a bit stressful, 5=Extremely stressful  — VERIFY codes
-    job_stress = factor(
-      case_when(
-        gen_07 == 1 ~ "Not at all stressful",
-        gen_07 == 2 ~ "Not very stressful",
-        gen_07 == 3 ~ "A bit stressful",
-        gen_07 == 4 ~ "Quite a bit stressful",
-        gen_07 == 5 ~ "Extremely stressful",
-        gen_07 %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Not at all stressful", "Not very stressful",
-                 "A bit stressful", "Quite a bit stressful", "Extremely stressful"),
-      ordered = TRUE
-    ),
-
-    # --- Student status (§2.2 predisposing) ---
-    # SDCDGSTUD: 1=Full-time student, 2=Part-time student, 3=Not a student — VERIFY
-    student_status = factor(
-      case_when(
-        sdcdgstud == 1 ~ "Full-time student",
-        sdcdgstud == 2 ~ "Part-time student",
-        sdcdgstud == 3 ~ "Not a student",
-        sdcdgstud %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Not a student", "Part-time student", "Full-time student")
-    ),
-
-    # --- Occupation category (§2.2 facilitating) ---
-    # LBSGSOC: 5-category occupation group (PUMF-consistent across both cycles)
-    #   1=Group 1 (Mgmt/Art/Educ), 2=Group 2 (Business/Finance),
-    #   3=Group 3 (Sales/Service), 4=Group 4 (Trades/Transport),
-    #   5=Group 5 (Prim.Ind./Processing)
-    occupation_category = factor(
-      case_when(
-        lbsgsoc == 1 ~ "Group 1",
-        lbsgsoc == 2 ~ "Group 2",
-        lbsgsoc == 3 ~ "Group 3",
-        lbsgsoc == 4 ~ "Group 4",
-        lbsgsoc == 5 ~ "Group 5",
-        lbsgsoc %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Group 1", "Group 2", "Group 3", "Group 4", "Group 5")
-    ),
-
-    # --- Cycle as factor for models ---
-    cycle_f = factor(
-      case_when(
-        cycle == 0L ~ "CCHS 2010-2011",
-        cycle == 1L ~ "CCHS 2013-2014"
-      ),
-      levels = c("CCHS 2010-2011", "CCHS 2013-2014")
+        dhhglvg == 6 ~ "Child in parent / sibling household",
+        dhhglvg == 7 ~ "Child in two-parent / sibling household",
+        dhhglvg == 8 ~ "Other arrangement",
+        TRUE         ~ NA_character_
+      ) %>% factor(levels = c(
+        "Unattached, living alone",
+        "Unattached, living with others",
+        "Couple, no children",
+        "Couple with children",
+        "Single parent with child",
+        "Child in parent / sibling household",
+        "Child in two-parent / sibling household",
+        "Other arrangement"
+      ))
     )
-  )
+}
 
-# Factor recoding for 19 chronic condition variables
-# CCC variables: 1=Yes, 2=No, 6=Not applicable, 7=DK, 8=Refusal, 9=Not stated
-ccc_vars_found <- intersect(vars_inferred_ccc, names(ds3))
-# CCC label map — VERIFIED against cchs_variable_labels.csv (extract-metadata.R)
-# Maps clean white-list variable name → short analytical label (used as cc_<label>).
-# Prior version had wrong assignments: ccc_015/ccc_011/ccc_051/ccc_061 were
-# mis-numbered. Corrected below based on SAV metadata.
-ccc_labels <- c(
-  ccc_031 = "asthma",           # VERIFIED: CCC_031 = "Has asthma" (both cycles)
-  ccc_041 = "fibromyalgia",     # VERIFIED: CCC_041 = "Has fibromyalgia" (both cycles)
-  ccc_051 = "arthritis",        # VERIFIED: CCC_051 = "Has arthritis" (both cycles)
-  ccc_061 = "back_problems",    # VERIFIED: CCC_061 = "Has back problems/excl. fibro/arthritis"
-  ccc_071 = "hypertension",     # VERIFIED: CCC_071 = "Has high blood pressure"
-  ccc_081 = "migraine",         # VERIFIED: CCC_081 = "Has migraine headaches"
-  ccc_091 = "copd",             # VERIFIED: CCC_091 = "Has a COPD"
-  ccc_101 = "diabetes",         # VERIFIED: CCC_101 = "Has diabetes"
-  ccc_121 = "heart_disease",    # VERIFIED: CCC_121 = "Has heart disease"
-  ccc_131 = "cancer",           # VERIFIED: CCC_131 = "Has cancer"
-  ccc_141 = "ulcer",            # VERIFIED: CCC_141 = "Has stomach or intestinal ulcers"
-  ccc_151 = "stroke",           # VERIFIED: CCC_151 = "Suffers from the effects of a stroke"
-  ccc_171 = "bowel_disorder",   # VERIFIED: CCC_171 = "Has bowel disorder"
-  ccc_251 = "chronic_fatigue",  # VERIFIED: CCC_251 = "Has chronic fatigue syndrome"
-  ccc_261 = "chemical_sensitiv",# VERIFIED: CCC_261 = "Suffers multiple chemical sensitivities"
-  ccc_280 = "mood_disorder",    # VERIFIED: CCC_280 = "Has a mood disorder"
-  ccc_290 = "anxiety_disorder", # VERIFIED: CCC_290 = "Has an anxiety disorder"
-  ccc_300 = "other_mental_ill", # NOT FOUND in SAV — NEEDS EXTERNAL DICT VERIFICATION
-  ccc_185 = "digestive_disease" # NOT FOUND in SAV — NEEDS EXTERNAL DICT VERIFICATION
-)
-
-if (verbose) {
-  cat("\n  Recoding chronic condition flags:\n")
-  for (v in ccc_vars_found) {
-    label <- if (v %in% names(ccc_labels)) ccc_labels[v] else v
-    new_name <- paste0("cc_", label)
-    ds3[[new_name]] <- factor(
-      case_when(
-        ds3[[v]] == 1L ~ "Yes",
-        ds3[[v]] == 2L ~ "No",
-        ds3[[v]] %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Yes", "No")
+# ---- recode-work-stress ------------------------------------------------------
+# GEN_09: self-perceived work stress (5-point scale)
+# Already in vars_inferred as raw integer. Recode to labelled ordered factor.
+if ("gen_09" %in% names(ds_analytic)) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(
+      # GEN_09: 1=Not at all, 2=Not very, 3=A bit, 4=Quite a bit, 5=Extremely
+      work_stress = dplyr::case_when(
+        gen_09 == 1 ~ "Not at all stressful",
+        gen_09 == 2 ~ "Not very stressful",
+        gen_09 == 3 ~ "A bit stressful",
+        gen_09 == 4 ~ "Quite a bit stressful",
+        gen_09 == 5 ~ "Extremely stressful",
+        TRUE        ~ NA_character_
+      ) %>% factor(
+        levels  = c("Not at all stressful", "Not very stressful",
+                    "A bit stressful", "Quite a bit stressful",
+                    "Extremely stressful"),
+        ordered = TRUE
+      )
     )
-    cat(sprintf("    %-18s → %-22s : Yes=%d, No=%d, NA=%d\n",
-                v, new_name,
-                sum(ds3[[new_name]] == "Yes", na.rm = TRUE),
-                sum(ds3[[new_name]] == "No",  na.rm = TRUE),
-                sum(is.na(ds3[[new_name]]))))
-  }
+}
+
+# ---- recode-adl --------------------------------------------------------------
+# Recode ADL_01-ADL_06 from raw integer codes to Yes/No factors and
+# rename to semantic column names for clarity in analysis and reporting.
+adl_raw_vars <- c("adl_01", "adl_02", "adl_03", "adl_04", "adl_05", "adl_06")
+if (all(adl_raw_vars %in% names(ds_analytic))) {
+  ds_analytic <- ds_analytic %>%
+    dplyr::mutate(dplyr::across(
+      dplyr::all_of(adl_raw_vars),
+      ~dplyr::case_when(
+        . == 1 ~ "Yes",
+        . == 2 ~ "No",
+        TRUE   ~ NA_character_
+      ) %>% factor(levels = c("No", "Yes"))
+    )) %>%
+    dplyr::rename(
+      adl_meals         = adl_01,  # Needs help: preparing meals
+      adl_errands       = adl_02,  # Needs help: appointments / errands
+      adl_housework     = adl_03,  # Needs help: housework
+      adl_personal_care = adl_04,  # Needs help: personal care
+      adl_moving_indoors = adl_05, # Needs help: moving inside home
+      adl_finances      = adl_06   # Needs help: personal finances
+    )
+  cat("  ADL columns recoded to Yes/No factors and renamed to semantic names.\n")
 } else {
-  for (v in ccc_vars_found) {
-    label <- if (v %in% names(ccc_labels)) ccc_labels[v] else v
-    new_name <- paste0("cc_", label)
-    ds3[[new_name]] <- factor(
-      case_when(
-        ds3[[v]] == 1L ~ "Yes",
-        ds3[[v]] == 2L ~ "No",
-        ds3[[v]] %in% special_na_codes ~ NA_character_,
-        TRUE ~ NA_character_
-      ),
-      levels = c("Yes", "No")
-    )
-  }
+  cat("  SKIP: ADL columns not all present — skipping ADL recode/rename.\n")
 }
 
-vcat(sprintf("   ✓ Factor recoding complete. Columns after recoding: %d\n", ncol(ds3)))
+cat("\n---- SECTION: Final Dataset Assembly ---------------------------------\n")
+# ---- assemble-final ----------------------------------------------------------
+# Select the analysis-ready columns for output.
+# Raw source columns (CCHS codes) are dropped; recoded variables are retained.
 
-# ---- tweak-data-4-weights ----------------------------------------------------
-vcat("\n🔧 Step 4: Survey weight adjustment for pooling\n")
-#
-# Statistics Canada guideline: when pooling two CCHS annual cycles, divide
-# each respondent's original survey weight by the number of cycles pooled (2).
-# This maintains the correct total weighted population size.
-# Bootstrap weights are adjusted identically.
-
-boot_cols <- grep(bootstrap_pattern, names(ds3), value = TRUE)
-
-ds4 <- ds3 %>%
-  mutate(
-    wts_m_original = wts_m,          # preserve original for reference
-    wts_m_pooled   = wts_m / 2       # pooled weight: divide by 2
+ds_out <- ds_analytic %>%
+  dplyr::select(
+    # Survey design
+    cchs_cycle, cchs_cycle_f, wts_m, wts_m_pooled,
+    # Outcome
+    days_absent_total, days_absent_chronic,
+    # Raw LOP components (keep for sensitivity checks)
+    dplyr::all_of(lop_day_vars),
+    # Chronic condition flags (renamed logical)
+    dplyr::starts_with("cc_"),
+    # Demographics (recoded)
+    age_group_3, dhhgage, sex, marital_status, household_size,
+    dplyr::any_of(c("dhhgle5","dhhg611","dhhgl12")),
+    dplyr::any_of(c("home_ownership")),
+    province, income_hh,
+    dplyr::any_of(c("living_arrangements")),
+    dplyr::any_of(c("education", "immigration_status", "visible_minority",
+                    "has_family_doctor", "work_schedule",
+                    "employment_type", "occupation_category")),
+    # Health behaviours
+    dplyr::any_of(c("bmi_category", "hwtgbmi", "alcohol_type",
+                    "fruit_veg_daily", "physical_activity", "smoking_status")),
+    # Perceived health + work stress
+    dplyr::any_of(c("health_perceived", "mental_health_perceived",
+                    "health_vs_prior_year", "work_stress")),
+    # Functional limitations (ADL module — semantic names after recode)
+    dplyr::any_of(c("adl_meals", "adl_errands", "adl_housework",
+                    "adl_personal_care", "adl_moving_indoors", "adl_finances",
+                    "functional_limitation", "injured_past_12m")),
+    # Completeness flags (use to subset for analysis-ready subsamples)
+    flag_complete_ccc, flag_complete_predictors, flag_analytic_complete
   )
 
-# Adjust bootstrap weights
-if (length(boot_cols) > 0) {
-  ds4 <- ds4 %>%
-    mutate(across(all_of(boot_cols), ~ .x / 2))
-  vcat(sprintf("   ✓ Original weight (wts_m) preserved in wts_m_original\n"))
-  vcat(sprintf("   ✓ Pooled weight (wts_m / 2) → wts_m_pooled\n"))
-  vcat(sprintf("   ✓ %d bootstrap weights divided by 2\n", length(boot_cols)))
-} else {
-  cat("   ⚠ No bootstrap weight columns found — weight adjustment incomplete\n")
-  cat("   Bootstrap weights are required for correct variance estimation.\n")
+cat("  Final analytic dataset:", nrow(ds_out), "rows x", ncol(ds_out), "cols\n")
+
+cat("\n---- SECTION: Write Output -------------------------------------------\n")
+# ---- write-ellis-sqlite ------------------------------------------------------
+if (!fs::dir_exists(dirname(path_ellis))) {
+  fs::dir_create(dirname(path_ellis), recursive = TRUE)
 }
 
-vcat(sprintf("   ✓ Mean original weight: %.1f\n", mean(ds4$wts_m_original, na.rm = TRUE)))
-vcat(sprintf("   ✓ Mean pooled weight:   %.1f\n", mean(ds4$wts_m_pooled, na.rm = TRUE)))
+con_out <- DBI::dbConnect(RSQLite::SQLite(), dbname = path_ellis)
+DBI::dbWriteTable(con_out, "cchs_analytic", ds_out, overwrite = TRUE)
+DBI::dbWriteTable(con_out, "sample_flow",   sample_flow, overwrite = TRUE)
+DBI::dbDisconnect(con_out)
+cat("  Written to:", path_ellis, " (tables: cchs_analytic, sample_flow)\n")
 
-# ---- tweak-data-5-types ------------------------------------------------------
-vcat("\n🔧 Step 5: Final data type standardization\n")
+# ---- write-parquet -----------------------------------------------------------
+if (!fs::dir_exists(parquet_dir)) fs::dir_create(parquet_dir, recursive = TRUE)
 
-# Build the final analytical column set:
-# outcomes | predictors (factors + continuous) | weights | design vars | identifiers
-cc_factor_cols  <- grep("^cc_", names(ds4), value = TRUE)
-factor_cols     <- c(
-  "age_group", "sex", "marital_status", "education", "immigration_status",
-  "visible_minority", "income_5cat", "has_family_doctor", "employment_type",
-  "work_schedule", "alcohol_type", "smoking_status", "bmi_category",
-  "physical_activity", "self_health_general", "self_health_mental",
-  "health_vs_lastyear", "activity_limitation", "injury_past_year",
-  # Added: previously dropped from output (Fix #2)
-  "living_arrangements", "job_stress", "student_status", "occupation_category",
-  "cycle_f",
-  cc_factor_cols
-)
-factor_cols_found <- intersect(factor_cols, names(ds4))
+arrow::write_parquet(ds_out,      file.path(parquet_dir, "cchs_analytic.parquet"))
+arrow::write_parquet(sample_flow, file.path(parquet_dir, "sample_flow.parquet"))
+cat("  Written parquet files to:", parquet_dir, "\n")
 
-# Continuous / integer columns to keep
-keep_numeric <- c(
-  # Outcomes
-  "days_absent_total", "days_absent_chronic",
-  lop_vars,                                      # raw LOP components (kept for transparency)
-  # Survey design
-  "wts_m_pooled", "wts_m_original", "geodpmf",
-  # Province/territory (§2.2 facilitating) — added: previously dropped (Fix #2)
-  if ("geodgprv" %in% names(ds4)) "geodgprv",
-  # Raw sample construction vars (kept for audit trail)
-  "dhhgage", "lop_015", "adm_prx",
-  # Cycle indicator
-  "cycle",
-  # Continuous predictors
-  "dhhdghsz",                                    # household size
-  if ("fvcdgtot" %in% names(ds4)) "fvcdgtot",   # fruit/veg servings
-  # Children by age group (§2.2 predisposing) — added: previously absent (Fix #1)
-  if ("dhhgle5"   %in% names(ds4)) "dhhgle5",   # children <= 5 yrs
-  if ("dhhg611"   %in% names(ds4)) "dhhg611",   # children 6-11 yrs
-  if ("dhhdfc12p" %in% names(ds4)) "dhhdfc12p", # children >= 12 yrs
-  if ("adm_rno"  %in% names(ds4)) "adm_rno",    # respondent ID
-  boot_cols
-)
-keep_numeric_found <- intersect(keep_numeric, names(ds4))
-
-ds_long <- ds4 %>%
-  select(all_of(c(keep_numeric_found, factor_cols_found))) %>%
-  mutate(
-    cycle           = as.integer(cycle),
-    days_absent_total   = as.numeric(days_absent_total),
-    days_absent_chronic = as.numeric(days_absent_chronic),
-    wts_m_pooled    = as.numeric(wts_m_pooled),
-    wts_m_original  = as.numeric(wts_m_original),
-    geodpmf         = as.character(geodpmf),    # strata: treat as character ID
-    dhhgage         = as.integer(dhhgage),
-    lop_015         = as.integer(lop_015),
-    adm_prx         = as.integer(adm_prx)
-  )
-
-vcat(sprintf("   ✓ Final analytical dataset: %s rows, %d columns\n",
-            format(nrow(ds_long), big.mark = ","),
-            ncol(ds_long)))
-vcat(sprintf("   ✓ Factor columns: %d  |  Numeric columns: %d\n",
-            sum(sapply(ds_long, is.factor)),
-            sum(sapply(ds_long, is.numeric))))
-
-# ==============================================================================
-# SECTION 3: VALIDATION
-# ==============================================================================
-
-# ---- verify-values -----------------------------------------------------------
-vcat("\n", strrep("=", 70), "\n")
-vcat("SECTION 3: DATA VALIDATION\n")
-vcat(strrep("=", 70), "\n")
-
-vcat("\n🔍 Running checkmate assertions...\n")
-
-checkmate::assert_integer(ds_long$cycle, any.missing = FALSE, lower = 0L, upper = 1L)
-vcat("   ✓ cycle: integer in {0, 1}\n")
-
-checkmate::assert_numeric(ds_long$wts_m_pooled, any.missing = FALSE, lower = 0)
-vcat("   ✓ wts_m_pooled: numeric, non-negative\n")
-
-checkmate::assert_numeric(ds_long$days_absent_total, lower = 0, upper = 90)
-vcat("   ✓ days_absent_total: numeric, 0–90 range\n")
-
-for (fct_col in intersect(factor_cols_found, names(ds_long))) {
-  checkmate::assert_factor(ds_long[[fct_col]], any.missing = TRUE)
-}
-vcat(sprintf("   ✓ All %d factor columns have valid factor type\n", length(factor_cols_found)))
-
-# Composite key: no duplicate respondents within a cycle
-# (adm_rno unique within cycle if present)
-if ("adm_rno" %in% names(ds_long)) {
-  dupes <- ds_long %>%
-    count(cycle, adm_rno) %>%
-    filter(n > 1L)
-  if (nrow(dupes) > 0) {
-    warning(sprintf("%d duplicate respondent IDs found within cycle — investigate", nrow(dupes)))
-  } else {
-    vcat("   ✓ No duplicate respondent IDs within cycle\n")
-  }
-}
-
-vcat("\n✅ Core validation checks passed\n")
-
-# ---- outcome-diagnostics -----------------------------------------------------
-vcat("\n📊 Outcome distribution (reference: mean≈1.35, 70.59% zeros):\n")
-
-n_total    <- sum(!is.na(ds_long$days_absent_total))
-n_zeros    <- sum(ds_long$days_absent_total == 0, na.rm = TRUE)
-mean_out   <- weighted.mean(ds_long$days_absent_total,
-                            w = ds_long$wts_m_pooled, na.rm = TRUE)
-var_out    <- sum(ds_long$wts_m_pooled * (ds_long$days_absent_total - mean_out)^2,
-                  na.rm = TRUE) / sum(ds_long$wts_m_pooled, na.rm = TRUE)
-
-vcat(sprintf("   Unweighted n:       %s\n", format(n_total, big.mark = ",")))
-vcat(sprintf("   Weighted mean:      %.2f  (reference: 1.35)\n", mean_out))
-vcat(sprintf("   Weighted variance:  %.1f  (reference: 17.7)\n", var_out))
-vcat(sprintf("   Dispersion (var/mean): %.1f  (>1 → overdispersion → NB model)\n", var_out / mean_out))
-vcat(sprintf("   Zeroes:             %.1f%%  (reference: 70.59%%)\n",
-            n_zeros / n_total * 100))
-vcat(sprintf("   Maximum:            %g\n", max(ds_long$days_absent_total, na.rm = TRUE)))
-
-# ==============================================================================
-# SECTION 4: BUILD ANALYSIS-READY TABLES
-# ==============================================================================
-
-# ---- build-cchs-analytical ---------------------------------------------------
-vcat("\n", strrep("=", 70), "\n")
-vcat("SECTION 4: BUILD ANALYSIS-READY TABLES\n")
-vcat(strrep("=", 70), "\n")
-
-vcat("\n📊 Table 1: cchs_analytical (pooled white-list dataset)\n")
-
-cchs_analytical <- ds_long   # already the final dataset
-
-vcat(sprintf("   ✓ Rows:    %s\n", format(nrow(cchs_analytical), big.mark = ",")))
-vcat(sprintf("   ✓ Columns: %d\n", ncol(cchs_analytical)))
-vcat(sprintf("   ✓ Factors: %d\n", sum(sapply(cchs_analytical, is.factor))))
-vcat(sprintf("   ✓ CCHS 2010-2011: %s\n", format(sum(cchs_analytical$cycle == 0L), big.mark = ",")))
-vcat(sprintf("   ✓ CCHS 2013-2014: %s\n", format(sum(cchs_analytical$cycle == 1L), big.mark = ",")))
-
-vcat("\n📊 Table 2: sample_flow (exclusion flowchart data)\n")
-vcat(sprintf("   ✓ Rows: %d (one per exclusion step)\n", nrow(sample_flow)))
-if (verbose) print(as.data.frame(sample_flow))
-
-# ==============================================================================
-# SECTION 5: SAVE TO OUTPUT
-# ==============================================================================
-
-vcat("\n", strrep("=", 70), "\n")
-vcat("SECTION 5A: SAVE TO PARQUET (Primary — preserves factor types & levels)\n")
-vcat(strrep("=", 70), "\n")
-
-arrow::write_parquet(cchs_analytical,
-                     file.path(output_parquet_dir, "cchs_analytical.parquet"))
-cat(sprintf("   ✓ cchs_analytical.parquet  (%s rows, %d cols)\n",
-            format(nrow(cchs_analytical), big.mark = ","),
-            ncol(cchs_analytical)))
-
-arrow::write_parquet(sample_flow,
-                     file.path(output_parquet_dir, "sample_flow.parquet"))
-cat(sprintf("   ✓ sample_flow.parquet      (%d rows)\n", nrow(sample_flow)))
-
-cat(sprintf("\n✅ Parquet files saved to: %s\n", output_parquet_dir))
-
-# ---- save-to-sqlite ----------------------------------------------------------
-vcat("\n", strrep("=", 70), "\n")
-vcat("SECTION 5B: SAVE TO SQLITE (Secondary — factors as character)\n")
-vcat(strrep("=", 70), "\n")
-
-# SQLite does not natively store R factor types.
-# Convert factors to character strings; factor level ORDER is lost in SQLite
-# (use Parquet as primary if factor ordering matters).
-cchs_analytical_sql <- cchs_analytical %>%
-  mutate(across(where(is.factor), as.character))
-
-sample_flow_sql <- sample_flow
-
-if (file.exists(output_sqlite)) {
-  file.remove(output_sqlite)
-  vcat("   ✓ Removed existing SQLite file\n")
-}
-
-cnn_out <- DBI::dbConnect(RSQLite::SQLite(), output_sqlite)
-DBI::dbWriteTable(cnn_out, "cchs_analytical", cchs_analytical_sql, overwrite = TRUE)
-DBI::dbWriteTable(cnn_out, "sample_flow",     sample_flow_sql,     overwrite = TRUE)
-
-tables_out <- DBI::dbListTables(cnn_out)
-for (tbl in tables_out) {
-  n_rows <- DBI::dbGetQuery(cnn_out, sprintf("SELECT COUNT(*) AS n FROM %s", tbl))$n
-  vcat(sprintf("   ✓ table '%s': %s rows\n", tbl, format(n_rows, big.mark = ",")))
-}
-DBI::dbDisconnect(cnn_out)
-
-cat(sprintf("\n✅ SQLite saved to: %s\n", output_sqlite))
-
-# ==============================================================================
-# SECTION 6: SESSION INFO
-# ==============================================================================
-
-# ---- session-info ------------------------------------------------------------
-duration <- difftime(Sys.time(), script_start, units = "secs")
-
-vcat("\n", strrep("=", 70), "\n")
-vcat("SESSION INFO\n")
-vcat(strrep("=", 70), "\n")
-
-vcat(sprintf("\n⏱️  Ellis completed in %.1f seconds\n", as.numeric(duration)))
-vcat(sprintf("📅 Executed: %s\n", format(Sys.time(), "%Y-%m-%d %H:%M:%S")))
-vcat(sprintf("👤 User: %s\n", Sys.info()["user"]))
-
-cat("\n📊 Output summary:\n")
-vcat(sprintf("   Parquet dir:      %s  (2 files, primary)\n", output_parquet_dir))
-vcat(sprintf("   SQLite database:  %s  (2 tables, secondary)\n", output_sqlite))
-cat(sprintf("   Analytical rows:  %s\n", format(nrow(cchs_analytical), big.mark = ",")))
-cat(sprintf("   Analytical cols:  %d  (white-listed subset)\n", ncol(cchs_analytical)))
-vcat(sprintf("   Factor columns:   %d  (with levels preserved in Parquet)\n",
-            sum(sapply(cchs_analytical, is.factor))))
-vcat(sprintf("   Bootstrap weights: %d  (÷2 for pooling)\n", length(boot_cols)))
-vcat(sprintf("   Cycles pooled:    2 (CCHS 2010-2011 + 2013-2014)\n"))
-
-vcat("\n⚠️  VERIFICATION CHECKLIST:\n")
-vcat("   1. Review white-list miss warnings above (if any)\n")
-vcat("      → Open PDF data dictionaries in ./data-private/raw/2026-02-19/\n")
-vcat("      → Update INFERRED variable names in declare-globals section\n")
-vcat("   2. Confirm DHHGAGE age codes match your data dictionary (currently 2-15)\n")
-vcat("   3. Confirm LOP_015 employment coding (retained as raw; no employment exclusion in default mode)\n")
-vcat("   4. Confirm ADM_PRX proxy coding (retained as raw; proxy exclusion only when apply_sample_exclusions=TRUE)\n")
-vcat("   5. Verify CCC variable names match the 19 conditions in thesis Appendix 3\n")
-vcat("   6. Check outcome distribution vs reference (mean≈1.35, 70.59% zeros)\n")
-
-if (verbose) sessionInfo()
+cat("\n---- SECTION: Session Info -------------------------------------------\n")
+elapsed <- as.numeric(difftime(Sys.time(), report_render_start_time, units = "secs"))
+cat(sprintf("  Elapsed: %.0f seconds\n", elapsed))
+sessionInfo()

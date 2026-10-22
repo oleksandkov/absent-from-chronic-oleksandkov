@@ -1,8 +1,12 @@
 # publishing-contract.prompt.md Template
 
-This template defines the schema for `publishing-contract.prompt.md` — the single contract file that captures **what pages will exist in `edited_content/` and which protocol governs each**. The Interviewer agent uses this as the scaffold when producing a contract from human intent.
+This template defines the schema for `publishing-contract.prompt.md` — the single contract file that captures **what pages will exist in `content/` and which protocol governs each**. The Interviewer agent uses this as the scaffold when producing a contract from human intent.
+
+Primary intent source for each frontend is `_frontend-N/README.md`, where the Interviewer appends timestamped intent updates derived from chat.
 
 Key principle: protocols classify pages in the edited site, not files in the repo. Each page listed below follows exactly one protocol. Raw files are source material — the same raw file can feed multiple edited pages under different protocols.
+
+Canonical taxonomy note: this template records **protocol and mode assignments**. Output type labels used in reporting (VERBATIM, REDIRECT, ADAPTED, COMPOSED) are derived via the designated source-of-truth mapping in `.github/instructions/publishing-rules.instructions.md` (Section "Taxonomy and Mapping Registry").
 
 ---
 
@@ -23,9 +27,9 @@ If either maturity requirement is unmet, warn the human before proceeding: *"The
 
 Every frontend is a static Quarto website. The Interviewer scaffolds the contract from this standard architecture, adding optional sections based on human intent.
 
-```
+```text
 Navbar
-├── (index)        ← Home page. Present in edited_content/ but absent from navbar.
+├── (index)        ← Home page. Present in content/ but absent from navbar.
 ├── Project        ← MANDATORY
 ├── Pipeline       ← MANDATORY
 ├── Analysis       ← MANDATORY
@@ -40,13 +44,13 @@ Navbar
 #### index (Home Page — not in navbar)
 
 | Page | Protocol | Default Source |
-|---|---|---|
+| --- | --- | --- |
 | Home | Narrative Bridge | Synthesized from mission, method, README, forecast image |
 
 #### Project
 
 | Page | Protocol | Default Source |
-|---|---|---|
+| --- | --- | --- |
 | Mission | Direct Line (VERBATIM) | `./ai/project/mission.md` |
 | Method | Direct Line (VERBATIM) | `./ai/project/method.md` |
 | Glossary | Direct Line (VERBATIM) | `./ai/project/glossary.md` |
@@ -55,31 +59,31 @@ Navbar
 #### Pipeline
 
 | Page | Protocol | Default Source |
-|---|---|---|
+| --- | --- | --- |
 | Pipeline Guide | Technical Bridge | `./manipulation/pipeline.md` — mermaid shortcode, sanitize developer noise; draw on `./README.md` for context |
 | Cache Manifest | Direct Line (VERBATIM) | `./data-public/metadata/CACHE-manifest.md` |
 
 #### Analysis
 
 | Page | Protocol | Default Source |
-|---|---|---|
+| --- | --- | --- |
 | EDA | Direct Line (REDIRECTED) | `./analysis/eda-2/eda-2.html` (or highest-numbered real EDA; never EDA-1) |
 | Report | Direct Line (REDIRECTED) | `./analysis/report-1/report-1.html` |
 
 #### Docs
 
 | Page | Protocol | Default Source |
-|---|---|---|
+| --- | --- | --- |
 | README | Technical Bridge | `./README.md` — links rewritten, mermaid injected, images co-located |
 | Site Map | Narrative Bridge | Agent-authored from contract navigation structure |
-| Publisher Notes | Direct Line (VERBATIM) | `./.github/publishing-orchestra-3.md` |
+| Publisher Notes | Direct Line (VERBATIM) | `./.github/publishing-orchestra.md` |
 
 ### Optional Section Defaults
 
 #### Story (when human describes a talk, slides, or presentation)
 
 | Page | Protocol | Default Source |
-|---|---|---|
+| --- | --- | --- |
 | [Talk title] | Narrative Bridge or Technical Bridge | Per human intent |
 
 > When the human mentions a talk, deck, slides, or presentation, route it to **Story** — not as a standalone deliverable.
@@ -116,6 +120,7 @@ The index page is listed first but is NOT added to the navbar — it is the home
 #### Mission
 - **Protocol**: Direct Line (VERBATIM)
 - **Source**: ./ai/project/mission.md
+- **source_sha256**: [optional hash snapshot of Source at contract time]
 
 #### Method
 - **Protocol**: Direct Line (VERBATIM)
@@ -137,6 +142,8 @@ The index page is listed first but is NOT added to the navbar — it is the home
 #### Pipeline Guide
 - **Protocol**: Technical Bridge
 - **Source**: ./manipulation/pipeline.md
+- **source_sha256**: [optional hash snapshot of Source at contract time]
+- **allowed_transforms**: [link_rewrite, shortcode_injection, sanitize, extension_promotion, frontmatter_add]
 - **Transforms**: Mermaid shortcode injection, sanitize developer noise; draw on README.md for framing context
 
 #### Cache Manifest
@@ -158,18 +165,21 @@ The index page is listed first but is NOT added to the navbar — it is the home
 #### README
 - **Protocol**: Technical Bridge
 - **Source**: ./README.md
+- **source_sha256**: [optional hash snapshot of Source at contract time]
+- **allowed_transforms**: [link_rewrite, shortcode_injection, sanitize, extension_promotion, frontmatter_add]
 - **Transforms**: Rewrite internal links for site context, inject mermaid shortcode, co-locate images
 
 #### Site Map
 - **Protocol**: Narrative Bridge
-- **Intent**: Help visitors navigate the site and understand what each section contains. Must include a **Content Types** table (defining VERBATIM, COMPOSED, GENERATED, REDIRECT) and a **Navigation Structure** ASCII tree annotating every page with its content type and source provenance.
+- **Intent**: Help visitors navigate the site and understand what each section contains. Must include a **Output Types** table (defining VERBATIM, COMPOSED, ADAPTED, REDIRECT) and a **Navigation Structure** ASCII tree annotating every page with its output type and source provenance.
 - **Goal**: Site map — an oriented index of all pages
 - **Spirit**: Concise, functional
 - **Inputs**: Contract navigation structure (this file)
 
 #### Publisher Notes
 - **Protocol**: Direct Line (VERBATIM)
-- **Source**: ./.github/publishing-orchestra-3.md
+- **Source**: ./.github/publishing-orchestra.md
+- **source_sha256**: [optional hash snapshot of Source at contract time]
 
 ### Story  <!-- optional: include if human describes a presentation or talk -->
 
@@ -207,7 +217,7 @@ journal
 ## Field Reference
 
 | Field | Required | Producer | Description |
-|-------|----------|----------|-------------|
+| ------- | ---------- | ---------- | ------------- |
 | Website Name | Yes | Interviewer | Display title for the site |
 | Purpose | Yes | Interviewer + Human | Goal and audience |
 | Navigation | Yes | Interviewer + Human | Sections with pages, each assigned a protocol |
@@ -218,24 +228,40 @@ journal
 
 ---
 
+## Required Companion Artifacts
+
+The contract governs content assembly. The following run artifacts are mandatory in v4 governance:
+
+- `_frontend-N/TRANSFORM_LOG.md` — required whenever at least one Technical Bridge (ADAPTED) page exists
+- `_frontend-N/FIDELITY_REPORT.md` — required for every Writer run, with protocol validation outcomes
+- `_frontend-N/scripts/audit-fidelity.R` — required for every Writer run (bootstrap from `.github/templates/audit-fidelity-template.R` when missing)
+
+---
+
 ## Protocol Reference
+
+Designated source note: Protocol, Mode, and Output Type canonical definitions and mapping are maintained in `.github/instructions/publishing-rules.instructions.md` (Section "Taxonomy and Mapping Registry"). This section documents contract fields that reference those concepts.
 
 Each page must be assigned exactly one protocol. However, the same **raw file** can serve as source material for multiple edited pages, each under a different protocol.
 
 ### Direct Line (VERBATIM)
 
 - **Source**: Required. Path to the repo `.md` or `.qmd` file.
+- **source_sha256**: Optional but recommended. If supplied, Writer verifies source hash matches or re-assembles page.
 - The Writer morphs the source to `.qmd`: prepends YAML frontmatter (`title:` derived from first `#` heading), preserves all body content exactly. No editorial changes.
 - Renders to `.html` via standard Quarto processing.
 
 ### Direct Line (REDIRECTED)
 
 - **Source**: Required. Path to the `.html` file.
+- **source_sha256**: Optional but recommended for the target source file.
 - Displayed via redirect stub. Post-render hook copies HTML to `_site/`.
 
 ### Technical Bridge
 
 - **Source**: Required. Path to the repo file.
+- **source_sha256**: Optional but recommended. If supplied, Writer verifies source hash matches or re-assembles page.
+- **allowed_transforms**: Optional but recommended. If supplied, Writer must reject transforms not listed.
 - **Transforms**: Required. List of modifications to apply (link rewriting, shortcode injection, sanitization, etc.).
 
 ### Narrative Bridge

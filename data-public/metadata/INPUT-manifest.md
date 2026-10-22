@@ -1,152 +1,120 @@
-# INPUT Manifest
+# CCHS Pipeline — INPUT Manifest
 
-Describes the raw input datasets consumed by the data pipeline **before** Ferry/Ellis processing.  
-Updated: 2026-03-20
+This document describes the raw input data for the CCHS absenteeism pipeline.
+It covers two SPSS PUMF files received from Statistics Canada and serves as
+the reference for `1-ferry.R` (transport) and `0-extract-metadata.R` (labelling).
 
----
+## Raw Input Summary
 
-## Summary
+| Field | CCHS 2010-2011 | CCHS 2013-2014 |
+|-------|----------------|----------------|
+| File name | `CCHS2010_LOP.sav` | `CCHS_2014_EN_PUMF.sav` |
+| Format | SPSS `.sav` (labelled) | SPSS `.sav` (labelled) |
+| Received date | 2026-02-19 | 2026-02-19 |
+| Path (config key) | `raw_data.cchs_2010` | `raw_data.cchs_2014` |
+| Survey cycle | Annual component 2010-2011 | Annual component 2013-2014 |
+| Source | Statistics Canada DLI / PUMF | Statistics Canada DLI / PUMF |
+| Respondents (raw) | ~62,909 | ~63,522 |
+| Variables | ~600+ | ~600+ |
 
-| File | Cycle | Rows (approx.) | Columns (approx.) | Received |
-|------|-------|---------------:|------------------:|----------|
-| `CCHS2010_LOP.sav` | 2010–2011 | 62,909 | 1,500+ | 2026-02-19 |
-| `CCHS_2014_EN_PUMF.sav` | 2013–2014 | 63,522 | 1,500+ | 2026-02-19 |
+## Companion Documentation
 
----
+PDF documentation files (converted to `.txt` by `manipulation/0-extract-dictionary/0-extract-dictionary.py`):
 
-## Source File Details
+| File | Derived text |
+|------|-------------|
+| `CCHS_2010_DataDictionary_Freqs-ver2.pdf` | `CCHS_2010_DataDictionary_Freqs-ver2.txt` |
+| `CCHS_2014_DataDictionary_Freqs.pdf` | `CCHS_2014_DataDictionary_Freqs.txt` |
+| `CCHS_2010_Record_Layout.pdf` | `CCHS_2010_Record_Layout.txt` |
+| `CCHS_2014_Record_Layout.pdf` | `CCHS_2014_Record_Layout.txt` |
+| `CCHS_2010_Derived_Variables.pdf` | `CCHS_2010_Derived_Variables.txt` |
+| `CCHS_2014_Derived_Variables.pdf` | `CCHS_2014_Derived_Variables.txt` |
 
-### File 1 — CCHS 2010–2011
+Extracted CSVs produced by `0-extract-metadata.R` and written to `data-private/derived/`:
 
-| Attribute | Value |
-|-----------|-------|
-| **Filename** | `CCHS2010_LOP.sav` |
-| **Survey cycle** | 2010–2011 Combined |
-| **Survey name** | Canadian Community Health Survey (CCHS) |
-| **Administrator** | Statistics Canada |
-| **Data type** | SPSS system file (.sav) with value/variable labels |
-| **Location** | `./data-private/raw/2026-02-19/CCHS2010_LOP.sav` |
-| **Approximate rows** | 62,909 |
-| **Approximate columns** | 1,500+ |
-| **Received date** | 2026-02-19 |
-| **Access type** | PUMF (Public Use Microdata File) |
-| **LOP module** | Yes — includes "Length of Physical Disability" (LOP) variables (`LOPG*`) |
+- `codebook-variable-labels.csv` — variable name + label for both cycles
+- `codebook-value-labels.csv` — value codes + labels for all labelled variables
+- `codebook-cycle-comparison.csv` — variable-by-variable cross-cycle presence check
+- `codebook-research-vars-check.csv` — spot-check of all research variables
 
-### File 2 — CCHS 2013–2014
+## Modules Required
 
-| Attribute | Value |
-|-----------|-------|
-| **Filename** | `CCHS_2014_EN_PUMF.sav` |
-| **Survey cycle** | 2013–2014 Combined |
-| **Survey name** | Canadian Community Health Survey (CCHS) |
-| **Administrator** | Statistics Canada |
-| **Data type** | SPSS system file (.sav) with value/variable labels |
-| **Location** | `./data-private/raw/2026-02-19/CCHS_2014_EN_PUMF.sav` |
-| **Approximate rows** | 63,522 |
-| **Approximate columns** | 1,500+ |
-| **Received date** | 2026-02-19 |
-| **Access type** | PUMF (Public Use Microdata File) |
-| **LOP module** | Yes — includes `LOPG*` absenteeism variables |
+Both cycles include the following modules essential to this study:
 
----
+| Module | Prefix | Purpose |
+|--------|--------|---------|
+| Loss of Productivity (LOP) | `LOP_`, `LOPG` | Outcome: days absent from work |
+| Chronic Conditions (CCC) | `CCC_` | Primary exposure: 19 chronic conditions |
+| General Health (GEN) | `GEN_` | Self-perceived health (needs domain) |
+| Demographics (DHH) | `DHH`, `DHHG` | Age, sex, household, home ownership (predisposing) |
+| Sociodemographics (SDC) | `SDCG` | Immigration, ethnicity (predisposing) |
+| Income (INC) | `INCG` | Household income (facilitating) |
+| Education (EDU) | `EDUD` | Education level (predisposing) |
+| Health behaviours | `HWT`, `ALC`, `SMKG`, `PACD`, `FVCG` | BMI, alcohol, smoking, activity, diet |
+| Activities of Daily Living (ADL) | `ADL_` | Functional limitations (needs domain) |
+| Health Care Utilization (HCU) | `HCU_` | Regular medical doctor (facilitating) |
+| Labour Force (LBS) | `LBSD` | Full/part-time status (facilitating) |
+| Survey design | `WTS_M`, `ADM_PRX` | Master weight, proxy indicator |
 
-## Variable Coverage
+LOP module inclusion is confirmed via the flag variable `DOLOP` (both cycles).
 
-The Ferry lane (`1-ferry.R`) imports **all columns** from both files with zero semantic transformation.
+## Known Cross-Cycle Variable Name Differences
 
-The Ellis lane (`2-ellis.R`) applies a **white-list** selecting only variables relevant to the
-work-absenteeism analysis. White-listed variables fall into two tiers:
+The following variables require alias resolution in `2-ellis.R`:
 
-Current Lane 2 sample mode:
-- Default: **exclusion criteria applied** (`apply_sample_exclusions = TRUE`) — ~63,843 respondents
-- Optional full-pooled mode: exclusions disabled (`apply_sample_exclusions = FALSE`) — 126,431 respondents
+| Construct | CCHS 2010 name | CCHS 2014 name | Harmonized name |
+|-----------|----------------|----------------|-----------------|
+| Has regular family doctor | `ACC_50A` | `HCU_1AA` | `hcu_1aa_h` |
+| Country of birth (grouped) | `SDCGCBG` | `SDCGCB13` | `sdcgcbg_h` |
 
-### Tier 1: CONFIRMED (error if missing)
-Variables verified against the PDF data dictionaries and the study's
-`required-variables-and-sample.md` specification.
+All other white-listed research variables use identical names in both cycles
+(confirmed by `0-extract-metadata.R` spot-check).
 
-| CCHS Variable | Description | Source Module |
-|---------------|-------------|---------------|
-| `LOPG040` | Days absent — own chronic condition (primary outcome; also sensitivity outcome) | LOP |
-| `LOPG070` | Days absent — injury | LOP |
-| `LOPG082` | Days absent — cold | LOP |
-| `LOPG083` | Days absent — flu / influenza | LOP |
-| `LOPG084` | Days absent — stomach flu (gastroenteritis) | LOP |
-| `LOPG085` | Days absent — respiratory infection | LOP |
-| `LOPG086` | Days absent — other infectious disease | LOP |
-| `LOPG100` | Days absent — other physical / mental health reason | LOP |
-| `LOP_015`  | Currently employed in past 3 months (1=Yes; inclusion criterion) | LOP |
-| `DHHGAGE`  | Age group (coded 1–16; inclusion: codes 2–15, approx. age 15–75) | DHH |
-| `ADM_PRX`  | Proxy respondent flag (1=Proxy; exclusion criterion) | ADM |
-| `GEODPMF`  | Health region / strata identifier | GEO |
-| `WTS_M`    | Survey weight (master weight; labelled WGHT_FINAL in stat instructions) | WTS |
+## Known Cross-Cycle Encoding Differences (Identical Names)
 
-### Tier 2: INFERRED (warning if missing — graceful drop)
-Variables inferred from standard CCHS PUMF naming conventions.  
-**Verify exact names against the data dictionary PDFs** if any are missing after running `2-ellis.R`.
+Some variables share a name across cycles but differ in label text or in how
+not-stated responses are stored. These need no alias resolution, but they do
+constrain how `2-ellis.R` may recode them.
 
-- **CCC module (19 vars):** `CCC_031` (asthma), `CCC_041` (fibromyalgia), `CCC_051` (arthritis),
-  `CCC_061` (back problems), `CCC_071` (hypertension), `CCC_081` (migraine), `CCC_091` (COPD),
-  `CCC_101` (diabetes), `CCC_121` (heart disease), `CCC_131` (cancer), `CCC_141` (ulcer),
-  `CCC_151` (stroke), `CCC_171` (bowel disorder), `CCC_251` (chronic fatigue),
-  `CCC_261` (chemical sensitivities), `CCC_280` (mood disorder), `CCC_290` (anxiety disorder),
-  `CCC_300` (other mental illness), `CCC_185` (digestive disease)
-- **Predisposing (11 vars):** `DHH_SEX`, `DHHGMS`, `DHHDGHSZ`, `EDUDH04`, `SDCFIMM`,
-  `SDCDGCB`, `DHHGLVG`, `DHHGLE5`, `DHHG611`, `DHHDFC12P`, `SDCDGSTUD`
-- **Facilitating (12 vars):** `INCDGHH`, `GEODGPRV`, `HCU_1AA`, `LBFDGHP`, `LBFDGFT`, `FVCDGTOT`,
-  `ALCDTTM`, `SMKDSTY`, `HWTGISW`, `PACDPAI`, `GEN_07`, `LBSGSOC`
-- **Needs (5 vars):** `GEN_01`, `GEN_02A`, `GEN_02`, `RAC_1`, `INJ_01`
-- **ID (1 var):** `ADM_RNO`
-- **Bootstrap weights (500 vars):** `BSW001`–`BSW500` (pattern `^BSW`)
+| Variable | 2010-2011 | 2013-2014 | Consequence for Ellis |
+|----------|-----------|-----------|-----------------------|
+| `DHH_OWN` | Label "Dwelling - owned by a member of hhld"; `1 = YES`, `2 = NO`; not-stated is **SPSS system missing** (1,475 rows) | Label "Owned, Rented"; `1 = OWNER`, `2 = RENTED`; not-stated is **explicit codes 7 / 8 / 9** (1,809 rows) | Integer coding is identical, so no alias is needed. The recode must map only `1` and `2` and send everything else to `NA`, so that both missingness representations are caught. |
 
----
+> **Verified 2026-08-01** by `scripts/qc-home-ownership.R`. `DHH_OWN` is present
+> in both PUMF files, covers 99.74% of the final analytic table, and shows no
+> optional-content aliasing (every province × cycle cell exceeds 99.3%). It
+> satisfies the Project Proposal §2.2 "homeownership" requirement, which earlier
+> documentation incorrectly reported as unavailable in the PUMF.
 
-## Known Limitations
+## Cross-Variable Dependencies
 
-- **Variable name differences between cycles**: Some CCHS variables change names slightly
-  between cycles. The Ellis lane includes a harmonization step; any harmonization decisions
-  are documented in `manipulation/2-ellis.R` under `# ---- SECTION 1 / harmonize`.
-- **DHHGAGE coding**: Age codes 1–16+ vary by cycle. The Ellis exclusion filter uses
-  `dhhgage %in% 2:15` (approximately age 15–75). Verify these codes against the PDF
-  data dictionaries for each cycle.
-- **Missing value codes**: Special NA codes (6, 7, 8, 9, 96, 97, 98, 99) are recoded to `NA`
-  throughout by the Ellis lane. Original SPSS codes are stripped during Ferry import.
-- **LOP module availability**: Not all provinces include the LOP module in both cycles.
-  Check `GEODPMF` × `cycle` cross-tabulation for potential geographic exclusions.
+`immigration_status` in `2-ellis.R` requires **both** `SDCFIMM` and `SDCGRES`:
 
----
+| Variable | Codes used | Role |
+|----------|------------|------|
+| `SDCFIMM` (Immigrant flag) | 1=YES, 2=NO | Identifies non-immigrants (SDCGRES=6 is stored as SPSS system missing → NA after Ferry) |
+| `SDCGRES` (Length in Canada) | 1=0-9 yrs, 2=10+ yrs | Distinguishes recent from long-term among immigrants |
 
-## Pipeline Traceability
+Both variables are in the `vars_inferred` (Tier 2) white-list in `2-ellis.R`.
 
-```
-CCHS2010_LOP.sav          ──┐
-                             ├──► 1-ferry.R ──► cchs-1.sqlite (cchs_2010_raw, cchs_2014_raw)
-CCHS_2014_EN_PUMF.sav     ──┘              └──► cchs-1-raw/*.parquet (backup)
-                                                      │
-                                                      ▼
-                                             2-ellis.R (white-list + recode)
-                                                      │
-                                            ┌─────────┴────────────┐
-                                            ▼                       ▼
-                                   cchs-2.sqlite             cchs-2-tables/
-                                  (cchs_analytical,          cchs_analytical.parquet
-                                   sample_flow)              sample_flow.parquet
-                                                      │
-                                                      ▼
-                                             3-ellis.R (clarity + splits)
-                                                      │
-                                            ┌─────────┴────────────┐
-                                            ▼                       ▼
-                                   cchs-3.sqlite             cchs-3-tables/
-                                  (cchs_analytical,          cchs_analytical.parquet
-                                   cchs_employed,            cchs_employed.parquet
-                                   cchs_unemployed,          cchs_unemployed.parquet
-                                   sample_flow,              sample_flow.parquet
-                                   data_dictionary)          data_dictionary.parquet
-```
+## Survey Design Notes
 
----
+- **Weights**: Master weight `WTS_M` is available in both PUMF files.
+- **Bootstrap weights**: Not available in the PUMF files for these cycles
+  (bootstrap weights for CCHS begin with the 2015 cycle). Variance estimation
+  must use master weight only; complex survey design variables (strata, PSUs)
+  are also not released in PUMF.
+- **Pooling adjustment**: When combining two annual cycles, each respondent's
+  master weight is divided by 2 per Statistics Canada guidance
+  (`wts_m_pooled = wts_m / 2` in `2-ellis.R`).
+- **Proxy interviews**: `ADM_PRX = 1` indicates a proxy respondent and must be
+  excluded from the analytic sample.
 
-*This manifest is updated manually when new raw data files are received.*
+## Analytic Scope
 
-
+- **Population**: Canadian residents aged 15-75 who reported paid employment
+  in the 3 months preceding the survey (LOP module respondents).
+- **Initial exploration n**: 64,141 (unweighted), pooled from both cycles.
+- **Study reference**: Blanchette M.-A., Koval O., Koval A. (2026)
+  "Predictors of Work Absenteeism Associated with Chronic Conditions Among
+  Canadian Workers."

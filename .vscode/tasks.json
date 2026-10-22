@@ -172,6 +172,16 @@
       "problemMatcher": []
     },
     {
+      "label": "Run Extract Metadata (Lane 0)",
+      "detail": "Harvest SPSS variable/value labels → codebook CSVs (manipulation/0-extract-metadata.R)",
+      "type": "shell",
+      "command": "Rscript",
+      "args": ["manipulation/0-extract-metadata.R"],
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
       "label": "Run Ferry Lane 1",
       "detail": "Import CCHS .sav files → cchs-1.sqlite (manipulation/1-ferry.R)",
       "type": "shell",
@@ -187,6 +197,16 @@
       "type": "shell",
       "command": "Rscript",
       "args": ["manipulation/2-ellis.R"],
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Test Ellis Cache (Lane 3)",
+      "detail": "Three-way alignment test: code ↔ disk ↔ CACHE-manifest (manipulation/3-test-ellis-cache.R)",
+      "type": "shell",
+      "command": "Rscript",
+      "args": ["manipulation/3-test-ellis-cache.R"],
       "group": "build",
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
       "problemMatcher": []
@@ -212,12 +232,60 @@
       "problemMatcher": []
     },
     {
-      "label": "Run EDA-5 Pipeline",
-      "detail": "Run eda-5.R then render eda-5.qmd",
+      "label": "Run Model-3 Script",
+      "detail": "Run analysis/model-3/model-3.R (sex-stratified models, Sections 5.9 and 5.10)",
       "type": "shell",
-      "command": "Rscript analysis/eda-5/eda-5.R ; quarto render analysis/eda-5/eda-5.qmd",
+      "command": "Rscript",
+      "args": [
+        "analysis/model-3/model-3.R"
+      ],
       "group": "build",
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Render Model-3 QMD",
+      "detail": "Render analysis/model-3/model-3.qmd to HTML",
+      "type": "shell",
+      "command": "quarto",
+      "args": [
+        "render",
+        "analysis/model-3/model-3.qmd"
+      ],
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Render Frontend-1 Site",
+      "detail": "Render the _frontend-1 Quarto website into _frontend-1/_site",
+      "type": "shell",
+      "command": "quarto",
+      "args": [
+        "render"
+      ],
+      "options": { "cwd": "${workspaceFolder}/_frontend-1" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+
+    // ── Diagram rendering ─────────────────────────────────────────────────────
+    {
+      "label": "Render Pipeline Diagram",
+      "detail": "Extract <!-- PIPELINE-DIAGRAM-SOURCE --> mermaid block from manipulation/pipeline.md, render to libs/images/pipeline-architecture.jpg, then report insertion sites",
+      "type": "shell",
+      "command": "Rscript",
+      "args": [
+        "utility/render-pipeline-diagram.R"
+      ],
+      "isBackground": false,
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
       "problemMatcher": []
     },
 

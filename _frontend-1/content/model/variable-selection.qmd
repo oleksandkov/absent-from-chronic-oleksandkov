@@ -1,0 +1,9 @@
+---
+title: "Variable Selection with Lasso (model-1)"
+format:
+  html:
+    page-layout: full
+    toc: false
+---
+
+<meta http-equiv="refresh" content="0; url=model-1.html">

@@ -135,62 +135,73 @@ if( interactive() ) {
 ds_rail  <- tibble::tribble(
   ~fx         , ~path,
 
-  # ===============================
-  # PHASE 0: METADATA EXTRACTION
-  # ===============================
-  # Reads raw SAV files (labels preserved) and writes the authoritative codebook
-  # to data-public/derived/cchs-metadata/.  Run once; re-run if SAV files change.
-  # Outputs are the source-of-truth for variable/value code decisions in Ellis.
+  # ---- CCHS Absenteeism Pipeline -------------------------------------------
+  # "run_r_soft", "manipulation/0-extract-metadata.R",    # Lane 0: extract SPSS codebook CSVs
+  # "run_r"     , "manipulation/1-ferry.R",               # Lane 1: transport .sav → cchs-1.sqlite
+  # "run_r"     , "manipulation/2-ellis.R",               # Lane 2: recode, validate → cchs-2.sqlite
+  # "run_r_soft", "manipulation/3-test-ellis-cache.R",    # Lane 3: three-way alignment test
 
-  "run_r"     , "manipulation/extract-metadata.R",     # Codebook: SAV metadata → cchs_variable_labels.csv + cchs_value_labels.csv
+  # ---- Data Primer (uncomment when ready to render) ------------------------
+  # "run_r_soft", "analysis/data-primer-1/univariate-distributions.R",   # data primer: compute distributions (composed, not yet active)
+  "run_qmd",    "analysis/data-primer-1/univariate-distributions.qmd",  # data primer: univariate distributions (composed, not yet active)
+  "run_qmd",    "analysis/data-primer-1/variable-inclusion.qmd",        # data primer: variable traceability (composed, not yet active)
 
-  # ===============================
-  # PHASE 1: DATA MANIPULATION
-  # ===============================
-
-  "run_r"     , "manipulation/1-ferry.R",              # Ferry: CCHS .sav files → cchs-1.sqlite (zero transformation)
-  "run_r"     , "manipulation/2-ellis.R",              # Ellis Lane 2: white-list + recode → cchs-2.sqlite + Parquet
-  # "run_r"     , "manipulation/3-ellis.R",              # Ellis Lane 3: clarity layer + splits → cchs-3.sqlite + Parquet
- # "run_r_soft", "manipulation/2-test-ellis-cache.R",   # Ellis validation (non-blocking in flow)
-  # "run_r_soft", "manipulation/example/ellis-lane-example.R",   # Ellis pattern example (non-blocking in flow)
-  
-  # ===============================
-  # PHASE 2: ANALYSIS SCRIPTS
-  # ===============================
-  
+  # ---- Analysis (uncomment as EDAs are developed) --------------------------
   # Core analysis scripts that depend on the manipulated data
   #"run_r_soft", "analysis/eda-1/eda-1.R",              # EDA-1 script (non-blocking)
   #"run_r_soft", "analysis/eda-2/eda-2.R",              # EDA-2 script (non-blocking)
   #"run_r"     , "analysis/Data-visualization/Data-visual.R",  # Data visualization script
   # "run_r"     , "analysis/report-example-2/1-scribe.R", # Scribe script for analysis-ready data
   
-  # ===============================
-  # PHASE 3: REPORTS & DOCUMENTATION
-  # ===============================
-  
   # Primary analysis reports (Quarto format) - WITH IMPROVED ERROR HANDLING
   #"run_qmd_soft", "analysis/eda-1/eda-1.qmd",          # EDA-1 report (non-blocking)
- #"run_qmd_soft", "analysis/eda-2/eda-2.qmd",          # EDA-2 report (non-blocking)
+  #"run_qmd_soft", "analysis/eda-2/eda-2.qmd",          # EDA-2 report (non-blocking)
   #"run_qmd"   , "analysis/Data-visualization/Data-visual.qmd", # Data visualization report
   # "run_qmd"   , "analysis/report-example-2/eda-1.qmd", # Analysis report example
   
-  # Documentation and template examples
-  # "run_qmd"   , "analysis/analysis-templatization/README.qmd" # Analysis documentation template
-  
-  # ===============================
-  # PHASE 4: ADVANCED REPORTS (OPTIONAL)
-  # ===============================  
-  # Commented out by default - uncomment as needed
-  
-  # "run_qmd"   , "analysis/report-example-3/eda-1.qmd",        # Additional EDA report
-  # "run_qmd"   , "analysis/report-example/annotation-layer-quarto.qmd", # Annotation layer example
-  # "run_qmd"   , "analysis/report-example/combined-in-quarto.qmd",      # Combined report example  
-  # "run_qmd"   , "analysis/report-example/combined-in-quarto-alt.qmd"   # Alternative combined report
   # "run_r_soft"  , "analysis/eda-1/eda-1.R",
   # "run_qmd_soft", "analysis/eda-1/eda-1.qmd",
-  
-  
 
+  # "run_r"     , "analysis/eda-5/eda-5.R",          # EDA-5: LOP component decomposition §4.1 + §4.2 (composed, not yet active)
+
+  # ---- EDA-7: Gender Differences in Illness-Related Absence -----------------
+  # "run_r"     , "analysis/eda-7/eda-7.R",        # EDA-7: Gender × chronic condition × days absent (composed, not yet active)
+  # "run_qmd"   , "analysis/eda-7/eda-7.qmd",      # EDA-7: Gender absence report (1990s Excel aesthetics)
+
+  # ---- Series 6: Andersen Model Variable Profiles ----------------------------
+  # "run_r"     , "analysis/eda-61/eda-61.R",        # EDA-61: Exposure — 17 chronic condition flags (composed, not yet active)
+  "run_qmd"   , "analysis/eda-61/eda-61.qmd",      # EDA-61: Exposure report
+  # "run_r"     , "analysis/eda-62/eda-62.R",        # EDA-62: Predisposing — socio-demographics (composed, not yet active)
+  # "run_qmd"   , "analysis/eda-62/eda-62.qmd",      # EDA-62: Predisposing report
+  # "run_r"     , "analysis/eda-63/eda-63.R",        # EDA-63: Facilitating — access & behaviours (composed, not yet active)
+  # "run_qmd"   , "analysis/eda-63/eda-63.qmd",      # EDA-63: Facilitating report
+  # "run_r"     , "analysis/eda-64/eda-64.R",        # EDA-64: Needs — health status & ADL (composed, not yet active)
+  # "run_qmd"   , "analysis/eda-64/eda-64.qmd",      # EDA-64: Needs report
+  "run_qmd"   , "analysis/eda-5/eda-5.qmd",        # EDA-5: LOP component decomposition §4.1 + §4.2 (composed, not yet active)
+
+  # ---- Series 7: Outcome Profile ---------------------------------------------
+  # "run_qmd"   , "analysis/eda-71/eda-71.qmd",     # EDA-71: LOP outcome profile — distribution structure for modeling context (composed, not yet active)
+  # "run_qmd"   , "analysis/eda-72/eda-72.qmd",     # EDA-72: Predisposition profiles across chronic-absence groups (composed, not yet active)
+
+  # ---- Series 8: Model Interpretation ----------------------------------------
+  # Reads artifacts persisted by model-00 and model-1; must run AFTER both.
+  # "run_r"     , "analysis/eda-81/eda-81.R",       # EDA-81: penalty rules and the selection-vs-estimate alignment (composed, not yet active)
+  # "run_qmd"   , "analysis/eda-81/eda-81.qmd",     # EDA-81: Reading the four models (composed, not yet active)
+
+  # ---- Model 2: Condition-Specific Models (Sections 5.7 and 5.8) --------------
+  # Self-contained: reads the Ellis parquet directly, does not depend on model-1.
+  # "run_r"     , "analysis/model-2/model-2.R",     # Model-2: 17 condition-specific NB models (composed, not yet active)
+  # "run_qmd"   , "analysis/model-2/model-2.qmd",   # Model-2: deliverable Table 4 + Section 5.8 performance
+
+  # ---- Model 3: Sex-Stratified Models (Sections 5.9 and 5.10) ----------------
+  # Self-contained: reads the Ellis parquet directly, does not depend on model-1.
+  # "run_r"     , "analysis/model-3/model-3.R",     # Model-3: 8 sex-stratified NB models + union model (composed, not yet active)
+  # "run_qmd"   , "analysis/model-3/model-3.qmd",   # Model-3: deliverable Table 5 + Section 5.10 performance
+
+  # ---- EDA-82: Model Synthesis (Story 2) -------------------------------------
+  # Reads artifacts persisted by model-1, model-2, and model-3; must run AFTER all three.
+  # "run_r"     , "analysis/eda-82/eda-82.R",       # EDA-82: synthesis across the three modelling frames (composed, not yet active)
+  # "run_qmd"   , "analysis/eda-82/eda-82.qmd",     # EDA-82: Story 2 — what the three frames together say (composed, not yet active)
 
 )
 
@@ -426,7 +437,7 @@ cat("\nOutput artefact checks:\n")
 .checks <- list(
   list(stage = "1-ferry",  label = "cchs-1.sqlite",            path = "data-private/derived/cchs-1.sqlite"),
   list(stage = "2-ellis",  label = "cchs-2.sqlite",            path = "data-private/derived/cchs-2.sqlite"),
-  list(stage = "2-ellis",  label = "cchs_analytical.parquet",  path = "data-private/derived/cchs-2-tables/cchs_analytical.parquet"),
+  list(stage = "2-ellis",  label = "cchs_analytic.parquet",    path = "data-private/derived/cchs-2-tables/cchs_analytic.parquet"),
   list(stage = "2-ellis",  label = "sample_flow.parquet",      path = "data-private/derived/cchs-2-tables/sample_flow.parquet")
 )
 for (.chk in .checks) {

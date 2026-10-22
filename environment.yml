@@ -1,5 +1,5 @@
 # Conda Environment for Cross-Language Reproducibility
-# Alternative to renv for users who need R + Python + system dependencies
+# For users who need R + Python + system dependencies
 name: quick-start-template
 channels:
   - conda-forge

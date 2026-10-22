@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "powershell -NoProfile -File .github/hooks/scripts/check-ellis-validation.ps1",
+        "timeout": 5
+      }
+    ]
+  }
+}

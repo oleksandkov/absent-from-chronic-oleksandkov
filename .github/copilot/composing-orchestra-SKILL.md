@@ -55,7 +55,7 @@ Composing creates raw analytical content; Publishing curates it for a website. T
 
 ## Key References
 
-- Design document: `.github/composing-orchestra-1.md`
+- Design document: `.github/composing-orchestra.md`
 - Agent definition: `.github/agents/report-composer.agent.md`
 - Instructions: `.github/instructions/report-composition.instructions.md`
 - Bootstrap prompt: `.github/prompts/composing-new.prompt.md`

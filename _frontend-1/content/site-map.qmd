@@ -1,0 +1,112 @@
+---
+title: "Site Map"
+---
+
+This page indexes all site content, identifies how each page was produced, and maps
+each page to the relevant sections of the Project Proposal
+(*"Predictors of Work Absenteeism Associated with Chronic Conditions Among Canadian Workers"*).
+
+---
+
+## Navigation Structure
+
+```
+Absent from Chronic
+│
+🏠  Index                                    COMPOSED  ← README.md, CACHE-manifest.md, ai/project/mission.md
+│   (home page — reached via the navbar title, not a navbar entry)
+│
+├── Data Primer
+│   ├── Variable Inclusion                   VERBATIM  ← analysis/data-primer-1/variable-inclusion.qmd
+│   │                                                     (strip embed-resources and theme from YAML)
+│   └── Univariate Distributions             REDIRECT  → analysis/data-primer-1/univariate-distributions.html
+│       (data-primer-1)
+│
+├── Predictors
+│   ├── Exposure: Chronic Conditions         REDIRECT  → analysis/eda-61/eda-61.html
+│   │   (eda-61)
+│   ├── Predisposing: Socio-demographic      REDIRECT  → analysis/eda-62/eda-62.html
+│   │   (eda-62)
+│   ├── Facilitating: Health System          REDIRECT  → analysis/eda-63/eda-63.html
+│   │   (eda-63)
+│   ├── Needs: Perceived Health              REDIRECT  → analysis/eda-64/eda-64.html
+│   │   (eda-64)
+│   └── Missingness                          REDIRECT  → analysis/eda-65/eda-65.html
+│       (eda-65)
+│
+├── Outcome
+│   ├── Outcome: LOP Day Decomposition       REDIRECT  → analysis/eda-5/eda-5.html
+│   │   (eda-5)
+│   ├── Outcome: Distribution Shapes         REDIRECT  → analysis/eda-71/eda-71.html
+│   │   (eda-71)
+│   └── Outcome: Rescaling                   REDIRECT  → analysis/eda-72/eda-72.html
+│       (eda-72)
+│
+├── Model
+│   ├── Bivariate Models                     REDIRECT  → analysis/model-00/model-00.html
+│   │   (model-00)
+│   ├── Lasso Rehearsal with Predisposing    REDIRECT  → analysis/model-0/model-0.html
+│   │   (model-0)
+│   ├── Variable Selection with Lasso         REDIRECT  → analysis/model-1/model-1.html
+│   │   (model-1)
+│   ├── Condition-Specific Models             REDIRECT  → analysis/model-2/model-2.html
+│   │   (model-2)
+│   └── Sex-Stratified Models                 REDIRECT  → analysis/model-3/model-3.html
+│       (model-3)
+│
+├── Analysis
+│   └── Story 1                              REDIRECT  → analysis/eda-81/eda-81.html
+│       (eda-81)
+│
+├── Pipeline
+│   ├── Pipeline Guide                       ADAPTED   ← manipulation/pipeline.md
+│   │                                                     (shortcode injection, sanitize, strip PowerShell)
+│   ├── CACHE Manifest                       VERBATIM  ← data-public/metadata/CACHE-manifest.md
+│   └── INPUT Manifest                       VERBATIM  ← data-public/metadata/INPUT-manifest.md
+│
+└── Docs
+    ├── Site Map                             COMPOSED  ← publishing-contract.prompt.md,
+    │                                                     stats_instructions_v3.md
+    ├── Project Proposal                     ADAPTED   ← stats_instructions_v3.md
+    │                                                     (sanitize: strip data-private refs)
+    └── Minding the Agents                   REDIRECT  → analysis/talks/minding-the-agents/slides.html
+        (talk slides)
+```
+
+---
+
+## Content Type
+
+| Output Type | Produced by Protocol | Meaning and Notes |
+|-------------|---------------------|-------------------|
+| **VERBATIM** | Direct Line (VERBATIM) | Source `.md` or `.qmd` morphed to `.qmd` with YAML frontmatter adjusted; body content preserved exactly. One permitted change: stripping site-incompatible YAML fields (e.g., `embed-resources`, standalone `theme`). |
+| **REDIRECT** | Direct Line (REDIRECTED) | Transit `.qmd` stub that forwards the browser via `<meta http-equiv="refresh">` to a standalone rendered HTML report. The HTML is copied into `_site/` by the post-render hook `scripts/copy-analysis-html.R`. |
+| **ADAPTED** | Technical Bridge | Source `.md`/`.qmd` transformed with non-editorial operations: mermaid shortcode injection, section exclusions, sanitization of developer-centric content (PowerShell blocks, internal file paths). All transforms documented in `TRANSFORM_LOG.md`. |
+| **COMPOSED** | Narrative Bridge | Authored by the Publishing Writer; synthesized from one or more raw source files per the contract brief. Every factual claim traces to a named source file. |
+
+---
+
+## Proposal Coverage
+
+| Page | Proposal Section(s) | Coverage Status |
+|------|---------------------|----------------|
+| [Project Proposal](docs/project-proposal.html) | §1–§6 (all) | Full text of the statistical analysis instructions as submitted by the PI. Contains all requirements, inclusion/exclusion criteria, variable specifications, analytic plan, and deliverables. |
+| [Pipeline Guide](pipeline/pipeline-guide.html) | §3.2 (pooling), §4.1 (outcome construction) | Documents the Ferry → Ellis → Test pipeline that harmonises variable names across cycles (§3.2), constructs `days_absent_total` and `days_absent_chronic` (§4.1), and applies all exclusion criteria (§3.1). |
+| [CACHE Manifest](pipeline/cache-manifest.html) | §2.2 (required variables), §3.1 (sample), §4.1–4.2 (outcome) | Authoritative record of the 63,843-row, 70-column analytic dataset. Confirms sample exclusion steps, outcome variable statistics (mean = 1.35, zero% = 70.5%), and all 17 chronic condition indicators available from the PUMF. |
+| [INPUT Manifest](pipeline/input-manifest.html) | §2.1 (database), §2.2 (survey modules) | Describes both raw CCHS SPSS files (2010-2011 and 2013-2014 cycles), confirms all required survey modules are present (LOP, CCC, GEN, DHH, SDC, INC, EDU, health behaviours, ADL, HCU, LBS), and documents known cross-cycle variable name differences. |
+| [Variable Inclusion](data-primer/variable-inclusion.html) | §2.2 (required variables), §3.1 (sample construction) | Maps every variable in §2.2 to its PUMF column name and Ellis implementation. Documents 17/19 chronic conditions available in PUMF (2 require RDC access), confirms all facilitating and needs variables present, and records the CONSORT-style sample exclusion flowchart (§3.1). |
+| [Univariate Distributions (data-primer-1)](data-primer/univariate-distributions.html) | §4.2 (distribution checks), §5.1 (missingness), §5.2 (descriptive statistics) | Shows empirical distributions for all 70 variables in the analytic dataset. Supports §4.2 outcome distribution checks, §5.1 missingness assessment, and §5.2 Table 1 preparation. |
+| [Exposure: Chronic Conditions (eda-61)](predictors/exposure.html) | §2.2 (primary exposure), §5.3 (Table 2), §5.7 (Table 4) | EDA-61: Profiles prevalence and co-occurrence of the 17 PUMF-available chronic conditions. Supports §5.3 bivariate analysis and §5.7 condition-specific model sample size assessment. |
+| [Predisposing: Socio-demographic (eda-62)](predictors/predisposing.html) | §2.2 (predisposing variables), §5.2 (Table 1), §5.3 (Table 2) | EDA-62: Profiles age, sex, marital status, education, immigration status, visible minority, home ownership, household size, and related predisposing variables. Directly supports §5.2 Table 1 and §5.3 Table 2 for the predisposing domain. |
+| [Facilitating: Health System & Behaviours (eda-63)](predictors/facilitating.html) | §2.2 (facilitating variables), §5.2 (Table 1), §5.3 (Table 2) | EDA-63: Profiles income, province, family doctor access, employment type, work schedule, occupation, and health behaviour variables. Directly supports §5.2 Table 1 and §5.3 Table 2 for the facilitating domain. |
+| [Needs: Perceived Health & Limitations (eda-64)](predictors/needs.html) | §2.2 (needs variables), §5.2 (Table 1), §5.3 (Table 2) | EDA-64: Profiles self-perceived general and mental health, health vs. prior year, functional limitations (ADL items), injury status, and work stress. Directly supports §5.2 Table 1 and §5.3 Table 2 for the needs domain. |
+| [Missingness (eda-65)](predictors/missingness.html) | §5.1 (missingness handling) | EDA-65: Documents the pattern and extent of missing data across all predictor variables. Supports §5.1 decisions on multiple imputation vs. missing-as-category treatment and informs the `flag_complete_predictors` coverage (59,309/63,843 rows fully complete). |
+| [Outcome: LOP Day Decomposition (eda-5)](outcome/day-decomposition.html) | §4.1–4.2 (outcome construction and checks), §5.2 (Table 1), §5.3 (Table 2 baseline) | EDA-5: Decomposes the LOP outcome by cause of absence, profiles zero inflation, and examines the chronic condition component separately. Addresses §4.2 distribution diagnostic requirements and establishes the outcome profile needed for Table 1 and Table 2. |
+| [Outcome: Distribution Shapes (eda-71)](outcome/distribution-shapes.html) | §4.2 (distribution checks), §5.4–5.5 (model selection) | EDA-71: Profiles the shape of the days-absent distribution across chronic vs. non-chronic subgroups using ECDF, density, and benchmark comparisons. Informs the choice of negative binomial vs. Poisson for §5.5 multivariable models. |
+| [Outcome: Rescaling (eda-72)](outcome/rescaling.html) | §4.2 (outcome checks), §5.3 (bivariate analysis), §5.4–5.5 (model preparation) | EDA-72: Compares predisposing-variable composition between respondents with No Days and Chronic Days, then profiles chronic-day intensity and exact distributions across predictor levels. Extends the EDA-71 outcome family and supports rescaling decisions for count-model specification. |
+| [Bivariate Models (model-00)](model/bivariate-models.html) | §5.3 (Table 2), §4.2 (outcome checks) | Model-00: Implements §5.3 as one model per predictor across seven reviewable steps — the bivariate protocol, the interval problem, two analytic bases, the Table 2 build, the cycle term, and a sensitivity pass. Explicitly names the one §5.3 requirement that cannot be met with PUMF data, and closes with a reproducibility ledger. |
+| [Lasso Rehearsal with Predisposing (model-0)](model/lasso-rehearsal.html) | §5.4 (variable selection via LASSO) | Model-0: A scoped rehearsal that tests the project's reading of §5.4 on the predisposing block alone before committing to the full candidate set. Fits the penalized path, examines what each penalty retains, hands selection to a negative binomial second stage, and asks whether survey weights disturb cross-validation. Records what is confirmed and which §5.4 decisions remain open. |
+| [Variable Selection with Lasso (model-1)](model/variable-selection.html) | §5.4 (variable selection via LASSO), §5.5 (primary multivariable models) | Model-1: Implements §5.4 across the full candidate set in nine reviewable steps — candidate registry, missing data, analytic sample, decision registry, four specifications, penalised Poisson fitting, selection results, negative binomial refitting, and a reproducibility ledger. Flags the one decision that cannot be reversed and produces the predictor set carried into the §5.5 primary models. |
+| [Condition-Specific Models (model-2)](model/condition-specific-models.html) | §5.7 (condition-specific models), §5.8 (comparison across conditions) | Model-2: Repeats the Model-1 selection-and-estimation procedure once inside each chronic-condition subgroup, in ten reviewable steps mirroring Model-1's artifact roles (`t6` deliverable table, `t62` full ledger, `t61` in-sample metrics, `t63`/`t64` held-out metrics, `t7` manifest). Records every settlement the proposal leaves open — which CCC items answer to the §2.2 condition names, duplicate-question handling, age-restricted universes, whether the remaining conditions stay in the model, and which §5.4 specification "the same LASSO procedure" refers to. |
+| [Sex-Stratified Models (model-3)](model/sex-stratified-models.html) | §5.9 (sex-stratified models, Table 5), §5.10 (model performance evaluation) | Model-3: Repeats the Model-1 selection-and-estimation procedure inside the female and the male stratum, in ten reviewable steps mirroring Model-1's artifact roles (`t6` deliverable Table 5, `t62` full ledger, `t61` in-sample metrics, `t63`/`t64` held-out metrics, `t7` manifest). Carries all four §5.4 specifications, measures how far the two strata differ in composition before any model is fitted, and delivers the female–male comparison §5.9 asks for on a union model (`t65`, `g5`, `g51`) so that a term the penalty declined to select is never mistaken for a null association. |
+| [Story 1 (eda-81)](analysis/story-1.html) | §5.3 (bivariate analysis), §5.4 (variable selection via LASSO) | EDA-81: The interpretation layer over `model-00` and `model-1`. Explains what the penalty is doing — what `lambda` is, what the `lambda.min` and `lambda.1se` rules each optimise, and why the perceived-health variables toggle on and off across specifications. Then aligns the evidence on one shared row axis: unadjusted signal (§5.3), selection verdict (§5.4), and adjusted estimate. |

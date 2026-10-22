@@ -1,0 +1,295 @@
+---
+title: "EDA 64 — Needs Variable Profile: Health Status & Functional Limitations"
+subtitle: "Andersen Behavioral Model — Needs Domain"
+author: "Analysis Team"
+date: "2026-05-22"
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    code-fold: true
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission
+
+This EDA profiles the 10 needs variables (perceived health status and functional
+limitations) from the Andersen Behavioral Model framework. These represent the most
+immediate determinant of health service use — the individual's perceived and evaluated
+need for care.
+
+**Research Questions:**
+
+1. What is the weighted distribution of each needs variable in the employed population?
+2. How does each needs variable relate to the primary outcome (`days_absent_total`) —
+   mean days, median days, and zero-proportion?
+3. What is the missing-data pattern across the 10 needs variables?
+4. What health gradient patterns exist — perceived health × ADL functional limitation stacking?
+
+ADL items are shown both individually (G1) and as a collapsed functional limitation
+summary count (G2, G4).
+
+Following the dual-file development pattern, all analytical code lives in
+`analysis/eda-64/eda-64.R`. This document sources those chunks for presentation.
+
+# Definition of Terms
+
+**Needs factors**: In the Andersen Behavioral Model, these represent the most immediate
+cause of health service use — perceived illness, evaluated health status, and functional
+limitations (ADL).
+
+**ADL (Activities of Daily Living)**: Six functional limitation domains: preparing meals,
+running errands, housework, personal care, moving indoors, managing finances. Each coded
+as ordinal (e.g., "NO", "SOMETIMES", "OFTEN").
+
+**ADL limitation count**: Collapsed summary — number of ADL items (0–6) where the
+respondent reports any limitation (value ≠ "NO").
+
+**`days_absent_total`**: Primary outcome. Row-wise sum of all 8 LOP component variables,
+representing total workdays missed in the past 3 months due to health reasons.
+
+```{r}
+#| code-summary: Reconciles working directory between execution modes
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir = "../../")
+```
+
+```{r}
+#| label: set_options
+#| code-summary: Report-wide formatting options
+#| echo: false
+#| results: hide
+#| message: false
+cat("Working directory: ", getwd())
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results   = "show",
+  message   = FALSE,
+  warning   = FALSE,
+  comment   = NA,
+  tidy      = FALSE,
+  out.width = "960px",
+  fig.width  = 10,
+  fig.height = 6,
+  fig.path   = "figure-png-iso/"
+)
+options(width = 100)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/eda-64/eda-64.R")
+```
+
+# Environment
+
+> Reviews the components of the working environment. Non-technical readers may skip this section.
+
+```{r}
+#| label: load-packages
+#| code-summary: Packages used in the current report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: Collection of custom functions used in current repository
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: Values used throughout the report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| code-summary: Custom functions defined for use in this report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+# Data
+
+```{r}
+#| label: load-data
+#| code-summary: Load data from Ellis parquet outputs
+#| warning: false
+#| code-fold: true
+#| cache: true
+```
+
+## Data Context
+
+For complete data documentation, see the
+[Data Primer](../data-primer-1/data-primer-1.html).
+
+```{r}
+#| label: data-context-tables
+#| code-summary: Tables and variables used in this analysis
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-person
+#| code-summary: Representative individual with ADL limitations
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: Level counts for needs variables
+#| code-fold: true
+```
+
+```{r}
+#| label: tweak-data-0
+#| code-summary: Ensure factor types and create ADL summary
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: inspect-data-0
+#| code-summary: Data overview and ADL summary statistics
+#| code-fold: true
+```
+
+# Analysis
+
+## Graph Family G1: Variable Distributions
+
+<!-- Research question: What is the weighted distribution of each needs variable? -->
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: Prepare distribution summaries
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g1
+#| code-summary: Weighted distribution of health status variables
+#| code-fold: true
+#| fig-cap: "Population-weighted distribution of perceived health variables"
+```
+
+```{r}
+#| label: g11
+#| code-summary: Weighted prevalence of individual ADL limitations
+#| code-fold: true
+#| fig-cap: "Proportion reporting any limitation in each ADL domain"
+```
+
+```{r}
+#| label: g12
+#| code-summary: Weighted distribution by CCHS cycle
+#| code-fold: true
+#| fig-cap: "Health status distribution comparison between 2010-2011 and 2013-2014 cycles"
+```
+
+## Graph Family G2: Outcome Relationship
+
+<!-- Research question: How does each needs variable relate to days_absent_total? -->
+
+```{r}
+#| label: g2-data-prep
+#| code-summary: Prepare outcome summaries by variable level
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g2
+#| code-summary: Mean days absent by health status variable level
+#| code-fold: true
+#| fig-cap: "Weighted mean days absent by perceived health level"
+```
+
+```{r}
+#| label: g21
+#| code-summary: Mean days absent by ADL limitation count (collapsed)
+#| code-fold: true
+#| fig-cap: "Dose-response: mean days absent increases with number of ADL limitations"
+```
+
+```{r}
+#| label: g22
+#| code-summary: Zero-day proportion by perceived health level
+#| code-fold: true
+#| fig-cap: "Proportion reporting zero days absent by self-rated health"
+```
+
+## Graph Family G3: Missing Data Profile
+
+<!-- Research question: What is the missing-data pattern across needs variables? -->
+
+```{r}
+#| label: g3-data-prep
+#| code-summary: Compute missingness statistics
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g3
+#| code-summary: Missingness profile across needs variables
+#| code-fold: true
+#| fig-cap: "Percentage and count of missing values per variable"
+```
+
+```{r}
+#| label: g31
+#| code-summary: Missingness by CCHS cycle
+#| code-fold: true
+#| fig-cap: "Missing data rates by survey cycle"
+```
+
+## Graph Family G4: Health Gradient / ADL Stacking
+
+<!-- Research question: What health gradient patterns exist? -->
+
+```{r}
+#| label: g4-data-prep
+#| code-summary: Compute health × ADL cross-tabulation and co-occurrence
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g4
+#| code-summary: Perceived health × ADL limitation count interaction
+#| code-fold: true
+#| fig-cap: "Mean days absent by perceived health and number of ADL limitations"
+```
+
+```{r}
+#| label: g41
+#| code-summary: ADL limitation co-occurrence heatmap
+#| code-fold: true
+#| fig-cap: "Which ADL limitation items tend to co-occur"
+```

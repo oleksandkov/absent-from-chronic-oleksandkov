@@ -10,7 +10,7 @@
 
 Build a complete Ferry → Ellis data pipeline for two pooled CCHS microdata files
 to produce an analysis-ready dataset for a study on chronic-condition work absenteeism
-among Canadian employed adults (Andréanne Kermiche et al., UQTR 2025).
+among Canadian employed adults (Blanchette et al., 2026).
 
 ---
 

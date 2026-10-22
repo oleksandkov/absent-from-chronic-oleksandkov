@@ -116,7 +116,7 @@ read_chunk("analysis/{NAME}/{NAME}.R")
 
 # Data
 
-<!-- Describe the data assets used in this report. Reference the data primer for details. -->
+<!-- Describes the data assets used in this report. Reference the data primer for details. -->
 
 ```{r}
 #| label: load-data
@@ -142,11 +142,37 @@ read_chunk("analysis/{NAME}/{NAME}.R")
 #| cache: true
 ```
 
+## Data Context
+
+For complete data documentation, see the [Data Primer](../data-primer-1/data-primer-1.html).
+
+```{r}
+#| label: data-context-tables
+#| code-summary: "Which tables and variables this analysis uses"
+#| echo: true
+#| eval: true
+```
+
+```{r}
+#| label: data-context-person
+#| code-summary: "Representative single-person view"
+#| echo: true
+#| eval: true
+```
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: "Distributions of key variables relevant to this analysis"
+#| echo: true
+#| eval: true
+```
+
 # Analysis
 
 ## Graph Family g1: {g1 description from contract}
 
-<!-- Research question: {RQ1} -->
+<!-- Artifact ID: g1 | Type: Graph | Research question: {RQ1 from contract} -->
+<!-- Numbering is nominal (creation order) unless the project documents a convention -->
 
 ```{r}
 #| label: g1-data-prep
@@ -158,16 +184,17 @@ read_chunk("analysis/{NAME}/{NAME}.R")
 
 ```{r}
 #| label: g1
-#| code-summary: "{g1 brief description}"
+#| code-summary: "Graph g1: {Descriptive title}"
 #| code-fold: true
 #| eval: true
 #| cache: true
-#| fig-cap: "{g1 caption}"
+#| fig-cap: "Graph g1: {Caption describing the visualization}"
 ```
 
 ## Graph Family g2: {g2 description from contract}
 
-<!-- Research question: {RQ2} -->
+<!-- Artifact ID: g2 | Type: Graph | Research question: {RQ2 from contract} -->
+<!-- Hierarchy: g2 (level 1) -> g21 (level 2) -> g211 (level 3 micro-variant) -->
 
 ```{r}
 #| label: g2-data-prep
@@ -179,32 +206,86 @@ read_chunk("analysis/{NAME}/{NAME}.R")
 
 ```{r}
 #| label: g2
-#| code-summary: "{g2 brief description}"
+#| code-summary: "Graph g2: {Descriptive title}"
 #| code-fold: true
 #| eval: true
 #| cache: true
-#| fig-cap: "{g2 caption}"
+#| fig-cap: "Graph g2: {Caption describing the visualization}"
 ```
 
-## Graph Family g3: {g3 description from contract}
-
-<!-- Research question: {RQ3} -->
+### g21 — {Alternative facet}
 
 ```{r}
-#| label: g3-data-prep
-#| code-summary: Prepare data for g3 family
+#| label: g21
+#| code-summary: "Graph g21: {Descriptive title}"
+#| code-fold: true
+#| eval: true
+#| cache: true
+#| fig-cap: "Graph g21: {Caption describing the variant}"
+```
+
+#### g211 — {Aesthetic variant}
+
+<!-- Level-3 micro-variants appear as subsections under their level-2 parent -->
+
+```{r}
+#| label: g211
+#| code-summary: "Graph g211: {Descriptive title} (palette test)"
+#| code-fold: true
+#| eval: true
+#| cache: true
+#| fig-cap: "Graph g211: {Caption describing the micro-variant}"
+```
+
+## Table Family t1: {t1 description from contract}
+
+<!-- Artifact ID: t1 | Type: Table | Enhanced display (kable/gt/DT) -->
+
+```{r}
+#| label: t1-data-prep
+#| code-summary: Prepare data for t1 table family
 #| code-fold: true
 #| eval: true
 #| cache: true
 ```
 
 ```{r}
-#| label: g3
-#| code-summary: "{g3 brief description}"
+#| label: t1
+#| code-summary: "Table t1: {Descriptive title}"
 #| code-fold: true
 #| eval: true
 #| cache: true
-#| fig-cap: "{g3 caption}"
+#| tbl-cap: "Table t1: {Caption describing the table}"
+```
+
+### t11 — {Stratified subset}
+
+```{r}
+#| label: t11
+#| code-summary: "Table t11: {Descriptive title}"
+#| code-fold: true
+#| eval: true
+#| cache: true
+#| tbl-cap: "Table t11: {Caption describing the stratified table}"
+```
+
+## Outputs
+
+<!-- Artifact ID: out1 | Type: Output | Raw text-based console blocks -->
+<!-- Outputs ground understanding relative to the CACHE-manifest, data primer, or method.md -->
+
+```{r}
+#| label: out1
+#| code-summary: "Output out1: {Descriptive title, e.g. grain proof}"
+#| echo: true
+#| eval: true
+```
+
+```{r}
+#| label: out11
+#| code-summary: "Output out11: {Descriptive title, e.g. structure dump}"
+#| echo: true
+#| eval: true
 ```
 
 # Session Information

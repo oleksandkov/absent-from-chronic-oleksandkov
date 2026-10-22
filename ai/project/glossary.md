@@ -56,5 +56,18 @@ Documentation file (`./data-public/metadata/CACHE-manifest.md`) describing analy
 ### INPUT-manifest
 Documentation file (`./data-public/metadata/INPUT-manifest.md`) describing raw input data before Ferry/Ellis processing.
 
+### Pipeline Orchestra
+
+Single-agent automation system (`@pipeline-engineer`) that guides the development, validation, and maintenance of data pipeline scripts and their companion documentation. Operates in four phases: Discovery + Ferry, Ellis Development, Validation + Documentation, Quality Audit. Design document at `.github/pipeline-orchestra.md`.
+
+### Pipeline Artifact
+
+One of seven tightly coupled files that define the data pipeline: `0-extract-metadata.R`, `1-ferry.R`, `2-ellis.R`, `3-test-ellis-cache.R`, `INPUT-manifest.md`, `CACHE-manifest.md`, `pipeline.md`. All must stay in sync.
+
+### White-List (Two-Tier)
+
+Variable selection strategy used in Ellis scripts. **CONFIRMED** (Tier 1) variables cause a hard error if missing. **INFERRED** (Tier 2) variables produce a warning and are gracefully dropped. Allows pipelines to run despite confidentiality suppressions in PUMF data.
+
 ---
+
 *Expand with domain-specific terminology as project evolves.*

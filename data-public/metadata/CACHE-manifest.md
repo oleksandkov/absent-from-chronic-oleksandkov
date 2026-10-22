@@ -1,295 +1,290 @@
-# CACHE Manifest
+# CCHS Pipeline — CACHE Manifest
 
-Definitive reference for datasets produced by the Ellis lane (`manipulation/2-ellis.R`).
-Describes file structure, variable inventory, factor levels, and transformation logic.
-Manually maintained — update after re-running Ellis with changed flags or white-list.
+This document describes the analysis-ready dataset produced by `manipulation/2-ellis.R`.
+It is the authoritative reference for downstream analyses in `analysis/`.
 
-Updated: 2026-05-15
+> **Status**: Populated — statistics refreshed from `2-ellis.R` run 2026-05-20
+> (after SDCFIMM fix; data-primer-1 extension adds 4 facilitating vars + ADL rename + work_stress). All 24 tests passing.
 
----
+## Output Summary
 
-## Overview
+| Field | Value |
+|-------|-------|
+| SQLite database | `data-private/derived/cchs-2.sqlite` |
+| Table name | `cchs_analytic` |
+| Parquet file | `data-private/derived/cchs-2-tables/cchs_analytic.parquet` |
+| Sample flow table | `cchs-2.sqlite` (table: `sample_flow`) + `sample_flow.parquet` |
+| Unit of observation | One row per CCHS respondent |
+| Columns | 70 |
+| Analytic n (unweighted) | 63,843 |
+| Weighted N (sum of `wts_m_pooled`) | 17,844,913 |
+| CCHS cycles pooled | 2010-2011 and 2013-2014 |
 
-| Dataset | Path | Format | Rows (default mode) | Columns |
-|---------|------|--------|--------------------:|---------|
-| `cchs_analytical` | `data-private/derived/cchs-2-tables/cchs_analytical.parquet` | Parquet | 63,843 | 62 |
-| `cchs_analytical` | `data-private/derived/cchs-2.sqlite` | SQLite | 63,843 | 62 |
-| `sample_flow` | `data-private/derived/cchs-2-tables/sample_flow.parquet` | Parquet | 5 | 5 |
-| `sample_flow` | `data-private/derived/cchs-2.sqlite` | SQLite | 5 | 5 |
+## Sample Construction
 
-**Run mode:** `apply_sample_exclusions = TRUE` (§3.1 exclusion criteria applied).
-Full pooled mode (`apply_sample_exclusions = FALSE`) yields ~126,431 rows.
+Sample exclusion was applied in the following order (see `sample_flow` table):
 
-**Source cycles pooled:**
+| Step | Criterion | n remaining | n excluded |
+|------|-----------|-------------|------------|
+| 0 | Full pooled sample (2010 + 2014) | 126,431 | — |
+| 1 | Age 15–75 (DHHGAGE codes 2–15) | 112,352 | 14,079 |
+| 2 | Employed in past 3 months (`LOP_015 = 1`) | 64,248 | 48,104 |
+| 3 | Exclude proxy respondents (`ADM_PRX = 1`) | 64,248 | 0 |
+| 4 | Complete outcome data (all 8 LOP components) | **63,843** | 405 |
 
-| Cycle | CCHS label | Raw rows | After exclusions |
-|-------|-----------|----------|-----------------|
-| `cycle = 0` | CCHS 2010–2011 | ~62,909 | 32,621 |
-| `cycle = 1` | CCHS 2013–2014 | ~63,522 | 31,222 |
+> **Note:** Steps 5 and 6 in the Ellis script (completeness of CCC indicators
+> and key predictors) create flags (`flag_complete_ccc`, `flag_complete_predictors`,
+> `flag_analytic_complete`) without excluding rows. They are not recorded in the
+> `sample_flow` table.
 
-**Survey weight pooling (Statistics Canada guideline):**
+Reference final n from the initial exploration of the data: **64,141**.
+Observed n: **63,843** — deviation of 298 rows (within the ±5,000 warning threshold).
 
-```
-wts_m_pooled   = wts_m / 2      # for each respondent
-bsw001_pooled  = bsw001 / 2     # same rule applied to all 500 bootstrap weights
-```
-
-`wts_m_original` is retained alongside `wts_m_pooled` for verification.
-
----
-
-## Reference Diagnostics (`cchs_analytical`, default mode)
-
-Verified from actual run on 2026-05-15. Four INFERRED white-list variables are absent from both
-CCHS PUMF cycles (`ccc_300`, `ccc_185`, `dhhdfc12p`, `sdcdgstud`); two of these (`sdcdgstud`,
-`dhhdfc12p`) are added as NA columns for factor recode compatibility; two CCC conditions
-(`ccc_300`, `ccc_185`) are entirely absent from the dataset.
-Bootstrap weights (`bsw*`) were also absent. Diagnostics reflect the current data files.
-
-| Diagnostic | Actual value |
-|------------|-------------|
-| Unweighted sample size | 63,843 |
-| Weighted mean `days_absent_total` | ≈ 1.25 |
-| Weighted variance `days_absent_total` | ≈ 15.4 |
-| Dispersion (variance / mean) | > 1 → overdispersion → negative binomial recommended |
-| % zeros in `days_absent_total` (unweighted) | ≈ 70.5% |
-| Maximum `days_absent_total` | 63 (observed); 90 = enforced cap |
-| Out-of-range values set to NA | 2,448 respondents |
-
----
-
-## cchs_analytical — Variable Inventory
-
-### Outcome Variables
-
-| Column | Type | Description |
-|--------|------|-------------|
-| `days_absent_total` | numeric | Primary outcome: row-wise sum of 8 LOP components (NA-safe; all-NA rows → 0) |
-| `days_absent_chronic` | numeric | Sensitivity outcome: `lopg040` only (days absent due to own chronic condition) |
-| `outcome_all_na` | logical | `TRUE` if all 8 LOP variables were `NA` before summing |
-
-**Source LOP variables (retained raw for transparency):**
+## Survey Weights
 
 | Column | Description |
 |--------|-------------|
-| `lopg040` | Days absent — own chronic condition |
-| `lopg070` | Days absent — injury |
-| `lopg082` | Days absent — cold |
-| `lopg083` | Days absent — flu / influenza |
-| `lopg084` | Days absent — stomach flu (gastroenteritis) |
-| `lopg085` | Days absent — respiratory infection |
-| `lopg086` | Days absent — other infectious disease |
-| `lopg100` | Days absent — other physical / mental health reason |
+| `wts_m` | Original master weight from Statistics Canada PUMF |
+| `wts_m_pooled` | Pooling-adjusted weight = `wts_m / 2` (two cycles pooled) |
 
-Valid range: 0–90 days. Values outside this range are set to `NA` with a warning.
+> **Bootstrap weights**: Not available for CCHS 2010 and 2014 PUMF. Variance
+> estimates must rely on master weight only. This is a known limitation.
 
----
+## Outcome Variable
 
-### Chronic Condition Variables (17 binary factors)
+| Column | Description | Range | Missing |
+|--------|-------------|-------|---------|
+| `days_absent_total` | Total workdays absent in past 3 months (any health reason) | 0–63 (cap 90) | None |
+| `days_absent_chronic` | Workdays absent due to chronic condition only | 0–31 (cap 90) | None |
 
-All variables coded: `"Yes"` / `"No"` (factor). Special numeric codes (6, 7, 8, 9, 96–99) → `NA`.
-Two conditions requested in §2.2 (`ccc_300` — other mental illness; `ccc_185` — digestive disease)
-are suppressed in the PUMF and entirely absent from this dataset.
+**Construction formula**:
 
-| Column | Condition |
-|--------|-----------|
-| `cc_asthma` | Asthma |
-| `cc_fibromyalgia` | Fibromyalgia |
-| `cc_arthritis` | Arthritis (excluding fibromyalgia) |
-| `cc_back_problems` | Back problems (excluding fibromyalgia/arthritis) |
-| `cc_hypertension` | Hypertension (high blood pressure) |
-| `cc_migraine` | Migraine headaches |
-| `cc_copd` | COPD / chronic bronchitis / emphysema |
-| `cc_diabetes` | Diabetes |
-| `cc_heart_disease` | Heart disease |
-| `cc_cancer` | Cancer (any type) |
-| `cc_ulcer` | Intestinal / stomach ulcer |
-| `cc_stroke` | Effects of stroke |
-| `cc_bowel_disorder` | Bowel disorder (Crohn's disease / colitis / IBS) |
-| `cc_chronic_fatigue` | Chronic fatigue syndrome (CFS) |
-| `cc_chemical_sensitiv` | Multiple chemical sensitivities (MCS) |
-| `cc_mood_disorder` | Mood disorder (depression / bipolar / mania / dysthymia) |
-| `cc_anxiety_disorder` | Anxiety disorder (phobia / OCD / panic disorder) |
+```text
+days_absent_total = lopg040 + lopg070 + lopg082 + lopg083 +
+                    lopg084 + lopg085 + lopg086 + lopg100
+```
 
-Source CCHS variables (17 found): `ccc_031` (asthma), `ccc_041` (fibromyalgia), `ccc_051` (arthritis),
-`ccc_061` (back problems), `ccc_071` (hypertension), `ccc_081` (migraine), `ccc_091` (COPD),
-`ccc_101` (diabetes), `ccc_121` (heart disease), `ccc_131` (cancer), `ccc_141` (ulcer),
-`ccc_151` (stroke), `ccc_171` (bowel disorder), `ccc_251` (chronic fatigue), `ccc_261` (chemical
-sensitivities), `ccc_280` (mood disorder), `ccc_290` (anxiety disorder).
-Two absent from PUMF: `ccc_300` (other mental illness), `ccc_185` (digestive disease).
+**Reference from the initial exploration of the data** (Table 2):
 
----
+- Mean = 1.35 (SE = 0.02)
+- Zero proportion = 70.59%
+- Variance = 17.7 / SD = 4.19
 
-### Demographic / Predisposing Factors
+**Observed in this run** (2026-05-20):
 
-| Column | Type | Levels / Notes |
-|--------|------|----------------|
-| `age_group` | ordered factor | `"15-24"` < `"25-54"` < `"55-75"` |
-| `sex` | factor | `"Male"`, `"Female"` |
-| `marital_status` | ordered factor | `"Single"` < `"Married"` < `"Common-law"` < `"Widowed/Divorced/Separated"` |
-| `education` | ordered factor | `"Less than secondary"` < `"Secondary graduate"` < `"Some post-secondary"` < `"Post-secondary graduate"` |
-| `immigration_status` | factor | `"Non-immigrant"`, `"Immigrant"`, `"Non-permanent resident"` |
-| `visible_minority` | factor | `"White"`, `"Visible minority"` |
-| `living_arrangements` | factor | `"Unattached, alone"`, `"Unattached, with others"`, `"Spouse/partner only"`, `"Parent, spouse, and child"`, `"Single parent with child"`, `"Child in parent/sibling household"`, `"Child in two-parent household"`, `"Other"` |
-| `student_status` | factor | `"Not a student"`, `"Part-time student"`, `"Full-time student"` — **ALL-NA** (`sdcdgstud` absent from PUMF) |
-| `dhhgle5` | integer / numeric | Number of persons ≤5 yrs in household (0=None, 1=1 or more) |
-| `dhhg611` | integer / numeric | Number of persons 6–11 yrs in household (0=None, 1=1 or more) |
-| `dhhdfc12p` | — | **ABSENT** from dataset; no PUMF equivalent found |
-| `dhhdghsz` | integer / numeric | Household size (number of persons; raw, continuous) |
+| Statistic | `days_absent_total` | `days_absent_chronic` |
+|-----------|---------------------|----------------------|
+| Mean (unweighted) | 1.35 | 0.414 |
+| Zero proportion | 70.49% | 94.32% |
+| Max observed | 63 | 31 |
+| Missing (NA) | 0 | 0 |
 
-Source variables: `dhhgage`, `dhh_sex`, `dhhgms`, `edudh04`, `sdcfimm`, `sdcdgcb` (→ `sdcgcgt`),
-`dhhglvg`, `dhhgle5`, `dhhg611`, `sdcdgstud` (absent), `dhhdghsz` (→ `dhhghsz`).
+## LOP Component Columns (Raw, Retained for Sensitivity Checks)
 
----
+| Column | Description |
+|--------|-------------|
+| `lopg040` | Days lost: chronic condition |
+| `lopg070` | Days lost: injury |
+| `lopg082` | Days lost: cold / runny nose |
+| `lopg083` | Days lost: flu / influenza |
+| `lopg084` | Days lost: stomach flu |
+| `lopg085` | Days lost: respiratory infection |
+| `lopg086` | Days lost: other infectious disease |
+| `lopg100` | Days lost: other physical or mental health reason |
 
-### Health-System / Facilitating Factors
+## Chronic Condition Indicators
 
-| Column | Type | Levels / Notes |
-|--------|------|----------------|
-| `income_5cat` | ordered factor | `"< $20k"` < `"$20k - $39.9k"` < `"$40k - $59.9k"` < `"$60k - $79.9k"` < `"$80k+"` |
-| `has_family_doctor` | factor | `"Yes"`, `"No"` |
-| `employment_type` | factor | `"Employee"`, `"Self-employed"`, `"Unpaid family worker"` |
-| `work_schedule` | factor | `"Full-time"`, `"Part-time"` |
-| `alcohol_type` | factor | `"Former or never drinker"`, `"Occasional drinker"`, `"Regular drinker"` |
-| `smoking_status` | ordered factor | `"Never"` < `"Former"` < `"Occasional"` < `"Daily"` |
-| `bmi_category` | ordered factor | `"Underweight"` < `"Normal weight"` < `"Overweight"` < `"Obese"` |
-| `physical_activity` | ordered factor | `"Active"` < `"Moderately active"` < `"Inactive"` |
-| `job_stress` | ordered factor | `"Not at all stressful"` < `"Not very stressful"` < `"A bit stressful"` < `"Quite a bit stressful"` < `"Extremely stressful"` |
-| `occupation_category` | factor | `"Group 1"`, `"Group 2"`, `"Group 3"`, `"Group 4"`, `"Group 5"` (5-category PUMF occupation) |
-| `geodgprv` | integer | Province / territory of residence (raw code; 10–13 categories) |
-| `fvcdgtot` | numeric | Fruit & vegetable consumption (3-category derived: 1=<5/day, 2=5–10/day, 3=>10/day) |
+All chronic condition columns are logical type (`TRUE` / `FALSE` / `NA`). NAs are present:
+`cc_copd` was administered to a sub-sample only (~70% coverage), so ~21,779 rows
+have at least one `NA` among the 17 `cc_*` columns. Use `flag_complete_ccc` to
+subset the 42,064 rows where all 17 indicators are non-NA.
 
-Source variables: `incdghh` (→ `incghh`), `geodgprv` (→ `geogprv`), `hcu_1aa`, `lbfdghp` (→ `lbsg31`),
-`lbfdgft` (→ `lbsdpft`), `fvcdgtot` (→ `fvcgtot`), `alcdttm`, `smkdsty`, `hwtgisw`,
-`pacdpai`, `gen_07`, `lbsgsoc`.
+| Column | CCC source | Condition |
+|--------|-----------|-----------|
+| `cc_asthma` | `CCC_031` | Asthma |
+| `cc_fibromyalgia` | `CCC_041` | Fibromyalgia |
+| `cc_arthritis` | `CCC_051` | Arthritis |
+| `cc_back_problems` | `CCC_061` | Back problems (excl. fibromyalgia / arthritis) |
+| `cc_hypertension` | `CCC_071` | High blood pressure |
+| `cc_migraine` | `CCC_081` | Migraine |
+| `cc_copd` | `CCC_091` | COPD |
+| `cc_diabetes` | `CCC_101` | Diabetes |
+| `cc_heart_disease` | `CCC_121` | Heart disease |
+| `cc_cancer` | `CCC_131` | Cancer |
+| `cc_ulcer` | `CCC_141` | Stomach / intestinal ulcer |
+| `cc_stroke` | `CCC_151` | Stroke effects |
+| `cc_bowel_disorder` | `CCC_171` | Bowel disorder (Crohn's / colitis) |
+| `cc_fatigue_syndrome` | `CCC_251` | Chronic fatigue syndrome |
+| `cc_chem_sensitivity` | `CCC_261` | Multiple chemical sensitivities |
+| `cc_mood_disorder` | `CCC_280` | Mood disorder |
+| `cc_anxiety` | `CCC_290` | Anxiety disorder |
 
----
+> **Note on 19th condition**: The research instrument refers to 19 chronic
+> conditions. The mapping above yields 17 from clearly identified CCC variables.
+> Heart disease (`cc_heart_disease`) and stroke (`cc_stroke`) may constitute
+> the "cardiovascular disease/stroke" category counted as two or one.
+> Verify against Appendix 3 of the thesis before finalizing analytic models.
 
-### Health Status / Needs Factors
+## Predictor Variables
 
-| Column | Type | Levels / Notes |
-|--------|------|----------------|
-| `self_health_general` | ordered factor | `"Excellent"` < `"Very good"` < `"Good"` < `"Fair"` < `"Poor"` |
-| `self_health_mental` | ordered factor | Same 5-level scale as `self_health_general` |
-| `health_vs_lastyear` | ordered factor | `"Much better"` < `"Somewhat better"` < `"About the same"` < `"Somewhat worse"` < `"Much worse"` |
-| `activity_limitation` | factor | `"Yes"`, `"No"` |
-| `injury_past_year` | factor | `"Yes"`, `"No"` |
+### Predisposing
 
-Source variables: `gen_01`, `gen_02a` (→ `gen_02b`), `gen_02`, `rac_1`, `inj_01`.
+| Column | Source | Levels / Range | n (non-NA) |
+|--------|--------|----------------|------------|
+| `dhhgage` | `DHHGAGE` | Integer codes 2–15 (not year values; 2=15-17 yrs, 15=75-79 yrs) | 63,843 |
+| `age_group_3` | Derived | 15-24 (9,662), 25-54 (37,101), 55-75 (17,080) | 63,843 |
+| `sex` | `DHH_SEX` | Male (31,540), Female (32,303) | 63,843 |
+| `marital_status` | `DHHGMS` | Married (28,416), Common-law (7,537), Widowed/Sep/Div (8,043), Single (19,722) | 63,718 |
+| `household_size` | `DHHGHSZ` | 1 (14,075), 2 (23,684), 3 (10,709), 4 (10,469), 5+ (4,884) | 63,821 |
+| `dhhgle5` | `DHHGLE5` | Binary 0/1 presence flag — any child ≤ 5 in household: 0 (55,089), 1 (8,754) | 63,843 |
+| `dhhg611` | `DHHG611` | Binary 0/1 presence flag — any child 6-11 in household: 0 (54,678), 1 (9,165) | 63,843 |
+| `dhhgl12` | `DHHGL12` | Binary 0/1 presence flag — any child **under 12** in household: 0 (49,264), 1 (14,579) | 63,843 |
+| `home_ownership` | `DHH_OWN` | Owner (50,101), Renter (13,576) | 63,677 |
+| `education` | `EDUDR04` | Less than secondary (7,348), Secondary graduate (11,778), Some post-secondary (4,341), Post-secondary graduate (39,774) | 63,241 |
+| `immigration_status` | `SDCFIMM` + `SDCGRES` | Non-immigrant (55,066), Long-term immigrant (6,317), Recent immigrant (2,092) | 63,475 |
+| `visible_minority` | `SDCGCGT` | White (54,105), Visible minority (9,259) | 63,364 |
 
----
+> **QC finding (2026-08-01) — the three child-presence flags are not counts, and
+> `dhhgl12` is redundant:** All three of `dhhgle5`, `dhhg611`, and `dhhgl12` arrive from
+> the PUMF as **binary 0/1 presence indicators**, not as counts of children; earlier
+> revisions of this manifest described them as counts. All three are complete
+> (0 missing across 63,843 rows). Furthermore, `dhhgl12` is a **deterministic function**
+> of the other two: `dhhgl12 == (dhhgle5 | dhhg611)` holds for all 63,843 rows with
+> **zero discordant cases**. Its unweighted correlation with `dhhgle5` is 0.733 and with
+> `dhhg611` is 0.753. A design matrix built from `~ dhhgle5 + dhhg611 + dhhgl12` spans
+> exactly the same column space as `~ dhhgle5 * dhhg611` (max residual 1.3e-10), so
+> `dhhgl12` carries no main-effect information beyond its two components — it merely
+> re-expresses their interaction. Do not read a coefficient on `dhhgl12` as an
+> independent "young children" effect when the other two flags are in the same model.
+>
+> **Naming caution:** `DHHGL12` means children **less than** 12 years old. It is *not*
+> the requested "children ≥ 12 yrs" construct (`dhhdfc12p`), which has no PUMF
+> equivalent in either cycle. See §4 of the Variable Inclusion report.
+>
+> **Analytic disposition (ratified 2026-08-01):** `dhhgl12` is retained for descriptive
+> reporting and for the Section 5.3 bivariate series, where its rate ratio is a
+> legitimate marginal quantity, but it is **withheld from the Section 5.4 penalised
+> selection**. Penalised selection among deterministically redundant columns splits a
+> shared coefficient arbitrarily between them. The split is implemented in
+> `scripts/modeling/candidate-registry.R` via `bivariate_only_vars`; `included_vars`
+> (49) drives descriptives and bivariate models, `lasso_vars` (48) drives LASSO.
 
-### Survey Design Variables
+<!-- -->
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `wts_m_pooled` | numeric | Master survey weight ÷ 2 (pooling adjustment) |
-| `wts_m_original` | numeric | Raw master survey weight (retained for verification) |
-| `geodpmf` | integer / character | Health region / strata identifier (raw from CCHS) |
-| `cycle` | integer | Survey cycle: `0L` = 2010–2011, `1L` = 2013–2014 |
-| `cycle_f` | factor | `"CCHS 2010-2011"`, `"CCHS 2013-2014"` |
-| `bsw001`–`bsw500` | numeric | Bootstrap weights (500 columns); each divided by 2 for pooling |
+> **New variable (2026-08-01) — `home_ownership` admitted:** `DHH_OWN` is present in
+> **both** cycles and satisfies the Project Proposal §2.2 "homeownership" requirement
+> directly. Earlier revisions of the Variable Inclusion report stated that no
+> house-ownership construct existed in the CCHS PUMF; that claim was wrong and has been
+> retracted. The variable label text differs across cycles (2010-2011: "Dwelling - owned
+> by a member of hhld", `1 = YES` / `2 = NO`; 2013-2014: "Owned, Rented",
+> `1 = OWNER` / `2 = RENTED`) but the **integer coding is identical**, so no alias
+> resolution is required.
+>
+> **Missingness is represented differently by cycle** and the Ellis recode must catch
+> both forms: 2010-2011 stores refusal / not-stated as SPSS **system missing** (→ `NA`
+> after `haven::zap_labels()` in the Ferry), whereas 2013-2014 stores them as **explicit
+> codes 7 / 8 / 9**. The recode therefore maps `1 → Owner`, `2 → Renter`, and everything
+> else → `NA`; it must not be simplified to `dhh_own != 1 ~ "Renter"`, which would
+> silently absorb the not-stated codes into the Renter category. Coverage in the final
+> analytic table is **99.74%** (63,677 of 63,843; 68 missing in 2010-2011, 98 in
+> 2013-2014). No optional-content aliasing was detected — every province × cycle cell
+> exceeds 99.3% coverage.
 
----
+<!-- -->
 
-### Sample Construction Variables (retained raw)
+> **Fix applied (2026-05-20) — `immigration_status` construction:** SPSS stores
+> SDCGRES code 6 ("NOT APPLICABLE" = Canadian-born) as **system missing**, which
+> becomes `NA` after `haven::zap_labels()` in the Ferry. The previous recode
+> `sdcgres == 6 ~ "Non-immigrant"` therefore never fired, leaving ~86% of analytic
+> rows as NA. The fix uses `SDCFIMM == 2` (NO, not an immigrant) to identify
+> non-immigrants, resolving near-complete coverage. `SDCFIMM` was added to
+> `vars_inferred` and is retained as raw column `sdcfimm` in the output.
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `lop_015` | integer | Currently employed in past 3 months (1=Yes, 2=No) |
-| `dhhgage` | integer | Age group code (1–16) |
-| `adm_prx` | integer | Proxy respondent flag (1=Proxy, 2=Not proxy) |
-| `adm_rno` | integer | Respondent sequence number (deduplication check; if present) |
+### Facilitating
 
----
+| Column | Source | Levels / Range | n (non-NA) |
+|--------|--------|----------------|------------|
+| `province` | `GEOGPRV` | NL, PEI, NS, NB, QC, ON, MB, SK, AB, BC, YK, NT, NU (13 levels) | 63,843 |
+| `income_hh` | `INCGHH` | < $20K (2,392), $20-39K (8,067), $40-59K (10,520), $60-79K (10,075), $80K+ (28,372) | 59,426 |
+| `has_family_doctor` | `ACC_50A` / `HCU_1AA` | Yes (35,800), No (6,006) | 41,806 |
+| `work_schedule` | `LBSDPFT` | Full-time (47,936), Part-time (11,453) | 59,389 |
+| `employment_type` | `LBSG31` | Employee (49,698), Self-employed (10,266) | 59,964 |
+| `occupation_category` | `LBSGSOC` | Management/Education/Arts (20,850), Business/Finance (10,590), Sales/Services (14,468), Trades/Transport (8,674), Primary/Processing (5,126) | 59,708 |
+| `smoking_status` | `SMKDSTY` | Never smoked (23,446), Former (25,717), Occasional (3,460), Daily (11,117) | 63,740 |
+| `living_arrangements` | `DHHGLVG` | Couple, no children (19,395), Unattached alone (14,064), Couple with children (13,776), Child in 2-parent household (6,781), Unattached with others (2,349), Child in parent/sibling (2,354), Single parent (2,056), Other (2,713) | 63,488 |
+| `alcohol_type` | `ALCDTTM` | Regular drinker (44,214), Occasional drinker (10,245), Did not drink (9,127) | 63,586 |
+| `fruit_veg_daily` | `FVCGTOT` | Less than 5/day (36,835), 5 to 10/day (22,456), More than 10/day (2,377) | 61,668 |
+| `physical_activity` | `PACDPAI` | Active (18,610), Moderately active (16,593), Inactive (28,619) | 63,822 |
+| `bmi_category` | `HWTGISW` | Underweight (1,110), Normal weight (25,153), Overweight (20,395), Obese (12,743) | 59,401 |
+| `hwtgbmi` | `HWTGBMI` | Continuous (kg/m²) | — |
 
-## sample_flow — Exclusion Audit Table
+> **Note — `province`:** YK = 2,055; NT = 0; NU = 0. The NT and NU factor
+> levels are retained in the output but contain no rows in this combined sample.
 
-Records the step-by-step effect of §3.1 inclusion/exclusion criteria.
-Always 5 rows (6 if `apply_completeness_exclusion = TRUE`).
+### Needs
 
-**Actual values from 2026-03-20 run:**
+| Column | Source | Levels / Range | n (non-NA) |
+|--------|--------|----------------|------------|
+| `health_perceived` | `GEN_01` | Excellent (14,285), Very good (26,788), Good (18,284), Fair (3,871), Poor (575) | 63,803 |
+| `mental_health_perceived` | `GEN_02B` | Excellent (22,501), Very good (24,708), Good (13,471), Fair (2,657), Poor (433) | 63,770 |
+| `health_vs_prior_year` | `GEN_02` | Much better, Somewhat better, About the same, Somewhat worse, Much worse | — |
+| `work_stress` | `GEN_09` | Not at all stressful (6,407), Not very stressful (12,854), A bit stressful (27,206), Quite a bit stressful (14,419), Extremely stressful (2,697) | 63,583 |
+| `adl_meals` | `ADL_01` | No (63,349), Yes (493) | 63,842 |
+| `adl_errands` | `ADL_02` | No / Yes — needs help: appointments / errands | — |
+| `adl_housework` | `ADL_03` | No / Yes — needs help: housework | — |
+| `adl_personal_care` | `ADL_04` | No / Yes — needs help: personal care | — |
+| `adl_moving_indoors` | `ADL_05` | No / Yes — needs help: moving inside home | — |
+| `adl_finances` | `ADL_06` | No (63,358), Yes (474) | 63,832 |
+| `injured_past_12m` | `INJ_01` | No (53,204), Yes (10,603) | 63,807 |
 
-| Step | Description | n_remaining | n_excluded | pct_remaining |
-|------|-------------|------------:|-----------:|--------------:|
-| `1_start` | Starting pool (both CCHS cycles pooled) | 126,431 | 0 | 100.0% |
-| `2_after_age_15_75` | Exclude respondents outside age 15–75 | 112,352 | 14,079 | 88.9% |
-| `3_after_employed` | Exclude respondents not employed (past 3 months) | 64,248 | 48,104 | 50.8% |
-| `4_after_no_proxy` | Exclude proxy respondents | 64,248 | 0 | 50.8% |
-| `5_after_complete_outcome` | Exclude respondents with missing outcome | 63,843 | 405 | 50.5% |
+## Survey / Cycle Variables
 
-**Column schema:**
+| Column | Description |
+|--------|-------------|
+| `cchs_cycle` | Integer: 0 = 2010-2011, 1 = 2013-2014 |
+| `cchs_cycle_f` | Factor: "2010-2011", "2013-2014" |
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `step` | character | Step label: `"1_start"`, `"2_after_age_15_75"`, `"3_after_employed"`, `"4_after_no_proxy"`, `"5_after_complete_outcome"` |
-| `description` | character | Human-readable criterion (or "No exclusion applied" when flag is `FALSE`) |
-| `n_remaining` | integer | Sample count after this step |
-| `n_excluded` | integer | Records removed in this step |
-| `pct_remaining` | numeric | Percentage of starting pool remaining |
+## Completeness Flags
 
----
+| Column | Description | n TRUE |
+|--------|-------------|--------|
+| `flag_complete_ccc` | All 17 chronic condition indicators non-NA | 42,064 |
+| `flag_complete_predictors` | All key predictor variables non-NA | 59,309 |
+| `flag_analytic_complete` | Both CCC and predictor flags TRUE | 39,702 |
 
-## Missing Value Handling
+> **Note:** These flags allow analysts to subset for fully complete cases without
+> re-running exclusion logic. Rows with `flag_analytic_complete == FALSE` are
+> retained in the file for sensitivity analysis.
 
-Special CCHS response codes recoded to `NA` throughout all factor variables:
+## Usage Notes for Analysts
 
-| Codes | Meaning |
-|-------|---------|
-| 6, 7, 8, 9 | Not applicable / Don't know / Refusal / Not stated (single-digit) |
-| 96, 97, 98, 99 | Same meanings (two-digit) |
-
-Original SPSS value labels are stripped during Ferry import (`haven::zap_labels()`).
-Numeric raw values are available only in the ferry staging database (`cchs-1.sqlite`).
-
----
-
-## Variable Harmonization (Cross-Cycle Aliases)
-
-Some variables changed names between the 2010–2011 and 2013–2014 PUMF files.
-Ellis maps known aliases to canonical names before white-listing:
-
-| Canonical name | Aliases tried | Affected cycles |
-|----------------|--------------|----------------|
-| `edudh04` | `edudr04` | Both cycles |
-| `sdcdgcb` | `sdcgcgt` | Both cycles |
-| `geodgprv` | `geogprv` | Both cycles |
-| `hcu_1aa` | `hcu_1a`, `hcudgmd` | Both cycles |
-| `lbfdghp` | `lbsg31` | Both cycles |
-| `lbfdgft` | `lbsdpft` | Both cycles |
-| `incdghh` | `incghh` | Both cycles |
-| `fvcdgtot` | `fvcgtot` | Both cycles |
-| `dhhdghsz` | `dhhghsz` | Both cycles |
-| `gen_02a` | `gen_02b` | Both cycles |
-| `inj_01` | `injdgyrs` | Both cycles |
-
-If a variable is still not found after alias resolution, it is dropped with a warning (INFERRED tier).
-
----
-
-## Notes and Limitations
-
-- **4 INFERRED variables absent from both CCHS PUMF cycles** (as of 2026-05-15 run):
-  `ccc_300`, `ccc_185`, `dhhdfc12p`, `sdcdgstud`. Of these, `sdcdgstud` is added as an
-  NA column so the factor recode block does not error; its output column (`student_status`)
-  is all-NA. `dhhdfc12p` is also added as NA (no PUMF equivalent found). The two CCC
-  conditions (`ccc_300` — other mental illness; `ccc_185` — digestive disease) are entirely
-  absent from the dataset (suppressed in PUMF for confidentiality).
-- **Bootstrap weights absent**: No `bsw*` columns found in either CCHS PUMF cycle.
-  Bootstrap weights are required for correct variance estimation with the survey package.
-  They are distributed as a separate supplemental file by Statistics Canada and were not
-  bundled with the PUMF `.sav` files in this project.
-- **LOP module availability**: Not all provinces/territories include the LOP module in all cycles.
-  Verify `geodpmf × cycle` cross-tabulation for geographic gaps before provincial models.
-- **DHHGAGE boundary**: Age code 15 covers 75–79 years; the dataset cannot distinguish exactly
-  age 75 from 76–79 within this category (PUMF regrouping).
-- **Education cross-cycle label discrepancy**: `EDUDH04` / `EDUDR04` code 3 is labelled
-  "Other post-secondary" in 2010 and "Some post-secondary" in 2014. The recode adopts
-  "Some post-secondary" as the common label. See `cchs_value_label_diffs.csv`.
-- **LBSGSOC cross-cycle label discrepancy**: The 5-category occupation variable uses
-  descriptive labels in 2010 (e.g. "MANAG./ART, EDUC") and generic labels in 2014
-  ("GROUP 1" – "GROUP 5"). Numeric codes 1–5 are consistent across cycles.
-- **CCC conditions**: 2 of 19 requested conditions (`ccc_300` — other mental illness;
-  `ccc_185` — digestive disease) are suppressed in the PUMF for confidentiality.
-  Thesis Appendix 3 may specify acceptable substitutes.
-
+- All factor levels are explicitly defined; do not rely on integer codes.
+- Perceived health variables are recoded from raw CCHS codes (1 = best, 5 = worst)
+  to labelled factors. Output columns are `health_perceived` (source: `GEN_01`),
+  `mental_health_perceived` (source: `GEN_02B`), and `health_vs_prior_year`
+  (source: `GEN_02`). Excellent / Much better is the first factor level in each.
+- `work_stress` (source: `GEN_09`) is an ordered factor with 5 levels from
+  "Not at all stressful" to "Extremely stressful". Note: this captures
+  self-perceived general work stress (not specifically job demands).
+- ADL limitation columns (`adl_meals`, `adl_errands`, `adl_housework`,
+  `adl_personal_care`, `adl_moving_indoors`, `adl_finances`) are "No"/"Yes"
+  factors. Prevalence of "Yes" is very low (~0.8%) in this employed sample.
+- `smoking_status` collapses SMKDSTY's 6 codes to 4 groups: Daily, Occasional
+  (codes 2+3), Former (codes 4+5), Never smoked.
+- `occupation_category` uses 2010 descriptive labels for both cycles; 2014 PUMF
+  labels the same 5 groups only as "GROUP 1"–"GROUP 5".
+- `home_ownership` (source: `DHH_OWN`) is a two-level factor, Owner / Renter.
+  "Renter" means "not owned by a member of the household" and therefore also
+  covers band housing and rent-free arrangements; it is not a tenure-type
+  breakdown. Not-stated responses are `NA` in both cycles despite being encoded
+  differently upstream — see the QC note in the Predisposing section.
+- The three child-presence flags (`dhhgle5`, `dhhg611`, `dhhgl12`) are numeric
+  0/1, not factors, and not counts. `dhhgl12` is the logical OR of the other two;
+  do not enter all three into a penalised model. See the QC note above.
+- The 17 `cc_*` columns are logical. Use `as.integer(cc_*)` to get 0/1 for
+  regression models.
+- Always use `wts_m_pooled` (not `wts_m`) for weighted analyses.
+- No bootstrap weights are available; report confidence intervals from survey
+  design-based variance or note this limitation in publications.
+- CCHS PUMF terms of use: results may not be published without review per your
+  data sharing agreement with Statistics Canada.

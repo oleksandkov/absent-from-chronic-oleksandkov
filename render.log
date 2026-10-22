@@ -1,0 +1,8 @@
+ERROR: The specified directory ('.') is not a Quarto project
+
+Error: The specified directory ('.') is not a Quarto project
+    at render (file:///C:/Program%20Files/Quarto/bin/quarto.js:90671:19)
+    at async Command.fn (file:///C:/Program%20Files/Quarto/bin/quarto.js:90856:32)
+    at async Command.execute (file:///C:/Program%20Files/Quarto/bin/quarto.js:8437:13)
+    at async quarto (file:///C:/Program%20Files/Quarto/bin/quarto.js:127545:5)
+    at async file:///C:/Program%20Files/Quarto/bin/quarto.js:127563:9

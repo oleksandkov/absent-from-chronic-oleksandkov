@@ -3,7 +3,12 @@
 Human decisions and reasoning.
 
 ---
-# 2026-03-11
+
+## 2026-05-16
+
+Designed and implemented the Pipeline Orchestra — a single-agent system (`@pipeline-engineer`) with 4 phased prompts for developing, validating, and maintaining data pipeline scripts. Renamed scripts to sequential numbering: `extract-metadata.R` → `0-extract-metadata.R`, `2-test-ellis-cache.R` → `3-test-ellis-cache.R`. Created design doc (`.github/pipeline-orchestra-1.md`), agent definition, 4 prompts, instruction file for `manipulation/**`, and human-facing guide (`guides/pipeline-process.md`). Updated `flow.R`, VS Code tasks, `pipeline.md`, and glossary. Decision: sequential 0–3 numbering for execution order clarity.
+
+## 2026-03-11
 Review the flowr.r,1-ferry and 2-ellis scripts. Udpated README.md, pipeline.md. Created some tasks to do the pipeline manageing easier. 
 # 2026-03-05
 Restructuring the ellis pipeline, and the logic of the eda folders. Creating eda report where will be described the completed tasks from the `statistics_insturcitons_v3.md` file. In the eda-2.qmd will be described the completed taks from 2-1 to 3-2.

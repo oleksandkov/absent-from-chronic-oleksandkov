@@ -1,75 +1,112 @@
 project:
   type: website
   output-dir: _site
-  render:
-    - edited_content/index.qmd
-    - edited_content/project/statistical-instructions.qmd
-    - edited_content/pipeline/pipeline-guide.qmd
-    - edited_content/pipeline/cache-manifest.qmd
-    - edited_content/pipeline/input-manifest.qmd
-    - edited_content/data-primer/variable-inclusion.qmd
-    - edited_content/data-primer/univariate-distributions-redirect.qmd
-    - edited_content/analysis/outcome-redirect.qmd
-    - edited_content/analysis/outcome-distribution-shapes-redirect.qmd
-    - edited_content/analysis/exposure-redirect.qmd
-    - edited_content/analysis/predisposing-redirect.qmd
-    - edited_content/analysis/facilitating-redirect.qmd
-    - edited_content/analysis/needs-redirect.qmd
-    - edited_content/analysis/missingness-redirect.qmd
-    - edited_content/site-map.qmd
+  pre-render:
+    - scripts/copy-contract-assets.R
   post-render:
-    - Rscript scripts/copy-analysis-html.R
+    - scripts/copy-analysis-html.R
+  render:
+    - content/index.qmd
+    - content/data-primer/variable-inclusion.qmd
+    - content/data-primer/univariate-distributions.qmd
+    - content/predictors/exposure.qmd
+    - content/predictors/predisposing.qmd
+    - content/predictors/facilitating.qmd
+    - content/predictors/needs.qmd
+    - content/predictors/missingness.qmd
+    - content/outcome/day-decomposition.qmd
+    - content/outcome/distribution-shapes.qmd
+    - content/outcome/rescaling.qmd
+    - content/model/bivariate-models.qmd
+    - content/model/lasso-rehearsal.qmd
+    - content/model/variable-selection.qmd
+    - content/model/condition-specific-models.qmd
+    - content/model/sex-stratified-models.qmd
+    - content/analysis/story-1.qmd
+    - content/analysis/story-2.qmd
+    - content/pipeline/pipeline-guide.qmd
+    - content/pipeline/cache-manifest.qmd
+    - content/pipeline/input-manifest.qmd
+    - content/site-map.qmd
+    - content/docs/project-proposal.qmd
+    - content/docs/minding-the-agents.qmd
 
 website:
   title: "Absent from Chronic"
+  repo-url: https://github.com/RG-FIDES/absent-from-chronic
   navbar:
     left:
-      - text: "Project"
-        menu:
-          - text: "Statistical Instructions"
-            href: edited_content/project/statistical-instructions.qmd
-      - text: "Pipeline"
-        menu:
-          - text: "Pipeline Guide"
-            href: edited_content/pipeline/pipeline-guide.qmd
-          - text: "CACHE Manifest"
-            href: edited_content/pipeline/cache-manifest.qmd
-          - text: "INPUT Manifest"
-            href: edited_content/pipeline/input-manifest.qmd
       - text: "Data Primer"
         menu:
           - text: "Variable Inclusion"
-            href: edited_content/data-primer/variable-inclusion.qmd
-          - text: "Univariate Distributions"
-            href: edited_content/data-primer/univariate-distributions-redirect.qmd
+            href: content/data-primer/variable-inclusion.qmd
+          - text: "Univariate Distributions (data-primer-1)"
+            href: content/data-primer/univariate-distributions.qmd
+      - text: "Predictors"
+        menu:
+          - text: "Exposure: Chronic Conditions (eda-61)"
+            href: content/predictors/exposure.qmd
+          - text: "Predisposing: Socio-demographic (eda-62)"
+            href: content/predictors/predisposing.qmd
+          - text: "Facilitating: Health System & Behaviours (eda-63)"
+            href: content/predictors/facilitating.qmd
+          - text: "Needs: Perceived Health & Limitations (eda-64)"
+            href: content/predictors/needs.qmd
+          - text: "Missingness (eda-65)"
+            href: content/predictors/missingness.qmd
+      - text: "Outcome"
+        menu:
+          - text: "Outcome: LOP Day Decomposition (eda-5)"
+            href: content/outcome/day-decomposition.qmd
+          - text: "Outcome: Distribution Shapes (eda-71)"
+            href: content/outcome/distribution-shapes.qmd
+          - text: "Outcome: Rescaling (eda-72)"
+            href: content/outcome/rescaling.qmd
+      - text: "Model"
+        menu:
+          - text: "Bivariate Models (model-00)"
+            href: content/model/bivariate-models.qmd
+          - text: "Lasso Rehearsal with Predisposing (model-0)"
+            href: content/model/lasso-rehearsal.qmd
+          - text: "Variable Selection with Lasso (model-1)"
+            href: content/model/variable-selection.qmd
+          - text: "Condition-Specific Models (model-2)"
+            href: content/model/condition-specific-models.qmd
+          - text: "Sex-Stratified Models (model-3)"
+            href: content/model/sex-stratified-models.qmd
       - text: "Analysis"
         menu:
-          - text: "Outcome (LOP Day Decomposition)"
-            href: edited_content/analysis/outcome-redirect.qmd
-          - text: "Outcome (Distribution Shapes)"
-            href: edited_content/analysis/outcome-distribution-shapes-redirect.qmd
-          - text: "Exposure (Chronic Conditions)"
-            href: edited_content/analysis/exposure-redirect.qmd
-          - text: "Predisposing (Socio-demographic)"
-            href: edited_content/analysis/predisposing-redirect.qmd
-          - text: "Facilitating (Health System & Behaviours)"
-            href: edited_content/analysis/facilitating-redirect.qmd
-          - text: "Needs (Perceived Health & Limitations)"
-            href: edited_content/analysis/needs-redirect.qmd
-          - text: "Missingness"
-            href: edited_content/analysis/missingness-redirect.qmd
-      - text: "Site Map"
-        href: edited_content/site-map.qmd
-
+          - text: "Story 1: Reading the Four Models (eda-81)"
+            href: content/analysis/story-1.qmd
+          - text: "Story 2: What the Three Frames Say (eda-82)"
+            href: content/analysis/story-2.qmd
+      - text: "Pipeline"
+        menu:
+          - text: "Pipeline Guide"
+            href: content/pipeline/pipeline-guide.qmd
+          - text: "CACHE Manifest"
+            href: content/pipeline/cache-manifest.qmd
+          - text: "INPUT Manifest"
+            href: content/pipeline/input-manifest.qmd
+      - text: "Docs"
+        menu:
+          - text: "Site Map"
+            href: content/site-map.qmd
+          - text: "Project Proposal"
+            href: content/docs/project-proposal.qmd
+          - text: "Minding the Agents"
+            href: content/docs/minding-the-agents.qmd
+    right:
+      - icon: github
+        href: https://github.com/RG-FIDES/absent-from-chronic
+        aria-label: "Source repository on GitHub"
+        target: _blank
   page-footer:
-    center: "*Absent from Chronic* — Statistical Analysis Replication | Marc-Andre Blanchette, Research Scientist"
-
-  repo-url: https://github.com/RG-FIDES/absent-from-chronic
+    center: "*Absent from Chronic* | Marc-Andre Blanchette, Oleksandr Koval, Andriy Koval | 2026"
 
 format:
   html:
     theme: flatly
     toc: true
-    embed-resources: true
     mermaid:
       theme: neutral

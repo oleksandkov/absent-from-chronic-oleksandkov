@@ -1,0 +1,488 @@
+---
+title: "EDA-82 (Story 2): What the Three Frames Together Say"
+subtitle: "Synthesising model-1, model-2, and model-3, and naming what comes next"
+author: "Analysis Team"
+date: last-modified
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    toc-depth: 3
+    code-fold: show
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission of `eda-82`
+
+Three modelling reports are complete. `model-1` applied a penalty to 48 candidate predictors across all workers and refit what survived. `model-2` repeated the procedure inside each of 17 chronic-condition subgroups. `model-3` repeated it inside each sex and then refit both strata on a common term list so the two could be compared. Each report answers its own question well. None of them answers the question a reader actually brings: **taken together, what do these say about the role chronic conditions play in predicting days of missed work?**
+
+That is this report. Where [eda-81](../eda-81/eda-81.html) explained *how* the primary model was built — what the penalty does, what the four specifications are — `eda-82` asks *what it means*, and is equally concerned with marking where the evidence runs out.
+
+::: callout-important
+## This report fits nothing
+
+Every number here was computed by `model-1`, `model-2`, or `model-3` and written to disk by them. `eda-82` opens no analytic parquet, calls no `glmnet`, and calls no `MASS::glm.nb`. It reads sixteen files, joins them on a common term key, and reasons about them. If a number here disagrees with the number in its source report, the fault is in this report's joining, and the provenance audit in Output out1 is where to look first.
+:::
+
+**Research questions:**
+
+1.  What survives all three cuts of the data, and which predictors appear in only one frame?
+2.  How much of the variation in days absent do these models actually explain, and what does the gap between a 10-term and an 81-term model tell us about the ceiling of this design?
+3.  Does the condition-specific view add anything the pooled view does not already carry, or does subgroup selection mostly track subgroup size?
+4.  Where do the sexes genuinely differ in the association between a condition and days absent, as opposed to differing only in which terms the penalty happened to retain?
+5.  What substantive claim can this body of evidence currently support, stated at the strength the evidence permits and no higher?
+6.  What would the next round buy?
+
+# Environment
+
+```{r}
+#| code-summary: Reconciles working directory between execution modes
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir='../../') # keep this chunk isolated
+```
+
+```{r}
+#| label: set_options
+#| code-summary: Report-wide formatting options
+#| echo: false
+#| results: hide
+#| message: false
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results = 'show',
+  message = FALSE,
+  warning = FALSE,
+  comment = NA,
+  tidy = FALSE,
+  fig.path = 'figure-png-iso/'
+)
+echo_chunks <- FALSE
+message_chunks <- FALSE
+options(width = 100)
+read_chunk("analysis/eda-82/eda-82.R")
+```
+
+```{r}
+#| label: load-packages
+#| code-summary: Packages used in the current report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: Project functions, Alberta visual identity colours, and the shared candidate registry
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: Paths to sixteen upstream artifacts, the frame grid, and local display decisions
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| code-summary: The term-key reconstruction, interval formatters, and a table printer
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+# Data
+
+```{r}
+#| label: load-data
+#| code-summary: Read the sixteen artifacts model-1, model-2, and model-3 persisted
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: tweak-data-0
+#| code-summary: Type coercion and key construction only — nothing is recomputed
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: inspect-data-0
+#| code-summary: Inventory of what was read
+#| echo: false
+#| code-fold: true
+```
+
+# Data Context
+
+For complete data documentation, see the [Data Primer](../data-primer-1/data-primer-1.html). This report's unit of analysis is not a respondent but a **model term**, so the context below describes the artifacts and the terms rather than the survey.
+
+## Which artifact feeds which conclusion
+
+```{r}
+#| label: data-context-tables
+#| code-summary: Upstream artifact, its frame, its grain, and where it is used
+#| echo: false
+#| results: asis
+```
+
+## A single term, traced through three frames
+
+Where a data primer would show one respondent, this report shows one term. `Migraine: Yes` is a useful specimen precisely because it appears everywhere: the pooled model kept it, both sex strata kept it, and eleven of the seventeen condition subgroups kept it.
+
+Read the table below carefully, because the three blocks answer three different questions. The pooled row says how much more absence is associated with migraine among workers generally. The two stratum rows say the same thing within each sex. The condition rows say something narrower and easily misread: *among people who already have some other named condition*, how much more absence is associated with also having migraine. A migraine estimate inside the diabetes subgroup is not an estimate about diabetes.
+
+```{r}
+#| label: data-context-person
+#| code-summary: One worked term across every frame eda-82 joins
+#| echo: false
+#| results: asis
+```
+
+## The shape of every subset that was modelled
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: Size, non-zero share, and mean days for every subgroup and stratum
+#| echo: false
+#| results: asis
+```
+
+Two columns are worth pausing on. **Any absence** is the share of the subgroup that missed at least one day; **mean days** averages over everyone, including the zeros. These move together across subgroups but not in lockstep — chronic fatigue syndrome has the highest of both, while diabetes has a middling absence rate and one of the lower day counts. That decoupling is a hint, and Part VI returns to it.
+
+# Part I: The Three Frames
+
+## Table t1: what each report asked
+
+```{r}
+#| label: t1
+#| code-summary: The three modelling frames stated side by side
+#| echo: false
+#| results: asis
+```
+
+::: callout-warning
+## The three frames do not share a penalty rule
+
+`model-1` and `model-3` designate `lambda.1se` primary — the parsimonious rule, which keeps the smallest model statistically indistinguishable from the best. `model-2` reverses this locally (its decision 25) because at subgroup scale the parsimonious rule finds nothing it is confident enough to keep in seven of the seventeen conditions.
+
+The reversal was correct. But it means the frames are not evidentially interchangeable: **a term retained in eleven subgroups under a permissive rule is not evidence of the same strength as a term retained in the pooled model under a parsimonious one.** Every cross-frame comparison in this report is annotated where it crosses that boundary.
+:::
+
+## Output out1: provenance
+
+```{r}
+#| label: out1
+#| code-summary: Every file read, its row count, and the term-key reconstruction check
+#| echo: false
+```
+
+`model-2` and `model-3` both persist a `term` column built as `variable_label: level`. `model-1` does not, so `eda-82` reconstructs the same string from `model-1`'s `variable_label` and `level` columns. The check above confirms the reconstruction: every term the pooled primary model retained also matched on the reconstructed key wherever it appears in the other two reports. Had a term failed to match, it would show as a shortfall in the last column and every downstream join would be suspect.
+
+# Part II: What Converges
+
+The central question. A predictor retained in one frame is a finding about that frame. A predictor retained in all of them is a finding about absenteeism.
+
+## Graph g1: the convergent core
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: Build the union row spine and the retention matrix
+#| echo: true
+#| results: hide
+#| code-fold: true
+```
+
+```{r}
+#| label: g1
+#| code-summary: Retention across pooled, female, male, and the 17 condition subgroups
+#| echo: false
+#| fig-width: 12
+#| fig-height: 11
+```
+
+The left panel resolves into three tiers.
+
+**Seven terms are retained in all three frames.** The survey cycle indicator, three chronic conditions (migraine, mood disorder, back problems), and three functional-need measures (injury in the past year, needing help with errands, needing help with housework). These are the terms that survived a parsimonious penalty applied three times to three different cuts of the data. They are the closest thing this body of work has to a robust finding.
+
+**Three terms are retained pooled and in one stratum only.** Arthritis (pooled and male), chronic fatigue syndrome and bowel disorder (pooled and female). Part V asks whether these are genuine differences in association or artefacts of which term the penalty happened to grab.
+
+**Everything below the green block is retained in *no* parsimonious model.** Living arrangements, marital status, province, work stress, alcohol, education — the whole predisposing and facilitating apparatus. Yet the right panel shows these terms being retained by eleven, twelve, thirteen of the seventeen condition subgroups.
+
+::: callout-note
+## Why the bottom of the graph is not a contradiction
+
+The right panel used the permissive rule; the left used the parsimonious one. A permissive rule keeps everything whose held-out deviance improvement is positive, however small. So "retained in 13 of 17 subgroups" and "retained in 0 of 3 parsimonious models" are entirely consistent: these variables carry a small, consistent, real signal that the parsimonious rule declines to pay for.
+
+That is not nothing. It is a statement that province and work stress and living arrangement are stably but weakly associated with absence — reliably detectable, not worth much predictively.
+:::
+
+## Graph g11: the same core, estimated three ways
+
+```{r}
+#| label: g11
+#| code-summary: Pooled, female, and male adjusted rate ratios on one log axis
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6.5
+```
+
+The horizontal axis is logarithmic because the models were fitted with a log link; equal distances are equal multiplicative factors, and a rate ratio of 1.5 means fifty per cent more days absent with everything else in the model held equal. `eda-81` sets out the reading rules for this scale in detail.
+
+What the graph shows:
+
+-   **Effect sizes are moderate and remarkably uniform.** Almost every chronic condition sits between 1.4 and 2.1. Mood disorder is the largest at about 2.1; arthritis and back problems the smallest at about 1.4. There is no condition in this list whose presence multiplies absence by five.
+-   **The functional-need measures are as large as the conditions, or larger.** Needing help with errands (about 2.5) exceeds every chronic condition in the model. Injury in the past twelve months (about 1.9) exceeds all but mood disorder. Part VI takes this seriously.
+-   **The three series mostly overlap.** The female and male estimates bracket the pooled estimate for most terms, which is what one expects when the pooled estimate is a weighted average of two similar quantities. Where they do not overlap — arthritis, migraine, bowel disorder — Part V looks closer.
+-   **Intervals widen sharply for rare terms.** Chronic fatigue syndrome has the widest interval of any condition and the male interval spans the null. It is retained by the pooled model on the strength of a small number of respondents.
+
+## Table t2: the core ledger
+
+```{r}
+#| label: t2
+#| code-summary: Each core term with its pooled estimate, stratum retention, and subgroup breadth
+#| echo: false
+#| results: asis
+```
+
+Empty cells in the pooled column are not zeros. They mark a term for which the pooled model produced no estimate, because its selection step declined the variable. The female and male columns are populated for every term the pooled model kept, because they come from `model-3`'s union model, which deliberately refits both strata on a shared term list for exactly this purpose.
+
+# Part III: What the Models Explain
+
+This is the part of the synthesis that is least comfortable and most important.
+
+## Table t3: the explained-variance ledger
+
+```{r}
+#| label: t3
+#| code-summary: In-sample and held-out fit for all pooled specifications and both strata
+#| echo: false
+#| results: asis
+```
+
+## Graph g2: what the extra terms buy
+
+```{r}
+#| label: g2
+#| code-summary: Held-out discrimination against model size
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6.5
+```
+
+Three readings, in increasing order of consequence.
+
+**The models discriminate modestly.** Held-out concordance runs from about 0.60 to about 0.65. A concordance of 0.50 is a coin flip and 1.00 is perfect ordering. Given two randomly chosen workers, the primary model correctly identifies which of the two missed more work about 61 per cent of the time.
+
+**McFadden's pseudo-$R^2$ is under 0.04 everywhere.** It is not a proportion of variance and must not be read as one, but on its own scale it is small: the fitted models improve the log-likelihood only slightly over an intercept-only model. Days of missed work are, in this data, overwhelmingly determined by something these 48 variables do not measure.
+
+**Eightfold more terms buy four hundredths of concordance.** Model 1 carries 10 terms and reaches 0.613. Model 4 carries 81 and reaches 0.653. The 71 additional terms — the whole predisposing and facilitating apparatus, plus perceived health — improve held-out ordering by 0.04. This is the strongest evidence in the whole exercise that the constraint is not the model.
+
+::: callout-important
+## What a low ceiling does and does not mean
+
+It does **not** mean the rate ratios are wrong. A predictor can carry a well-estimated, reproducible association and still explain little variation, because most of the variation is elsewhere. The intervals in Graph g11 are narrow for exactly this reason: 48,932 respondents estimate a moderate association precisely.
+
+It **does** mean two things. First, these models are not prediction tools; nobody should use them to forecast an individual's absence. Second, and more interesting scientifically: absence is dominated by within-person, within-episode, and within-workplace variation that a cross-sectional self-report of chronic condition status cannot reach. Table t6 lists the several ways one might reach it.
+:::
+
+# Part IV: The Condition-Specific View
+
+Seventeen models, one per chronic condition. The question this part asks is whether the differences among them are differences between conditions or differences between sample sizes.
+
+## Table t4: the condition ledger
+
+```{r}
+#| label: t4
+#| code-summary: Subgroup size, non-zero share, mean days, comorbidity load, and selection yield
+#| echo: false
+#| results: asis
+```
+
+## Graph g3: subgroup scale and selection yield
+
+```{r}
+#| label: g3
+#| code-summary: Variables retained against non-zero outcome count
+#| echo: false
+#| fig-width: 10
+#| fig-height: 7.5
+```
+
+The graph makes one point with unusual clarity: **what a subgroup model retains tracks how many people are in it.** Under the permissive rule, back problems (3,510 workers with any absence) keeps 27 variables and cancer (248) keeps 6. Under the parsimonious rule the seven smallest subgroups keep nothing at all beyond the forced cycle term.
+
+This has a direct interpretive consequence. Reading `model-2`'s condition-specific term lists as a claim about the conditions — "in diabetes, only these three things matter" — would be a mistake. In diabetes the penalty had 754 absentees to work with and could not confidently distinguish much. The term list is a statement about statistical power at least as much as about pathophysiology.
+
+::: callout-note
+## The one clean exception
+
+Stroke sits well above the permissive trend line: 79 absentees, 12 variables retained. That is the opposite of what the trend predicts and is worth a look. With 187 respondents and 79 absentees, a permissive penalty on a wide design matrix is in the regime where selection is unstable rather than informative. `model-2` flags stroke and chronic fatigue syndrome as small-subgroup cases for this reason. This is a caution, not a finding.
+:::
+
+## What the comorbidity columns do to the whole exercise
+
+Table t4's comorbidity block is easy to skim past and should not be. Between 63 and 93 per cent of the members of any condition subgroup carry at least one other named condition. Workers with fibromyalgia carry 2.9 other conditions on average; workers with chronic fatigue syndrome, 3.3.
+
+The seventeen subgroups are therefore not seventeen independent findings. They are seventeen heavily overlapping views of substantially the same people. And in the pooled model, the same overlap means the LASSO faced a block of correlated binary indicators and did what L1 penalties do with correlated blocks: **kept one member and dropped the rest.** That mechanism, not an absence of association, is the most plausible explanation for why hypertension, diabetes, heart disease, and asthma appear nowhere in the pooled parsimonious model while being retained in a dozen subgroup models each.
+
+This is the single most actionable methodological finding in this report, and it is what makes elastic net the first item on the roadmap.
+
+# Part V: The Sex-Stratified View
+
+Whether the two strata differ in *what they retain* is a fact about selection. Whether they differ in *the size of an association* is a fact about the world. Only the union model can speak to the second, because it refits both strata on a common term list so that a female and a male estimate exist for the same term.
+
+## Table t5: the heterogeneity ledger
+
+```{r}
+#| label: t5
+#| code-summary: Ratio of female to male rate ratios, with intervals and stratum retention
+#| echo: false
+#| results: asis
+```
+
+## Graph g4: where the sexes differ
+
+```{r}
+#| label: g4
+#| code-summary: Ratio-of-ratios forest from the union model
+#| echo: false
+#| fig-width: 10
+#| fig-height: 6.5
+```
+
+Three terms show a difference that clears conventional significance without correction for testing ten terms at once, and all three point the same way:
+
+-   **Arthritis** (ratio 0.76, $p$ = 0.0004): the association with absence is stronger among men.
+-   **Bowel disorder** (ratio 0.69, $p$ = 0.0025): stronger among men.
+-   **Migraine** (ratio 0.76, $p$ = 0.0017): stronger among men.
+
+The remaining seven terms show no detectable difference.
+
+::: callout-warning
+## Selection disagreement is not the same as heterogeneity
+
+The colour coding makes a point the table cannot. Arthritis was kept by the **male** stratum's own selection step and not the female one; bowel disorder by the **female** one and not the male. The *estimates* say the association is stronger in men in both cases. Selection and effect size are answering different questions, and reading a stratum's term list as a claim about which conditions "matter for women" would invert the arthritis result.
+
+This is the general hazard of stratified selection, and it is why `model-3` built the union model.
+:::
+
+## An interpretation offered tentatively
+
+A pattern in which several conditions carry a *larger* association with absence among men, while women have both higher overall absence (mean 1.53 days versus 1.08) and higher prevalence of most of these conditions, is consistent with a differential-threshold account: if women's absence is driven by a broader set of causes — including caregiving and a wider range of conditions — then any single condition accounts for a smaller share of it. It is equally consistent with differential reporting, differential job type, or differential access to sick leave.
+
+Nothing in this data adjudicates among those. The three significant ratios are worth a designed follow-up; they are not worth a mechanism in a manuscript.
+
+# Part VI: What This Body of Evidence Currently Supports
+
+Stating conclusions at the strength the evidence permits, and no higher.
+
+## Five claims the evidence supports
+
+**1. Chronic conditions are reliably associated with work absence, at moderate magnitude.** Six condition indicators survive a parsimonious penalty applied to 48 candidates on nearly 49,000 workers, and they survive it again in each sex separately. Adjusted rate ratios cluster between 1.4 and 2.1. This is a stable, replicated, unremarkable-sized association.
+
+**2. Mental health and pain conditions dominate the physical-disease conditions.** Mood disorder (2.12) is the largest single condition effect, and migraine (1.63), back problems (1.44), and bowel disorder (1.65) all survive while hypertension, diabetes, heart disease, and cancer do not. The conditions that predict absence are the ones that are episodic, painful, or psychological — not the ones that are chronic, managed, and asymptomatic between events.
+
+**3. Functional limitation predicts absence at least as strongly as diagnosis.** Needing help with errands (2.48) and with housework (1.82), and injury in the past twelve months (1.91), are among the largest terms in the pooled model and are retained in every frame. A worker's functional state carries information a diagnosis list does not.
+
+**4. Where a condition's association differs by sex, the difference is modest and currently points toward men.** Three of ten tested terms differ; all three are stronger among men; none exceeds a ratio-of-ratios of 0.70 in magnitude. This is a real but second-order finding.
+
+**5. These predictors, collectively, account for very little of the variation in absence.** Held-out concordance around 0.61, McFadden under 0.04, and an eightfold increase in model size buying four hundredths of discrimination. This is the most robust finding in the report and the one most likely to be under-reported.
+
+## Four claims the evidence does not support
+
+**Not causation.** Condition status and days absent are reported in the same interview. A worker who missed thirty days is more likely to have consulted a physician and received a diagnosis. Every estimate here is an adjusted association on cross-sectional data, and no further modelling of these two cycles will change that.
+
+**Not "condition X does not matter."** Hypertension, diabetes, heart disease, and asthma are absent from the pooled parsimonious model. Given the comorbidity structure in Table t4 and the known behaviour of L1 penalties on correlated blocks, the most likely reading is that they were crowded out by a correlated neighbour, not that they are unrelated to absence. `model-2` retains each of them in a dozen subgroup models.
+
+**Not a prediction instrument.** A concordance of 0.61 is not a basis for individual forecasting, screening, or targeting.
+
+**Not condition-specific mechanism.** The seventeen subgroup models overlap so heavily — 63 to 93 per cent of each subgroup carries another condition — that a term retained in the arthritis model is not cleanly a statement about arthritis.
+
+## How this advances what is known
+
+The literature on chronic conditions and work absence is large and mostly reports condition-by-condition associations from single-condition samples. This exercise contributes three things that design cannot.
+
+**A common candidate set and a common penalty across seventeen conditions.** The condition-specific results are directly comparable to one another because they were produced by one procedure on one frame, rather than assembled from studies with different covariate sets.
+
+**An explicit accounting of what the whole apparatus explains.** Very few papers in this area report held-out discrimination. Table t3 is a statement about the limits of the cross-sectional survey design that is useful independent of any individual rate ratio.
+
+**A demonstration that functional limitation competes with diagnosis.** The activities-of-daily-living measures are retained in every frame and are as large as the largest condition. That is an argument for measuring function alongside diagnosis in absence research, and it is visible here only because both were offered to the same penalty on the same footing.
+
+# Part VII: Next Lines of Inquiry
+
+## Table t6: the roadmap
+
+```{r}
+#| label: t6
+#| code-summary: Methodological and substantive extensions, each with what it would settle
+#| echo: false
+#| results: asis
+```
+
+## Methodological expansion, in priority order
+
+The roadmap table gives the full comparison. Four items deserve a sentence of argument here.
+
+**Elastic net is the highest-value single change.** The comorbidity structure documented in Table t4 is exactly the situation in which L1 selection is known to misbehave: correlated predictors compete, one wins arbitrarily, and the rest are reported as eliminated. Ridge would give every candidate an estimate and reveal how much of the elimination was collinearity. Elastic net would let the condition block enter as a block. Running a grid over $\alpha$ and reporting the selection path as a function of $\alpha$ would convert the current binary retained/eliminated verdict into a graded one, which is a strictly more honest object.
+
+**A two-part model is the highest-value change to the outcome side.** Table t4 shows that a subgroup's non-zero share and its mean days do not move together. A single negative binomial averages two distinguishable processes: whether a worker misses any time at all, and how long the absence runs. Separating them would let the analysis say whether chronic conditions raise the *frequency* of absence, its *duration*, or both — a question the current results cannot address and that matters for policy, since the two have different remedies.
+
+**Trees settle the ceiling question.** If a random forest, given the same 48 variables, reaches roughly the same held-out concordance as the ten-term negative binomial, then the ceiling in Table t3 belongs to the data and the additive form is not costing anything. If it clears that ceiling materially, there is interaction or threshold structure the current models cannot see, and the obvious place to look is condition-by-occupation and condition-by-sex. Either result is informative, which is unusual and makes this a good use of effort.
+
+**Stepwise selection is worth running and not worth reporting as primary.** Its value is entirely as a concordance check: agreement between two selection procedures with different failure modes is worth more than either alone. Its inferential properties are the weakest of the four, and post-selection intervals from a stepwise search are worse than the already-optimistic ones this report carries.
+
+## Substantive expansion
+
+The methodological items sharpen what is already here. The substantive items ask different questions, and two of them are more likely to move the ceiling than any estimator.
+
+**Severity and duration are the most plausible explanation for the ceiling.** Every worker with arthritis is currently one binary indicator, whether newly diagnosed and well controlled or long-standing and disabling. Non-differential misclassification of exposure of that magnitude attenuates estimates toward the null and caps explainable variation. If the true relationship is between *severity* and absence, then a binary indicator is measuring a diluted version of it, and no estimator can undo that. This is the most expensive item on the roadmap, because the PUMF does not carry severity detail, and probably the most important.
+
+**Morbidity burden should be modelled directly.** The comorbidity table shows workers with chronic fatigue syndrome carrying 3.3 other conditions on average. A count of conditions, and empirically derived clusters of conditions, are both derivable from the existing exposure block in a single pass, and they ask a question the seventeen indicators cannot: does absence track any particular diagnosis, or the accumulation of morbidity?
+
+**Workplace context is the largest omitted domain.** Work stress, occupation, and schedule are retained in eleven or more condition subgroups each, which says they carry stable signal. What is missing is any hypothesis about how they *interact* with condition — whether the same back problem costs more days in manual work than in office work. That is a design question, not a data question, and it can be asked of the existing frame.
+
+**Between-cycle replication is cheap and currently unexercised.** The cycle indicator is retained in every model in this report, meaning the two cycles differ in level. Nothing yet establishes whether they differ in structure. Fitting the pooled and stratified frames separately on 2010–11 and 2013–14 would provide an independent-sample check on the term list, at the cost of halving the sample per fit.
+
+## What cannot be fixed from here
+
+The direction of the association. Condition status and absence are reported in the same interview, on the same day, by the same person. No estimator, no penalty, and no amount of adjustment recovers temporal order from a cross-section. Resolving it requires longitudinal linkage or an administrative absence record. Until then, every number in this report is an adjusted association, and the manuscript language should say so in every table caption.
+
+::: callout-tip
+## Suggested sequence
+
+If the next round is to be a single focused effort rather than a survey of methods, the ordering implied by the argument above is: **(1)** elastic net over a grid of $\alpha$, to establish whether the pooled term list is stable under a different treatment of correlated exposures; **(2)** a two-part decomposition, to separate frequency from duration; **(3)** a forest, to bound the ceiling; **(4)** condition burden and clusters as alternative exposures. The first three are each one script on the existing frame. The fourth needs one Ellis pass.
+:::
+
+# Session
+
+```{r}
+#| label: session-info
+#| code-summary: Environment
+#| echo: false
+report_render_duration <- round(as.numeric(difftime(
+  Sys.time(), report_render_start_time, units = "secs")), 1)
+cat("Rendered in", report_render_duration, "seconds on", format(Sys.time()), "\n\n")
+sessionInfo()
+```

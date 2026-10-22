@@ -1,13 +1,80 @@
 ---
-description: "Rules for assembling edited_content/ from repository source files. Organized by writing protocol: Direct Line, Technical Bridge, Narrative Bridge. Applied by the Publishing Writer."
+description: "Rules for assembling content/ from repository source files. Organized by writing protocol: Direct Line, Technical Bridge, Narrative Bridge. Applied by the Publishing Writer."
 applyTo: "_frontend-*/**"
 ---
 
 # Publishing Rules
 
-Exhaustive rules for how the Writer agent constructs pages in `edited_content/`. Each page in `edited_content/` follows exactly one protocol. The protocols classify edited pages, not raw files — raw files are source material that feeds into the construction of each edited page.
+**Role of this document**: Operational source of truth for protocol/content-type semantics and execution rules.
+**Companion high-level reference**: `.github/publishing-orchestra.md` explains architecture and intent for humans.
 
-Organized by writing protocol. Consult `.github/publishing-orchestra-3.md` for the full system design.
+Exhaustive rules for how the Writer agent constructs pages in `content/`. Each page in `content/` follows exactly one protocol. The protocols classify edited pages, not raw files — raw files are source material that feeds into the construction of each edited page.
+
+Organized by writing protocol. Consult `.github/publishing-orchestra.md` for the full system design.
+
+---
+
+## 0. Taxonomy and Mapping Registry
+
+<!-- DESIGNATED SOURCE OF TRUTH: This section is the designated source of truth for Protocol, Mode, Output Type concepts, and their relationships, across this repository. All other documents and scripts must reference this section rather than redefining these concepts independently. -->
+
+This section defines three interdependent registries used by the publishing system:
+
+- **Protocol Registry**: the primary category defining how an edited page in `content/` is produced.
+- **Mode Registry**: optional specializations within a protocol. Each mode belongs to exactly one protocol and is not shared across protocols.
+- **Output Type Registry**: the classification of the resulting edited artifact, describing its nature and production mechanism for readers. One output type is unique to each protocol-mode combination.
+
+### 0a. Protocol Registry (Current)
+
+- Direct Line
+- Technical Bridge
+- Narrative Bridge
+
+### 0b. Mode Registry (Current)
+
+Modes are optional specializations within a protocol:
+
+- **Direct Line modes**: VERBATIM, REDIRECTED
+- **Technical Bridge modes**: (none — operates without specialization)
+- **Narrative Bridge modes**: (none — operates without specialization)
+
+### 0c. Output Type Registry (Current)
+
+- VERBATIM
+- REDIRECT
+- ADAPTED
+- COMPOSED
+
+### 0d. Protocol-Mode-to-Output-Type Mapping (Current)
+
+| Protocol | Mode (if any) | Resulting output type |
+| --- | --- | --- |
+| Direct Line | VERBATIM | VERBATIM |
+| Direct Line | REDIRECTED | REDIRECT |
+| Technical Bridge | (none) | ADAPTED |
+| Narrative Bridge | (none) | COMPOSED |
+
+**Key principles**:
+- Each mode belongs to one and only one protocol.
+- Each protocol-mode combination produces a unique output type.
+- When a protocol has no modes, it operates without specialization.
+
+### 0e. Conceptual and Scriptual Connection
+
+- The contract assigns a **protocol** (and optionally a **mode** for that protocol) per page.
+- Writer execution applies protocol and mode rules to produce page outputs.
+- Fidelity and site-map reporting use **output types** derived from the mapping above.
+- Output types provide readers immediate understanding of the production mechanism (determinism, trust, etc.).
+
+In other words: protocol-mode assignment is the planning/execution language, while output type is the reporting/audit/trust language.
+
+### 0f. Extensibility Policy
+
+- New protocols may be introduced without changing existing output types.
+- New modes may be introduced within existing or new protocols; each must map to an existing or new output type.
+- New output types may be introduced without changing existing protocols.
+- Any new protocol, mode, or output type must add (or revise) rows in the mapping table above.
+- Downstream docs, templates, and scripts must reference this section for canonical term usage.
 
 ---
 
@@ -15,11 +82,11 @@ Organized by writing protocol. Consult `.github/publishing-orchestra-3.md` for t
 
 ### Self-Containment Rule
 
-At the conclusion of assembly, the `edited_content/` folder must be fully autonomous. All images, data artifacts, and includes must be co-located. No relative paths may point outside this folder.
+At the conclusion of assembly, the `content/` folder must be fully autonomous. All images, data artifacts, and includes must be co-located. No relative paths may point outside this folder.
 
 ### Source File Integrity
 
-Never edit original source files in their repository locations. All transformations happen on copies placed inside `edited_content/`. The originals remain the source of truth.
+Never edit original source files in their repository locations. All transformations happen on copies placed inside `content/`. The originals remain the source of truth.
 
 ### Explicit Render List
 
@@ -27,10 +94,17 @@ The `_quarto.yml` file must list every page individually in `project.render`. Ne
 
 ### Page Semantics
 
-- Each page defined in the contract becomes one page in `edited_content/` and one page on the website.
+- Each page defined in the contract becomes one page in `content/` and one page on the website.
 - Protocols classify these edited pages, not the raw source files. A raw file may feed multiple edited pages under different protocols.
 - Never expose raw file paths as visible page text, headings, or navigation labels.
 - Derive display labels from: (1) YAML frontmatter `title`, (2) first markdown heading, (3) humanized filename stem — in that priority order.
+
+### Required Audit Artifacts
+
+- `FIDELITY_REPORT.md` is required for every Writer run.
+- `TRANSFORM_LOG.md` is required whenever one or more ADAPTED pages are produced.
+- `scripts/audit-fidelity.R` is required for every Writer run.
+- Keep both files at `_frontend-N/` root.
 
 ---
 
@@ -63,7 +137,7 @@ For content that should reach the reader essentially as the analyst wrote it. Tw
 
 **When**: The contract assigns Direct Line (REDIRECTED) to an HTML report.
 
-**Stub creation**: Create a `.qmd` stub in `edited_content/<section>/`:
+**Stub creation**: Create a `.qmd` stub in `content/<section>/`:
 
 ```qmd
 ---
@@ -125,6 +199,15 @@ When a `.md` file requires Quarto-specific features (e.g., `{{< include >}}` sho
 - Adapt section headings if needed for website context
 - Apply the asset resolution algorithm (Section 6)
 
+### 3f. Transform Logging (Required)
+
+For every ADAPTED page, append entries to `_frontend-N/TRANSFORM_LOG.md` with:
+
+- edited page path
+- source file path
+- transform type (`link_rewrite`, `shortcode_injection`, `sanitize`, `extension_promotion`, `frontmatter_add`)
+- concise rationale
+
 ### Priority
 
 Formatting over content. The Writer preserves the source's meaning while adapting its technical format. Do not editorially revise the content.
@@ -143,6 +226,9 @@ For content that doesn't exist in the repo — or that synthesizes multiple sour
 - Read the specified input sources from the repo
 - Author the page content following the brief
 - **Epistemological grounding**: Every factual claim must trace to a specific Raw source. When making claims about data or results, reference which file supports it. Do not hallucinate data results not found in the source files.
+- If a COMPOSED page already exists and the page contract is unchanged, preserve the existing draft and do not rewrite it.
+- If a COMPOSED page already exists and the page contract has changed, the human must choose whether to continue from the existing draft or start from scratch.
+- In the contract-changed case, the existing draft may inform the new draft, but it is not silently overwritten.
 
 ### 4b. Index / Landing Page
 
@@ -153,7 +239,7 @@ The index page has **three mandatory components**, assembled in this order:
 The single most important visual in the project — typically the primary forecast or results chart. Place it first, above all prose.
 
 - The contract brief or the human's intent statement identifies which image to use. If not specified, use the primary forecast chart from `analysis/report-1/prints/` (or the highest-numbered report available).
-- Co-locate the image in `edited_content/images/` and reference it with a relative path.
+- Co-locate the image in `content/images/` and reference it with a relative path.
 - Include a concise caption (one sentence) that explains what the reader is looking at.
 - Render at `width=90%` or similar to fill the page column without overflow.
 
@@ -172,7 +258,7 @@ A brief, plain-language orientation — no more than 3–4 short paragraphs or e
 
 Render the pipeline diagram immediately after the Welcome section.
 
-- Extract the mermaid diagram from `manipulation/pipeline.md` (or `README.md` if not available there) into a `_mermaid-index.qmd` partial file co-located in `edited_content/`.
+- Extract the mermaid diagram from `manipulation/pipeline.md` (or `README.md` if not available there) into a `_mermaid-index.qmd` partial file co-located in `content/`.
 - Include it via `{{< include _mermaid-index.qmd >}}`.
 - Precede the diagram with a short label (e.g., `## How It Works` or `## Pipeline`) — one heading level below the page title.
 - Do not duplicate this partial if one already exists for another page; reuse the same file.
@@ -187,41 +273,43 @@ Render the pipeline diagram immediately after the Welcome section.
 
 Rules for auto-generating a site map. The site map page must contain two mandatory sections in this order:
 
-**1. Content Types table**
+**1. Output Types table**
 
-Define the four content types used in this site. Use this exact table structure:
+Define the four output types used in this site. Use this exact table structure:
 
 ```markdown
-## Content Types
+## Output Types
 
 | Type | Meaning |
 |------|----------|
 | **VERBATIM** | Source `.md` morphed to `.qmd` with YAML frontmatter added; content preserved exactly |
 | **COMPOSED** | Authored by the Publishing Writer; synthesized from one or more raw sources per the contract brief |
-| **GENERATED** | Produced by a pre-render script from a verbatim source, with transforms applied (e.g., mermaid diagram injection) |
+| **ADAPTED** | Source `.md`/`.qmd` transformed with non-editorial Technical Bridge operations (for example link rewriting, include injection, section exclusions, and sanitization), with all transforms documented in `TRANSFORM_LOG.md` |
 | **REDIRECT** | Transit `.qmd` stub that forwards the browser to a standalone rendered HTML file |
 ```
 
 **2. Navigation Structure tree**
 
-An ASCII tree showing every page in the site with its content type annotation and source provenance arrow. Use this format:
+An ASCII tree showing every page in the site with its output type annotation and source provenance arrow. Use this format:
 
 ```markdown
 ## Navigation Structure
 
 ```
+
 [Site Title]
 │
 ├── 🏠  Index                      COMPOSED  ← [brief source description]
 │
 ├── [Section]
 │   ├── [Page]                     VERBATIM  ← [source file path]
-│   └── [Page]                     GENERATED ← [source file] (pre-render: [transform])
+│   └── [Page]                     ADAPTED  ← [source file] (transforms: [summary from TRANSFORM_LOG])
 │
 └── [Section]
     ├── [Page]                     REDIRECT  → [target html path]
     └── [Page]                     COMPOSED  ← [brief source description]
-` `` 
+` ``
+
 ```
 
 Annotation rules:
@@ -309,7 +397,7 @@ The same `README.md` can serve both roles in the same site.
 
 ## 6. Asset Resolution Algorithm
 
-Apply to every file copied into `edited_content/`:
+Apply to every file copied into `content/`:
 
 1. **Scan** the source file for all local asset references:
    - Markdown images: `![...](path)`
@@ -343,7 +431,7 @@ Hooks are a **first-class pattern**, not workarounds.
 
 ### When to Use
 
-- REDIRECTED pages whose HTML targets live outside `edited_content/`
+- REDIRECTED pages whose HTML targets live outside `content/`
 - Images or assets that cannot be pre-resolved at assembly time
 - Dynamic content generation (e.g., mermaid diagram injection from source files)
 
@@ -402,7 +490,7 @@ format:
 If the Writer encounters issues that don't block assembly:
 
 1. Complete the rest of the assembly
-2. Create `edited_content/BUILD_REPORT.md` with:
+2. Create `content/BUILD_REPORT.md` with:
    - Issue description
    - Affected page(s)
    - Suggested resolution
@@ -416,11 +504,27 @@ After rendering:
 2. Compare against intended pages in the contract
 3. Report discrepancies in the assembly report
 
+### Protocol Validation Report
+
+After reconciliation, produce `_frontend-N/FIDELITY_REPORT.md` with protocol-specific results:
+
+- **VERBATIM**: deterministic body equivalence (frontmatter excluded)
+- **REDIRECT**: target existence and `_site/` placement checks
+- **ADAPTED**: whitelist transform compliance plus `TRANSFORM_LOG.md` coverage
+- **COMPOSED**: brief-field completeness and source-grounding verification
+- **SOURCE_HASH** (when provided in contract): source file hash equals `source_sha256`; mismatches must be marked `fail` until page is re-assembled
+
+Each check must be labeled `pass`, `warn`, or `fail`, with remediation notes for non-pass items.
+
+### Hard Gate Rule
+
+The Writer must execute `_frontend-N/scripts/audit-fidelity.R` as the final validation step. If the script is missing, bootstrap it from `.github/templates/audit-fidelity-template.R`. If overall fidelity status is `fail`, the run is failed and must not be reported as successful.
+
 ---
 
 ## 10. Sync Behavior
 
 - Re-resolve all file references on every Writer run
-- If source files changed since the last run, update corresponding files in `edited_content/`
+- If source files changed since the last run, update corresponding files in `content/`
 - If new matching files appear, add them during the same run
 - Always overwrite `_quarto.yml` from the contract (the contract is the source of truth)

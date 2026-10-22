@@ -88,65 +88,125 @@ message("Data loaded. Uncomment the tables needed for this analysis.")
 #   nrow() # should be 0 if grain is person-year
 
 # ---- data-context-tables -----------------------------------------------------
-# Which tables and variables this analysis uses (from contract Data Sources)
-# Populate during interview to make the Data Context section analysis-specific.
+# Which tables and variables this analysis uses (MANDATORY — populate during interview)
+# References: contract Data Sources (Primary + Supporting tables)
+# Example:
 # cat("This analysis uses:\n")
-# cat("  - support_by_year.parquet: person-year of financial support\n")
-# cat("  - client_roster.parquet: person-level demographics\n")
-# cat("\nKey variables: person_oid, year, client_type_code, program_class1\n")
+# cat("  - support_by_year.parquet: person-year of financial support (grain: person × year)\n")
+# cat("  - client_roster.parquet: person-level demographics and enrollment history\n")
 
 # ---- data-context-person -----------------------------------------------------
-# What the data looks like for a representative individual (1-2 people)
-# example_oid <- ds_support %>%
-#   count(person_oid) %>%
-#   filter(n >= 3, n <= 8) %>%
-#   slice_sample(n = 1) %>%
-#   pull(person_oid)
+# What the data looks like for a representative individual (MANDATORY)
+# Show 1-2 people whose data exemplifies the grain of analysis
+# Example:
+# example_oid <- ds_support %>% count(person_oid) %>% filter(n >= 3, n <= 8) %>% slice_sample(n = 1) %>% pull(person_oid)
 # cat("Example person_oid:", example_oid, "\n\n")
-# ds_support %>% filter(person_oid == example_oid) %>% print()
+# ds_support %>% filter(person_oid == example_oid)
+# ds_client %>% filter(person_oid == example_oid)
 
 # ---- data-context-distributions ----------------------------------------------
-# Distributions of key variables relevant to this analysis
+# Distributions of key variables relevant to this analysis (MANDATORY)
+# Show only variables that appear in this report's graphs and tables
+# Example:
 # ds_support %>% count(program_class1) %>% arrange(desc(n))
+# ds_client %>% summarise(age_mean = mean(age), age_sd = sd(age))
+
+# ---- SECTION: Graph Family g1 ------------------------------------------------
+# Artifact ID: g1 | Type: Graph | Research Question: {RQ1 from contract}
+# Numbering is nominal (creation order); see artifact-naming.instructions.md
 
 # ---- g1-data-prep -----------------------------------------------------------
-# Data preparation for first graph family
+# Data preparation for first graph family (g1 and any g1* members)
 # Research question: {RQ1 from contract}
 
 # g1_data <- ds_support %>%
 #   # your data prep here
 
-# ---- g1 ---------------------------------------------------------------------
-# Primary visualization for first graph family
-# g1_{descriptive_name} <- g1_data %>%
+# ---- g1 --------------------------------------------------------------------
+# Level-1 graph: g1 {descriptive title}
+# g1_primary <- g1_data %>%
 #   ggplot(aes(x = , y = )) +
-#   geom_*() +
+#   geom_point() +
 #   labs(
-#     title = "",
+#     title = "Graph g1: {Descriptive Title}",
 #     subtitle = "Data source: {table_name}",
 #     x = "",
 #     y = ""
 #   ) +
 #   theme_minimal()
 #
-# ggsave(paste0(prints_folder, "g1_{descriptive_name}.png"),
-#        g1_{descriptive_name}, width = 8.5, height = 5.5, dpi = 300)
-# print(g1_{descriptive_name})
+# ggsave(paste0(prints_folder, "g1_descriptive_name.png"),
+#        g1_primary, width = 8.5, height = 5.5, dpi = 300)
+# print(g1_primary)
+
+# ---- SECTION: Graph Family g2 ------------------------------------------------
+# Artifact ID: g2 | Type: Graph | Research Question: {RQ2 from contract}
+# Hierarchy: g2 (level 1) -> g21, g22 (level 2) -> g211 (level 3 micro-variant)
 
 # ---- g2-data-prep -----------------------------------------------------------
-# Data preparation for second graph family
+# Data preparation shared by the g2 family
 # Research question: {RQ2 from contract}
 
-# ---- g2 ---------------------------------------------------------------------
-# Primary visualization for second graph family
+# ---- g2 --------------------------------------------------------------------
+# Level-1 graph: g2 {descriptive title}
 
-# ---- g3-data-prep -----------------------------------------------------------
-# Data preparation for third graph family
-# Research question: {RQ3 from contract}
+# ---- g21 -------------------------------------------------------------------
+# Level-2 variant: alternative facet of the g2 family
+# g21_plot <- g2_data %>% ggplot(...) + labs(title = "Graph g21: {Descriptive Title}")
+# ggsave(paste0(prints_folder, "g21_descriptive_name.png"), g21_plot, width = 8.5, height = 5.5, dpi = 300)
+# print(g21_plot)
 
-# ---- g3 ---------------------------------------------------------------------
-# Primary visualization for third graph family
+# ---- g211 ------------------------------------------------------------------
+# Level-3 micro-variant: aesthetic test of g21 (e.g., alternative palette)
+# Use a micro-variant instead of renumbering when testing a minor change
+# g211_plot <- g21_plot + scale_color_brewer(palette = "Set2") +
+#   labs(title = "Graph g211: {Descriptive Title} (palette test)")
+# ggsave(paste0(prints_folder, "g211_descriptive_name.png"), g211_plot, width = 8.5, height = 5.5, dpi = 300)
+# print(g211_plot)
 
-# ---- save-to-disk ------------------------------------------------------------
+# ---- SECTION: Table Family t1 ------------------------------------------------
+# Artifact ID: t1 | Type: Table | {Description}
+# Tables are enhanced displays (kable/gt/DT) and form their own families,
+# independent of graphs. A raw text print belongs in an Output (out*) instead.
+
+# ---- t1-data-prep -----------------------------------------------------------
+# Data preparation for the t1 table family
+# t1_summary <- ds_support %>%
+#   group_by(program_class1) %>%
+#   summarise(n = n(), mean_support = mean(annual_support), sd_support = sd(annual_support))
+
+# ---- t1 --------------------------------------------------------------------
+# Level-1 table: summary statistics rendered through an enhanced display
+# t1_summary %>%
+#   knitr::kable(caption = "Table t1: Summary Statistics by Program Type")
+
+# ---- t11 -------------------------------------------------------------------
+# Level-2 table: same family, stratified subset
+# t1_summary_sub <- ds_support %>% filter(<subset>) %>%
+#   group_by(program_class1) %>% summarise(n = n(), mean_support = mean(annual_support))
+# t1_summary_sub %>%
+#   knitr::kable(caption = "Table t11: Summary Statistics — {Subset}")
+
+# ---- SECTION: Outputs --------------------------------------------------------
+# Artifact ID: out1 | Type: Output | Raw text-based blocks
+# Outputs establish understanding relative to the CACHE-manifest, the data
+# primer, or method.md. They are RAW TEXT by definition. If you render the same
+# content through an enhanced display (kable), classify it as a Table (t*).
+
+# ---- out1 ------------------------------------------------------------------
+# Level-1 output: grain proof for the primary table (should print 0)
+# cat("Output out1: Grain proof for support_by_year (person x year)\n")
+# ds_support %>%
+#   group_by(person_oid, year) %>%
+#   summarise(n = n(), .groups = "drop") %>%
+#   filter(n > 1) %>%
+#   nrow()
+
+# ---- out11 -----------------------------------------------------------------
+# Level-2 output: structure dump for the same table
+# cat("Output out11: Structure of support_by_year\n")
+# ds_support %>% dplyr::glimpse()
+
+# ---- save-to-disk -----------------------------------------------------------
 # Save any derived datasets for downstream use
 # arrow::write_parquet(derived_data, paste0(data_private_derived, "descriptive_name.parquet"))

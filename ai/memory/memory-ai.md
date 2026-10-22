@@ -4,6 +4,10 @@ AI system status and technical briefings.
 
 ---
 
+## 2026-05-16 (Pipeline Orchestra implementation)
+
+Implemented Pipeline Orchestra — single-agent system (`@pipeline-engineer`) for pipeline lifecycle management. Created: `.github/pipeline-orchestra-1.md` (design doc), `.github/agents/pipeline-engineer.agent.md`, 4 phased prompts (`pipeline-bootstrap/ellis/validate/audit.prompt.md`), `.github/instructions/pipeline-scripts.instructions.md` (applyTo `manipulation/**`), `guides/pipeline-process.md`. Renamed `extract-metadata.R` → `0-extract-metadata.R`, `2-test-ellis-cache.R` → `3-test-ellis-cache.R`. Updated `flow.R` ds_rail, `.vscode/tasks.json`, `manipulation/pipeline.md`, `ai/project/glossary.md`. Added glossary terms: Pipeline Orchestra, Pipeline Artifact, White-List (Two-Tier).
+
 ## 2026-03-21 (documentation alignment sprint)
 
 Ran Ellis (`apply_sample_exclusions = TRUE`) producing 63,843 rows × 62 columns (Cycle 0:

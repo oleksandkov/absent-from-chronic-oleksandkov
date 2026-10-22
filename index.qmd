@@ -101,8 +101,6 @@ Install R dependencies:
 
 ```r
 Rscript utility/install-packages.R   # flexible: recommended for most users
-# or
-Rscript utility/init-renv.R          # strict: exact reproducibility
 ```
 
 See [Guides](pages/guides.qmd) for full setup instructions.

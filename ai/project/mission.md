@@ -1,14 +1,14 @@
 # Project Mission 
 
-The project's mission is perform the statistical analysis request in data-private\raw\2026-02-19\stats_instructions_v3.md (aka stat instructions)
+The project's mission is perform the statistical analysis requested in the Project Proposal (data-private\raw\2026-02-19\stats_instructions_v3.md)
 
 ## Objectives
 
-- deliver a frontend containing the exhaustive response to stat instructions.
+- deliver a frontend containing the exhaustive response to the Project Proposal.
 
 ## Success Metrics
 
-- Each bullet point of the stat instructions is addressed
+- Each bullet point of the Project Proposal is addressed
 - Each requirement or ask is implemented or addressed
 
 ## Non-Goals

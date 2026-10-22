@@ -31,6 +31,7 @@ Scan existing directories to determine the next available number:
 ### Step 3: Check for Conflicts
 
 If the target directory already exists:
+
 - List its contents
 - Ask: "Directory `analysis/{target}/` already exists with these files. Should I continue developing this report, or create a new one?"
 - If continuing: read `report-contract.prompt.md` and resume from Phase 1 or Phase 2
@@ -65,10 +66,12 @@ Create the target directory and populate it from templates in `.github/templates
 | `data-primer-template.qmd` | `analysis/{target}/{name}.qmd` |
 
 Also create:
+
 - `analysis/{target}/data-local/` directory
 - `analysis/{target}/prints/` directory
 
 Replace all `{PLACEHOLDERS}` in templates:
+
 - `{NAME}` → e.g., `eda-7`, `report-1`, `data-primer-1`
 - `{TITLE}` → descriptive title (ask if not provided)
 - `{DATE}` → current date
@@ -90,6 +93,7 @@ Place it after existing entries in the PHASE 2 section, maintaining the comment 
 Ask 3–5 focused questions to refine `report-contract.prompt.md`. Questions are adaptive — each answer influences the next.
 
 After the interview:
+
 - Update `report-contract.prompt.md` with mission, research questions, target graph families
 - Add initial graph family stubs to the `.R` file (g1-data-prep, g1, etc.)
 - For EDA/Report: populate the `data-context-tables`, `data-context-person`, and `data-context-distributions` chunks in both `.R` and `.qmd`
@@ -98,6 +102,7 @@ After the interview:
 ## Default Section Mapping
 
 ### EDA Default Sources
+
 | Contract Field | Typical Source |
 |---------------|---------------|
 | Primary Data | `data-private/derived/manipulation/*.parquet` |
@@ -105,6 +110,7 @@ After the interview:
 | Graph families | 3–5, driven by interview answers |
 
 ### Report Default Sources
+
 | Contract Field | Typical Source |
 |---------------|---------------|
 | Upstream EDAs | `analysis/eda-2/`, `analysis/eda-3/`, etc. (explicit list) |
@@ -114,7 +120,8 @@ After the interview:
 ## Reference Files
 
 Read these before scaffolding:
-- `.github/composing-orchestra-1.md` — Design document
+
+- `.github/composing-orchestra.md` — Design document
 - `analysis/eda-1/eda-style-guide.md` — Canonical style conventions
 - `data-public/metadata/CACHE-manifest.md` — Data dictionary
 - `flow.R` — Pipeline registration (for ds_rail entry)

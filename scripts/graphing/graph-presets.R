@@ -13,7 +13,11 @@
 # library(extrafont)
 library(grid)
 library(ggplot2)
-library(dichromat)
+if (requireNamespace("dichromat", quietly = TRUE)) {
+  library(dichromat)
+} else {
+  message("dichromat not installed; color transform helpers will remain unavailable.")
+}
 library(RColorBrewer)
 # devtools::install_github(repo="Melinae/TabularManifest")
 # library(TabularManifest) # custom histographs for quick EDA

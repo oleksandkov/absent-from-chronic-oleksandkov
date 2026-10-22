@@ -38,17 +38,12 @@ Dependencies
 ------------
   pdfplumber>=0.11.0    (pure Python; install via pip — no admin, no system DLLs)
 
-  Install into the project virtual environment:
-    python utility/init-venv.py          # bootstraps .venv from python-requirements.txt
-  OR directly:
-    .venv\\Scripts\\pip install pdfplumber
+    Install into your active Python environment:
+        python -m pip install pdfplumber
 
 Usage (from repo root)
 ----------------------
-  .venv\\Scripts\\python.exe manipulation\\0-extract-dictionary\\0-extract-dictionary.py
-
-  Alternatively, from this script's directory:
-    ..\\..\\venv\\Scripts\\python.exe 0-extract-dictionary.py
+    python manipulation\\0-extract-dictionary\\0-extract-dictionary.py
 
 Notes
 -----
@@ -77,8 +72,7 @@ except ImportError:
     print(
         "\n[ERROR] pdfplumber is not installed in the active Python environment.\n"
         "Install it with:\n"
-        "    .venv\\\\Scripts\\\\pip install pdfplumber>=0.11.0\n"
-        "Or run:  python utility/init-venv.py  from the repo root to bootstrap the full .venv.\n",
+        "    python -m pip install pdfplumber>=0.11.0\n",
         file=sys.stderr,
     )
     sys.exit(1)
@@ -214,7 +208,7 @@ def write_manifest(records: list[dict], output_dir: Path) -> None:
         "",
         "```bash",
         "# Re-run extraction from repo root:",
-        '.venv\\Scripts\\python.exe manipulation\\0-extract-dictionary\\0-extract-dictionary.py',
+        'python manipulation\\0-extract-dictionary\\0-extract-dictionary.py',
         "```",
     ]
 

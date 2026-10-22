@@ -15,7 +15,7 @@ haven,TRUE,TRUE,,Import SPSS (.sav) / Stata / SAS files
 DBI,TRUE,TRUE,,Database interface abstraction layer
 RSQLite,TRUE,TRUE,,SQLite database driver
 arrow,TRUE,TRUE,,Parquet and Arrow columnar file format
-dbplyr,TRUE,TRUE,,dplyr backend for database connections
+dbplyr,FALSE,TRUE,,dplyr backend for database connections
 fs,TRUE,TRUE,,File system operations (path/dir/file)
 janitor,TRUE,TRUE,,Data cleaning utilities and tabyl
 checkmate,TRUE,TRUE,,Fast function argument assertions
@@ -25,19 +25,27 @@ emmeans,TRUE,TRUE,,Estimated marginal means for models
 knitr,TRUE,TRUE,,Dynamic report generation
 rmarkdown,TRUE,TRUE,,R Markdown rendering
 quarto,TRUE,TRUE,,Quarto document and report support
-gt,TRUE,TRUE,,Grammar of tables
-gtsummary,TRUE,TRUE,,Publication-ready summary tables via gt
+gt,FALSE,TRUE,,Grammar of tables
+gtsummary,FALSE,TRUE,,Publication-ready summary tables via gt
 kableExtra,TRUE,TRUE,,Enhanced knitr/kable HTML and LaTeX tables
 htmltools,TRUE,TRUE,,HTML generation and manipulation tools
-tableone,TRUE,TRUE,,Table 1 descriptive statistics
-readxl,TRUE,TRUE,,Read Excel (.xlsx/.xls) files
+tableone,FALSE,TRUE,,Table 1 descriptive statistics
+readxl,FALSE,TRUE,,Read Excel (.xlsx/.xls) files
 readr,TRUE,TRUE,,Read rectangular text data files (CSV/TSV)
-data.table,TRUE,TRUE,,Fast in-memory data manipulation
+data.table,FALSE,TRUE,,Fast in-memory data manipulation
 config,TRUE,TRUE,,YAML configuration file management
-plotly,TRUE,TRUE,,Interactive web graphics via D3.js
+plotly,FALSE,TRUE,,Interactive web graphics via D3.js
 httpgd,TRUE,TRUE,,HTTP graphics device for VS Code R extension
-survey,TRUE,TRUE,,Complex survey design and weighted analysis
+survey,FALSE,TRUE,,Complex survey design and weighted analysis
 devtools,TRUE,TRUE,,R package development tools
 remotes,TRUE,TRUE,,Install packages from GitHub and other remotes
 OuhscMunge,TRUE,FALSE,OuhscBbmc,OUHSC data munging and package installation utilities
+mice,TRUE,TRUE,,Missing data handling and MCAR pattern analysis (md.pattern)
+naniar,TRUE,TRUE,,Missing data visualization and MCAR testing
+zoo,TRUE,TRUE,,Time series and date utilities (yearmon/yearqtr)
+rlang,TRUE,TRUE,,Metaprogramming and non-standard evaluation (NSE)
+VennDiagram,TRUE,TRUE,,Venn and Euler diagram graphics
+duckdb,TRUE,TRUE,,In-memory analytical SQL database
+tidyverse,TRUE,TRUE,,Meta-package: ggplot2, dplyr, tidyr, readr, purrr, tibble, stringr, forcats
+dichromat,FALSE,TRUE,,Color vision deficiency simulation (optional graphing utility)
 

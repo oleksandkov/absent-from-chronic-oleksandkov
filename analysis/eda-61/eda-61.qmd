@@ -1,0 +1,322 @@
+---
+title: "EDA 61 — Exposure Variable Profile: 17 Chronic Condition Flags"
+subtitle: "Andersen Behavioral Model — Primary Exposure Domain"
+author: "Analysis Team"
+date: "2026-05-22"
+format:
+  html:
+    page-layout: full
+    toc: true
+    toc-location: right
+    code-fold: true
+    theme: yeti
+    highlight-style: breeze
+    code-line-numbers: true
+    self-contained: true
+    embed-resources: true
+    keep-md: false
+editor: visual
+editor_options:
+  chunk_output_type: console
+---
+
+# Mission
+
+This EDA profiles the 17 chronic-condition exposure variables (`cc_*`) that constitute
+the primary predictor domain in the Andersen Behavioral Model framework. It directly
+addresses §2.2 (primary exposure definition) and previews §4.3 (bivariate associations)
+from the Project Proposal.
+
+**Research Questions:**
+
+1. What is the weighted prevalence of each chronic condition in the employed population?
+2. How does each chronic condition relate to the primary outcome (`days_absent_total`) —
+   mean days, median days, and zero-proportion?
+3. What is the missing-data pattern across the 17 `cc_*` variables?
+4. What is the multimorbidity structure — how many conditions do respondents report,
+   and which condition pairs most frequently co-occur?
+
+Following the dual-file development pattern, all analytical code lives in
+`analysis/eda-61/eda-61.R`. This document sources those chunks for presentation.
+
+# Definition of Terms
+
+**Chronic condition (`cc_*`)**: A long-term health condition (expected duration ≥6 months)
+diagnosed by a health professional. Coded as R logical (`TRUE`/`FALSE`). Source: CCHS
+Canadian Community Health Survey chronic conditions module (CCC).
+
+**Multimorbidity**: The co-occurrence of two or more chronic conditions in the same
+individual.
+
+**`days_absent_total`**: Primary outcome. Row-wise sum of all 8 LOP component variables,
+representing total workdays missed in the past 3 months due to health reasons.
+
+**Exposure domain**: In the Andersen Behavioral Model, chronic conditions represent the
+mechanism through which predisposing, facilitating, and needs factors translate into
+absenteeism.
+
+```{r}
+#| code-summary: Reconciles working directory between execution modes
+#| echo: false
+#| results: hide
+#| message: false
+#| warning: false
+cat("Working directory: ", getwd())
+library(knitr)
+opts_knit$set(root.dir = "../../")
+```
+
+```{r}
+#| label: set_options
+#| code-summary: Report-wide formatting options
+#| echo: false
+#| results: hide
+#| message: false
+cat("Working directory: ", getwd())
+report_render_start_time <- Sys.time()
+opts_chunk$set(
+  results   = "show",
+  message   = FALSE,
+  warning   = FALSE,
+  comment   = NA,
+  tidy      = FALSE,
+  out.width = "960px",
+  fig.width  = 10,
+  fig.height = 6,
+  fig.path   = "figure-png-iso/"
+)
+options(width = 100)
+ggplot2::theme_set(ggplot2::theme_minimal())
+read_chunk("analysis/eda-61/eda-61.R")
+```
+
+# Environment
+
+> Reviews the components of the working environment. Non-technical readers may skip this section.
+
+```{r}
+#| label: load-packages
+#| code-summary: Packages used in the current report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: load-sources
+#| code-summary: Collection of custom functions used in current repository
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-globals
+#| code-summary: Values used throughout the report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+```{r}
+#| label: declare-functions
+#| code-summary: Custom functions defined for use in this report
+#| echo: true
+#| results: hide
+#| message: false
+#| code-fold: true
+```
+
+# Data
+
+```{r}
+#| label: load-data
+#| code-summary: Load data from Ellis parquet outputs
+#| warning: false
+#| code-fold: true
+#| cache: true
+```
+
+## Data Context
+
+For complete data documentation, see the
+[Data Primer](../data-primer-1/data-primer-1.html).
+
+```{r}
+#| label: data-context-tables
+#| code-summary: Tables and variables used in this analysis
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-person
+#| code-summary: Representative individual with multiple chronic conditions
+#| code-fold: true
+```
+
+```{r}
+#| label: data-context-distributions
+#| code-summary: Prevalence summary of 17 chronic condition variables
+#| code-fold: true
+```
+
+```{r}
+#| label: tweak-data-0
+#| code-summary: Reshape to long-form for analysis
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: inspect-data-0
+#| code-summary: Data overview
+#| code-fold: true
+```
+
+# Analysis
+
+## Graph Family G1: Condition Prevalence
+
+<!-- Research question: What is the weighted prevalence of each chronic condition? -->
+
+```{r}
+#| label: g1-data-prep
+#| code-summary: Prepare prevalence summaries
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g1
+#| code-summary: Unweighted prevalence of chronic conditions
+#| code-fold: true
+#| fig-cap: "Unweighted prevalence of 17 chronic conditions in the analytical sample"
+```
+
+```{r}
+#| label: g11
+#| code-summary: Weighted prevalence of chronic conditions
+#| code-fold: true
+#| fig-cap: "Population-weighted prevalence using wts_m_pooled"
+```
+
+```{r}
+#| label: g12
+#| code-summary: Weighted prevalence by CCHS cycle
+#| code-fold: true
+#| fig-cap: "Condition prevalence comparison between 2010-2011 and 2013-2014 cycles"
+```
+
+## Graph Family G1a: COPD Age-Gated Prevalence
+
+> **Context (Marc-André, 2026-05-15)**: The COPD question (CCC_091) was administered
+> only to respondents aged 35+. Younger respondents show `NA` because the question was
+> skipped — this is a survey design feature, not data quality failure. The graphs below
+> show COPD prevalence with age-gating applied (imputing `FALSE` for respondents below
+> the threshold) and compare the 17-condition profile within the eligible subsample.
+
+```{r}
+#| label: g1a-data-prep
+#| code-summary: Prepare COPD age-gated comparison data
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g1a
+#| code-summary: COPD prevalence — naive vs age-gated
+#| code-fold: true
+#| fig-cap: "COPD prevalence drops when restricting to age-eligible respondents (35+)"
+```
+
+```{r}
+#| label: g1a1
+#| code-summary: All 17 conditions — prevalence in 35+ subsample
+#| code-fold: true
+#| fig-cap: "Condition prevalence restricted to respondents aged 35+ (COPD-eligible subsample)"
+```
+
+## Graph Family G2: Outcome Relationship
+
+<!-- Research question: How does each condition relate to days_absent_total? -->
+
+```{r}
+#| label: g2-data-prep
+#| code-summary: Prepare outcome summaries by condition
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g2
+#| code-summary: Mean days absent by condition (those with condition)
+#| code-fold: true
+#| fig-cap: "Weighted mean days absent among those reporting each condition"
+```
+
+```{r}
+#| label: g21
+#| code-summary: Median days absent (IQR) by condition
+#| code-fold: true
+#| fig-cap: "Median and interquartile range of days absent for each condition"
+```
+
+```{r}
+#| label: g22
+#| code-summary: Zero-day proportion by condition status
+#| code-fold: true
+#| fig-cap: "Proportion reporting zero days absent, contrasting condition present vs absent"
+```
+
+## Graph Family G3: Missing Data Profile
+
+<!-- Research question: What is the missing-data pattern across 17 cc_* variables? -->
+
+```{r}
+#| label: g3-data-prep
+#| code-summary: Compute missingness statistics
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g3
+#| code-summary: Missingness profile across chronic condition variables
+#| code-fold: true
+#| fig-cap: "Percentage and count of missing values per condition flag"
+```
+
+```{r}
+#| label: g31
+#| code-summary: Missingness by CCHS cycle
+#| code-fold: true
+#| fig-cap: "Missing data rates by survey cycle"
+```
+
+## Graph Family G4: Multimorbidity / Co-occurrence
+
+<!-- Research question: What is the multimorbidity structure? -->
+
+```{r}
+#| label: g4-data-prep
+#| code-summary: Compute condition counts and co-occurrence matrix
+#| code-fold: true
+#| cache: true
+```
+
+```{r}
+#| label: g4
+#| code-summary: Distribution of condition count per respondent
+#| code-fold: true
+#| fig-cap: "Weighted distribution of number of chronic conditions per respondent"
+```
+
+```{r}
+#| label: g41
+#| code-summary: Top 20 co-occurring condition pairs (dot plot)
+#| code-fold: true
+#| fig-cap: "Top 20 condition pairs ranked by co-occurrence rate"
+```

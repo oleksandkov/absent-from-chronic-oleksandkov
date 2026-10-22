@@ -1,6 +1,6 @@
 # Python Package Requirements for Visualization & Analysis
 # Similar role to package-dependency-list.csv for R packages
-# Used by utility/init-venv.py to populate the project virtual environment
+# Use with: python -m pip install -r utility/python-requirements.txt
 #
 # Format: package_name>=minimum_version   # description
 # Pin exact versions by replacing >= with ==

@@ -46,10 +46,28 @@ For Report: what story or argument are we presenting?}
 5. {Optional: fifth question}
 
 ## Target Graph Families
+
 - g1: {Brief description of first graph family and its analytical focus}
 - g2: {Brief description of second graph family}
 - g3: {Brief description of third graph family}
 {Add more as needed. These are initial targets; the list evolves during development.}
+
+## Artifact Inventory
+
+| ID | Type | Title | Purpose |
+| --- | --- | --- | --- |
+| g1 | Graph | {Title} | {Purpose} |
+| g2 | Graph | {Title} | {Purpose} |
+| g21 | Graph | {Title} | {Purpose, level-2 variant of g2} |
+| g3 | Graph | {Title} | {Purpose} |
+| t1 | Table | {Title} | {Purpose} |
+| fig01 | Figure | {Title} | {Purpose} |
+| out1 | Output | {Title} | {Purpose, raw text block} |
+
+{Numbering is nominal (creation order / analytic flow) by default. Document any
+semantic convention for the levels in project-specific instructions if adopted.}
+
+**Note**: Update this inventory as artifacts are added, removed, or modified during development. Use it for audit before completion. See `.github/instructions/artifact-naming.instructions.md` for detailed ID rules.
 
 ## Output Format
 {HTML | PDF | Both}
@@ -84,7 +102,7 @@ Delete this section if empty.}
 ## Field Reference
 
 | Field | Required | Producer | Notes |
-|-------|----------|----------|-------|
+| --- | --- | --- | --- |
 | Type | Yes | Composer | `EDA` or `Report` |
 | Date | Yes | Composer | Auto-populated at creation |
 | Status | Yes | Composer/Human | Updated as work progresses |
@@ -99,7 +117,7 @@ Delete this section if empty.}
 
 ## Status Lifecycle
 
-```
+```text
 draft → active → complete
 ```
 

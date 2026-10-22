@@ -1,0 +1,6 @@
+target_type: parquet
+database_label: local-filesystem
+target_path: data-private/derived/cchs-2-tables/cchs_analytic.parquet
+target_label: cchs_analytic
+manifest_path: data-public/metadata/CACHE-manifest.md
+report_path: data-private/derived/manifest-validation/validation-report.md

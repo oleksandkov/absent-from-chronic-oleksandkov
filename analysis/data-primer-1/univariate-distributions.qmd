@@ -1,6 +1,6 @@
 ---
-title: "CCHS Analytical Dataset: Univariate Distributions"
-subtitle: "Data Primer 1 — Complete Variable Reference by Section"
+title: "CCHS Analytic Dataset: Univariate Distributions"
+subtitle: "Data Primer 1 \u2014 Complete Variable Reference by Section"
 author: "Analysis Team"
 date: today
 format:
@@ -23,23 +23,28 @@ editor_options:
 
 # Mission
 
-This document provides a univariate distribution profile for every variable in the `cchs_analytical` table produced by the Ellis lane (`manipulation/2-ellis.R`). Variables are grouped according to the seven sections defined in `analysis/data-primer-1/variable-inclusion.md`, which traces each variable back to the §2.2 requirements in `stats_instructions_v3.md`.
+This document provides a complete univariate profile of every variable in the `cchs_analytic` analysis-ready table produced by `manipulation/2-ellis.R`. It serves as the **canonical data reference** for all EDAs and Reports in this project.
 
-For each numeric/continuous variable, a **summary statistics** table is shown (N valid, N missing, mean, SD, min, p25, median, p75, max). For each discrete/categorical variable, a **frequency table** is shown (value, n, % of non-missing). Variables that are all-NA in the current PUMF files are flagged accordingly.
+**Dataset:** CCHS 2010 + 2014 pooled analytic sample\
+**Rows:** 63,843 respondents **Cols:** 70 variables\
+**Source:** `data-private/derived/cchs-2-tables/cchs_analytic.parquet`\
+**Pipeline documentation:** `data-public/metadata/CACHE-manifest.md`\
+**Variable traceability:** [Variable Inclusion](variable-inclusion.html)
 
-**N = 63 843 rows** (CCHS 2010–2011 and CCHS 2013–2014 pooled, employment-eligible respondents).
+All computation lives in `univariate-distributions.R` (the laboratory). This document sources those chunks and presents output only. All chunk bodies are intentionally empty.
 
 ------------------------------------------------------------------------
 
 ```{r}
 #| label: knitr-setup
+#| code-summary: Reconciles working directory between execution modes
 #| echo: false
 #| results: hide
 #| message: false
 #| warning: false
 cat("Working directory: ", getwd())
 library(knitr)
-opts_knit$set(root.dir = "../../")
+opts_knit$set(root.dir = "../../") # keep isolated from surrounding chunks
 ```
 
 ```{r}
@@ -56,9 +61,15 @@ opts_chunk$set(
   comment  = NA,
   tidy     = FALSE
 )
-echo_chunks    <- FALSE
-message_chunks <- FALSE
 options(width = 110)
+# display-* chunks: hide code and pass output as raw HTML/markdown to pandoc
+knitr::opts_hooks$set(label = function(options) {
+  if (isTRUE(grepl("^display-", options$label))) {
+    options$echo    <- FALSE
+    options$results <- "asis"
+  }
+  options
+})
 read_chunk("analysis/data-primer-1/univariate-distributions.R")
 ```
 
@@ -83,69 +94,77 @@ read_chunk("analysis/data-primer-1/univariate-distributions.R")
 
 ------------------------------------------------------------------------
 
-# 1. Outcome Variables
+## Data Context
 
-The **primary outcome** is `days_absent_total` — the total number of self-reported workdays lost in the past three months due to any health reason. The **sensitivity outcome** `days_absent_chronic` counts only days lost attributed to the respondent's own chronic condition. Both are derived by Ellis from eight LOP-module components (`lopg040`–`lopg100`); the components are also retained in the table.
+```{r}
+#| label: data-context-overview
+#| echo: false
+#| message: false
+# Overview table: rows, cols, completeness flags
+d_local <- readRDS("analysis/data-primer-1/data-local/univariate-distributions.rds")
+cat(sprintf(
+  "Parquet table: cchs_analytic\nRows: 63,843  |  Columns: 69\nCycles: CCHS 2010 + CCHS 2014 (pooled)\nSource: data-private/derived/cchs-2-tables/cchs_analytic.parquet\n"
+))
+knitr::kable(
+  d_local$t_cycle_freq,
+  col.names = c("CCHS cycle", "N", "% (of valid)"),
+  caption   = "Sample size by survey cycle"
+)
+```
+
+```{r}
+#| label: data-context-completeness
+#| echo: false
+#| message: false
+if (nrow(d_local$t_flags_summary) > 0) {
+  knitr::kable(
+    d_local$t_flags_summary,
+    col.names = c("Completeness flag", "N TRUE", "N FALSE", "N missing"),
+    caption   = "Analytic completeness flags"
+  )
+}
+```
+
+------------------------------------------------------------------------
+
+# 1. Outcomes
 
 ## 1.1 Primary and Sensitivity Outcomes
+
+`days_absent_total` is the primary outcome: total workdays absent due to any health reason in the past 2 weeks (LOP module). `days_absent_chronic` counts only absences attributable to chronic conditions.
 
 ```{r section-outcomes}
 ```
 
 ```{r display-outcomes}
-#| echo: false
-knitr::kable(
-  t_outcomes_summary,
-  col.names = c("Variable", "N valid", "N missing", "Mean", "SD",
-                "Min", "P25", "Median", "P75", "Max"),
-  caption   = "Table 1.1 — Summary statistics: primary and sensitivity outcomes",
-  align     = c("l", rep("r", 9))
-)
 ```
 
 ## 1.2 LOP Component Variables
 
-The eight raw LOP components contributing to `days_absent_total`. Each measures days absent for a specific health reason. High missingness is structural — the LOP module is only administered to currently employed respondents who reported any absence.
+The eight raw LOP components contributing to `days_absent_total`. Each measures days absent for a specific health reason. High missingness is structural: the LOP module is administered only to currently employed respondents who reported any absence.
 
 ```{r display-lop}
-#| echo: false
-lop_display <- t_lop_summary[, c("label", "variable", "n_valid", "n_miss",
-                                  "mean", "sd", "min", "p25", "median", "p75", "max")]
-knitr::kable(
-  lop_display,
-  col.names = c("Reason", "Variable", "N valid", "N missing", "Mean", "SD",
-                "Min", "P25", "Median", "P75", "Max"),
-  caption   = "Table 1.2 — Summary statistics: LOP component variables",
-  align     = c("l", "l", rep("r", 9))
-)
 ```
 
 ------------------------------------------------------------------------
 
 # 2. Chronic Conditions (Primary Exposure)
 
-Seventeen of the 19 requested chronic conditions are available in the PUMF. Two are suppressed for confidentiality (`ccc_300` — other mental illness; `ccc_185` — digestive disease) and are absent from this dataset. All variables are binary factors (`"Yes"` / `"No"`); percentages are calculated among non-missing responses.
+Seventeen of the 19 requested chronic conditions are available in the PUMF. Two are suppressed for confidentiality (`ccc_300` — other mental illness; `ccc_185` — digestive disease) and are absent from this dataset. All `cc_*` columns are **logical** (TRUE/FALSE); prevalence percentages exclude missing values.
 
 ```{r section-chronic-conditions}
 ```
 
 ```{r display-chronic-conditions}
-#| echo: false
-knitr::kable(
-  t_chronic_conditions,
-  col.names = c("Condition", "Yes (n)", "Yes (%)", "No (n)", "No (%)", "Missing (n)"),
-  caption   = "Table 2.1 — Prevalence of 17 available chronic conditions (17 of 19 from §2.2 available in PUMF)",
-  align     = c("l", "r", "r", "r", "r", "r")
-)
 ```
 
-> **Note:** Two conditions from §2.2 are absent from the PUMF and therefore not shown: *other mental illness* (`ccc_300`) and *digestive disease* (`ccc_185`). Both require RDC access.
+> **Note:** Two conditions from §2.2 are absent from the PUMF and not shown: *other mental illness* (`ccc_300`) and *digestive disease* (`ccc_185`). Both require RDC access.
 
 ------------------------------------------------------------------------
 
 # 3. Predisposing Variables
 
-Predisposing variables characterise the respondent's socio-demographic background. Student status is all-NA in the current output (source variable `sdcdgstud` absent from PUMF). Children-by-age-group variables (`dhhgle5`, `dhhg611`) are now populated; `dhhdfc12p` (children ≥ 12 yrs) has no PUMF equivalent and remains absent.
+Predisposing variables characterise the respondent's socio-demographic background. Student status (`sdcdgstud`) is suppressed in the PUMF and renders as all-NA. `dhhdfc12p` (children ≥ 12 yrs) has no PUMF equivalent and is absent. See [Variable Inclusion](variable-inclusion.html) §4 for full traceability.
 
 ```{r section-predisposing}
 ```
@@ -154,292 +173,154 @@ Predisposing variables characterise the respondent's socio-demographic backgroun
 ### Age Group
 
 ```{r display-age-group}
-#| echo: false
-knitr::kable(
-  t_pred_freq[["age_group"]],
-  col.names = c("Age group", "N", "% (of valid)"),
-  caption   = "age_group — Recoded from dhhgage; Ordered: 15-24 / 25-54 / 55-75",
-  align     = c("l", "r", "r")
-)
 ```
 
 ### Sex
 
 ```{r display-sex}
-#| echo: false
-knitr::kable(
-  t_pred_freq[["sex"]],
-  col.names = c("Sex", "N", "% (of valid)"),
-  caption   = "sex — Binary: Male / Female",
-  align     = c("l", "r", "r")
-)
 ```
 
 ### Marital Status
 
 ```{r display-marital-status}
-#| echo: false
-knitr::kable(
-  t_pred_freq[["marital_status"]],
-  col.names = c("Marital status", "N", "% (of valid)"),
-  caption   = "marital_status — Single / Married / Common-law / Widowed-Divorced-Separated",
-  align     = c("l", "r", "r")
-)
+```
+
+### Household Size
+
+```{r display-household-size}
 ```
 
 ### Education
 
 ```{r display-education}
-#| echo: false
-knitr::kable(
-  t_pred_freq[["education"]],
-  col.names = c("Education level", "N", "% (of valid)"),
-  caption   = "education — Ordered factor: Less than secondary → Post-secondary graduate",
-  align     = c("l", "r", "r")
-)
 ```
 
 ### Immigration Status
 
 ```{r display-immigration-status}
-#| echo: false
-knitr::kable(
-  t_pred_freq[["immigration_status"]],
-  col.names = c("Immigration status", "N", "% (of valid)"),
-  caption   = "immigration_status — Non-immigrant / Immigrant / Non-permanent resident",
-  align     = c("l", "r", "r")
-)
 ```
 
 ### Visible Minority
 
 ```{r display-visible-minority}
-#| echo: false
-knitr::kable(
-  t_pred_freq[["visible_minority"]],
-  col.names = c("Ethnic origin", "N", "% (of valid)"),
-  caption   = "visible_minority — White / Visible minority",
-  align     = c("l", "r", "r")
-)
 ```
+
+### Home Ownership
+
+```{r display-home-ownership}
+```
+
+::: {.callout-note}
+`home_ownership` derives from `DHH_OWN`, which is present in both cycles. "Renter"
+means "not owned by a member of the household" and therefore also covers band
+housing and rent-free arrangements; it is not a tenure-type breakdown. Not-stated
+responses are SPSS system-missing in 2010-2011 but explicit codes 7/8/9 in
+2013-2014; both are mapped to `NA` by the Ellis recode.
+:::
 
 ### Living Arrangements
 
 ```{r display-living-arrangements}
-#| echo: false
-n_miss_la <- attr(t_pred_freq[["living_arrangements"]], "n_miss")
-n_valid_la <- attr(t_pred_freq[["living_arrangements"]], "n_valid")
-if (n_valid_la == 0) {
-  cat(sprintf(
-    "**All-NA variable.** `living_arrangements` is all-missing in the current output (%d missing, %d valid).",
-    n_miss_la, n_valid_la
-  ))
-} else {
-  knitr::kable(
-    t_pred_freq[["living_arrangements"]],
-    col.names = c("Living arrangements", "N", "% (of valid)"),
-    caption   = "living_arrangements — Household living arrangement (8-level)"
-  )
-}
 ```
 
 ### Student Status
 
 ```{r display-student-status}
-#| echo: false
-n_miss_ss <- attr(t_pred_freq[["student_status"]], "n_miss")
-n_valid_ss <- attr(t_pred_freq[["student_status"]], "n_valid")
-if (n_valid_ss == 0) {
-  cat(sprintf(
-    "**All-NA variable.** `student_status` is all-missing (%d missing, %d valid). ",
-    n_miss_ss, n_valid_ss
-  ))
-  cat("`sdcdgstud` is suppressed in the CCHS PUMF; this variable requires RDC access.")
-} else {
-  knitr::kable(
-    t_pred_freq[["student_status"]],
-    col.names = c("Student status", "N", "% (of valid)"),
-    caption   = "student_status"
-  )
-}
 ```
 
-### Raw Age Code (dhhgage)
+### Raw Age Code
 
 ```{r display-dhhgage}
-#| echo: false
-knitr::kable(
-  t_dhhgage_summary,
-  col.names = c("Variable", "N valid", "N missing", "Mean", "SD",
-                "Min", "P25", "Median", "P75", "Max"),
-  caption   = "dhhgage — Raw PUMF age group code (integer 1–16; not recoded to years in PUMF)",
-  align     = c("l", rep("r", 9))
-)
+```
+
+### Children in Household
+
+```{r display-children}
 ```
 :::
 
-> **Missing household-composition variables:** `dhhgle5` (children \< 5 yrs), `dhhg611` (children 6–11 yrs) — require whitelist name fixes and are absent from the current output. `dhhdfc12p` (children ≥ 12 yrs) has no PUMF equivalent. Household size (`dhhdghsz`) is present via alias resolution. See `variable-inclusion.qmd` §4 for details.
+> **Note on the three child-presence flags:** `dhhgle5`, `dhhg611`, and `dhhgl12` are **binary 0/1 presence indicators** (0 = no such child in the household, 1 = one or more), not counts of children. All three are fully populated (0 missing across 63,843 rows).
+
+> **Note on `dhhgl12` redundancy:** `dhhgl12` denotes a child **under** 12 and is a deterministic function of the other two flags — `dhhgl12 == (dhhgle5 | dhhg611)` holds in all 63,843 rows, with zero discordant cases. Its marginal (22.8% positive) is therefore fully determined by the two component marginals (13.7% and 14.4%) and their overlap (3,340 households with both). Read it as a summary of the two, never as a third independent household characteristic.
+
+> **Note on missing household variables:** `dhhdfc12p` (children ≥ 12 yrs) has no PUMF equivalent and is a *different* construct from `dhhgl12`. See [Variable Inclusion](variable-inclusion.html) §4.
 
 ------------------------------------------------------------------------
 
 # 4. Facilitating Variables
 
-Facilitating variables describe health-system access, health behaviours, and labour-market context. All 12 facilitating variables are now populated in the analytical dataset. Income, employment type, and work schedule resolve via alias map; alcohol use (`alcdttm`), BMI (`hwtgisw`), and occupation (`lbsgsoc`) are directly white-listed.
+Facilitating variables describe health-system access, health behaviours, and labour-market context. All 12 facilitating variables are populated in the current pipeline output. See [Variable Inclusion](variable-inclusion.html) §5 for traceability.
 
 ```{r section-facilitating}
 ```
 
 ::: panel-tabset
-### Smoking Status
-
-```{r display-smoking}
-#| echo: false
-knitr::kable(
-  t_facil_freq[["smoking_status"]],
-  col.names = c("Smoking status", "N", "% (of valid)"),
-  caption   = "smoking_status — Ordered: Never / Former / Occasional / Daily"
-)
-```
-
-### Physical Activity
-
-```{r display-physical-activity}
-#| echo: false
-knitr::kable(
-  t_facil_freq[["physical_activity"]],
-  col.names = c("Physical activity level", "N", "% (of valid)"),
-  caption   = "physical_activity — Ordered: Active / Moderately active / Inactive"
-)
-```
-
-### Job Stress
-
-```{r display-job-stress}
-#| echo: false
-knitr::kable(
-  t_facil_freq[["job_stress"]],
-  col.names = c("Job stress level", "N", "% (of valid)"),
-  caption   = "job_stress — Ordered: Not at all stressful → Extremely stressful"
-)
-```
-
-### Has Family Doctor
-
-```{r display-family-doctor}
-#| echo: false
-knitr::kable(
-  t_facil_freq[["has_family_doctor"]],
-  col.names = c("Has regular family doctor", "N", "% (of valid)"),
-  caption   = "has_family_doctor — Yes / No"
-)
-```
-
-### Income (5-cat)
+### Income
 
 ```{r display-income}
-#| echo: false
-knitr::kable(
-  t_facil_freq[["income_5cat"]],
-  col.names = c("Household income category", "N", "% (of valid)"),
-  caption   = "income_5cat \u2014 5-category derived household income",
-  align     = c("l", "r", "r")
-)
+```
+
+### Family Doctor
+
+```{r display-family-doctor}
 ```
 
 ### Employment Type
 
 ```{r display-employment-type}
-#| echo: false
-knitr::kable(
-  t_facil_freq[["employment_type"]],
-  col.names = c("Employment type", "N", "% (of valid)"),
-  caption   = "employment_type \u2014 Self-employed vs. Employee",
-  align     = c("l", "r", "r")
-)
 ```
 
 ### Work Schedule
 
 ```{r display-work-schedule}
-#| echo: false
-knitr::kable(
-  t_facil_freq[["work_schedule"]],
-  col.names = c("Work schedule", "N", "% (of valid)"),
-  caption   = "work_schedule \u2014 Full-time vs. Part-time",
-  align     = c("l", "r", "r")
-)
+```
+
+### Smoking Status
+
+```{r display-smoking}
+```
+
+### BMI Category
+
+```{r display-bmi-category}
+```
+
+### Physical Activity
+
+```{r display-physical-activity}
 ```
 
 ### Alcohol Use
 
 ```{r display-alcohol}
-#| echo: false
-n_valid_al <- attr(t_facil_freq[["alcohol_type"]], "n_valid")
-if (n_valid_al == 0) {
-  cat("**All-NA variable.** `alcohol_type` is all-missing. ",
-      "Source variable `alcdttm` may be absent from PUMF.")
-} else {
-  knitr::kable(
-    t_facil_freq[["alcohol_type"]],
-    col.names = c("Type of drinker", "N", "% (of valid)"),
-    caption   = "alcohol_type — Derived type of drinker"
-  )
-}
 ```
 
-### BMI Category
+### Fruit & Veg
 
-```{r display-bmi}
-#| echo: false
-n_valid_bmi <- attr(t_facil_freq[["bmi_category"]], "n_valid")
-if (n_valid_bmi == 0) {
-  cat("**All-NA variable.** `bmi_category` is all-missing. ",
-      "Source variable `hwtgisw` may be absent from PUMF.")
-} else {
-  knitr::kable(
-    t_facil_freq[["bmi_category"]],
-    col.names = c("BMI category", "N", "% (of valid)"),
-    caption   = "bmi_category — Derived BMI classification"
-  )
-}
+```{r display-fruit-veg}
 ```
 
 ### Occupation Category
 
-```{r display-occupation}
-#| echo: false
-n_valid_oc <- attr(t_facil_freq[["occupation_category"]], "n_valid")
-if (n_valid_oc == 0) {
-  cat("**All-NA variable.** `occupation_category` is all-missing. ",
-      "Source variable `lbsgsoc` may be absent from PUMF.")
-} else {
-  knitr::kable(
-    t_facil_freq[["occupation_category"]],
-    col.names = c("Occupation category", "N", "% (of valid)"),
-    caption   = "occupation_category — 5-category PUMF occupation group (LBSGSOC)"
-  )
-}
+```{r display-occupation-category}
 ```
 
-### Province of Residence
+### Work Stress
+
+```{r display-work-stress}
+```
+
+### Province
 
 ```{r display-province}
-#| echo: false
-knitr::kable(
-  t_province_freq,
-  col.names = c("Province code (geodgprv)", "N", "% (of valid)"),
-  caption   = "geodgprv — Province / territory of residence (integer PUMF code; not recoded to names)"
-)
 ```
 :::
-
-> **Note:** `fvcdgtot` (total daily fruit & vegetable consumption) is **present** in the dataset — the alias `fvcdgtot ← fvcgtot` resolves correctly in Ellis. It is a 3-category derived variable (1 = \<5/day, 2 = 5–10/day, 3 = \>10/day), not a continuous count; treat as ordinal in analysis.
 
 ------------------------------------------------------------------------
 
 # 5. Needs Variables
 
-Needs variables capture self-reported health status and functional limitations, representing predisposing demand for healthcare and productivity loss.
+Needs variables capture perceived health status and functional limitations. ADL items use semantic names after Ellis renaming (`adl_01` → `adl_meals`, etc.). All ADL items are binary Yes/No factors.
 
 ```{r section-needs}
 ```
@@ -447,57 +328,27 @@ Needs variables capture self-reported health status and functional limitations, 
 ::: panel-tabset
 ### General Health
 
-```{r display-self-health-general}
-#| echo: false
-knitr::kable(
-  t_needs_freq[["self_health_general"]],
-  col.names = c("Self-perceived general health", "N", "% (of valid)"),
-  caption   = "self_health_general — Ordered: Excellent / Very good / Good / Fair / Poor"
-)
+```{r display-health-perceived}
 ```
 
 ### Mental Health
 
-```{r display-self-health-mental}
-#| echo: false
-knitr::kable(
-  t_needs_freq[["self_health_mental"]],
-  col.names = c("Self-perceived mental health", "N", "% (of valid)"),
-  caption   = "self_health_mental — Ordered: Excellent / Very good / Good / Fair / Poor"
-)
+```{r display-mental-health}
 ```
 
-### Health vs. Last Year
+### Health vs. Prior Year
 
-```{r display-health-vs-lastyear}
-#| echo: false
-knitr::kable(
-  t_needs_freq[["health_vs_lastyear"]],
-  col.names = c("Health compared to 1 year ago", "N", "% (of valid)"),
-  caption   = "health_vs_lastyear — Ordered: Much better → Much worse"
-)
+```{r display-health-vs-prior-year}
 ```
 
-### Activity Limitation
+### Injured Past 12 Months
 
-```{r display-activity-limitation}
-#| echo: false
-knitr::kable(
-  t_needs_freq[["activity_limitation"]],
-  col.names = c("Activity / functional limitation", "N", "% (of valid)"),
-  caption   = "activity_limitation — Yes / No"
-)
+```{r display-injury}
 ```
 
-### Injury Past Year
+### ADL Items
 
-```{r display-injury-past-year}
-#| echo: false
-knitr::kable(
-  t_needs_freq[["injury_past_year"]],
-  col.names = c("Injury in past 12 months", "N", "% (of valid)"),
-  caption   = "injury_past_year — Yes / No"
-)
+```{r display-adl}
 ```
 :::
 
@@ -505,56 +356,87 @@ knitr::kable(
 
 # 6. Survey Design Variables
 
-These variables are required for complex-sample variance estimation and cycle identification. Bootstrap weights (`bsw001`–`bsw500`) and the cluster PSU identifier are absent from the PUMF and require Statistics Canada's supplemental bootstrap file or RDC access.
-
 ```{r section-survey-design}
 ```
 
-## 6.1 Survey Weights
+## 6.1 Sampling Weights
+
+`wts_m` is the per-cycle survey weight; `wts_m_pooled` is the pooled weight adjusted for two-cycle pooling (divide by 2 per Statistics Canada guidelines).
 
 ```{r display-weights}
-#| echo: false
-knitr::kable(
-  t_weights_summary,
-  col.names = c("Variable", "N valid", "N missing", "Mean", "SD",
-                "Min", "P25", "Median", "P75", "Max"),
-  caption   = "Table 6.1 — Survey weights: wts_m_pooled (halved for pooling) and wts_m_original",
-  align     = c("l", rep("r", 9))
-)
 ```
 
 ## 6.2 Survey Cycle
 
 ```{r display-cycle}
-#| echo: false
-knitr::kable(
-  t_cycle_freq,
-  col.names = c("Survey cycle", "N", "% (of valid)"),
-  caption   = "Table 6.2 — cycle_f: CCHS survey cycle label"
-)
 ```
 
-## 6.3 Health Region Strata (geodpmf)
+## 6.3 Completeness Flags
 
-```{r display-geodpmf}
-#| echo: false
-knitr::kable(
-  t_geodpmf_summary,
-  caption = "Table 6.3 — geodpmf: health region proxy used as strata identifier",
-  align   = c("l", "r", "r", "r", "l")
-)
+Three logical flags indicate whether a respondent has complete data for each analytical dimension. Use `flag_analytic_complete` to subset to the analytic sample.
+
+```{r display-flags}
 ```
 
-> **Missing bootstrap weights:** `bsw001`–`bsw500` are distributed by Statistics Canada in a separate supplemental file not bundled with the standard PUMF download. Without these, §5.3–5.10 bootstrap confidence intervals cannot be computed. **Missing cluster identifier:** PSU cluster codes are suppressed in the PUMF; full complex-sample variance estimation requires master file access.
+**`flag_complete_ccc`** — All 17 chronic condition indicators (`cc_*`) are non-`NA`. `cc_copd` was administered to a sub-sample only (\~66% coverage), so this flag is `TRUE` for 42,064 of the 63,843 analytic rows. Use this flag when running models that include any `cc_*` predictor.
+
+**`flag_complete_predictors`** — All key predictor variables (age, sex, education, income, immigration status, province, employment, smoking, BMI, physical activity, perceived health, etc.) are non-`NA`. Rows with missing values on any single predictor will have this flag set to `FALSE`. Covers 59,309 rows.
+
+**`flag_analytic_complete`** — Both `flag_complete_ccc` AND `flag_complete_predictors` are `TRUE`. This is the recommended subsetting criterion for fully complete-case analyses. Covers 39,702 rows (\~62% of the analytic sample).
+
+> All three flags are pre-computed in the Ellis script. No need to re-derive exclusion logic in downstream analyses — simply filter on the relevant flag.
 
 ------------------------------------------------------------------------
 
-# Session Information
+# 7. Clustered Missingness Audit
 
-```{r session-info}
+> **Context (Marc-André, 2026-05-15)**: Several variables share a similar level of
+> missingness (~30%). This section audits whether these form a coherent cluster and
+> documents the mechanism for each — primarily age-gated questions that were only
+> administered to respondents above a certain age threshold.
+
+## 7.1 Age-Gated Variables
+
+The following variables were administered conditionally based on respondent age:
+
+| Variable | Threshold | Mechanism | Coverage |
+|----------|-----------|-----------|----------|
+| `cc_copd` (CCC_091) | 35+ years (DHHGAGE ≥ 8) | COPD question not asked to younger respondents | ~66% |
+| `bmi_category` (HWTGISW) | 18+ years (DHHGAGE ≥ 3) | BMI derived only for adults 18+ | ~95% |
+
+## 7.2 Other Missingness Mechanisms
+
+| Variable | Mechanism | Notes |
+|----------|-----------|-------|
+| `income_hh` (INCGHH) | Non-response / refusal | Income is sensitive; ~5% refuse |
+| `immigration_status` | NOT STATED in source | ~3% codes 9/99 → NA |
+| `occupation_category` (LBSGSOC) | Not applicable for some employment types | Self-employed with no SOC code |
+| `fruit_veg_daily` (FVCGTOT) | Partial module administration | ~10% missing across cycles |
+| `smoking_status` (SMKDSTY) | Complex derived variable | Requires valid responses to multiple source items |
+
+## 7.3 Interpretation
+
+The ~30% missingness cluster is dominated by `cc_copd` (age-gated, 34% missing). When
+this condition is excluded from the complete-case flag, `flag_complete_ccc` would rise from
+66% to approximately 95%. Analysts working exclusively with conditions other than COPD
+should consider subsetting on the 16 remaining conditions rather than using
+`flag_complete_ccc` which penalizes younger respondents.
+
+For COPD-inclusive models, restrict to respondents aged 35+ (DHHGAGE ≥ 8) and impute
+`cc_copd = FALSE` for the younger subsample, following the recommendation from the
+2026-05-15 review session.
+
+------------------------------------------------------------------------
+
+```{r}
+#| label: session-info
 #| echo: false
-#| results: asis
-cat("Report rendered:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n")
-cat("Elapsed time:", round(difftime(Sys.time(), report_render_start_time, units = "secs"), 1), "seconds\n\n")
+#| results: hide
+report_render_stop_time <- Sys.time()
+cat(
+  "Report rendered at:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
+  "\nElapsed:", round(difftime(report_render_stop_time, report_render_start_time, units = "secs"), 1),
+  "seconds\n"
+)
 sessionInfo()
 ```
